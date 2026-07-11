@@ -33,6 +33,10 @@ impl Chunk {
         &self.section
     }
 
+    pub fn uniform_block(&self) -> Option<BlockInstance> {
+        self.section.uniform_block()
+    }
+
     pub fn iter(&self) -> impl Iterator<Item = (LocalBlockPos, BlockInstance)> + '_ {
         (0..CHUNK_VOLUME).map(|index| {
             let layer = 16 * 16;
@@ -47,5 +51,21 @@ impl Chunk {
             };
             (local, self.get(local))
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn uniform_chunks_roundtrip_without_a_packed_data_payload() {
+        let chunk = Chunk::filled(ChunkPos::new(12, 80, -9), block_instance_api::BlockId::Air);
+        assert!(chunk.section().data().is_empty());
+        let encoded = serde_cbor::to_vec(&chunk).unwrap();
+        assert!(encoded.len() < 256);
+        let decoded: Chunk = serde_cbor::from_slice(&encoded).unwrap();
+        assert_eq!(decoded, chunk);
+        assert!(decoded.section().data().is_empty());
     }
 }

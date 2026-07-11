@@ -17,6 +17,11 @@ pub struct ActiveChunks {
     pub positions: HashSet<ChunkPos>,
 }
 
+#[derive(Resource, Debug, Clone, Copy, Default)]
+pub struct ChunkStreamingFocus {
+    pub center: Option<ChunkPos>,
+}
+
 /// Size of the moving chunk window around the local player. The window has no
 /// world-space bounds: it follows the player across every chunk coordinate.
 #[derive(Resource, Debug, Clone, Copy)]

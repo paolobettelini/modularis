@@ -25,6 +25,10 @@ impl ChunkMeshNeighborhood {
         &self.center
     }
 
+    pub fn chunk(&self, position: ChunkPos) -> Option<&Chunk> {
+        self.chunks.get(&position)
+    }
+
     pub fn block(&self, position: BlockPos) -> Option<BlockInstance> {
         self.chunks
             .get(&position.chunk())

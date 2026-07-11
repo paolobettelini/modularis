@@ -2,7 +2,10 @@ use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use chunk_network_message_types::ChunkRequest;
 use client_chunk_cache_api::{ClientChunkAvailable, ClientChunkCache, ClientChunkCacheApi};
-use client_chunk_streaming_api::{ActiveChunks, ChunkNeeded, ChunkStreamingApi, ChunkUnload};
+use client_chunk_streaming_api::{
+    ActiveChunks, ChunkNeeded, ChunkStreamingApi, ChunkStreamingFocus, ChunkUnload,
+};
+use client_chunk_work_priority_api::{ChunkWorkPriorityService, ClientChunkWorkPriorityApi};
 use client_game_state_api::{GameState, GameStateApi};
 use client_network_api::{ClientNetworkApi, ClientNetworkSender};
 use generated_network_messages::ServerBoundMessage;
@@ -16,10 +19,31 @@ const RETRY_AFTER_SECONDS: f64 = 0.5;
 #[derive(Debug, Clone, Copy)]
 struct PendingChunkRequest {
     last_sent_at: Option<f64>,
+    order: u64,
 }
 
 #[derive(Resource, Default)]
-struct PendingChunkRequests(HashMap<ChunkPos, PendingChunkRequest>);
+struct PendingChunkRequests {
+    entries: HashMap<ChunkPos, PendingChunkRequest>,
+    next_order: u64,
+}
+
+impl PendingChunkRequests {
+    fn ensure(&mut self, position: ChunkPos) {
+        if self.entries.contains_key(&position) {
+            return;
+        }
+        let order = self.next_order;
+        self.next_order = self.next_order.wrapping_add(1);
+        self.entries.insert(
+            position,
+            PendingChunkRequest {
+                last_sent_at: None,
+                order,
+            },
+        );
+    }
+}
 
 pub struct ClientChunkRequestNetworkMod;
 
@@ -28,12 +52,14 @@ impl ClientChunkRequestNetworkMod {
         N: ClientNetworkApi,
         S: ChunkStreamingApi,
         C: ClientChunkCacheApi,
+        P: ClientChunkWorkPriorityApi,
         G: GameStateApi,
     >(
         bevy: &mut BevyMod,
         _network: &mut N,
         _streaming: &mut S,
         _cache: &mut C,
+        _priority: &mut P,
         _game_state: &mut G,
     ) -> Self {
         bevy.app
@@ -64,10 +90,7 @@ fn track_needed_chunks(
     mut pending: ResMut<PendingChunkRequests>,
 ) {
     for needed in needed.read() {
-        pending
-            .0
-            .entry(needed.position)
-            .or_insert(PendingChunkRequest { last_sent_at: None });
+        pending.ensure(needed.position);
     }
 }
 
@@ -76,7 +99,7 @@ fn finish_chunk_requests(
     mut pending: ResMut<PendingChunkRequests>,
 ) {
     for available in available.read() {
-        pending.0.remove(&available.position);
+        pending.entries.remove(&available.position);
     }
 }
 
@@ -85,7 +108,7 @@ fn forget_unloaded_chunks(
     mut pending: ResMut<PendingChunkRequests>,
 ) {
     for unload in unloads.read() {
-        pending.0.remove(&unload.position);
+        pending.entries.remove(&unload.position);
     }
 }
 
@@ -95,21 +118,18 @@ fn reconcile_active_chunks(
     mut pending: ResMut<PendingChunkRequests>,
 ) {
     pending
-        .0
+        .entries
         .retain(|position, _| active.positions.contains(position));
-    for position in active.positions.iter().copied() {
-        if cache.chunk(position).is_none() {
-            pending
-                .0
-                .entry(position)
-                .or_insert(PendingChunkRequest { last_sent_at: None });
-        }
+    for position in cache.missing_from(&active.positions) {
+        pending.ensure(position);
     }
 }
 
 fn send_chunk_requests(
     time: Res<Time>,
     sender: Option<Res<ClientNetworkSender>>,
+    focus: Res<ChunkStreamingFocus>,
+    priority: Res<ChunkWorkPriorityService>,
     mut pending: ResMut<PendingChunkRequests>,
 ) {
     let Some(sender) = sender else {
@@ -117,30 +137,41 @@ fn send_chunk_requests(
     };
 
     let now = time.elapsed_secs_f64();
-    let mut sent = 0;
-    for (position, request) in &mut pending.0 {
-        let ready = request
-            .last_sent_at
-            .is_none_or(|last_sent| now - last_sent >= RETRY_AFTER_SECONDS);
-        if !ready {
-            continue;
-        }
+    let mut ready = pending
+        .entries
+        .iter()
+        .filter_map(|(position, request)| {
+            request
+                .last_sent_at
+                .is_none_or(|last_sent| now - last_sent >= RETRY_AFTER_SECONDS)
+                .then(|| {
+                    (
+                        (priority.priority)(*position, focus.center),
+                        request.order,
+                        *position,
+                    )
+                })
+        })
+        .collect::<Vec<_>>();
+    if ready.len() > MAX_REQUESTS_PER_FRAME {
+        ready.select_nth_unstable(MAX_REQUESTS_PER_FRAME);
+        ready.truncate(MAX_REQUESTS_PER_FRAME);
+    }
+    ready.sort_unstable();
 
-        let message = ServerBoundMessage::ChunkRequest(ChunkRequest {
-            position: *position,
-        });
+    for (_, _, position) in ready {
+        let message = ServerBoundMessage::ChunkRequest(ChunkRequest { position });
         if let Err(error) = sender.send(&message) {
             warn!("failed to request chunk {position:?}: {error}");
         } else {
-            request.last_sent_at = Some(now);
-            sent += 1;
-            if sent >= MAX_REQUESTS_PER_FRAME {
-                break;
+            if let Some(request) = pending.entries.get_mut(&position) {
+                request.last_sent_at = Some(now);
             }
         }
     }
 }
 
 fn clear_pending_requests(mut pending: ResMut<PendingChunkRequests>) {
-    pending.0.clear();
+    pending.entries.clear();
+    pending.next_order = 0;
 }

@@ -7,14 +7,18 @@ use client_chunk_cache_api::{
     ClientChunkAvailable, ClientChunkCache, ClientChunkCacheApi, ClientChunkChanged,
 };
 use client_chunk_mesh_api::{ChunkMeshApi, ChunkMeshNeighborhood, ChunkMeshService};
-use client_chunk_render_api::{ChunkRenderApi, RenderedChunks};
-use client_chunk_streaming_api::{ChunkStreamingApi, ChunkUnload};
+use client_chunk_render_api::{ChunkRemeshBudget, ChunkRenderApi, RenderedChunks};
+use client_chunk_streaming_api::{ChunkStreamingApi, ChunkStreamingFocus, ChunkUnload};
+use client_chunk_work_priority_api::{ChunkWorkPriorityService, ClientChunkWorkPriorityApi};
 use client_game_state_api::{GameState, GameStateApi};
 use std::collections::{HashMap, HashSet};
 use tokio::task::JoinHandle;
 
 #[derive(Resource, Default)]
 struct ChunkMaterials(HashMap<String, Handle<StandardMaterial>>);
+
+#[derive(Resource, Default)]
+struct PendingChunkRemeshes(HashSet<voxel_math_api::ChunkPos>);
 
 pub struct ChunkRenderBevyImpl;
 
@@ -25,6 +29,7 @@ impl ChunkRenderBevyImpl {
         M: ChunkMeshApi,
         B: BlockManagerApi,
         G: GameStateApi,
+        P: ClientChunkWorkPriorityApi,
     >(
         bevy: &mut BevyMod,
         _cache: &mut C,
@@ -32,13 +37,20 @@ impl ChunkRenderBevyImpl {
         _mesher: &mut M,
         _blocks: &mut B,
         _game_state: &mut G,
+        _priority: &mut P,
     ) -> Self {
         bevy.app
             .init_resource::<RenderedChunks>()
             .init_resource::<ChunkMaterials>()
+            .init_resource::<PendingChunkRemeshes>()
+            .init_resource::<ChunkRemeshBudget>()
             .add_systems(
                 Update,
-                (render_needed_chunks, unload_chunks)
+                (
+                    collect_chunk_remeshes::<B>,
+                    process_chunk_remeshes::<B>,
+                    unload_chunks,
+                )
                     .chain()
                     .run_if(in_state(GameState::InGame)),
             )
@@ -53,10 +65,38 @@ impl ChunkRenderBevyImpl {
 
 impl ChunkRenderApi for ChunkRenderBevyImpl {}
 
-fn render_needed_chunks(
-    mut commands: Commands,
+fn collect_chunk_remeshes<B: BlockManagerApi>(
     mut available: MessageReader<ClientChunkAvailable>,
     mut changed: MessageReader<ClientChunkChanged>,
+    cache: Res<ClientChunkCache>,
+    rendered: Res<RenderedChunks>,
+    mut pending: ResMut<PendingChunkRemeshes>,
+) {
+    for request in available.read() {
+        if cache
+            .uniform_block(request.position)
+            .is_some_and(|block| B::is_air(block.block))
+        {
+            // Missing chunks are already treated as transparent by the mesher,
+            // so receiving an all-air chunk cannot change any neighbor mesh.
+            if rendered.entities.contains_key(&request.position) {
+                pending.0.insert(request.position);
+            }
+        } else {
+            add_chunk_and_neighbors(&mut pending.0, request.position);
+        }
+    }
+    for request in changed.read() {
+        add_chunk_and_neighbors(&mut pending.0, request.position);
+    }
+}
+
+fn process_chunk_remeshes<B: BlockManagerApi>(
+    mut commands: Commands,
+    mut pending: ResMut<PendingChunkRemeshes>,
+    budget: Res<ChunkRemeshBudget>,
+    focus: Res<ChunkStreamingFocus>,
+    priority: Res<ChunkWorkPriorityService>,
     cache: Res<ClientChunkCache>,
     mesher: Res<ChunkMeshService>,
     mut rendered: ResMut<RenderedChunks>,
@@ -65,20 +105,32 @@ fn render_needed_chunks(
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
-    let mut requests = HashSet::new();
-    for request in available.read() {
-        add_chunk_and_neighbors(&mut requests, request.position);
+    let mut requests = pending
+        .0
+        .iter()
+        .copied()
+        .map(|position| ((priority.priority)(position, focus.center), position))
+        .collect::<Vec<_>>();
+    let budget = budget.chunks_per_frame.max(1);
+    if requests.len() > budget {
+        requests.select_nth_unstable(budget);
+        requests.truncate(budget);
     }
-    for request in changed.read() {
-        add_chunk_and_neighbors(&mut requests, request.position);
-    }
+    requests.sort_unstable();
 
-    for position in requests {
+    for (_, position) in requests {
+        pending.0.remove(&position);
         despawn_chunk(&mut commands, &mut rendered, position);
 
         let Some(chunk) = cache.chunk(position) else {
             continue;
         };
+        if chunk
+            .uniform_block()
+            .is_some_and(|block| B::is_air(block.block))
+        {
+            continue;
+        }
         let neighborhood = ChunkMeshNeighborhood::new(
             chunk,
             neighboring_chunk_positions(position)
@@ -163,8 +215,10 @@ fn unload_chunks(
     mut commands: Commands,
     mut unloads: MessageReader<ChunkUnload>,
     mut rendered: ResMut<RenderedChunks>,
+    mut pending: ResMut<PendingChunkRemeshes>,
 ) {
     for unload in unloads.read() {
+        pending.0.remove(&unload.position);
         despawn_chunk(&mut commands, &mut rendered, unload.position);
     }
 }
@@ -181,8 +235,12 @@ fn despawn_chunk(
     }
 }
 
-fn cleanup_rendered_chunks(mut rendered: ResMut<RenderedChunks>) {
+fn cleanup_rendered_chunks(
+    mut rendered: ResMut<RenderedChunks>,
+    mut pending: ResMut<PendingChunkRemeshes>,
+) {
     rendered.entities.clear();
+    pending.0.clear();
 }
 
 fn material_key(texture: Option<&str>) -> String {

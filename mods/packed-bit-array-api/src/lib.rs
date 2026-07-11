@@ -58,11 +58,18 @@ impl PackedBitArray {
 
     pub fn get(&self, index: usize) -> u32 {
         assert!(index < self.len, "packed array index out of bounds");
+        if self.bits_per_entry == 0 {
+            return 0;
+        }
         read_packed(&self.data, self.bits_per_entry, index)
     }
 
     pub fn set(&mut self, index: usize, value: u32) {
         assert!(index < self.len, "packed array index out of bounds");
+        if self.bits_per_entry == 0 {
+            assert_eq!(value, 0, "non-zero value does not fit a uniform array");
+            return;
+        }
         assert!(
             u64::from(value) <= entry_mask(self.bits_per_entry),
             "value does not fit packed entry"
@@ -90,20 +97,20 @@ pub enum PackedBitArrayError {
 
 pub const fn bits_required(value_count: usize) -> u8 {
     if value_count <= 1 {
-        return 1;
+        return 0;
     }
     (usize::BITS - (value_count - 1).leading_zeros()) as u8
 }
 
 fn validate_bits(bits_per_entry: u8) -> u8 {
-    assert!(
-        (1..=32).contains(&bits_per_entry),
-        "bits per entry must be in 1..=32"
-    );
+    assert!(bits_per_entry <= 32, "bits per entry must be in 0..=32");
     bits_per_entry
 }
 
 fn word_len(len: usize, bits_per_entry: u8) -> usize {
+    if bits_per_entry == 0 {
+        return 0;
+    }
     (len * bits_per_entry as usize).div_ceil(u64::BITS as usize)
 }
 
@@ -167,5 +174,13 @@ mod tests {
         for index in 0..128 {
             assert_eq!(packed.get(index), (index % 4) as u32);
         }
+    }
+
+    #[test]
+    fn uniform_arrays_need_no_data_words() {
+        let packed = PackedBitArray::filled(4096, 0, 0);
+        assert_eq!(packed.get(4095), 0);
+        assert!(packed.data().is_empty());
+        assert_eq!(bits_required(1), 0);
     }
 }

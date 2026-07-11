@@ -544,7 +544,10 @@ ChunkSection
 ```
 
 `packed-bit-array-api` contains the bit-packing helper. The same compact model
-is suitable for memory storage and network payloads.
+is suitable for memory storage and network payloads. A section whose palette
+contains one block uses `bits_per_entry = 0` and an empty `data` vector. Air
+chunks and uniform solid chunks therefore serialize only their palette and
+position instead of carrying 4096 zero indices.
 
 ## Dimensions and portals
 
@@ -642,6 +645,36 @@ The vanilla server residency policy allows the same vertical window plus one
 chunk of latency slack. Terrain providers already answer every chunk coordinate:
 solid worlds continue below their surface, while empty space and Aether gaps
 produce ordinary air chunks.
+
+Chunk work order is a replaceable policy:
+
+- `client-chunk-work-priority-api` defines the shared request/remesh priority
+  service;
+- `client-chunk-work-priority-mod` provides a neutral FIFO-compatible service;
+- `client-chunk-layered-priority-vanilla-mod` prioritizes the current XZ plane,
+  nearest chunks first, and only then progressively loads vertical layers.
+
+Both network requests and mesh work consume this API. A different client can
+select a distance-only, view-cone, teleport-aware or custom priority policy
+without changing networking or rendering.
+
+Mesh invalidation is also budgeted. `ChunkRemeshBudget` defaults to four chunks
+per frame, and pending remeshes are deduplicated and priority-sorted. Uniform
+air chunks do not trigger neighbor remeshes because missing chunks are already
+treated as transparent. Uniform opaque chunks completely surrounded by uniform
+opaque neighbors produce no mesh. These fast paths make vertical window changes
+cheap in mostly empty sky and deep homogeneous terrain.
+
+The vanilla terrain providers also detect vertical ranges that are guaranteed
+uniform before entering their 4096-cell generation loop. Overworld, Nether and
+checkerboard return uniform sky/depth chunks immediately; Aether immediately
+returns air outside its island altitude. The generic provider API is unchanged,
+so custom generators may implement different summaries or no fast path at all.
+
+The moving streaming window is rebuilt only when its center or radii change.
+Cache reconciliation checks all active positions under one read lock, and the
+request/remesh queues use partial selection for their small per-frame budgets
+instead of sorting every pending chunk.
 
 The mesh implementation is deliberately simple and replaceable. A greedy mesher
 or lighting-aware renderer should provide the same mesh/render API instead of

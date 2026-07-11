@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use client_camera_api::{CameraApi, PlayerCamera};
 use client_chunk_streaming_api::{
-    ActiveChunks, ChunkNeeded, ChunkStreamingApi, ChunkStreamingViewConfig, ChunkUnload,
+    ActiveChunks, ChunkNeeded, ChunkStreamingApi, ChunkStreamingFocus, ChunkStreamingViewConfig,
+    ChunkUnload,
 };
 use client_game_state_api::{GameState, GameStateApi};
 use client_settings_api::{SettingsApi, SettingsStore};
@@ -13,6 +14,9 @@ use voxel_math_api::{BlockPos, ChunkPos};
 
 pub struct AroundPlayerChunkStreaming;
 
+#[derive(Resource, Default)]
+struct LastStreamingWindow(Option<(ChunkPos, i32, i32)>);
+
 impl AroundPlayerChunkStreaming {
     pub fn init<S: SettingsApi, C: CameraApi, G: GameStateApi>(
         bevy: &mut BevyMod,
@@ -22,7 +26,9 @@ impl AroundPlayerChunkStreaming {
     ) -> Self {
         bevy.app
             .init_resource::<ActiveChunks>()
+            .init_resource::<ChunkStreamingFocus>()
             .init_resource::<ChunkStreamingViewConfig>()
+            .init_resource::<LastStreamingWindow>()
             .add_message::<ChunkNeeded>()
             .add_message::<ChunkUnload>()
             .add_systems(
@@ -44,6 +50,8 @@ fn update_active_chunks(
     camera: Query<&Transform, With<PlayerCamera>>,
     settings: Res<SettingsStore>,
     view: Res<ChunkStreamingViewConfig>,
+    mut focus: ResMut<ChunkStreamingFocus>,
+    mut last_window: ResMut<LastStreamingWindow>,
     mut active: ResMut<ActiveChunks>,
     mut needed: MessageWriter<ChunkNeeded>,
     mut unload: MessageWriter<ChunkUnload>,
@@ -57,11 +65,17 @@ fn update_active_chunks(
         camera.translation.z.floor() as i32,
     )
     .chunk();
+    focus.center = Some(center);
     let radius = settings
         .get_i32(SettingKey::GraphicsRenderDistance)
         .unwrap_or(8)
         .clamp(1, view.max_horizontal_radius.max(1));
     let vertical_radius = view.vertical_radius.max(0);
+    let window = (center, radius, vertical_radius);
+    if last_window.0 == Some(window) && !active.positions.is_empty() {
+        return;
+    }
+    last_window.0 = Some(window);
 
     let desired = desired_chunks(center, radius, vertical_radius);
 

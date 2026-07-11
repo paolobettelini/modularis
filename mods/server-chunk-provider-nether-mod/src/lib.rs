@@ -46,6 +46,12 @@ impl ServerChunkProvider for NetherTerrainProvider {
 }
 
 fn build_chunk(position: voxel_math_api::ChunkPos) -> Chunk {
+    if position.y > 0 {
+        return Chunk::filled(position, BlockId::Air);
+    }
+    if position.y < 0 {
+        return Chunk::filled(position, BlockId::Netherrack);
+    }
     let mut chunk = Chunk::filled(position, BlockId::Air);
     for local_y in 0..CHUNK_SIZE {
         for z in 0..CHUNK_SIZE {
@@ -101,5 +107,23 @@ mod tests {
             .map(|x| nether_height(x, 80))
             .collect::<std::collections::HashSet<_>>();
         assert!(heights.len() >= 2);
+    }
+
+    #[test]
+    fn distant_vertical_layers_are_uniform() {
+        assert_eq!(
+            build_chunk(voxel_math_api::ChunkPos::new(0, 10, 0))
+                .uniform_block()
+                .unwrap()
+                .block,
+            BlockId::Air
+        );
+        assert_eq!(
+            build_chunk(voxel_math_api::ChunkPos::new(0, -10, 0))
+                .uniform_block()
+                .unwrap()
+                .block,
+            BlockId::Netherrack
+        );
     }
 }

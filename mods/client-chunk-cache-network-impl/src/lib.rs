@@ -79,7 +79,13 @@ fn remove_unloaded_chunks(
     mut changed: MessageWriter<ClientChunkChanged>,
 ) {
     for unload in unloads.read() {
+        let was_empty = cache
+            .uniform_block(unload.position)
+            .is_some_and(|block| block.block == generated_block_registry::BlockId::Air);
         cache.remove(unload.position);
+        if was_empty {
+            continue;
+        }
         for position in neighboring_chunk_positions(unload.position) {
             changed.write(ClientChunkChanged { position });
         }

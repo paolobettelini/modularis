@@ -68,6 +68,7 @@ mods = [
     "client-player-spawn-mod",
     "client-block-interaction-raycast-mod",
     "client-chunk-vertex-lighting-pipeline-mod",
+    "client-chunk-work-priority-mod",
     "client-chunk-mesh-naive-cubes-impl",
     "client-chunk-request-network-mod",
     "client-chunk-render-bevy-impl",

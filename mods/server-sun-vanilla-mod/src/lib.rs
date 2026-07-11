@@ -22,8 +22,7 @@ fn configure_vanilla_sun(mut settings: MessageWriter<SetServerSun>) {
         settings: SunSettings {
             position: [0.45, 0.82, 0.35],
             illuminance: 12_000.0,
-            // color: [1.0, 0.94, 0.82],
-            color: [1.0, 0.0, 0.0],
+            color: [1.0, 0.94, 0.82],
         },
     });
 }

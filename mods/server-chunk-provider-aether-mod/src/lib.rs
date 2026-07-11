@@ -46,6 +46,9 @@ impl ServerChunkProvider for AetherIslandProvider {
 }
 
 fn build_chunk(position: voxel_math_api::ChunkPos) -> Chunk {
+    if position.y != 0 {
+        return Chunk::filled(position, BlockId::Air);
+    }
     let mut chunk = Chunk::filled(position, BlockId::Air);
     for local_y in 0..CHUNK_SIZE {
         for z in 0..CHUNK_SIZE {
@@ -125,5 +128,11 @@ mod tests {
                 .step_by(8)
                 .any(|x| island_column(x, 160).is_none())
         );
+    }
+
+    #[test]
+    fn layers_outside_the_island_altitude_are_uniform_air() {
+        let chunk = build_chunk(voxel_math_api::ChunkPos::new(0, 100, 0));
+        assert_eq!(chunk.uniform_block().unwrap().block, BlockId::Air);
     }
 }

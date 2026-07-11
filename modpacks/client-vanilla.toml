@@ -7,6 +7,7 @@ mods = [
     "client-setting-jump-key",
     "client-setting-sprint-key",
     "client-block-interaction-rules-vanilla-mod",
+    "client-chunk-layered-priority-vanilla-mod",
     "client-crosshair-bevy-mod",
     "client-hotbar-selection-input-mod",
     "client-hotbar-scroll-input-mod",

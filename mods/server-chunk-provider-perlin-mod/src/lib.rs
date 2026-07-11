@@ -45,6 +45,12 @@ impl ServerChunkProvider for PerlinTerrainProvider {
 }
 
 fn build_chunk(position: voxel_math_api::ChunkPos) -> Chunk {
+    if position.y > 0 {
+        return Chunk::filled(position, BlockId::Air);
+    }
+    if position.y < 0 {
+        return Chunk::filled(position, BlockId::Stone);
+    }
     let mut chunk = Chunk::filled(position, BlockId::Air);
     for local_y in 0..CHUNK_SIZE {
         for z in 0..CHUNK_SIZE {
@@ -116,5 +122,23 @@ mod tests {
         let left = terrain_height(15, 40);
         let right = terrain_height(16, 40);
         assert!((left - right).abs() <= 2);
+    }
+
+    #[test]
+    fn vertical_chunks_outside_the_surface_layer_use_uniform_fast_paths() {
+        assert_eq!(
+            build_chunk(voxel_math_api::ChunkPos::new(0, 50, 0))
+                .uniform_block()
+                .unwrap()
+                .block,
+            BlockId::Air
+        );
+        assert_eq!(
+            build_chunk(voxel_math_api::ChunkPos::new(0, -50, 0))
+                .uniform_block()
+                .unwrap()
+                .block,
+            BlockId::Stone
+        );
     }
 }

@@ -12,6 +12,7 @@ init = [
     "client-network-api",
     "client-chunk-streaming-api",
     "client-chunk-cache-api",
+    "client-chunk-work-priority-api",
     "client-game-state-api",
 ]
 run = []
@@ -22,6 +23,7 @@ bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 chunk-network-message-types = { path = "../chunk-network-message-types" }
 client-chunk-cache-api = { path = "../client-chunk-cache-api" }
+client-chunk-work-priority-api = { path = "../client-chunk-work-priority-api" }
 client-chunk-streaming-api = { path = "../client-chunk-streaming-api" }
 client-game-state-api = { path = "../client-game-state-api" }
 client-network-api = { path = "../client-network-api" }

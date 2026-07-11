@@ -42,6 +42,12 @@ impl ServerChunkProvider for CheckerboardChunkProvider {
 }
 
 fn build_chunk(position: voxel_math_api::ChunkPos) -> Chunk {
+    if position.y > 0 {
+        return Chunk::filled(position, BlockId::Air);
+    }
+    if position.y < 0 {
+        return Chunk::filled(position, BlockId::Stone);
+    }
     let mut chunk = Chunk::filled(position, BlockId::Air);
     for local_y in 0..CHUNK_SIZE {
         for z in 0..CHUNK_SIZE {

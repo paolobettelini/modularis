@@ -17,7 +17,7 @@ impl ChunkSection {
         Self {
             palette: vec![block.clone()],
             reverse_map: HashMap::from([(block, 0)]),
-            entries: PackedBitArray::filled(CHUNK_VOLUME, 1, 0),
+            entries: PackedBitArray::filled(CHUNK_VOLUME, bits_required(1), 0),
         }
     }
 
@@ -48,6 +48,10 @@ impl ChunkSection {
 
     pub fn palette(&self) -> &[BlockInstance] {
         &self.palette
+    }
+
+    pub fn uniform_block(&self) -> Option<BlockInstance> {
+        (self.palette.len() == 1).then(|| self.palette[0].clone())
     }
 
     pub fn reverse_map(&self) -> &HashMap<BlockInstance, u32> {
@@ -138,5 +142,16 @@ mod tests {
             block_instance_api::BlockId::Stone
         );
         assert_eq!(section.data().len(), 128);
+    }
+
+    #[test]
+    fn uniform_sections_have_no_packed_words() {
+        let section = ChunkSection::filled(block_instance_api::BlockId::Air);
+        assert_eq!(section.bits_per_entry(), 0);
+        assert!(section.data().is_empty());
+        assert_eq!(
+            section.uniform_block().unwrap().block,
+            block_instance_api::BlockId::Air
+        );
     }
 }

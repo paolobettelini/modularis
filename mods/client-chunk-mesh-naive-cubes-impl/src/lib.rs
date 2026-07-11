@@ -47,6 +47,9 @@ fn mesh_chunk_with_lighting<B: BlockManagerApi>(
     neighborhood: &ChunkMeshNeighborhood,
     lighting: &ChunkVertexLightingSnapshot,
 ) -> ChunkMeshData {
+    if uniform_chunk_is_fully_hidden::<B>(neighborhood) {
+        return ChunkMeshData::default();
+    }
     let mut mesh = ChunkMeshData::default();
     let chunk = neighborhood.center();
     for (local, block_instance) in chunk.iter() {
@@ -66,6 +69,30 @@ fn mesh_chunk_with_lighting<B: BlockManagerApi>(
         }
     }
     mesh
+}
+
+fn uniform_chunk_is_fully_hidden<B: BlockManagerApi>(neighborhood: &ChunkMeshNeighborhood) -> bool {
+    let Some(center_block) = neighborhood.center().uniform_block() else {
+        return false;
+    };
+    if B::is_air(center_block.block) {
+        return true;
+    }
+    if !B::is_opaque(center_block.block) {
+        return false;
+    }
+    let center = neighborhood.center().position();
+    FACES.iter().all(|face| {
+        let position = voxel_math_api::ChunkPos::new(
+            center.x + face.neighbor[0],
+            center.y + face.neighbor[1],
+            center.z + face.neighbor[2],
+        );
+        neighborhood
+            .chunk(position)
+            .and_then(|chunk| chunk.uniform_block())
+            .is_some_and(|block| B::is_opaque(block.block))
+    })
 }
 
 fn mesh_part<'a>(
@@ -356,5 +383,22 @@ mod tests {
         let with_opaque_neighbor = ChunkMeshNeighborhood::new(center, [neighbor]);
         let hidden = NaiveCubeChunkMesher::<TestBlocks>::mesh_chunk(&with_opaque_neighbor);
         assert_eq!(hidden.parts[0].indices.len(), 5 * 6);
+    }
+
+    #[test]
+    fn fully_surrounded_uniform_opaque_chunk_needs_no_mesh() {
+        let center = Chunk::filled(ChunkPos::new(0, 0, 0), BlockId::Stone);
+        let neighbors = [
+            ChunkPos::new(1, 0, 0),
+            ChunkPos::new(-1, 0, 0),
+            ChunkPos::new(0, 1, 0),
+            ChunkPos::new(0, -1, 0),
+            ChunkPos::new(0, 0, 1),
+            ChunkPos::new(0, 0, -1),
+        ]
+        .map(|position| Chunk::filled(position, BlockId::Stone));
+        let neighborhood = ChunkMeshNeighborhood::new(center, neighbors);
+        let mesh = NaiveCubeChunkMesher::<TestBlocks>::mesh_chunk(&neighborhood);
+        assert!(mesh.is_empty());
     }
 }
