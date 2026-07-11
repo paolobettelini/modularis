@@ -1,0 +1,13 @@
+use tokio::task::JoinHandle;
+
+pub struct ItemMetadataRegistryCodegenMod;
+
+impl ItemMetadataRegistryCodegenMod {
+    pub fn init() -> Self {
+        Self
+    }
+
+    pub fn run(&self) -> Option<Vec<JoinHandle<()>>> {
+        None
+    }
+}

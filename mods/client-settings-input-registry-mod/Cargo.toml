@@ -1,0 +1,19 @@
+[package]
+name = "client-settings-input-registry-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientSettingsInputRegistryMod"
+provides = "client-settings-input-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-settings-input-api = { path = "../client-settings-input-api" }
+tokio = { version = "1.48.0", features = ["full"] }

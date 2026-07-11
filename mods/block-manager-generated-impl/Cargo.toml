@@ -1,0 +1,24 @@
+[package]
+name = "block-manager-generated-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "GeneratedBlockManager"
+provides = "block-manager-api"
+
+[package.metadata.mod.dependencies]
+init = ["block-registry-codegen"]
+run = []
+ownership = []
+
+[dependencies]
+block-api = { path = "../block-api" }
+block-manager-api = { path = "../block-manager-api" }
+block-registry-codegen = { path = "../block-registry-codegen" }
+block-render-api = { path = "../block-render-api" }
+generated-block-registry = "0.1.0"
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-block-registry = { path = "../generated-block-registry" }

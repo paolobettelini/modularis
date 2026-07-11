@@ -1,0 +1,16 @@
+[package]
+name = "client-chunk-mesh-api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy = "0.17.3"
+block-instance-api = { path = "../block-instance-api" }
+block-manager-api = { path = "../block-manager-api" }
+block-render-api = { path = "../block-render-api" }
+chunk-api = { path = "../chunk-api" }
+voxel-math-api = { path = "../voxel-math-api" }
+
+[patch.crates-io]
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }

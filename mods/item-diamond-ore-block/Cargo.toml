@@ -1,0 +1,20 @@
+[package]
+name = "item-diamond-ore-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemDiamondOreBlockMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:diamond_ore_block"
+label = "Diamond Ore"
+
+[dependencies]
+item-api = { path = "../item-api" }
+tokio = { version = "1.48.0", features = ["full"] }

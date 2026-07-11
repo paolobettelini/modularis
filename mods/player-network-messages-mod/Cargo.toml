@@ -1,0 +1,25 @@
+[package]
+name = "player-network-messages-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "PlayerNetworkMessagesMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.network.messages]
+clientbound = [
+    "player_network_message_types::PlayerJoined",
+    "player_network_message_types::PlayerLeft",
+    "player_network_message_types::PlayerMoved",
+    "player_network_message_types::PlayerRotationChanged",
+]
+serverbound = ["player_network_message_types::PlayerMove"]
+
+[dependencies]
+player-network-message-types = { path = "../player-network-message-types" }
+tokio = { version = "1.48.0", features = ["full"] }

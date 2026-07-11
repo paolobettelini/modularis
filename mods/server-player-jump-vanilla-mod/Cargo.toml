@@ -1,0 +1,38 @@
+[package]
+name = "server-player-jump-vanilla-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerPlayerJumpVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "block-manager-api",
+    "server-chunk-world-api",
+    "server-player-registry-api",
+    "player-gravity-api",
+    "network-protocol-mod",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+block-manager-api = { path = "../block-manager-api" }
+generated-network-messages = "0.1.0"
+player-block-collision-api = { path = "../player-block-collision-api" }
+player-gravity-api = { path = "../player-gravity-api" }
+player-hitbox-api = { path = "../player-hitbox-api" }
+player-jump-api = { path = "../player-jump-api" }
+player-network-message-types = { path = "../player-network-message-types" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }
+server-player-registry-api = { path = "../server-player-registry-api" }
+network-protocol-mod = { path = "../network-protocol-mod" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { path = "../voxel-math-api" }
+
+[patch.crates-io]
+generated-network-messages = { path = "../generated-network-messages" }

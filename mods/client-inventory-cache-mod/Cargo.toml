@@ -1,0 +1,21 @@
+[package]
+name = "client-inventory-cache-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientInventoryCacheMod"
+provides = "client-inventory-cache-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "inventory-events-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-inventory-cache-api = { path = "../client-inventory-cache-api" }
+inventory-events-api = { path = "../inventory-events-api" }
+inventory-events-mod = { path = "../inventory-events-mod" }
+tokio = { version = "1.48.0", features = ["full"] }

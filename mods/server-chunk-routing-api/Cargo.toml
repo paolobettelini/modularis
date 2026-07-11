@@ -1,0 +1,10 @@
+[package]
+name = "server-chunk-routing-api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy = "0.17.3"
+server-chunk-provider-api = { path = "../server-chunk-provider-api" }
+voxel-math-api = { path = "../voxel-math-api" }
+world-instance-api = { path = "../world-instance-api" }

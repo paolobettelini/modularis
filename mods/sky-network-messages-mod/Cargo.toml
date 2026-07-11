@@ -1,0 +1,20 @@
+[package]
+name = "sky-network-messages-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "SkyNetworkMessagesMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.network.messages]
+clientbound = ["sky_network_message_types::SkyColorChanged"]
+serverbound = []
+
+[dependencies]
+sky-network-message-types = { path = "../sky-network-message-types" }
+tokio = { version = "1.48.0", features = ["full"] }

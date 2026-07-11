@@ -1,0 +1,36 @@
+[package]
+name = "server-block-edit-network-send-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerBlockEditNetworkSendMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "block-edit-events-mod",
+    "server-network-events-api",
+    "server-chunk-world-api",
+    "server-player-registry-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+block-edit-events-api = { path = "../block-edit-events-api" }
+block-edit-events-mod = { path = "../block-edit-events-mod" }
+block-edit-network-message-types = { path = "../block-edit-network-message-types" }
+generated-network-messages = "0.1.0"
+player-network-message-types = { path = "../player-network-message-types" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }
+server-network-events-api = { path = "../server-network-events-api" }
+server-player-registry-api = { path = "../server-player-registry-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { path = "../voxel-math-api" }
+world-instance-api = { path = "../world-instance-api" }
+
+[patch.crates-io]
+generated-network-messages = { path = "../generated-network-messages" }

@@ -1,0 +1,31 @@
+[package]
+name = "client-chunk-mesh-naive-cubes-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "NaiveCubeChunkMesher"
+provides = "client-chunk-mesh-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "block-manager-api", "client-chunk-vertex-lighting-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+block-manager-api = { path = "../block-manager-api" }
+block-render-api = { path = "../block-render-api" }
+chunk-api = { path = "../chunk-api" }
+client-chunk-mesh-api = { path = "../client-chunk-mesh-api" }
+client-chunk-vertex-lighting-api = { path = "../client-chunk-vertex-lighting-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { path = "../voxel-math-api" }
+
+[dev-dependencies]
+block-api = { path = "../block-api" }
+generated-block-registry = "0.1.0"
+
+[patch.crates-io]
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }

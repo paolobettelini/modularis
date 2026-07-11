@@ -1,0 +1,18 @@
+[package]
+name = "client-block-interaction-rules-vanilla-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientBlockInteractionRulesVanillaMod"
+provides = "client-block-interaction-rules-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+client-block-interaction-rules-api = { path = "../client-block-interaction-rules-api" }
+tokio = { version = "1.48.0", features = ["full"] }

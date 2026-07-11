@@ -1,0 +1,30 @@
+name = "Minecraft demo server foundation"
+description = "Server transport, sessions and authoritative pipelines without vanilla gameplay policy."
+modpacks = ["common"]
+ignore = []
+
+mods = [
+    "server-config-local-impl",
+    "server-bevy-runner-mod",
+    "server-network-tcp-impl",
+    "server-network-events-api",
+    "server-network-router-mod",
+    "server-player-lifecycle-events-mod",
+    "server-inventory-authoritative-mod",
+    "server-inventory-network-receive-mod",
+    "server-inventory-network-sync-mod",
+    "server-cell-menu-authoritative-mod",
+    "server-cell-menu-network-receive-mod",
+    "server-cell-menu-inventory-bridge-mod",
+    "server-cell-menu-network-sync-mod",
+    "server-block-edit-network-receive-mod",
+    "server-block-edit-network-send-mod",
+    "server-player-session-mod",
+    "server-player-flight-capability-mod",
+    "server-player-flight-network-sync-mod",
+    "server-sun-state-mod",
+    "server-sun-network-sync-mod",
+    "server-player-timeout-mod",
+    "server-chunk-request-mod",
+    "server-game-bootstrap-mod",
+]

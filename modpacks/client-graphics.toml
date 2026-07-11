@@ -1,0 +1,12 @@
+name = "Minecraft demo client graphics"
+description = "Optional lightweight lighting and mesh shading features for the demo client."
+modpacks = []
+ignore = []
+
+mods = [
+    "client-sun-directional-light-bevy-mod",
+    "client-sun-shadows-vanilla-mod",
+    "client-ambient-light-vanilla-mod",
+    "client-chunk-face-shading-vanilla-mod",
+    "client-chunk-ambient-occlusion-vanilla-mod",
+]

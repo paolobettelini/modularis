@@ -1,0 +1,8 @@
+[package]
+name = "network-codegen-utils"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+codegen-utils = { path = "../codegen-utils" }
+toml = "0.9"

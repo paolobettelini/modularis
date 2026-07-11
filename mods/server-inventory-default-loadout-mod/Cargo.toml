@@ -1,0 +1,47 @@
+[package]
+name = "server-inventory-default-loadout-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerInventoryDefaultLoadoutMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "inventory-events-mod",
+    "server-inventory-layout-api",
+    "item-manager-api",
+    "block-manager-api",
+    "item-metadata-registry-codegen",
+    "server-player-lifecycle-events-mod",
+    "server-inventory-api",
+    "item-favicon-meta",
+    "item-portal-igniter-meta",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+block-manager-api = { path = "../block-manager-api" }
+generated-item-metadata = "0.1.0"
+inventory-core-api = { path = "../inventory-core-api" }
+inventory-events-api = { path = "../inventory-events-api" }
+inventory-events-mod = { path = "../inventory-events-mod" }
+item-favicon-meta = { path = "../item-favicon-meta" }
+item-instance-api = { path = "../item-instance-api" }
+item-manager-api = { path = "../item-manager-api" }
+item-metadata-registry-codegen = { path = "../item-metadata-registry-codegen" }
+item-place-block-meta = { path = "../item-place-block-meta" }
+item-portal-igniter-meta = { path = "../item-portal-igniter-meta" }
+item-quantity-meta = { path = "../item-quantity-meta" }
+server-inventory-layout-api = { path = "../server-inventory-layout-api" }
+server-inventory-api = { path = "../server-inventory-api" }
+server-player-lifecycle-events-api = { path = "../server-player-lifecycle-events-api" }
+server-player-lifecycle-events-mod = { path = "../server-player-lifecycle-events-mod" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-item-metadata = { path = "../generated-item-metadata" }

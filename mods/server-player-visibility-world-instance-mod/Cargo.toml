@@ -1,0 +1,20 @@
+[package]
+name = "server-player-visibility-world-instance-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerPlayerVisibilityWorldInstanceMod"
+provides = "server-player-visibility-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-chunk-world-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }
+server-player-visibility-api = { path = "../server-player-visibility-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { path = "../voxel-math-api" }

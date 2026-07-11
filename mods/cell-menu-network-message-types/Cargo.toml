@@ -1,0 +1,11 @@
+[package]
+name = "cell-menu-network-message-types"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+cell-menu-api = { path = "../cell-menu-api" }
+inventory-core-api = { path = "../inventory-core-api" }
+item-instance-api = { path = "../item-instance-api" }
+serde = { version = "1.0", features = ["derive"] }
+voxel-math-api = { path = "../voxel-math-api" }

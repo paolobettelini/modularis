@@ -1,0 +1,31 @@
+[package]
+name = "client-inventory-ui-bevy-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientInventoryUiBevyMod"
+provides = "client-inventory-ui-api"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-game-state-api",
+    "client-inventory-cache-api",
+    "inventory-events-mod",
+    "item-manager-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-inventory-cache-api = { path = "../client-inventory-cache-api" }
+client-inventory-ui-api = { path = "../client-inventory-ui-api" }
+inventory-core-api = { path = "../inventory-core-api" }
+inventory-events-api = { path = "../inventory-events-api" }
+inventory-events-mod = { path = "../inventory-events-mod" }
+item-manager-api = { path = "../item-manager-api" }
+tokio = { version = "1.48.0", features = ["full"] }

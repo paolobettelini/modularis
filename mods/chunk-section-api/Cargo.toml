@@ -1,0 +1,14 @@
+[package]
+name = "chunk-section-api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+block-instance-api = { path = "../block-instance-api" }
+packed-bit-array-api = { path = "../packed-bit-array-api" }
+serde = { version = "1.0", features = ["derive"] }
+voxel-math-api = { path = "../voxel-math-api" }
+
+[patch.crates-io]
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }

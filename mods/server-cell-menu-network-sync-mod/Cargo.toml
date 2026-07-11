@@ -1,0 +1,29 @@
+[package]
+name = "server-cell-menu-network-sync-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerCellMenuNetworkSyncMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "cell-menu-events-mod",
+    "server-network-events-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+cell-menu-api = { path = "../cell-menu-api" }
+cell-menu-events-mod = { path = "../cell-menu-events-mod" }
+cell-menu-network-message-types = { path = "../cell-menu-network-message-types" }
+generated-network-messages = "0.1.0"
+server-network-events-api = { path = "../server-network-events-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-network-messages = { path = "../generated-network-messages" }

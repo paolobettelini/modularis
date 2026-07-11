@@ -1,0 +1,35 @@
+[package]
+name = "client-cell-menu-ui-bevy-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientCellMenuUiBevyMod"
+provides = "client-cell-menu-ui-api"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "cell-menu-events-mod",
+    "client-cell-menu-cache-api",
+    "client-game-state-api",
+    "inventory-events-mod",
+    "item-manager-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+cell-menu-api = { path = "../cell-menu-api" }
+cell-menu-events-mod = { path = "../cell-menu-events-mod" }
+client-cell-menu-cache-api = { path = "../client-cell-menu-cache-api" }
+client-cell-menu-ui-api = { path = "../client-cell-menu-ui-api" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-inventory-ui-api = { path = "../client-inventory-ui-api" }
+inventory-core-api = { path = "../inventory-core-api" }
+inventory-events-api = { path = "../inventory-events-api" }
+inventory-events-mod = { path = "../inventory-events-mod" }
+item-manager-api = { path = "../item-manager-api" }
+tokio = { version = "1.48.0", features = ["full"] }

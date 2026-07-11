@@ -1,0 +1,34 @@
+name = "Minecraft demo vanilla server features"
+description = "Optional vanilla-style server gameplay features. Import this from a server profile only when you want classic behavior."
+modpacks = []
+ignore = []
+
+mods = [
+    "server-chunk-residency-player-interest-vanilla-mod",
+    "server-player-visibility-world-instance-mod",
+    "server-player-dimension-lifecycle-vanilla-mod",
+    "server-dimension-network-sync-mod",
+    "server-player-flight-grant-all-vanilla-mod",
+    "server-sun-vanilla-mod",
+    "server-portal-state-mod",
+    "server-nether-portal-rule-vanilla-mod",
+    "server-aether-portal-rule-vanilla-mod",
+    "server-portal-ignite-vanilla-mod",
+    "server-portal-network-sync-mod",
+    "server-portal-travel-vanilla-mod",
+    "player-gravity-vanilla-mod",
+    "player-gravity-network-messages-mod",
+    "player-jump-network-messages-mod",
+    "server-player-movement-collision-vanilla-mod",
+    "server-player-gravity-network-sync-mod",
+    "server-player-jump-vanilla-mod",
+    "server-inventory-layout-default-impl",
+    "server-block-interaction-rules-vanilla-mod",
+    "server-block-break-reach-vanilla-mod",
+    "server-inventory-default-loadout-mod",
+    "server-inventory-quantity-stacking-mod",
+    "server-item-quantity-consumption-mod",
+    "server-block-edit-world-mod",
+    "server-place-block-item-use-mod",
+    "server-crafting-table-menu-vanilla-mod",
+]

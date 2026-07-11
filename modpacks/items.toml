@@ -1,0 +1,26 @@
+name = "Minecraft demo items"
+description = "Item contributors, item metadata contributors, and generated item registries."
+modpacks = ["blocks"]
+ignore = []
+
+mods = [
+    "item-dirt-block",
+    "item-grass-block",
+    "item-stone-block",
+    "item-bedrock-block",
+    "item-crafting-table-block",
+    "item-diamond-block",
+    "item-diamond-ore-block",
+    "item-end-stone-block",
+    "item-glowstone-block",
+    "item-netherrack-block",
+    "item-obsidian-block",
+    "item-flint-and-steel",
+    "item-quantity-meta",
+    "item-place-block-meta",
+    "item-favicon-meta",
+    "item-portal-igniter-meta",
+    "item-registry-codegen",
+    "item-metadata-registry-codegen",
+    "item-manager-generated-impl",
+]

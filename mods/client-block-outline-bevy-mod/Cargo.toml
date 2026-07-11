@@ -1,0 +1,22 @@
+[package]
+name = "client-block-outline-bevy-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientBlockOutlineBevyMod"
+provides = "client-block-outline-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "client-bevy-default-plugins-mod", "client-game-state-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-bevy-default-plugins-mod = { path = "../client-bevy-default-plugins-mod" }
+client-block-outline-api = { path = "../client-block-outline-api" }
+client-game-state-api = { path = "../client-game-state-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { path = "../voxel-math-api" }

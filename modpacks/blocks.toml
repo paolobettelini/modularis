@@ -1,0 +1,22 @@
+name = "Minecraft demo blocks"
+description = "All block contributors plus the generated block registry and manager."
+modpacks = []
+ignore = []
+
+mods = [
+    "block-air",
+    "block-grass",
+    "block-dirt",
+    "block-stone",
+    "block-bedrock",
+    "block-crafting-table",
+    "block-diamond-block",
+    "block-diamond-ore",
+    "block-end-stone",
+    "block-glowstone",
+    "block-netherrack",
+    "block-obsidian",
+    "block-metadata-registry-codegen",
+    "block-registry-codegen",
+    "block-manager-generated-impl",
+]

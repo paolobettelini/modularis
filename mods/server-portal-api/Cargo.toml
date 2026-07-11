@@ -1,0 +1,16 @@
+[package]
+name = "server-portal-api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy = "0.17.3"
+generated-block-registry = "0.1.0"
+generated-dimension-registry = "0.1.0"
+player-network-message-types = { path = "../player-network-message-types" }
+portal-api = { path = "../portal-api" }
+world-instance-api = { path = "../world-instance-api" }
+
+[patch.crates-io]
+generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }

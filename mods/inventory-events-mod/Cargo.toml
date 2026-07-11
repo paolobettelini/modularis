@@ -1,0 +1,32 @@
+[package]
+name = "inventory-events-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "InventoryEventsMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod"]
+run = []
+ownership = []
+
+[package.metadata.network.messages]
+clientbound = [
+    "inventory_network_message_types::InventoryResetPacket",
+    "inventory_network_message_types::InventoryResizePacket",
+    "inventory_network_message_types::InventorySetCellPacket",
+]
+serverbound = [
+    "inventory_network_message_types::InventoryMoveRequest",
+    "inventory_network_message_types::HotbarSelectRequest",
+    "inventory_network_message_types::UseHeldItemRequest",
+    "inventory_network_message_types::InventorySyncRequest",
+]
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+inventory-events-api = { path = "../inventory-events-api" }
+inventory-network-message-types = { path = "../inventory-network-message-types" }
+tokio = { version = "1.48.0", features = ["full"] }

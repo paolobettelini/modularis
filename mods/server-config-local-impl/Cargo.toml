@@ -1,0 +1,17 @@
+[package]
+name = "server-config-local-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "LocalServerConfig"
+provides = "server-config-api"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[dependencies]
+server-config-api = { path = "../server-config-api" }
+tokio = { version = "1.48.0", features = ["full"] }

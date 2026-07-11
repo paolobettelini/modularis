@@ -1,0 +1,18 @@
+[package]
+name = "server-inventory-layout-default-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerInventoryLayoutDefaultImpl"
+provides = "server-inventory-layout-api"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[dependencies]
+inventory-core-api = { path = "../inventory-core-api" }
+server-inventory-layout-api = { path = "../server-inventory-layout-api" }
+tokio = { version = "1.48.0", features = ["full"] }

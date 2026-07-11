@@ -1,0 +1,19 @@
+[package]
+name = "client-sun-state-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientSunStateMod"
+provides = "client-sun-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+client-sun-api = { path = "../client-sun-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+

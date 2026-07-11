@@ -1,0 +1,12 @@
+[package]
+name = "block-manager-api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+block-api = { path = "../block-api" }
+block-render-api = { path = "../block-render-api" }
+generated-block-registry = "0.1.0"
+
+[patch.crates-io]
+generated-block-registry = { path = "../generated-block-registry" }

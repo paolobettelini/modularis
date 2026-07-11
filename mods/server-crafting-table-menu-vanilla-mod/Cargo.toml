@@ -1,0 +1,32 @@
+[package]
+name = "server-crafting-table-menu-vanilla-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerCraftingTableMenuVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "cell-menu-events-mod",
+    "server-chunk-world-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+audience-api = { path = "../audience-api" }
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+cell-menu-api = { path = "../cell-menu-api" }
+cell-menu-events-mod = { path = "../cell-menu-events-mod" }
+generated-block-registry = "0.1.0"
+inventory-core-api = { path = "../inventory-core-api" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { path = "../voxel-math-api" }
+world-instance-api = { path = "../world-instance-api" }
+
+[patch.crates-io]
+generated-block-registry = { path = "../generated-block-registry" }

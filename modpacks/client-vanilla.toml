@@ -1,0 +1,25 @@
+name = "Minecraft demo vanilla client features"
+description = "Optional vanilla-style client controls and gameplay behavior."
+modpacks = []
+ignore = []
+
+mods = [
+    "client-setting-jump-key",
+    "client-setting-sprint-key",
+    "client-block-interaction-rules-vanilla-mod",
+    "client-crosshair-bevy-mod",
+    "client-hotbar-selection-input-mod",
+    "client-hotbar-scroll-input-mod",
+    "client-pause-menu-input-mod",
+    "client-inventory-toggle-input-mod",
+    "player-gravity-vanilla-mod",
+    "player-gravity-network-messages-mod",
+    "player-jump-network-messages-mod",
+    "client-player-gravity-network-receive-mod",
+    "client-player-gravity-prediction-vanilla-mod",
+    "client-player-jump-vanilla-mod",
+    "client-player-flight-vanilla-mod",
+    "client-player-sprint-vanilla-mod",
+    "client-use-held-item-on-block-mod",
+    "client-crafting-table-open-network-mod",
+]

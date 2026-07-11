@@ -1,0 +1,13 @@
+[package]
+name = "block-instance-api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+generated-block-metadata = "0.1.0"
+generated-block-registry = "0.1.0"
+serde = { version = "1.0", features = ["derive"] }
+
+[patch.crates-io]
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }

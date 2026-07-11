@@ -1,0 +1,34 @@
+[package]
+name = "client-settings-bevy-menu-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "SettingsBevyMenuImpl"
+provides = "client-settings-api"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-menu-api",
+    "client-game-state-api",
+    "client-settings-input-api",
+    "client-settings-registry-codegen",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-game-state-api = { path = "../client-game-state-api" }
+generated-client-settings-registry = "0.1.0"
+client-menu-api = { path = "../client-menu-api" }
+client-settings-api = { path = "../client-settings-api" }
+client-settings-input-api = { path = "../client-settings-input-api" }
+client-settings-registry-codegen = { path = "../client-settings-registry-codegen" }
+settings-schema-api = { path = "../settings-schema-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-client-settings-registry = { path = "../generated-client-settings-registry" }

@@ -1,0 +1,17 @@
+[package]
+name = "client-config-default-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "DefaultClientConfig"
+provides = "client-config-api"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[dependencies]
+client-config-api = { path = "../client-config-api" }
+tokio = { version = "1.48.0", features = ["full"] }

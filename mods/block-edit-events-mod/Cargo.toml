@@ -1,0 +1,27 @@
+[package]
+name = "block-edit-events-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "BlockEditEventsMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "block-registry-codegen"]
+run = []
+ownership = []
+
+[package.metadata.network.messages]
+clientbound = [
+    "block_edit_network_message_types::BlockBrokenPacket",
+    "block_edit_network_message_types::BlockPlacedPacket",
+]
+serverbound = ["block_edit_network_message_types::BlockBreakRequest"]
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+block-edit-events-api = { path = "../block-edit-events-api" }
+block-edit-network-message-types = { path = "../block-edit-network-message-types" }
+block-registry-codegen = { path = "../block-registry-codegen" }
+tokio = { version = "1.48.0", features = ["full"] }

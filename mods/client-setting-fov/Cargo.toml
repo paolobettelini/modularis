@@ -1,0 +1,23 @@
+[package]
+name = "client-setting-fov"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientSettingFovMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.setting]
+id = "graphics.fov"
+label = "Field of view (degrees)"
+type = "f32"
+input = "f32"
+default = 75.0
+
+[dependencies]
+settings-schema-api = { path = "../settings-schema-api" }
+tokio = { version = "1.48.0", features = ["full"] }

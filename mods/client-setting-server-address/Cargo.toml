@@ -1,0 +1,24 @@
+[package]
+name = "client-setting-server-address"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientSettingServerAddressMod"
+
+[package.metadata.mod.dependencies]
+init = ["client-config-api"]
+run = []
+ownership = []
+
+[package.metadata.setting]
+id = "network.server_address"
+label = "Server address"
+type = "string"
+input = "string"
+default = "127.0.0.1:9999"
+
+[dependencies]
+client-config-api = { path = "../client-config-api" }
+settings-schema-api = { path = "../settings-schema-api" }
+tokio = { version = "1.48.0", features = ["full"] }

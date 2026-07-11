@@ -1,0 +1,20 @@
+[package]
+name = "client-input-bevy-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "InputBevyImpl"
+provides = "client-input-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "client-game-state-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-input-api = { path = "../client-input-api" }
+tokio = { version = "1.48.0", features = ["full"] }

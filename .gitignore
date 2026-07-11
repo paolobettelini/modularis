@@ -1,0 +1,16 @@
+build-client
+build-server
+build
+target
+
+# Composer-generated development crates.
+mods/generated-block-registry
+mods/generated-client-settings-registry
+mods/generated-item-metadata
+mods/generated-item-registry
+mods/generated-network-messages
+
+
+# Temp
+*.png
+*.ttf

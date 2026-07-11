@@ -1,0 +1,34 @@
+[package]
+name = "client-player-render-bevy-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientPlayerRenderBevyImpl"
+provides = "client-player-render-api"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-camera-api",
+    "player-gravity-api",
+    "client-game-state-api",
+    "network-protocol-mod",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-camera-api = { path = "../client-camera-api" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-player-render-api = { path = "../client-player-render-api" }
+generated-network-messages = "0.1.0"
+player-network-message-types = { path = "../player-network-message-types" }
+player-gravity-api = { path = "../player-gravity-api" }
+network-protocol-mod = { path = "../network-protocol-mod" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-network-messages = { path = "../generated-network-messages" }

@@ -1,0 +1,21 @@
+[package]
+name = "server-item-quantity-consumption-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerItemQuantityConsumptionMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "inventory-events-mod", "server-inventory-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+inventory-events-api = { path = "../inventory-events-api" }
+inventory-events-mod = { path = "../inventory-events-mod" }
+item-quantity-meta = { path = "../item-quantity-meta" }
+server-inventory-api = { path = "../server-inventory-api" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -1,0 +1,20 @@
+[package]
+name = "block-crafting-table"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "BlockCraftingTableMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.block]
+id = "demo:crafting-table"
+
+[dependencies]
+block-api = { path = "../block-api" }
+block-render-api = { path = "../block-render-api" }
+tokio = { version = "1.48.0", features = ["full"] }

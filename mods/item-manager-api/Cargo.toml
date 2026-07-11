@@ -1,0 +1,11 @@
+[package]
+name = "item-manager-api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+generated-item-registry = "0.1.0"
+item-api = { path = "../item-api" }
+
+[patch.crates-io]
+generated-item-registry = { path = "../generated-item-registry" }

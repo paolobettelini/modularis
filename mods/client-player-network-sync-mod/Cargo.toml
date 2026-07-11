@@ -1,0 +1,38 @@
+[package]
+name = "client-player-network-sync-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientPlayerNetworkSyncMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-network-api",
+    "client-session-api",
+    "client-player-controller-api",
+    "client-camera-api",
+    "player-gravity-api",
+    "client-game-state-api",
+    "network-protocol-mod",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-camera-api = { path = "../client-camera-api" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-network-api = { path = "../client-network-api" }
+client-player-controller-api = { path = "../client-player-controller-api" }
+client-session-api = { path = "../client-session-api" }
+generated-network-messages = "0.1.0"
+network-protocol-mod = { path = "../network-protocol-mod" }
+player-gravity-api = { path = "../player-gravity-api" }
+player-network-message-types = { path = "../player-network-message-types" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-network-messages = { path = "../generated-network-messages" }

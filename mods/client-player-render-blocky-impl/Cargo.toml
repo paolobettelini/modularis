@@ -1,0 +1,40 @@
+[package]
+name = "client-player-render-blocky-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientPlayerRenderBlockyImpl"
+provides = "client-player-render-api"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-camera-api",
+    "player-gravity-api",
+    "client-game-state-api",
+    "network-protocol-mod",
+    "blocky-model-api",
+    "blocky-animation-api",
+    "client-player-blocky-model-paths-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+blocky-animation-api = { path = "../blocky-animation-api" }
+blocky-model-api = { path = "../blocky-model-api" }
+client-camera-api = { path = "../client-camera-api" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-player-blocky-model-paths-api = { path = "../client-player-blocky-model-paths-api" }
+client-player-render-api = { path = "../client-player-render-api" }
+generated-network-messages = "0.1.0"
+network-protocol-mod = { path = "../network-protocol-mod" }
+player-gravity-api = { path = "../player-gravity-api" }
+player-network-message-types = { path = "../player-network-message-types" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-network-messages = { path = "../generated-network-messages" }

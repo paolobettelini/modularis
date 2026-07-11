@@ -1,0 +1,34 @@
+[package]
+name = "client-chunk-streaming-around-player-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "AroundPlayerChunkStreaming"
+provides = "client-chunk-streaming-api"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-settings-api",
+    "client-camera-api",
+    "client-game-state-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-camera-api = { path = "../client-camera-api" }
+client-chunk-streaming-api = { path = "../client-chunk-streaming-api" }
+client-game-state-api = { path = "../client-game-state-api" }
+generated-client-settings-registry = "0.1.0"
+client-settings-api = { path = "../client-settings-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { path = "../voxel-math-api" }
+
+[patch.crates-io]
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }
+generated-client-settings-registry = { path = "../generated-client-settings-registry" }

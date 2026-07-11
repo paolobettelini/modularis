@@ -1,0 +1,21 @@
+name = "Minecraft demo network protocol"
+description = "Common ECS event contracts, packet contributors, and the generated network protocol."
+modpacks = ["blocks", "dimensions"]
+ignore = []
+
+mods = [
+    "inventory-events-mod",
+    "cell-menu-events-mod",
+    "hotbar-network-messages-mod",
+    "block-edit-events-mod",
+    "session-network-messages-mod",
+    "player-network-messages-mod",
+    "player-flight-network-messages-mod",
+    "chunk-network-messages-mod",
+    "dimension-network-messages-mod",
+    "sky-network-messages-mod",
+    "sun-network-messages-mod",
+    "portal-network-messages-mod",
+    "cell-menu-network-messages-mod",
+    "network-protocol-mod",
+]

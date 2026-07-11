@@ -1,0 +1,25 @@
+[package]
+name = "block-metadata-registry-codegen"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "BlockMetadataRegistryCodegenMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[[package.metadata.mod.codegen]]
+crate = "generated-block-metadata"
+version = "0.1.0"
+dev_crate = "generated-block-metadata"
+
+[package.metadata.mod.codegen.generator]
+crate = "block-metadata-registry-codegen"
+command = "generate"
+
+[dependencies]
+tokio = { version = "1.48.0", features = ["full"] }
+toml = "0.9"

@@ -1,0 +1,33 @@
+[package]
+name = "client-camera-first-person-bevy-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "FirstPersonCameraBevyImpl"
+provides = "client-camera-api"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-input-api",
+    "client-settings-api",
+    "player-gravity-api",
+    "client-game-state-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-camera-api = { path = "../client-camera-api" }
+client-game-state-api = { path = "../client-game-state-api" }
+generated-client-settings-registry = "0.1.0"
+client-input-api = { path = "../client-input-api" }
+client-settings-api = { path = "../client-settings-api" }
+player-gravity-api = { path = "../player-gravity-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-client-settings-registry = { path = "../generated-client-settings-registry" }

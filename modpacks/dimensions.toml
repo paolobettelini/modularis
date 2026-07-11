@@ -1,0 +1,11 @@
+name = "Minecraft demo dimensions"
+description = "Dimension contributors and the generated dimension enum."
+modpacks = []
+ignore = []
+
+mods = [
+    "dimension-overworld",
+    "dimension-nether",
+    "dimension-aether",
+    "dimension-registry-codegen",
+]

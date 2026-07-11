@@ -1,0 +1,25 @@
+[package]
+name = "cell-menu-network-messages-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "CellMenuNetworkMessagesMod"
+
+[package.metadata.mod.dependencies]
+init = ["cell-menu-events-mod"]
+run = []
+ownership = []
+
+[package.metadata.network.messages]
+clientbound = [
+    "cell_menu_network_message_types::CellMenuPacket",
+]
+serverbound = [
+    "cell_menu_network_message_types::CellMenuRequest",
+]
+
+[dependencies]
+cell-menu-events-mod = { path = "../cell-menu-events-mod" }
+cell-menu-network-message-types = { path = "../cell-menu-network-message-types" }
+tokio = { version = "1.48.0", features = ["full"] }

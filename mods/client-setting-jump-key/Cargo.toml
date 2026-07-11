@@ -1,0 +1,23 @@
+[package]
+name = "client-setting-jump-key"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientSettingJumpKeyMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.setting]
+id = "controls.jump_key"
+label = "Jump key"
+type = "string"
+input = "keybinding"
+default = "Space"
+
+[dependencies]
+settings-schema-api = { path = "../settings-schema-api" }
+tokio = { version = "1.48.0", features = ["full"] }

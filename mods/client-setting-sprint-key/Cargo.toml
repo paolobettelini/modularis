@@ -1,0 +1,23 @@
+[package]
+name = "client-setting-sprint-key"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientSettingSprintKeyMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.setting]
+id = "controls.sprint_key"
+label = "Sprint key"
+type = "string"
+input = "keybinding"
+default = "ControlLeft"
+
+[dependencies]
+settings-schema-api = { path = "../settings-schema-api" }
+tokio = { version = "1.48.0", features = ["full"] }

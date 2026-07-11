@@ -1,0 +1,21 @@
+[package]
+name = "client-menu-bevy-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "MenuBevyImpl"
+provides = "client-menu-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "client-game-state-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-keybinding-api = { path = "../client-keybinding-api" }
+client-menu-api = { path = "../client-menu-api" }
+tokio = { version = "1.48.0", features = ["full"] }

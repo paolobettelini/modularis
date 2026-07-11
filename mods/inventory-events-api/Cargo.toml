@@ -1,0 +1,10 @@
+[package]
+name = "inventory-events-api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy = "0.17.3"
+inventory-core-api = { path = "../inventory-core-api" }
+item-instance-api = { path = "../item-instance-api" }
+item-use-api = { path = "../item-use-api" }

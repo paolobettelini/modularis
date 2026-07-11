@@ -1,0 +1,11 @@
+[package]
+name = "server-cell-menu-api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+audience-api = { path = "../audience-api" }
+bevy = "0.17.3"
+cell-menu-api = { path = "../cell-menu-api" }
+inventory-core-api = { path = "../inventory-core-api" }
+item-instance-api = { path = "../item-instance-api" }

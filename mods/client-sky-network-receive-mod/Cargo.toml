@@ -1,0 +1,23 @@
+[package]
+name = "client-sky-network-receive-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientSkyNetworkReceiveMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "client-sky-api", "network-protocol-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-sky-api = { path = "../client-sky-api" }
+generated-network-messages = "0.1.0"
+network-protocol-mod = { path = "../network-protocol-mod" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-network-messages = { path = "../generated-network-messages" }

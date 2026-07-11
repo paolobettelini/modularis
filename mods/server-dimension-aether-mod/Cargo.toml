@@ -1,0 +1,30 @@
+[package]
+name = "server-dimension-aether-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerDimensionAetherMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "server-dimension-api",
+    "server-chunk-provider-aether-mod",
+    "dimension-aether",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+dimension-aether = { path = "../dimension-aether" }
+generated-dimension-registry = "0.1.0"
+server-chunk-provider-aether-mod = { path = "../server-chunk-provider-aether-mod" }
+server-chunk-provider-api = { path = "../server-chunk-provider-api" }
+server-dimension-api = { path = "../server-dimension-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+world-instance-api = { path = "../world-instance-api" }
+
+[patch.crates-io]
+generated-dimension-registry = { path = "../generated-dimension-registry" }

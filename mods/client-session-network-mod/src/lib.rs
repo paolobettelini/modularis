@@ -1,0 +1,92 @@
+use bevy::prelude::*;
+use bevy_mod::BevyMod;
+use client_game_state_api::{GameState, GameStateApi};
+use client_network_api::{ClientNetworkApi, ClientNetworkSender};
+use client_session_api::{ClientSession, ClientSessionApi};
+use client_settings_api::{SettingsApi, SettingsStore};
+use generated_client_settings_registry::SettingKey;
+use generated_network_messages::{JoinAcceptedReceived, NetworkMessageSet, ServerBoundMessage};
+use network_protocol_mod::NetworkProtocolMod;
+use session_network_message_types::{JoinRequest, LeaveRequest};
+use tokio::task::JoinHandle;
+
+#[derive(Resource, Default)]
+struct PendingJoin(bool);
+
+pub struct ClientSessionNetworkMod;
+
+impl ClientSessionNetworkMod {
+    pub fn init<N: ClientNetworkApi, S: SettingsApi, G: GameStateApi>(
+        bevy: &mut BevyMod,
+        _network: &mut N,
+        _settings: &mut S,
+        _game_state: &mut G,
+        _protocol: &mut NetworkProtocolMod,
+    ) -> Self {
+        bevy.app
+            .init_resource::<ClientSession>()
+            .init_resource::<PendingJoin>()
+            .add_systems(OnEnter(GameState::InGame), begin_join)
+            .add_systems(
+                Update,
+                (
+                    send_pending_join,
+                    accept_join.after(NetworkMessageSet::DispatchPackets),
+                )
+                    .run_if(in_state(GameState::InGame)),
+            )
+            .add_systems(OnExit(GameState::InGame), leave_server);
+        Self
+    }
+
+    pub fn run(&self) -> Option<Vec<JoinHandle<()>>> {
+        None
+    }
+}
+
+impl ClientSessionApi for ClientSessionNetworkMod {}
+
+fn begin_join(mut pending: ResMut<PendingJoin>, mut session: ResMut<ClientSession>) {
+    pending.0 = true;
+    session.player_id = None;
+}
+
+fn send_pending_join(
+    sender: Option<Res<ClientNetworkSender>>,
+    settings: Res<SettingsStore>,
+    mut pending: ResMut<PendingJoin>,
+) {
+    if !pending.0 {
+        return;
+    }
+    let Some(sender) = sender else {
+        return;
+    };
+    let name = settings
+        .get_string(SettingKey::NetworkPlayerName)
+        .unwrap_or("Player")
+        .to_string();
+    if sender
+        .send(&ServerBoundMessage::JoinRequest(JoinRequest { name }))
+        .is_ok()
+    {
+        pending.0 = false;
+    }
+}
+
+fn accept_join(
+    mut accepted: MessageReader<JoinAcceptedReceived>,
+    mut session: ResMut<ClientSession>,
+) {
+    for accepted in accepted.read() {
+        session.player_id = Some(accepted.0.player_id);
+        info!("joined server as player {}", accepted.0.player_id);
+    }
+}
+
+fn leave_server(sender: Option<Res<ClientNetworkSender>>, mut session: ResMut<ClientSession>) {
+    if let Some(sender) = sender {
+        let _ = sender.send(&ServerBoundMessage::LeaveRequest(LeaveRequest));
+    }
+    session.player_id = None;
+}

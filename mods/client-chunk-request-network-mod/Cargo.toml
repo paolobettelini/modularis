@@ -1,0 +1,33 @@
+[package]
+name = "client-chunk-request-network-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientChunkRequestNetworkMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-network-api",
+    "client-chunk-streaming-api",
+    "client-chunk-cache-api",
+    "client-game-state-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+chunk-network-message-types = { path = "../chunk-network-message-types" }
+client-chunk-cache-api = { path = "../client-chunk-cache-api" }
+client-chunk-streaming-api = { path = "../client-chunk-streaming-api" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-network-api = { path = "../client-network-api" }
+generated-network-messages = "0.1.0"
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { path = "../voxel-math-api" }
+
+[patch.crates-io]
+generated-network-messages = { path = "../generated-network-messages" }

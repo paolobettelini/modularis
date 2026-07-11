@@ -1,0 +1,21 @@
+[package]
+name = "sun-network-messages-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "SunNetworkMessagesMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.network.messages]
+clientbound = ["sun_network_message_types::SunSettingsChanged"]
+serverbound = []
+
+[dependencies]
+sun-network-message-types = { path = "../sun-network-message-types" }
+tokio = { version = "1.48.0", features = ["full"] }
+

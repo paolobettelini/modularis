@@ -1,0 +1,30 @@
+[package]
+name = "server-dimension-nether-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerDimensionNetherMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "server-dimension-api",
+    "server-chunk-provider-nether-mod",
+    "dimension-nether",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+dimension-nether = { path = "../dimension-nether" }
+generated-dimension-registry = "0.1.0"
+server-chunk-provider-api = { path = "../server-chunk-provider-api" }
+server-chunk-provider-nether-mod = { path = "../server-chunk-provider-nether-mod" }
+server-dimension-api = { path = "../server-dimension-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+world-instance-api = { path = "../world-instance-api" }
+
+[patch.crates-io]
+generated-dimension-registry = { path = "../generated-dimension-registry" }

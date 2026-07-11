@@ -1,0 +1,34 @@
+[package]
+name = "server-dimension-network-sync-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerDimensionNetworkSyncMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "server-dimension-api",
+    "server-network-events-api",
+    "server-player-registry-api",
+    "network-protocol-mod",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+dimension-network-message-types = { path = "../dimension-network-message-types" }
+generated-network-messages = "0.1.0"
+network-protocol-mod = { path = "../network-protocol-mod" }
+player-network-message-types = { path = "../player-network-message-types" }
+server-dimension-api = { path = "../server-dimension-api" }
+server-network-events-api = { path = "../server-network-events-api" }
+server-player-registry-api = { path = "../server-player-registry-api" }
+sky-network-message-types = { path = "../sky-network-message-types" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-network-messages = { path = "../generated-network-messages" }
