@@ -14,7 +14,8 @@ Current limits:
 - no revision/version field in chunk responses;
 - client cache keys omit world scope and rely on reset;
 - residency is a simple player window;
-- no biome or structure registry.
+- biome visuals are not synchronized or rendered;
+- no generated structure registry.
 
 Design direction:
 
@@ -22,7 +23,8 @@ Design direction:
 - persistent overlay/backend;
 - scoped/revisioned client chunks;
 - byte-budget or LRU residency;
-- generated biome/structure contributors.
+- client biome maps and visual synchronization;
+- generated structure contributors and asynchronous generation stages.
 
 ## Rendering
 

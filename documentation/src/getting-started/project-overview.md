@@ -48,13 +48,15 @@ The current compositions are:
 | `blocks.toml` | Block contributors, block metadata, generated block registry |
 | `items.toml` | Item contributors, item metadata, generated item registry |
 | `dimensions.toml` | Dimension contributors and generated `Dimension` enum |
+| `biomes.toml` | Biome identity contributors and generated `BiomeId` enum |
 | `network.toml` | Network message contributors and generated protocol |
 | `common.toml` | Shared Bevy foundation plus blocks, items, and protocol |
 | `client-vanilla.toml` | Optional Minecraft-like client behavior |
 | `client-graphics.toml` | Optional lighting and voxel shading |
 | `client.toml` | Playable client composition |
 | `server-base.toml` | Neutral server transport and authoritative pipelines |
-| `server-vanilla.toml` | Optional Minecraft-like server rules |
+| `server-biomes-vanilla.toml` | Optional vanilla biome definitions, features, and selector |
+| `server-vanilla.toml` | Optional Minecraft-like server rules and selected biome runtime/provider |
 | `server.toml` | Demo server composition and concrete world providers |
 
 The split between `server-base.toml` and `server-vanilla.toml` is especially
@@ -92,6 +94,7 @@ The repository contains development copies of generated crates:
 - `generated-item-registry`;
 - `generated-item-metadata`;
 - `generated-dimension-registry`;
+- `generated-biome-registry`;
 - `generated-client-settings-registry`;
 - `generated-network-messages`.
 
@@ -113,7 +116,8 @@ The demo currently includes:
 - client-predicted first-person movement with server collision validation;
 - configurable jump, sprint, flight, FOV, mouse sensitivity, and inventory key;
 - vertically unbounded chunk coordinates with a moving client window;
-- pluggable Overworld, Nether, and Aether terrain providers;
+- pluggable biome-driven Overworld, Nether, and Aether terrain providers;
+- generated biome IDs with code-side definitions and phased world features;
 - palette-compressed chunks carrying block instances and metadata;
 - block breaking, item-based placement, reach checks, and hitbox checks;
 - server-authoritative inventory, hotbar, stacking, quantity consumption, and

@@ -10,6 +10,7 @@ The current generated domains are:
 - items;
 - item metadata;
 - dimensions;
+- biomes;
 - client settings;
 - network messages and Bevy packet events.
 
@@ -166,6 +167,23 @@ pub enum Dimension {
 
 Network messages and server definitions use this enum. Portal packets can carry
 any selected dimension without a hardcoded Nether-specific message.
+
+## Biome code generation
+
+A biome identity contributor declares only:
+
+```toml
+[package.metadata.biome]
+id = "demo:forest"
+```
+
+`biome-registry-codegen` generates `BiomeId`, `ALL_BIOMES`, string lookup, and
+stable namespaced ID conversion. Climate, terrain blocks, visual properties,
+and feature lists remain normal Rust registered by server definition mods.
+
+This split keeps identity available independently from the server's selected
+world-generation policy. See
+[Biomes and world-generation features](../world/biomes.md).
 
 ## Settings code generation
 

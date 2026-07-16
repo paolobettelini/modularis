@@ -75,7 +75,8 @@ Use when several implementations must coexist.
 Examples:
 
 - chunk providers;
-- future recipe or biome registries;
+- biome feature registries;
+- future recipe or structure registries;
 - settings input factories.
 
 Register by stable ID.
@@ -90,6 +91,7 @@ Examples:
 - item;
 - item/block metadata;
 - dimension;
+- biome;
 - setting;
 - network packet.
 

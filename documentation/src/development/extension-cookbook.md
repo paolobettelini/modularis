@@ -352,6 +352,35 @@ Provider generation must:
 If it depends on viewer identity, document whether edits are shared or
 viewer-specific. Routing and instance keys must match that policy.
 
+## Add a biome
+
+Create a small identity contributor:
+
+```toml
+[package.metadata.biome]
+id = "example:crystal-fields"
+```
+
+Add it to `biomes.toml` and recompose to generate
+`BiomeId::CrystalFields`.
+
+Create a separate server definition mod that registers `BiomeDefinition` in
+`ServerBiomeRegistry`. Put climate targets, terrain blocks, visual data, and an
+ordered list of feature IDs in that Rust definition.
+
+If the biome needs new generation behavior, create a feature mod implementing
+`ServerBiomeFeature`, register a namespaced `BiomeFeatureId`, and give it a
+public phase plus a conservative vertical range. Make the definition mod depend
+on the feature mod so registration happens first.
+
+The vanilla climate selector automatically considers registered definitions.
+Replace `server-biome-selection-api` when the desired placement policy is not
+nearest climate-point selection. Replace the primary chunk provider when the
+desired terrain shape does not fit the current heightmap/strata model.
+
+The complete contract and examples are in
+[Biomes and world-generation features](../world/biomes.md).
+
 ## Add a dimension
 
 Create:

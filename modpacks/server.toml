@@ -8,7 +8,6 @@ mods = [
     "server-dimension-registry-mod",
     "server-dimension-overworld-mod",
     "server-chunk-routing-dimensions-mod",
-    "server-chunk-provider-perlin-mod",
     "server-chunk-provider-nether-mod",
     "server-dimension-nether-mod",
     "server-chunk-provider-aether-mod",

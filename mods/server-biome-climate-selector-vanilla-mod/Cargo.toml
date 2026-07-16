@@ -1,0 +1,27 @@
+[package]
+name = "server-biome-climate-selector-vanilla-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerBiomeClimateSelectorVanillaMod"
+provides = "server-biome-selection-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-biome-api", "server-biome-plains-vanilla-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+coherent-noise-api = { path = "../coherent-noise-api" }
+generated-biome-registry = "0.1.0"
+server-biome-api = { path = "../server-biome-api" }
+server-biome-plains-vanilla-mod = { path = "../server-biome-plains-vanilla-mod" }
+server-biome-selection-api = { path = "../server-biome-selection-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-biome-registry = { path = "../generated-biome-registry" }
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }

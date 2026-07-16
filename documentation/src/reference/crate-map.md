@@ -23,6 +23,7 @@ as families.
 | `item-registry-codegen` | `generated-item-registry` | `item-*` contributors |
 | `item-metadata-registry-codegen` | `generated-item-metadata` | `item-*-meta` |
 | `dimension-registry-codegen` | `generated-dimension-registry` | `dimension-*` |
+| `biome-registry-codegen` | `generated-biome-registry` | `biome-*` identity contributors |
 | `client-settings-registry-codegen` | `generated-client-settings-registry` | `client-setting-*` |
 | `network-protocol-mod` / `network-codegen-utils` | `generated-network-messages` | `*-network-messages-mod` |
 
@@ -52,10 +53,17 @@ Current block contributors:
 - `block-diamond-ore`;
 - `block-dirt`;
 - `block-end-stone`;
+- `block-cactus`;
+- `block-gravel`;
 - `block-glowstone`;
 - `block-grass`;
 - `block-netherrack`;
+- `block-oak-leaves`;
+- `block-oak-log`;
 - `block-obsidian`;
+- `block-packed-ice`;
+- `block-sand`;
+- `block-snow`;
 - `block-stone`.
 
 Block edit networking:
@@ -129,6 +137,7 @@ Infrastructure:
 
 Providers:
 
+- `server-chunk-provider-biomes-mod` (active Overworld provider);
 - `server-chunk-provider-perlin-mod`;
 - `server-chunk-provider-nether-mod`;
 - `server-chunk-provider-aether-mod`;
@@ -142,6 +151,31 @@ Routing:
 Residency:
 
 - `server-chunk-residency-player-interest-vanilla-mod`.
+
+## Biomes and generation features
+
+Identity and codegen:
+
+- `biome-registry-codegen`;
+- `generated-biome-registry`;
+- Plains, Forest, Desert, Tundra, and Rocky Peaks contributor mods.
+
+Contracts and providers:
+
+- `server-biome-api`;
+- `server-biome-selection-api`;
+- `server-biome-registry-mod`;
+- `server-biome-climate-selector-vanilla-mod`;
+- one vanilla definition mod per biome.
+
+Phased features:
+
+- caves;
+- diamond ores;
+- sparse/dense oak trees;
+- cacti;
+- packed-ice patches;
+- rock boulders.
 
 ## Client chunks
 

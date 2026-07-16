@@ -18,6 +18,7 @@
   - [Blocks, items, and metadata](./world/blocks-and-items.md)
   - [Chunk coordinates and storage](./world/chunk-storage.md)
   - [Server world providers and residency](./world/server-world.md)
+  - [Biomes and world-generation features](./world/biomes.md)
   - [Client streaming, meshing, and rendering](./world/client-chunks.md)
   - [Dimensions and world scopes](./world/dimensions.md)
   - [Portals](./world/portals.md)

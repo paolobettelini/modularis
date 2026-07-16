@@ -15,6 +15,7 @@ Use direct crate tests for pure or local behavior:
 - dimension registration;
 - AO brightness;
 - provider uniform-layer behavior.
+- biome registry validation, climate determinism, and feature vertical bounds;
 
 Pure API/support crates should have most of their behavior covered without
 starting Bevy.
@@ -75,6 +76,7 @@ Useful composition fixtures:
 
 - server base without vanilla rules;
 - checkerboard provider instead of Perlin;
+- primary provider without the vanilla biome pack;
 - single-world routing without dimensions;
 - client without graphics pack;
 - client with outline feature;

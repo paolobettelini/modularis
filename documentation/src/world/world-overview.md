@@ -8,6 +8,8 @@ Block and metadata registries
              │
        Chunk data format
              │
+biome identities, definitions, features
+             │
 server provider registry
              │
 viewer-aware chunk router
@@ -32,6 +34,7 @@ No single "world manager" owns this entire flow.
 The server decides:
 
 - which provider answers a viewer's query;
+- which biome selector, definitions, and generation features shape terrain;
 - which world instance namespaces the data;
 - which chunks may be requested;
 - which chunks stay in the resident cache;

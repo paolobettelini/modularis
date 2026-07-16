@@ -13,4 +13,11 @@ mods/generated-network-messages
 
 # Temp
 *.png
+!mods/block-sand/assets/*.png
+!mods/block-snow/assets/*.png
+!mods/block-gravel/assets/*.png
+!mods/block-packed-ice/assets/*.png
+!mods/block-oak-leaves/assets/*.png
+!mods/block-oak-log/assets/*.png
+!mods/block-cactus/assets/*.png
 *.ttf

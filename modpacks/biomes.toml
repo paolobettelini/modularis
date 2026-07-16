@@ -1,0 +1,13 @@
+name = "Minecraft demo biome identities"
+description = "Biome id contributors and the generated biome registry shared by composed applications."
+modpacks = ["blocks"]
+ignore = []
+
+mods = [
+    "biome-plains",
+    "biome-forest",
+    "biome-desert",
+    "biome-tundra",
+    "biome-rocky-peaks",
+    "biome-registry-codegen",
+]

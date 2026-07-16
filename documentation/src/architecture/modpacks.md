@@ -24,6 +24,10 @@ generated `BlockId`.
 `network.toml` imports blocks and dimensions because packets serialize block
 instances, chunks, and dimension IDs.
 
+`biomes.toml` imports blocks and selects biome identity contributors plus
+`biome-registry-codegen`. It is not part of `common.toml` yet because the
+current network protocol does not transmit biome IDs.
+
 ## Client composition
 
 `client.toml` imports:
@@ -88,6 +92,9 @@ changing controls or graphics.
 
 `server-vanilla.toml` contains selected policy:
 
+- the imported `server-biomes-vanilla.toml` pack with climate selection,
+  biome definitions, and phased generation features;
+- the biome runtime registry and the selected primary Overworld provider;
 - player-interest chunk residency;
 - world-scope player visibility;
 - default dimension lifecycle;
@@ -108,8 +115,12 @@ changing controls or graphics.
 - dimension registry;
 - Overworld, Nether, and Aether definitions;
 - dimension-aware chunk routing;
-- Perlin, Nether, and Aether providers;
+- biome-driven Overworld, Nether, and Aether providers;
 - dynamic world cache and edit overlay.
+
+The biome pack is separate from `server-base.toml`. A server can omit it and
+select the simple Perlin provider, checkerboard provider, a file-backed world,
+or a custom biome composition.
 
 ## Why vanilla is not base
 

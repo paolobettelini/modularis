@@ -45,7 +45,7 @@ pub struct DimensionDefinition {
 
 The current definitions are:
 
-- Overworld: primary Perlin provider, blue sky, default spawn;
+- Overworld: primary biome-driven provider, blue sky, default spawn;
 - Nether: Nether provider, dark red sky;
 - Aether: Aether provider, blue sky, elevated spawn.
 
