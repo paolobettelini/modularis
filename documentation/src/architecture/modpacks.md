@@ -1,0 +1,187 @@
+# Modpacks and feature boundaries
+
+Modpacks are the architecture's final decision layer. APIs and feature mods make
+choices possible; modpacks decide which choices become an application.
+
+## Shared composition
+
+`common.toml` imports:
+
+```text
+blocks
+items
+network
+```
+
+and selects `bevy-mod`.
+
+This gives client and server the same generated block, item, metadata, dimension,
+and protocol types.
+
+`items.toml` imports `blocks.toml` because `PlaceBlock` metadata contains a
+generated `BlockId`.
+
+`network.toml` imports blocks and dimensions because packets serialize block
+instances, chunks, and dimension IDs.
+
+## Client composition
+
+`client.toml` imports:
+
+```toml
+modpacks = ["common", "client-vanilla", "client-graphics"]
+```
+
+The top-level client selects neutral state and concrete presentation:
+
+- Bevy default plugins and window;
+- settings and input editor providers;
+- TCP transport;
+- session state;
+- chunk cache, streaming, meshing, and rendering;
+- first-person controller and camera;
+- inventory and cell-menu UI;
+- Blocky remote player rendering;
+- dimension, sky, sun, and portal client state;
+- bootstrap.
+
+`client-vanilla.toml` adds optional behavior:
+
+- jump and sprint settings;
+- crosshair;
+- number-key and wheel hotbar selection;
+- pause and inventory input;
+- client gravity prediction;
+- jump, sprint, and flight controls;
+- held-item fallback;
+- crafting-table interaction;
+- layered chunk priority.
+
+`client-graphics.toml` adds:
+
+- directional sun;
+- sun shadows;
+- ambient fill;
+- face-direction shading;
+- voxel ambient occlusion.
+
+This split lets a custom client keep the base protocol and chunk renderer while
+changing controls or graphics.
+
+## Server composition
+
+`server-base.toml` contains infrastructure:
+
+- server configuration;
+- headless Bevy runner;
+- TCP transport;
+- server packet events and routing;
+- lifecycle messages;
+- authoritative inventory and cell-menu state;
+- network receive/sync bridges;
+- block edit network bridges;
+- sessions and timeout;
+- flight capability state and synchronization;
+- sun state and synchronization;
+- chunk request handling;
+- bootstrap.
+
+`server-vanilla.toml` contains selected policy:
+
+- player-interest chunk residency;
+- world-scope player visibility;
+- default dimension lifecycle;
+- grant-all flight;
+- default sun;
+- Nether and Aether portal rules;
+- portal ignition and travel;
+- movement collision and jump validation;
+- default inventory layout and loadout;
+- quantity stacking and consumption;
+- reach validation;
+- block breaking and `PlaceBlock` item behavior;
+- crafting-table menus.
+
+`server.toml` selects the concrete world:
+
+- chunk provider registry;
+- dimension registry;
+- Overworld, Nether, and Aether definitions;
+- dimension-aware chunk routing;
+- Perlin, Nether, and Aether providers;
+- dynamic world cache and edit overlay.
+
+## Why vanilla is not base
+
+Suppose a custom server wants inventories but no block placement. It can use
+`server-base.toml` and select the inventory layout/loadout mods it wants, while
+omitting `server-place-block-item-use-mod`.
+
+Suppose another server wants players to move through blocks. It can omit
+`server-player-movement-collision-vanilla-mod` or provide a different validator.
+
+Suppose a server wants team worlds. It can replace:
+
+- chunk routing;
+- player visibility;
+- chunk residency;
+- dimension lifecycle;
+
+without replacing TCP, packet generation, or the chunk storage backend.
+
+These are only possible when default behavior remains outside the base.
+
+## Designing a new feature pack
+
+A feature pack should:
+
+1. import only foundations it genuinely needs;
+2. select small behavior mods;
+3. avoid selecting both sides of an exclusive provider API;
+4. keep generated contributors near the domain pack that owns them;
+5. avoid importing a top-level application modpack;
+6. document which policies it chooses.
+
+Example:
+
+```toml
+name = "Low gravity server rules"
+description = "Movement rules for a low-gravity server."
+modpacks = []
+ignore = []
+
+mods = [
+    "player-gravity-low-mod",
+    "server-player-gravity-network-sync-mod",
+    "server-player-jump-low-gravity-mod",
+]
+```
+
+The top-level server profile can import this pack instead of the vanilla gravity
+selection.
+
+## Using `ignore`
+
+`ignore` is appropriate when importing a convenient broad pack but replacing
+one selected mod:
+
+```toml
+modpacks = ["client", "my-graphics"]
+ignore = ["client-sun-shadows-vanilla-mod"]
+```
+
+Use it carefully. If the ignored mod provides an API required by another
+selected feature, the profile must select a replacement.
+
+## Dependency review at the modpack level
+
+Before accepting a modpack change, check:
+
+- does it accidentally add a client-only mod to the server?
+- does it select two exclusive providers?
+- does it make a vanilla behavior mandatory through an imported base?
+- are packet contributors shared by both client and server?
+- are contributor and codegen owner selected together?
+- does a new asset-owning mod appear in the correct application?
+
+The modpack is where architectural promises become testable compositions.

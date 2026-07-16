@@ -1,0 +1,8 @@
+[book]
+title = "Minecraft Simple Demo Architecture"
+authors = ["paolobettelini"]
+language = "en"
+src = "src"
+
+[build]
+build-dir = "book"
