@@ -16,6 +16,7 @@ pub enum InGameOverlayState {
     PauseMenu,
     Settings,
     Inventory,
+    Chat,
 }
 
 #[derive(Message, Debug, Clone, Copy, PartialEq, Eq)]
@@ -42,6 +43,7 @@ pub enum InGameOverlayCommand {
     OpenSettings,
     BackToPause,
     OpenInventory,
+    OpenChat,
 }
 
 impl InGameOverlayCommand {
@@ -51,6 +53,7 @@ impl InGameOverlayCommand {
             Self::Resume => InGameOverlayState::Playing,
             Self::OpenSettings => InGameOverlayState::Settings,
             Self::OpenInventory => InGameOverlayState::Inventory,
+            Self::OpenChat => InGameOverlayState::Chat,
         }
     }
 }

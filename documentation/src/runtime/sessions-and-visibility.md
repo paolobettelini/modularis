@@ -27,6 +27,21 @@ NetworkPlayer {
 The server sanitizes names by trimming, falling back to `Player`, and limiting
 the name to 32 characters.
 
+Admission policy is separate from registry storage. Before creating a new
+player, `server-player-session-mod` builds a `ServerJoinCandidate` and asks all
+rules in `ServerPlayerAdmissionRules` to validate it. A rule can reject a join
+without modifying the session implementation.
+
+The selected `server-player-name-unique-vanilla-mod` rejects duplicate names
+case-insensitively. The server sends `JoinRejected { reason }`; the client
+returns to the main menu, displays the reason, and drops its TCP connection as
+it exits the in-game state.
+
+The client setting still owns the chosen name. The optional
+`client-player-name-random-default-mod` changes only the untouched default
+`Player` to `Player0` through `Player100` at startup. It does not overwrite a
+name saved by the user, and uniqueness is still authoritative on the server.
+
 ## Lifecycle messages
 
 `server-player-lifecycle-events-mod` exposes:
@@ -48,7 +63,9 @@ Session code should not call all these features directly.
 
 ```text
 JoinRequestReceived
-  -> address authenticated/registered
+  -> sanitize candidate
+  -> composable admission rules
+  -> reject with reason, or register address/player
   -> player created or reused
   -> visible player snapshot selected
   -> JoinAccepted sent to source address
@@ -155,7 +172,11 @@ engine.
 `ServerPlayerVisibility` is policy for one domain: player entities.
 
 `Audience` in `audience-api` describes ownership/sharing of state such as cell
-menus.
+menus and chat. It currently has personal, shared-ID, and everyone variants.
+`server-audience-api` turns that domain-level value into player IDs. The basic
+provider maps `Everyone` and `Shared` to all online players and `Personal` to
+one online player. Servers can replace it with team, permission, distance, or
+world-scope policy without changing chat packet code.
 
 They can all resolve to player lists, but keeping them separate allows each
 domain to choose its own policy.

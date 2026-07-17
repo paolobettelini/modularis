@@ -104,9 +104,10 @@ state, saved maps, or no climate data.
 subsurface and underground blocks, and subsurface depth.
 
 Providers interpret these fields. The Overworld uses them for a normal
-heightmap, the Nether for low terrain above bedrock, and the Aether for island
-height and material layers. A file-backed provider may ignore all height fields
-while still using biome IDs and features.
+heightmap, the Nether for low terrain that continues through negative chunk
+layers, and the Aether for island height and material layers. A file-backed
+provider may ignore all height fields while still using biome IDs and
+features.
 
 ### Visuals
 
@@ -183,11 +184,11 @@ viewer, and world instance. A custom selector can therefore vary by instance
 or player. If it varies by player, chunk routing and edit identity must use a
 matching scope; otherwise two different logical worlds would share edits.
 
-The vanilla selector derives stable noise seeds from `WorldInstanceId` and
-uses stable ID tie-breaking. Only an Overworld definition set containing
-`BiomeId::Plains` receives the small safe Plains area around spawn. Nether and
-Aether selections cannot accidentally select Plains because definitions are
-filtered first.
+The vanilla selector derives a stable noise seed from `ServerWorldSeed`, its
+own namespace, and `WorldInstanceId`, then uses stable ID tie-breaking. Only an
+Overworld definition set containing `BiomeId::Plains` receives the small safe
+Plains area around spawn. Nether and Aether selections cannot accidentally
+select Plains because definitions are filtered first.
 
 ## Shared biome sampler
 
@@ -218,9 +219,12 @@ chunks use compact one-entry palettes where possible.
 ### Nether
 
 `server-chunk-provider-nether-mod` keeps its own Nether geometry and provider
-ID. It places bedrock at world Y zero, derives surface shape from Nether biome
-terrain, and applies Nether features. Cave carving preserves bedrock. Chunks
-above every relevant surface and feature are returned as uniform air.
+ID. It derives surface shape and material strata from Nether biome terrain and
+applies Nether features. It does not treat world Y zero as a floor: doing so in
+an unbounded vertical coordinate system would create a bedrock wall through the
+middle of the world. Chunks above every relevant surface and feature are
+returned as uniform air. A bedrock boundary, if desired, belongs in a separate
+feature or bounded provider.
 
 ### Aether
 

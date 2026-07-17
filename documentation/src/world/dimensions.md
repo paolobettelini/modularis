@@ -46,7 +46,7 @@ pub struct DimensionDefinition {
 The current definitions are:
 
 - Overworld: continuous biome-driven heightmap, blue sky, default spawn;
-- Nether: biome-driven ground over bedrock, dark red sky;
+- Nether: biome-driven terrain with no implicit vertical floor, dark red sky;
 - Aether: biome-driven floating islands, blue sky, elevated spawn.
 
 Each provider requests only `BiomeDefinition` values whose `dimension` matches

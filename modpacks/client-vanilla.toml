@@ -6,6 +6,7 @@ ignore = []
 mods = [
     "client-setting-jump-key",
     "client-setting-sprint-key",
+    "client-setting-chat-key",
     "client-block-interaction-rules-vanilla-mod",
     "client-chunk-layered-priority-vanilla-mod",
     "client-crosshair-bevy-mod",
@@ -13,6 +14,7 @@ mods = [
     "client-hotbar-scroll-input-mod",
     "client-pause-menu-input-mod",
     "client-inventory-toggle-input-mod",
+    "client-chat-toggle-input-mod",
     "player-gravity-vanilla-mod",
     "player-gravity-network-messages-mod",
     "player-jump-network-messages-mod",

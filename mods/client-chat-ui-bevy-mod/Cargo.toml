@@ -1,0 +1,25 @@
+[package]
+name = "client-chat-ui-bevy-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientChatUiBevyMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-chat-api",
+    "client-game-state-api",
+    "client-ui-font-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-chat-api = { path = "../client-chat-api" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-ui-font-api = { path = "../client-ui-font-api" }
+tokio = { version = "1.48.0", features = ["full"] }

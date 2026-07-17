@@ -13,6 +13,7 @@ init = [
     "block-manager-api",
     "server-biome-api",
     "server-biome-selection-api",
+    "server-world-seed-api",
 ]
 run = []
 ownership = []
@@ -29,6 +30,7 @@ server-biome-sampling-api = { path = "../server-biome-sampling-api" }
 server-biome-selection-api = { path = "../server-biome-selection-api" }
 server-chunk-provider-api = { path = "../server-chunk-provider-api" }
 server-chunk-provider-registry-mod = { path = "../server-chunk-provider-registry-mod" }
+server-world-seed-api = { path = "../server-world-seed-api" }
 tokio = { version = "1.48.0", features = ["full"] }
 voxel-math-api = { path = "../voxel-math-api" }
 

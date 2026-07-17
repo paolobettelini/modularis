@@ -8,7 +8,12 @@ entry = "ServerBiomeClimateSelectorVanillaMod"
 provides = "server-biome-selection-api"
 
 [package.metadata.mod.dependencies]
-init = ["bevy-mod", "server-biome-api", "server-biome-plains-vanilla-mod"]
+init = [
+    "bevy-mod",
+    "server-biome-api",
+    "server-biome-plains-vanilla-mod",
+    "server-world-seed-api",
+]
 run = []
 ownership = []
 
@@ -19,7 +24,9 @@ generated-biome-registry = "0.1.0"
 server-biome-api = { path = "../server-biome-api" }
 server-biome-plains-vanilla-mod = { path = "../server-biome-plains-vanilla-mod" }
 server-biome-selection-api = { path = "../server-biome-selection-api" }
+server-world-seed-api = { path = "../server-world-seed-api" }
 tokio = { version = "1.48.0", features = ["full"] }
+world-instance-api = { path = "../world-instance-api" }
 
 [patch.crates-io]
 generated-biome-registry = { path = "../generated-biome-registry" }

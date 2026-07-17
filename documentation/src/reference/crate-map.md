@@ -127,6 +127,7 @@ Contracts:
 - `server-chunk-routing-api`;
 - `server-chunk-residency-api`;
 - `server-chunk-world-api`;
+- `server-world-seed-api`;
 - `world-instance-api`.
 
 Infrastructure:
@@ -134,6 +135,7 @@ Infrastructure:
 - `server-chunk-provider-registry-mod`;
 - `server-chunk-world-dynamic-impl`;
 - `server-chunk-request-mod`.
+- `server-world-seed-random-impl`.
 
 Providers:
 
@@ -219,6 +221,8 @@ Contracts:
 - `server-player-registry-api`;
 - `server-player-visibility-api`;
 - lifecycle event API/mod.
+- `server-player-admission-api`;
+- `server-audience-api`.
 
 Active transport:
 
@@ -237,6 +241,8 @@ Routing/session:
 - `server-player-session-mod`;
 - `server-player-timeout-mod`;
 - `server-player-visibility-world-instance-mod`.
+- `server-player-name-unique-vanilla-mod`;
+- `server-audience-basic-impl`.
 
 Message type/contributor families:
 
@@ -251,6 +257,29 @@ Message type/contributor families:
 - dimension;
 - sky/sun;
 - portal.
+- chat and command completion.
+
+## Chat and commands
+
+Contracts and state:
+
+- `client-chat-api` and `client-chat-state-mod`;
+- `server-chat-api` and `server-chat-events-mod`;
+- `server-command-api`.
+
+Network and presentation:
+
+- `chat-network-message-types` and `chat-network-messages-mod`;
+- client chat send/receive, toggle-input, and Bevy UI mods;
+- server chat receive/sync mods;
+- `client-setting-chat-key`.
+
+Policies and implementations:
+
+- `server-chat-global-vanilla-mod`;
+- `server-chat-command-router-mod`;
+- `server-command-brigadier-mod`;
+- `server-command-flight-vanilla-mod`.
 
 ## Player movement
 

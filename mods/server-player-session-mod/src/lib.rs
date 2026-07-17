@@ -8,6 +8,7 @@ use network_protocol_mod::NetworkProtocolMod;
 use player_network_message_types::{PlayerJoined, PlayerLeft, PlayerMoved, PlayerRotationChanged};
 use server_network_api::{ServerNetworkApi, ServerNetworkSender};
 use server_network_events_api::{ServerAudience, ServerNetworkEventsApi, ServerPacketOut};
+use server_player_admission_api::{ServerJoinCandidate, ServerPlayerAdmissionRules};
 use server_player_lifecycle_events_api::{ServerPlayerJoined, ServerPlayerLeft};
 use server_player_lifecycle_events_mod::ServerPlayerLifecycleEventsMod;
 use server_player_registry_api::{
@@ -15,7 +16,7 @@ use server_player_registry_api::{
     ServerPlayerRegistry, ServerPlayerRegistryApi,
 };
 use server_player_visibility_api::{ServerPlayerVisibility, ServerPlayerVisibilityApi};
-use session_network_message_types::JoinAccepted;
+use session_network_message_types::{JoinAccepted, JoinRejected};
 use tokio::task::JoinHandle;
 
 const LOCAL_PLAYER_CORRECTION_THRESHOLD: f32 = 0.15;
@@ -33,6 +34,7 @@ impl ServerPlayerSessionMod {
     ) -> Self {
         bevy.app
             .init_resource::<ServerPlayerRegistry>()
+            .init_resource::<ServerPlayerAdmissionRules>()
             .init_resource::<PendingServerPlayerMoves>()
             .configure_sets(
                 Update,
@@ -76,6 +78,7 @@ fn handle_join(
     mut joined: MessageWriter<ServerPlayerJoined>,
     mut packets: MessageWriter<ServerPacketOut>,
     visibility: Res<ServerPlayerVisibility>,
+    admission: Res<ServerPlayerAdmissionRules>,
 ) {
     for join in joins.read() {
         let name = {
@@ -87,6 +90,19 @@ fn handle_join(
             }
         };
         let already_joined = registry.player_for_address(join.source).is_some();
+        if !already_joined {
+            let candidate = ServerJoinCandidate {
+                address: join.source,
+                name: name.clone(),
+            };
+            if let Err(reason) = admission.validate(&candidate, &registry.players()) {
+                packets.write(ServerPacketOut {
+                    audience: ServerAudience::Address(join.source),
+                    message: ClientBoundMessage::JoinRejected(JoinRejected { reason }),
+                });
+                continue;
+            }
+        }
         let player = registry.join(join.source, name, time.elapsed_secs_f64());
         network.register_client(join.source);
         let visible_players = registry

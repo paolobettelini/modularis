@@ -48,6 +48,7 @@ fn inventory_key_toggle(
         InGameOverlayState::Inventory => {
             commands.write(InGameOverlayCommand::Resume);
         }
-        InGameOverlayState::PauseMenu | InGameOverlayState::Settings => {}
+        InGameOverlayState::PauseMenu | InGameOverlayState::Settings | InGameOverlayState::Chat => {
+        }
     }
 }

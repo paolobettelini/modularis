@@ -13,11 +13,16 @@ impl AudienceId {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Audience {
+    Everyone,
     Personal(AudienceMemberId),
     Shared(AudienceId),
 }
 
 impl Audience {
+    pub const fn everyone() -> Self {
+        Self::Everyone
+    }
+
     pub fn personal(member: AudienceMemberId) -> Self {
         Self::Personal(member)
     }
@@ -27,7 +32,7 @@ impl Audience {
     }
 
     pub fn contains_personal_member(&self, member: AudienceMemberId) -> bool {
-        matches!(self, Self::Personal(owner) if *owner == member)
+        matches!(self, Self::Everyone) || matches!(self, Self::Personal(owner) if *owner == member)
     }
 }
 

@@ -8,23 +8,26 @@ use server_chunk_provider_api::{
 };
 use server_chunk_provider_registry_mod::ServerChunkProviderRegistryMod;
 use server_primary_chunk_provider_api::ServerPrimaryChunkProviderApi;
+use server_world_seed_api::{ServerWorldSeed, ServerWorldSeedApi};
 use tokio::task::JoinHandle;
 use voxel_math_api::{BlockPos, CHUNK_SIZE, LocalBlockPos};
 
-const TERRAIN_SEED: u32 = 0x5041_5443;
+const TERRAIN_SEED_NAMESPACE: &str = "demo:simple-perlin-terrain";
 
 pub struct ServerChunkProviderPerlinMod;
 
 impl ServerChunkProviderPerlinMod {
-    pub fn init<B: BlockManagerApi>(
+    pub fn init<B: BlockManagerApi, W: ServerWorldSeedApi>(
         bevy: &mut BevyMod,
         _registry_mod: &mut ServerChunkProviderRegistryMod,
         _blocks: &mut B,
+        _world_seed: &mut W,
     ) -> Self {
+        let seed = *bevy.app.world().resource::<ServerWorldSeed>();
         bevy.app
             .world()
             .resource::<ServerChunkProviderRegistry>()
-            .register(ChunkProviderId::primary(), PerlinTerrainProvider)
+            .register(ChunkProviderId::primary(), PerlinTerrainProvider { seed })
             .expect("the primary server chunk provider must be unique");
         Self
     }
@@ -36,15 +39,20 @@ impl ServerChunkProviderPerlinMod {
 
 impl ServerPrimaryChunkProviderApi for ServerChunkProviderPerlinMod {}
 
-struct PerlinTerrainProvider;
+struct PerlinTerrainProvider {
+    seed: ServerWorldSeed,
+}
 
 impl ServerChunkProvider for PerlinTerrainProvider {
     fn generate(&self, request: &ChunkGenerationRequest) -> Option<Chunk> {
-        Some(build_chunk(request.position))
+        Some(build_chunk(
+            request.position,
+            self.seed.derive(TERRAIN_SEED_NAMESPACE, &request.instance) as u32,
+        ))
     }
 }
 
-fn build_chunk(position: voxel_math_api::ChunkPos) -> Chunk {
+fn build_chunk(position: voxel_math_api::ChunkPos, seed: u32) -> Chunk {
     if position.y > 0 {
         return Chunk::filled(position, BlockId::Air);
     }
@@ -57,28 +65,28 @@ fn build_chunk(position: voxel_math_api::ChunkPos) -> Chunk {
             for x in 0..CHUNK_SIZE {
                 let local = LocalBlockPos::new(x, local_y, z).unwrap();
                 let world = local.to_world(position);
-                chunk.set(local, terrain_block(world));
+                chunk.set(local, terrain_block(world, seed));
             }
         }
     }
     chunk
 }
 
-fn terrain_block(position: BlockPos) -> BlockId {
-    let surface = terrain_height(position.x, position.z);
+fn terrain_block(position: BlockPos, seed: u32) -> BlockId {
+    let surface = terrain_height(position.x, position.z, seed);
     match position.y {
         i32::MIN..=-1 => BlockId::Stone,
         0 => BlockId::Bedrock,
         y if y > surface => BlockId::Air,
         y if y == surface => BlockId::Grass,
         y if y >= surface - 2 => BlockId::Dirt,
-        _ if ore_hash(position) % 89 == 0 => BlockId::DiamondOre,
+        _ if ore_hash(position, seed) % 89 == 0 => BlockId::DiamondOre,
         _ => BlockId::Stone,
     }
 }
 
-fn terrain_height(x: i32, z: i32) -> i32 {
-    let noise = PerlinNoise2d::new(TERRAIN_SEED);
+fn terrain_height(x: i32, z: i32, seed: u32) -> i32 {
+    let noise = PerlinNoise2d::new(seed);
     let macro_noise = noise.sample(x as f32 * 0.035, z as f32 * 0.035);
     let detail_noise = noise.sample(x as f32 * 0.09 + 31.7, z as f32 * 0.09 - 18.2);
     let distant_height = (5.0 + macro_noise * 3.0 + detail_noise * 1.25).clamp(1.0, 10.0);
@@ -93,8 +101,8 @@ fn smoothstep(value: f32) -> f32 {
     value * value * (3.0 - 2.0 * value)
 }
 
-fn ore_hash(position: BlockPos) -> u32 {
-    let mut value = TERRAIN_SEED
+fn ore_hash(position: BlockPos, seed: u32) -> u32 {
+    let mut value = seed
         ^ (position.x as u32).wrapping_mul(0x9e37_79b9)
         ^ (position.y as u32).wrapping_mul(0x85eb_ca6b)
         ^ (position.z as u32).wrapping_mul(0xc2b2_ae35);
@@ -107,34 +115,36 @@ fn ore_hash(position: BlockPos) -> u32 {
 mod tests {
     use super::*;
 
+    const TEST_SEED: u32 = 42;
+
     #[test]
     fn spawn_is_safe_and_distant_terrain_has_hills() {
-        assert_eq!(terrain_height(0, 0), 1);
+        assert_eq!(terrain_height(0, 0, TEST_SEED), 1);
         let heights = (-128..=128)
             .step_by(8)
-            .map(|x| terrain_height(x, 96))
+            .map(|x| terrain_height(x, 96, TEST_SEED))
             .collect::<std::collections::HashSet<_>>();
         assert!(heights.len() >= 3);
     }
 
     #[test]
     fn neighboring_chunks_share_world_space_height_function() {
-        let left = terrain_height(15, 40);
-        let right = terrain_height(16, 40);
+        let left = terrain_height(15, 40, TEST_SEED);
+        let right = terrain_height(16, 40, TEST_SEED);
         assert!((left - right).abs() <= 2);
     }
 
     #[test]
     fn vertical_chunks_outside_the_surface_layer_use_uniform_fast_paths() {
         assert_eq!(
-            build_chunk(voxel_math_api::ChunkPos::new(0, 50, 0))
+            build_chunk(voxel_math_api::ChunkPos::new(0, 50, 0), TEST_SEED)
                 .uniform_block()
                 .unwrap()
                 .block,
             BlockId::Air
         );
         assert_eq!(
-            build_chunk(voxel_math_api::ChunkPos::new(0, -50, 0))
+            build_chunk(voxel_math_api::ChunkPos::new(0, -50, 0), TEST_SEED)
                 .uniform_block()
                 .unwrap()
                 .block,

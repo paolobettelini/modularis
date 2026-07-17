@@ -7,9 +7,10 @@ use server_biome_selection_api::{
     BiomeSelectionRequest, ServerBiomeSelectionApi, ServerBiomeSelector,
     ServerBiomeSelectorResource,
 };
+use server_world_seed_api::{ServerWorldSeed, ServerWorldSeedApi};
 use tokio::task::JoinHandle;
 
-const CLIMATE_SEED: u32 = 0x4249_4f4d;
+const CLIMATE_SEED_NAMESPACE: &str = "demo:biome-climate";
 const BIOME_SCALE_MULTIPLIER: f32 = 4.0;
 const SPAWN_PLAINS_RADIUS: i64 = 8;
 const REGION_DETAIL_STRENGTH: f32 = 0.18;
@@ -18,13 +19,16 @@ const CLIMATE_INFLUENCE: f32 = 0.10;
 pub struct ServerBiomeClimateSelectorVanillaMod;
 
 impl ServerBiomeClimateSelectorVanillaMod {
-    pub fn init<B: ServerBiomeApi>(
+    pub fn init<B: ServerBiomeApi, W: ServerWorldSeedApi>(
         bevy: &mut BevyMod,
         _biomes: &mut B,
         _plains: &mut ServerBiomePlainsVanillaMod,
+        _world_seed: &mut W,
     ) -> Self {
-        bevy.app
-            .insert_resource(ServerBiomeSelectorResource::new(ClimateNoiseBiomeSelector));
+        let world_seed = *bevy.app.world().resource::<ServerWorldSeed>();
+        bevy.app.insert_resource(ServerBiomeSelectorResource::new(
+            ClimateNoiseBiomeSelector { world_seed },
+        ));
         Self
     }
 
@@ -35,7 +39,9 @@ impl ServerBiomeClimateSelectorVanillaMod {
 
 impl ServerBiomeSelectionApi for ServerBiomeClimateSelectorVanillaMod {}
 
-struct ClimateNoiseBiomeSelector;
+struct ClimateNoiseBiomeSelector {
+    world_seed: ServerWorldSeed,
+}
 
 impl ServerBiomeSelector for ClimateNoiseBiomeSelector {
     fn select(
@@ -57,19 +63,21 @@ impl ServerBiomeSelector for ClimateNoiseBiomeSelector {
             return Some(BiomeId::Plains);
         }
 
-        let instance_seed = stable_string_hash(&request.generation.instance.0) as u32;
+        let instance_seed =
+            self.world_seed
+                .derive(CLIMATE_SEED_NAMESPACE, &request.generation.instance) as u32;
         let temperature = normalized_noise(
-            CLIMATE_SEED ^ instance_seed,
+            instance_seed ^ 0x4249_4f4d,
             request.x as f32 * 0.0042 * BIOME_SCALE_MULTIPLIER,
             request.z as f32 * 0.0042 * BIOME_SCALE_MULTIPLIER,
         );
         let humidity = normalized_noise(
-            CLIMATE_SEED ^ instance_seed ^ 0x9e37_79b9,
+            instance_seed ^ 0xdc7e_36f4,
             request.x as f32 * 0.0038 * BIOME_SCALE_MULTIPLIER + 117.0,
             request.z as f32 * 0.0038 * BIOME_SCALE_MULTIPLIER - 71.0,
         );
         let continentalness = normalized_noise(
-            CLIMATE_SEED ^ instance_seed ^ 0x85eb_ca6b,
+            instance_seed ^ 0xc7a2_8526,
             request.x as f32 * 0.0027 * BIOME_SCALE_MULTIPLIER - 203.0,
             request.z as f32 * 0.0027 * BIOME_SCALE_MULTIPLIER + 149.0,
         );
@@ -118,10 +126,9 @@ fn biome_score(
     let region_x = x as f32 * 0.0042 * BIOME_SCALE_MULTIPLIER;
     let region_z = z as f32 * 0.0042 * BIOME_SCALE_MULTIPLIER;
     let broad =
-        PerlinNoise2d::new(CLIMATE_SEED ^ instance_seed ^ biome_seed).sample(region_x, region_z);
-    let detail =
-        PerlinNoise2d::new(CLIMATE_SEED ^ instance_seed ^ biome_seed.rotate_left(13) ^ 0x27d4_eb2d)
-            .sample(region_x * 2.07 + 31.0, region_z * 2.07 - 47.0);
+        PerlinNoise2d::new(instance_seed ^ biome_seed ^ 0x4249_4f4d).sample(region_x, region_z);
+    let detail = PerlinNoise2d::new(instance_seed ^ biome_seed.rotate_left(13) ^ 0x65ad_a460)
+        .sample(region_x * 2.07 + 31.0, region_z * 2.07 - 47.0);
     let climate_penalty = climate_distance(climate, temperature, humidity, continentalness);
     broad + detail * REGION_DETAIL_STRENGTH - climate_penalty * CLIMATE_INFLUENCE
 }
@@ -196,24 +203,27 @@ mod tests {
     }
 
     fn assert_balanced(instance: &str, climates: &[(BiomeId, f32, f32, f32)]) {
-        let instance_seed = stable_string_hash(instance) as u32;
+        let instance_seed = ServerWorldSeed::new(42).derive(
+            CLIMATE_SEED_NAMESPACE,
+            &world_instance_api::WorldInstanceId::new(instance),
+        ) as u32;
         let mut counts = vec![0_usize; climates.len()];
         let mut samples = 0_usize;
 
         for z in (-256..=256).step_by(4) {
             for x in (-256..=256).step_by(4) {
                 let temperature = normalized_noise(
-                    CLIMATE_SEED ^ instance_seed,
+                    instance_seed ^ 0x4249_4f4d,
                     x as f32 * 0.0042 * BIOME_SCALE_MULTIPLIER,
                     z as f32 * 0.0042 * BIOME_SCALE_MULTIPLIER,
                 );
                 let humidity = normalized_noise(
-                    CLIMATE_SEED ^ instance_seed ^ 0x9e37_79b9,
+                    instance_seed ^ 0xdc7e_36f4,
                     x as f32 * 0.0038 * BIOME_SCALE_MULTIPLIER + 117.0,
                     z as f32 * 0.0038 * BIOME_SCALE_MULTIPLIER - 71.0,
                 );
                 let continentalness = normalized_noise(
-                    CLIMATE_SEED ^ instance_seed ^ 0x85eb_ca6b,
+                    instance_seed ^ 0xc7a2_8526,
                     x as f32 * 0.0027 * BIOME_SCALE_MULTIPLIER - 203.0,
                     z as f32 * 0.0027 * BIOME_SCALE_MULTIPLIER + 149.0,
                 );

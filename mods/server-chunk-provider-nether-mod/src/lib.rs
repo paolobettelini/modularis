@@ -10,6 +10,7 @@ use server_chunk_provider_api::{
     ChunkGenerationRequest, ChunkProviderId, ServerChunkProvider, ServerChunkProviderRegistry,
 };
 use server_chunk_provider_registry_mod::ServerChunkProviderRegistryMod;
+use server_world_seed_api::{ServerWorldSeed, ServerWorldSeedApi};
 use std::cell::RefCell;
 use std::collections::{BTreeSet, HashMap};
 use std::sync::{Arc, OnceLock};
@@ -17,18 +18,24 @@ use tokio::task::JoinHandle;
 use voxel_math_api::{CHUNK_SIZE, LocalBlockPos};
 
 pub const NETHER_PROVIDER_ID: &str = "demo:nether-terrain";
-const NETHER_SEED: u32 = 0x4e45_5448;
+const NETHER_SEED_NAMESPACE: &str = "demo:nether-terrain";
 const FEATURE_HORIZONTAL_MARGIN: i32 = 2;
 
 pub struct ServerChunkProviderNetherMod;
 
 impl ServerChunkProviderNetherMod {
-    pub fn init<B: BlockManagerApi, A: ServerBiomeApi, S: ServerBiomeSelectionApi>(
+    pub fn init<
+        B: BlockManagerApi,
+        A: ServerBiomeApi,
+        S: ServerBiomeSelectionApi,
+        W: ServerWorldSeedApi,
+    >(
         bevy: &mut BevyMod,
         _registry_mod: &mut ServerChunkProviderRegistryMod,
         _blocks: &mut B,
         _biomes: &mut A,
         _selection: &mut S,
+        _world_seed: &mut W,
     ) -> Self {
         let biomes = bevy.app.world().resource::<ServerBiomeRegistry>().clone();
         let selector = bevy
@@ -36,6 +43,7 @@ impl ServerChunkProviderNetherMod {
             .world()
             .resource::<ServerBiomeSelectorResource>()
             .clone();
+        let world_seed = *bevy.app.world().resource::<ServerWorldSeed>();
         bevy.app
             .world()
             .resource::<ServerChunkProviderRegistry>()
@@ -44,6 +52,7 @@ impl ServerChunkProviderNetherMod {
                 NetherTerrainProvider {
                     biomes,
                     selector,
+                    world_seed,
                     validated: Arc::new(OnceLock::new()),
                 },
             )
@@ -59,6 +68,7 @@ impl ServerChunkProviderNetherMod {
 struct NetherTerrainProvider {
     biomes: ServerBiomeRegistry,
     selector: ServerBiomeSelectorResource,
+    world_seed: ServerWorldSeed,
     validated: Arc<OnceLock<()>>,
 }
 
@@ -72,7 +82,16 @@ impl ServerChunkProvider for NetherTerrainProvider {
             !biomes.is_empty(),
             "the Nether provider requires at least one Nether biome"
         );
-        Some(NetherWorldSampler::new(request, biomes, &self.biomes).build_chunk())
+        Some(
+            NetherWorldSampler::new(
+                request,
+                biomes,
+                &self.biomes,
+                self.world_seed
+                    .derive(NETHER_SEED_NAMESPACE, &request.instance),
+            )
+            .build_chunk(),
+        )
     }
 }
 
@@ -108,12 +127,13 @@ impl<'a> NetherWorldSampler<'a> {
         request: &'a ChunkGenerationRequest,
         biomes: ServerBiomeSampler<'a>,
         registry: &'a ServerBiomeRegistry,
+        world_seed: u64,
     ) -> Self {
         Self {
             request,
             biomes,
             registry,
-            world_seed: NETHER_SEED as u64 ^ stable_string_hash(&request.instance.0),
+            world_seed,
             height_cache: RefCell::new(HashMap::new()),
         }
     }
@@ -165,17 +185,7 @@ impl<'a> NetherWorldSampler<'a> {
                     let local = LocalBlockPos::new(x, local_y, z).unwrap();
                     let world_y = origin.y + local_y;
                     let column = columns[(x + z * CHUNK_SIZE) as usize];
-                    let block = if world_y > column.surface {
-                        BlockId::Air
-                    } else if world_y == 0 {
-                        BlockId::Bedrock
-                    } else if world_y == column.surface {
-                        column.terrain.surface
-                    } else if world_y >= column.surface - column.terrain.subsurface_depth as i32 {
-                        column.terrain.subsurface
-                    } else {
-                        column.terrain.underground
-                    };
+                    let block = base_block_at(world_y, column);
                     chunk.set(local, block);
                 }
             }
@@ -215,9 +225,9 @@ impl<'a> NetherWorldSampler<'a> {
             .biomes
             .blended_terrain_parameters(x, z, SAMPLES)
             .unwrap_or((4.0, 2.0, 1.0));
-        let large = PerlinNoise2d::new(NETHER_SEED ^ self.world_seed as u32)
+        let large = PerlinNoise2d::new(self.world_seed as u32 ^ 0x4e45_5448)
             .sample(x as f32 * 0.04, z as f32 * 0.04);
-        let detail = PerlinNoise2d::new(NETHER_SEED ^ self.world_seed as u32 ^ 0x9e37_79b9)
+        let detail = PerlinNoise2d::new(self.world_seed as u32 ^ 0xd079_2df1)
             .sample(x as f32 * 0.11 - 22.0, z as f32 * 0.11 + 9.0);
         let distant = (base + large * variation + detail * detail_variation).max(1.0);
         let distance = ((x as f32).powi(2) + (z as f32).powi(2)).sqrt();
@@ -228,12 +238,42 @@ impl<'a> NetherWorldSampler<'a> {
     }
 }
 
-fn stable_string_hash(value: &str) -> u64 {
-    value.bytes().fold(0xcbf2_9ce4_8422_2325, |hash, byte| {
-        (hash ^ byte as u64).wrapping_mul(0x1000_0000_01b3)
-    })
+fn base_block_at(world_y: i32, column: ColumnSample) -> BlockId {
+    if world_y > column.surface {
+        BlockId::Air
+    } else if world_y == column.surface {
+        column.terrain.surface
+    } else if world_y >= column.surface - column.terrain.subsurface_depth as i32 {
+        column.terrain.subsurface
+    } else {
+        column.terrain.underground
+    }
 }
 
 fn smoothstep(value: f32) -> f32 {
     value * value * (3.0 - 2.0 * value)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn world_zero_is_not_a_special_bedrock_plane() {
+        let column = ColumnSample {
+            terrain: BiomeTerrain {
+                base_height: 8.0,
+                height_variation: 0.0,
+                detail_variation: 0.0,
+                surface: BlockId::Netherrack,
+                subsurface: BlockId::Netherrack,
+                underground: BlockId::Netherrack,
+                subsurface_depth: 3,
+            },
+            surface: 8,
+        };
+
+        assert_eq!(base_block_at(0, column), BlockId::Netherrack);
+        assert_ne!(base_block_at(0, column), BlockId::Bedrock);
+    }
 }

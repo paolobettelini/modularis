@@ -34,6 +34,7 @@ Current audience modes:
 pub enum Audience {
     Personal(PlayerId),
     Shared(AudienceId),
+    Everyone,
 }
 ```
 
@@ -41,6 +42,9 @@ Personal menus allow only their owner.
 
 Shared menus can be opened by several viewers. Once opened, current viewers can
 interact and all receive cell changes.
+
+`Everyone` is useful for domain events such as global chat. Cell menus still
+perform their own open/interact validation and viewer tracking.
 
 `AudienceId` identifies sharing policy/state. It is not a world scope and not a
 network address.
@@ -207,11 +211,14 @@ This should be separate from:
 - drag/drop;
 - network synchronization.
 
-## Current audience limit
+## Audience resolution and current limit
 
-The current shared audience model allows any player to open a shared menu if
-the feature emits the request, then limits interaction to current viewers.
+`server-audience-api` is the generic resolution seam for domains that need to
+turn an `Audience` into player IDs. The selected basic implementation maps a
+shared audience to all online players. Chat uses this service directly.
 
-It is not yet a general resolver for teams, distance, permissions, or world
-visibility. A future audience service should resolve domain audience IDs to
-members while preserving domain-specific validation.
+Cell menus additionally track active viewers and validate each interaction, so
+they do not broadcast every menu mutation to the whole resolved audience.
+Teams, distance, permissions, and world visibility still require a replacement
+resolver and matching domain validation. Audience resolution must never be
+treated as sufficient authorization by itself.

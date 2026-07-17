@@ -24,6 +24,7 @@ The server owns:
 - inventory and cell-menu state;
 - dimensions and portal state;
 - capability grants;
+- player admission, chat routing, and command execution;
 - validation and synchronization.
 
 The shared protocol carries intentions from client to server and authoritative
@@ -72,6 +73,8 @@ After dispatch, feature mods read typed messages such as:
 - `PlayerMoveReceived`;
 - `InventoryResetPacketReceived`;
 - `SunSettingsChangedReceived`.
+- `ChatSubmitReceived`;
+- `CommandSuggestionsResponseReceived`.
 
 Network feature systems should normally run after
 `NetworkMessageSet::DispatchPackets`.
@@ -93,4 +96,5 @@ ServerPacketOut {
 This keeps transport, player registry, audience choice, and gameplay meaning in
 separate mods.
 
-The next chapters cover app lifecycle, transport, and sessions in detail.
+The next chapters cover app lifecycle, transport, sessions, chat, and commands
+in detail.

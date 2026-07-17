@@ -10,6 +10,7 @@ use server_chunk_provider_api::{
     ChunkGenerationRequest, ChunkProviderId, ServerChunkProvider, ServerChunkProviderRegistry,
 };
 use server_chunk_provider_registry_mod::ServerChunkProviderRegistryMod;
+use server_world_seed_api::{ServerWorldSeed, ServerWorldSeedApi};
 use std::cell::RefCell;
 use std::collections::{BTreeSet, HashMap};
 use std::sync::{Arc, OnceLock};
@@ -17,18 +18,24 @@ use tokio::task::JoinHandle;
 use voxel_math_api::{CHUNK_SIZE, LocalBlockPos};
 
 pub const AETHER_PROVIDER_ID: &str = "demo:aether-islands";
-const AETHER_SEED: u32 = 0x4145_5448;
+const AETHER_SEED_NAMESPACE: &str = "demo:aether-terrain";
 const FEATURE_HORIZONTAL_MARGIN: i32 = 2;
 
 pub struct ServerChunkProviderAetherMod;
 
 impl ServerChunkProviderAetherMod {
-    pub fn init<B: BlockManagerApi, A: ServerBiomeApi, S: ServerBiomeSelectionApi>(
+    pub fn init<
+        B: BlockManagerApi,
+        A: ServerBiomeApi,
+        S: ServerBiomeSelectionApi,
+        W: ServerWorldSeedApi,
+    >(
         bevy: &mut BevyMod,
         _registry: &mut ServerChunkProviderRegistryMod,
         _blocks: &mut B,
         _biomes: &mut A,
         _selection: &mut S,
+        _world_seed: &mut W,
     ) -> Self {
         let biomes = bevy.app.world().resource::<ServerBiomeRegistry>().clone();
         let selector = bevy
@@ -36,6 +43,7 @@ impl ServerChunkProviderAetherMod {
             .world()
             .resource::<ServerBiomeSelectorResource>()
             .clone();
+        let world_seed = *bevy.app.world().resource::<ServerWorldSeed>();
         bevy.app
             .world()
             .resource::<ServerChunkProviderRegistry>()
@@ -44,6 +52,7 @@ impl ServerChunkProviderAetherMod {
                 AetherIslandProvider {
                     biomes,
                     selector,
+                    world_seed,
                     validated: Arc::new(OnceLock::new()),
                 },
             )
@@ -59,6 +68,7 @@ impl ServerChunkProviderAetherMod {
 struct AetherIslandProvider {
     biomes: ServerBiomeRegistry,
     selector: ServerBiomeSelectorResource,
+    world_seed: ServerWorldSeed,
     validated: Arc<OnceLock<()>>,
 }
 
@@ -72,7 +82,16 @@ impl ServerChunkProvider for AetherIslandProvider {
             !biomes.is_empty(),
             "the Aether provider requires at least one Aether biome"
         );
-        Some(AetherWorldSampler::new(request, biomes, &self.biomes).build_chunk())
+        Some(
+            AetherWorldSampler::new(
+                request,
+                biomes,
+                &self.biomes,
+                self.world_seed
+                    .derive(AETHER_SEED_NAMESPACE, &request.instance),
+            )
+            .build_chunk(),
+        )
     }
 }
 
@@ -109,12 +128,13 @@ impl<'a> AetherWorldSampler<'a> {
         request: &'a ChunkGenerationRequest,
         biomes: ServerBiomeSampler<'a>,
         registry: &'a ServerBiomeRegistry,
+        world_seed: u64,
     ) -> Self {
         Self {
             request,
             biomes,
             registry,
-            world_seed: AETHER_SEED as u64 ^ stable_string_hash(&request.instance.0),
+            world_seed,
             island_cache: RefCell::new(HashMap::new()),
         }
     }
@@ -224,9 +244,9 @@ impl<'a> AetherWorldSampler<'a> {
                 thickness: 4.max(terrain.subsurface_depth as i32 + 1),
             })
         } else {
-            let continents = PerlinNoise2d::new(AETHER_SEED ^ self.world_seed as u32)
+            let continents = PerlinNoise2d::new(self.world_seed as u32 ^ 0x4145_5448)
                 .sample(x as f32 * 0.026, z as f32 * 0.026);
-            let breakup = PerlinNoise2d::new(AETHER_SEED ^ self.world_seed as u32 ^ 0x9e37_79b9)
+            let breakup = PerlinNoise2d::new(self.world_seed as u32 ^ 0xdf72_2cf1)
                 .sample(x as f32 * 0.071 + 31.0, z as f32 * 0.071 - 17.0);
             if continents + breakup * 0.36 < 0.08 {
                 None
@@ -236,9 +256,9 @@ impl<'a> AetherWorldSampler<'a> {
                     .biomes
                     .blended_terrain_parameters(x, z, SAMPLES)
                     .unwrap_or((9.0, 3.0, 1.0));
-                let height = PerlinNoise2d::new(AETHER_SEED ^ self.world_seed as u32 ^ 0x4845_4947)
+                let height = PerlinNoise2d::new(self.world_seed as u32 ^ 0x0900_1c0f)
                     .sample(x as f32 * 0.047 - 8.0, z as f32 * 0.047 + 12.0);
-                let detail = PerlinNoise2d::new(AETHER_SEED ^ self.world_seed as u32 ^ 0x5448_4943)
+                let detail = PerlinNoise2d::new(self.world_seed as u32 ^ 0x150d_1d0b)
                     .sample(x as f32 * 0.083 + 19.0, z as f32 * 0.083 + 3.0);
                 Some(IslandColumn {
                     terrain,
@@ -253,10 +273,4 @@ impl<'a> AetherWorldSampler<'a> {
         self.island_cache.borrow_mut().insert((x, z), column);
         column
     }
-}
-
-fn stable_string_hash(value: &str) -> u64 {
-    value.bytes().fold(0xcbf2_9ce4_8422_2325, |hash, byte| {
-        (hash ^ byte as u64).wrapping_mul(0x1000_0000_01b3)
-    })
 }

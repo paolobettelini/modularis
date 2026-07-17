@@ -50,6 +50,7 @@ Current setting contributors:
 | `controls.jump_key` | string | keybinding | `Space` |
 | `controls.sprint_key` | string | keybinding | `ControlLeft` |
 | `controls.inventory_key` | string | keybinding | `E` |
+| `controls.chat_key` | string | keybinding | `T` |
 | `network.player_name` | string | string | `Player` |
 | `network.server_address` | string | string | `127.0.0.1:9999` |
 
@@ -166,6 +167,7 @@ Playing
 PauseMenu
 Settings
 Inventory
+Chat
 ```
 
 Input behavior mods emit commands:
@@ -173,6 +175,7 @@ Input behavior mods emit commands:
 - Escape opens pause;
 - resume returns to playing;
 - inventory key opens inventory;
+- chat key opens the chat composer;
 - settings buttons switch to settings overlays.
 
 The state provider applies commands.

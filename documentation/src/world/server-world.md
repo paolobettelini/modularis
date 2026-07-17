@@ -35,8 +35,8 @@ Registration rejects duplicate IDs.
 The demo selects:
 
 - `server-chunk-provider-biomes-mod`: biome-driven Overworld terrain;
-- `server-chunk-provider-nether-mod`: biome-driven Nether terrain over a
-  bedrock floor;
+- `server-chunk-provider-nether-mod`: biome-driven Nether terrain without an
+  implicit vertical floor;
 - `server-chunk-provider-aether-mod`: biome-driven floating islands;
 - `server-chunk-provider-perlin-mod`: alternate single-biome terrain, not active
   in the main server;
@@ -59,6 +59,41 @@ They use uniform fast paths for guaranteed regions:
 - checkerboard returns simple uniform deep/sky chunks.
 
 Exact terrain policy belongs to each provider.
+
+## World seeds
+
+Procedural generation depends on the replaceable `server-world-seed-api`.
+`ServerWorldSeed` owns one root `u64` and derives stable child seeds from:
+
+```text
+root seed + feature/provider namespace + WorldInstanceId
+```
+
+The namespace keeps unrelated algorithms independent. Changing a biome
+selector must not silently change a terrain provider's random stream, and two
+world instances must not accidentally generate the same terrain unless a
+custom seed provider chooses that behavior.
+
+The selected `server-world-seed-random-impl` creates a random root at server
+startup. For reproducible development or a fixed world, set:
+
+```sh
+PATCHWORK_WORLD_SEED=123456
+```
+
+The Overworld, Nether, Aether, alternate Perlin/checkerboard providers, and the
+vanilla biome selector all derive their values from this service. Local numeric
+constants in a noise expression are algorithm salts, not independent world
+seeds.
+
+A persistent server should replace the random provider with a mod that loads
+and saves the root seed next to the world data. Features should depend only on
+`server-world-seed-api`, never on that concrete implementation.
+
+Because chunk Y coordinates are unbounded, world Y zero is not a valid generic
+"bottom of the world". The Nether provider therefore uses biome strata at Y
+zero instead of inserting bedrock there. A bounded world can add a separate
+bedrock-floor feature or select a provider whose contract includes a floor.
 
 The dimension-scoped registry, selector, shared sampler, phased features, and
 provider responsibilities are described in

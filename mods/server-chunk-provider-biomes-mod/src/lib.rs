@@ -11,24 +11,31 @@ use server_chunk_provider_api::{
 };
 use server_chunk_provider_registry_mod::ServerChunkProviderRegistryMod;
 use server_primary_chunk_provider_api::ServerPrimaryChunkProviderApi;
+use server_world_seed_api::{ServerWorldSeed, ServerWorldSeedApi};
 use std::cell::RefCell;
 use std::collections::{BTreeSet, HashMap};
 use std::sync::{Arc, OnceLock};
 use tokio::task::JoinHandle;
 use voxel_math_api::{CHUNK_SIZE, LocalBlockPos};
 
-const TERRAIN_SEED: u64 = 0x5041_5443_4857_4f52;
+const TERRAIN_SEED_NAMESPACE: &str = "demo:overworld-terrain";
 const FEATURE_HORIZONTAL_MARGIN: i32 = 2;
 
 pub struct ServerChunkProviderBiomesMod;
 
 impl ServerChunkProviderBiomesMod {
-    pub fn init<B: BlockManagerApi, A: ServerBiomeApi, S: ServerBiomeSelectionApi>(
+    pub fn init<
+        B: BlockManagerApi,
+        A: ServerBiomeApi,
+        S: ServerBiomeSelectionApi,
+        W: ServerWorldSeedApi,
+    >(
         bevy: &mut BevyMod,
         _provider_registry: &mut ServerChunkProviderRegistryMod,
         _blocks: &mut B,
         _biomes: &mut A,
         _selection: &mut S,
+        _world_seed: &mut W,
     ) -> Self {
         let biomes = bevy.app.world().resource::<ServerBiomeRegistry>().clone();
         let selector = bevy
@@ -36,6 +43,7 @@ impl ServerChunkProviderBiomesMod {
             .world()
             .resource::<ServerBiomeSelectorResource>()
             .clone();
+        let world_seed = *bevy.app.world().resource::<ServerWorldSeed>();
         bevy.app
             .world()
             .resource::<ServerChunkProviderRegistry>()
@@ -44,6 +52,7 @@ impl ServerChunkProviderBiomesMod {
                 BiomeTerrainProvider {
                     biomes,
                     selector,
+                    world_seed,
                     validated: Arc::new(OnceLock::new()),
                 },
             )
@@ -61,6 +70,7 @@ impl ServerPrimaryChunkProviderApi for ServerChunkProviderBiomesMod {}
 struct BiomeTerrainProvider {
     biomes: ServerBiomeRegistry,
     selector: ServerBiomeSelectorResource,
+    world_seed: ServerWorldSeed,
     validated: Arc<OnceLock<()>>,
 }
 
@@ -83,7 +93,16 @@ impl ServerChunkProvider for BiomeTerrainProvider {
         if biomes.is_empty() {
             return None;
         }
-        Some(WorldSampler::new(request, biomes, &self.biomes).build_chunk())
+        Some(
+            WorldSampler::new(
+                request,
+                biomes,
+                &self.biomes,
+                self.world_seed
+                    .derive(TERRAIN_SEED_NAMESPACE, &request.instance),
+            )
+            .build_chunk(),
+        )
     }
 }
 
@@ -106,12 +125,13 @@ impl<'a> WorldSampler<'a> {
         request: &'a ChunkGenerationRequest,
         biomes: ServerBiomeSampler<'a>,
         registry: &'a ServerBiomeRegistry,
+        world_seed: u64,
     ) -> Self {
         Self {
             request,
             biomes,
             registry,
-            world_seed: TERRAIN_SEED ^ stable_string_hash(&request.instance.0),
+            world_seed,
             height_cache: RefCell::new(HashMap::new()),
         }
     }
@@ -259,12 +279,6 @@ impl<'a> WorldSampler<'a> {
     }
 }
 
-fn stable_string_hash(value: &str) -> u64 {
-    value.bytes().fold(0xcbf2_9ce4_8422_2325, |hash, byte| {
-        (hash ^ byte as u64).wrapping_mul(0x1000_0000_01b3)
-    })
-}
-
 fn smoothstep(value: f32) -> f32 {
     value * value * (3.0 - 2.0 * value)
 }
@@ -327,6 +341,7 @@ mod tests {
         BiomeTerrainProvider {
             biomes: registry,
             selector: ServerBiomeSelectorResource::new(FixedSelector),
+            world_seed: ServerWorldSeed::new(42),
             validated: Arc::new(OnceLock::new()),
         }
     }
@@ -372,7 +387,14 @@ mod tests {
             &provider.selector,
             Dimension::Overworld,
         );
-        let sampler = WorldSampler::new(&request, biomes, &provider.biomes);
+        let sampler = WorldSampler::new(
+            &request,
+            biomes,
+            &provider.biomes,
+            provider
+                .world_seed
+                .derive(TERRAIN_SEED_NAMESPACE, &request.instance),
+        );
         assert_eq!(sampler.surface_height(0, 0), 1);
     }
 }

@@ -89,7 +89,7 @@ Current limits:
 
 - no maximum finite stack size;
 - no durability/equipment semantics;
-- shared audience is basic;
+- the selected audience resolver maps shared audiences to all online players;
 - cell-menu state is not persistent;
 - no recipe system;
 - no transaction revision in optimistic UI;
@@ -98,7 +98,7 @@ Current limits:
 Design direction:
 
 - more metadata contributors and independent UI decorators;
-- audience resolver service;
+- team/distance/permission audience resolver implementations;
 - menu persistence providers;
 - generated recipes;
 - operation acknowledgements/revisions.

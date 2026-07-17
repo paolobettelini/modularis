@@ -14,3 +14,8 @@ pub struct JoinAccepted {
     pub player_id: PlayerId,
     pub players: Vec<NetworkPlayer>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct JoinRejected {
+    pub reason: String,
+}

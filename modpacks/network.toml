@@ -17,5 +17,6 @@ mods = [
     "sun-network-messages-mod",
     "portal-network-messages-mod",
     "cell-menu-network-messages-mod",
+    "chat-network-messages-mod",
     "network-protocol-mod",
 ]

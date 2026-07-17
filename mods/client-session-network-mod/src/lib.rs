@@ -1,11 +1,13 @@
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
-use client_game_state_api::{GameState, GameStateApi};
+use client_game_state_api::{GameState, GameStateApi, GameStateCommand};
 use client_network_api::{ClientNetworkApi, ClientNetworkSender};
 use client_session_api::{ClientSession, ClientSessionApi};
 use client_settings_api::{SettingsApi, SettingsStore};
 use generated_client_settings_registry::SettingKey;
-use generated_network_messages::{JoinAcceptedReceived, NetworkMessageSet, ServerBoundMessage};
+use generated_network_messages::{
+    JoinAcceptedReceived, JoinRejectedReceived, NetworkMessageSet, ServerBoundMessage,
+};
 use network_protocol_mod::NetworkProtocolMod;
 use session_network_message_types::{JoinRequest, LeaveRequest};
 use tokio::task::JoinHandle;
@@ -32,6 +34,7 @@ impl ClientSessionNetworkMod {
                 (
                     send_pending_join,
                     accept_join.after(NetworkMessageSet::DispatchPackets),
+                    reject_join.after(NetworkMessageSet::DispatchPackets),
                 )
                     .run_if(in_state(GameState::InGame)),
             )
@@ -49,6 +52,7 @@ impl ClientSessionApi for ClientSessionNetworkMod {}
 fn begin_join(mut pending: ResMut<PendingJoin>, mut session: ResMut<ClientSession>) {
     pending.0 = true;
     session.player_id = None;
+    session.rejection_reason = None;
 }
 
 fn send_pending_join(
@@ -80,7 +84,21 @@ fn accept_join(
 ) {
     for accepted in accepted.read() {
         session.player_id = Some(accepted.0.player_id);
+        session.rejection_reason = None;
         info!("joined server as player {}", accepted.0.player_id);
+    }
+}
+
+fn reject_join(
+    mut rejected: MessageReader<JoinRejectedReceived>,
+    mut session: ResMut<ClientSession>,
+    mut state: MessageWriter<GameStateCommand>,
+) {
+    for rejected in rejected.read() {
+        warn!("server rejected join: {}", rejected.0.reason);
+        session.player_id = None;
+        session.rejection_reason = Some(rejected.0.reason.clone());
+        state.write(GameStateCommand::BackToMainMenu);
     }
 }
 

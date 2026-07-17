@@ -99,6 +99,7 @@ impl ServerCellMenus {
 
 fn can_open(audience: &Audience, viewer: CellMenuViewerId) -> bool {
     match audience {
+        Audience::Everyone => true,
         Audience::Personal(owner) => *owner == viewer,
         Audience::Shared(_) => true,
     }
@@ -110,6 +111,7 @@ fn can_interact(
     viewers: &HashSet<CellMenuViewerId>,
 ) -> bool {
     match audience {
+        Audience::Everyone => true,
         Audience::Personal(owner) => *owner == viewer,
         Audience::Shared(_) => viewers.contains(&viewer),
     }

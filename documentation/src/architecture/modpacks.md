@@ -44,6 +44,7 @@ The top-level client selects neutral state and concrete presentation:
 - settings and input editor providers;
 - TCP transport;
 - session state;
+- chat state, network bridges, and UI;
 - chunk cache, streaming, meshing, and rendering;
 - first-person controller and camera;
 - inventory and cell-menu UI;
@@ -57,6 +58,7 @@ The top-level client selects neutral state and concrete presentation:
 - crosshair;
 - number-key and wheel hotbar selection;
 - pause and inventory input;
+- configurable chat-key input;
 - client gravity prediction;
 - jump, sprint, and flight controls;
 - held-item fallback;
@@ -87,6 +89,8 @@ changing controls or graphics.
 - network receive/sync bridges;
 - block edit network bridges;
 - sessions and timeout;
+- player admission contracts;
+- chat ECS contracts, network bridges, and the Brigadier command provider;
 - flight capability state and synchronization;
 - sun state and synchronization;
 - chunk request handling;
@@ -97,6 +101,8 @@ changing controls or graphics.
 - the imported `server-biomes-vanilla.toml` umbrella, whose separate
   Overworld, Nether, and Aether packs contain definitions and phased features;
 - the biome runtime registry, vanilla selector, and shared biome sampler;
+- global-chat audience policy and case-insensitive unique player names;
+- chat command routing and the optional `/flight` command;
 - player-interest chunk residency;
 - world-scope player visibility;
 - default dimension lifecycle;
@@ -113,6 +119,7 @@ changing controls or graphics.
 
 `server.toml` selects the concrete world:
 
+- random-at-startup world seed provider;
 - chunk provider registry;
 - dimension registry;
 - Overworld, Nether, and Aether definitions;

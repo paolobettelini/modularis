@@ -115,10 +115,14 @@ The demo currently includes:
 
 - TCP multiplayer with CBOR packets and length-prefixed framing;
 - join, leave, timeout, movement, player visibility, and remote avatars;
+- unique-name admission with client-visible rejection;
+- configurable chat, audience-based delivery, Brigadier commands, and
+  server-backed completion;
 - client-predicted first-person movement with server collision validation;
 - configurable jump, sprint, flight, FOV, mouse sensitivity, and inventory key;
 - vertically unbounded chunk coordinates with a moving client window;
 - pluggable biome-driven Overworld, Nether, and Aether terrain providers;
+- an explicit scoped world-seed service used by procedural providers;
 - generated biome IDs with code-side definitions and phased world features;
 - palette-compressed chunks carrying block instances and metadata;
 - block breaking, item-based placement, reach checks, and hitbox checks;

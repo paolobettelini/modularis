@@ -14,6 +14,7 @@
   - [Bevy application lifecycle](./runtime/bevy-lifecycle.md)
   - [Protocol, transport, and framing](./runtime/networking.md)
   - [Sessions, routing, and visibility](./runtime/sessions-and-visibility.md)
+  - [Chat, commands, and completion](./runtime/chat-and-commands.md)
 - [World architecture](./world/world-overview.md)
   - [Blocks, items, and metadata](./world/blocks-and-items.md)
   - [Chunk coordinates and storage](./world/chunk-storage.md)
