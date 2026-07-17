@@ -24,6 +24,17 @@ pub struct BakedMeshPart {
     pub indices: Vec<u32>,
 }
 
+/// Axis-aligned box produced from one resolved model element.
+///
+/// Coordinates follow the same normalization policy as [`BakedQuad`]. Rotated
+/// elements use the smallest axis-aligned box containing their transformed
+/// corners.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct BakedModelBox {
+    pub min: [f32; 3],
+    pub max: [f32; 3],
+}
+
 #[derive(Debug, Clone)]
 pub struct BakeOptions {
     pub normalize_coordinates: bool,
@@ -61,6 +72,58 @@ impl Default for ModelTransform {
 
 pub fn bake_model(model: &ResolvedModel, options: &BakeOptions) -> Result<Vec<BakedQuad>> {
     bake_model_with_transform(model, options, ModelTransform::default())
+}
+
+pub fn bake_model_boxes(model: &ResolvedModel, options: &BakeOptions) -> Vec<BakedModelBox> {
+    bake_model_boxes_with_transform(model, options, ModelTransform::default())
+}
+
+pub fn bake_model_boxes_with_transform(
+    model: &ResolvedModel,
+    options: &BakeOptions,
+    transform: ModelTransform,
+) -> Vec<BakedModelBox> {
+    model
+        .elements
+        .iter()
+        .filter_map(|element| {
+            let [x0, y0, z0] = element.from;
+            let [x1, y1, z1] = element.to;
+            let mut corners = [
+                [x0, y0, z0],
+                [x0, y0, z1],
+                [x0, y1, z0],
+                [x0, y1, z1],
+                [x1, y0, z0],
+                [x1, y0, z1],
+                [x1, y1, z0],
+                [x1, y1, z1],
+            ];
+            for corner in &mut corners {
+                if let Some(rotation) = &element.rotation {
+                    *corner = rotate_element_point(*corner, rotation);
+                }
+                *corner = apply_model_transform_point(*corner, transform);
+                if options.normalize_coordinates {
+                    for coordinate in corner {
+                        *coordinate /= 16.0;
+                    }
+                }
+            }
+
+            let mut min = [f32::INFINITY; 3];
+            let mut max = [f32::NEG_INFINITY; 3];
+            for corner in corners {
+                for axis in 0..3 {
+                    min[axis] = min[axis].min(corner[axis]);
+                    max[axis] = max[axis].max(corner[axis]);
+                }
+            }
+            (0..3)
+                .all(|axis| max[axis] - min[axis] > f32::EPSILON)
+                .then_some(BakedModelBox { min, max })
+        })
+        .collect()
 }
 
 pub fn bake_model_with_transform(
@@ -303,24 +366,8 @@ fn rotate_axis(point: [f32; 3], axis: Axis, radians: f32) -> [f32; 3] {
 }
 
 fn apply_block_transform(quad: &mut BakedQuad, transform: ModelTransform) {
-    let center = [8.0, 8.0, 8.0];
     for position in &mut quad.positions {
-        for axis in 0..3 {
-            position[axis] -= center[axis];
-        }
-        *position = rotate_axis(
-            *position,
-            Axis::X,
-            (transform.x_degrees as f32).to_radians(),
-        );
-        *position = rotate_axis(
-            *position,
-            Axis::Y,
-            (transform.y_degrees as f32).to_radians(),
-        );
-        for axis in 0..3 {
-            position[axis] += center[axis];
-        }
+        *position = apply_model_transform_point(*position, transform);
     }
     quad.normal = normalize(rotate_axis(
         rotate_axis(
@@ -336,6 +383,19 @@ fn apply_block_transform(quad: &mut BakedQuad, transform: ModelTransform) {
         let steps = ((transform.y_degrees.rem_euclid(360)) / 90) as usize;
         quad.uvs.rotate_left(steps % 4);
     }
+}
+
+fn apply_model_transform_point(mut point: [f32; 3], transform: ModelTransform) -> [f32; 3] {
+    let center = [8.0, 8.0, 8.0];
+    for axis in 0..3 {
+        point[axis] -= center[axis];
+    }
+    point = rotate_axis(point, Axis::X, (transform.x_degrees as f32).to_radians());
+    point = rotate_axis(point, Axis::Y, (transform.y_degrees as f32).to_radians());
+    for axis in 0..3 {
+        point[axis] += center[axis];
+    }
+    point
 }
 
 fn transform_direction(

@@ -1,13 +1,12 @@
 [package]
-name = "player-block-collision-api"
+name = "block-shape-api"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
 bevy = "0.17.3"
-block-shape-api = { path = "../block-shape-api" }
+block-instance-api = { path = "../block-instance-api" }
 collision-api = { path = "../collision-api" }
-voxel-math-api = { path = "../voxel-math-api" }
 
 [patch.crates-io]
 generated-block-metadata = { path = "../generated-block-metadata" }

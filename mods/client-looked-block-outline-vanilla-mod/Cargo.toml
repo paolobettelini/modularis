@@ -15,6 +15,7 @@ init = [
     "client-camera-api",
     "client-chunk-cache-api",
     "client-game-state-api",
+    "block-shape-api",
 ]
 run = []
 ownership = []
@@ -23,6 +24,7 @@ ownership = []
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 block-manager-api = { path = "../block-manager-api" }
+block-shape-api = { path = "../block-shape-api" }
 client-block-interaction-rules-api = { path = "../client-block-interaction-rules-api" }
 client-block-outline-api = { path = "../client-block-outline-api" }
 client-camera-api = { path = "../client-camera-api" }

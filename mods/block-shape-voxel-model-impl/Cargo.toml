@@ -1,34 +1,25 @@
 [package]
-name = "client-collision-block-aabb-impl"
+name = "block-shape-voxel-model-impl"
 version = "0.1.0"
 edition = "2024"
 
 [package.metadata.mod]
-entry = "BlockAabbCollisionImpl"
-provides = "collision-api"
+entry = "BlockShapeVoxelModelImpl"
+provides = "block-shape-api"
 
 [package.metadata.mod.dependencies]
-init = [
-    "bevy-mod",
-    "client-chunk-cache-api",
-    "block-manager-api",
-    "block-shape-api",
-]
+init = ["bevy-mod", "block-manager-api", "voxel-model-api"]
 run = []
 ownership = []
 
 [dependencies]
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
-block-instance-api = { path = "../block-instance-api" }
 block-manager-api = { path = "../block-manager-api" }
 block-shape-api = { path = "../block-shape-api" }
-client-chunk-cache-api = { path = "../client-chunk-cache-api" }
 collision-api = { path = "../collision-api" }
-generated-block-registry = "0.1.0"
-player-block-collision-api = { path = "../player-block-collision-api" }
 tokio = { version = "1.48.0", features = ["full"] }
-voxel-math-api = { path = "../voxel-math-api" }
+voxel-model-api = { path = "../voxel-model-api" }
 
 [patch.crates-io]
 generated-block-metadata = { path = "../generated-block-metadata" }

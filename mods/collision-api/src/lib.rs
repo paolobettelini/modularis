@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use std::sync::Arc;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Aabb {
     pub min: Vec3,
     pub max: Vec3,

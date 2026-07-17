@@ -15,6 +15,7 @@ init = [
     "server-player-speed-api",
     "server-player-flight-api",
     "server-player-flight-speed-api",
+    "block-shape-api",
 ]
 run = []
 ownership = []
@@ -23,6 +24,7 @@ ownership = []
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 block-manager-api = { path = "../block-manager-api" }
+block-shape-api = { path = "../block-shape-api" }
 generated-block-registry = "0.1.0"
 player-block-collision-api = { path = "../player-block-collision-api" }
 player-hitbox-api = { path = "../player-hitbox-api" }

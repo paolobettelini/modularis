@@ -131,9 +131,14 @@ Template asset mods:
 - `voxel-model-item-templates-mod`;
 - `voxel-model-anvil-template-mod`.
 
-Client providers and consumers:
+Shared providers and contracts:
 
-- `client-voxel-model-assets-fs-impl`;
+- `voxel-model-assets-fs-impl`;
+- `block-shape-api`;
+- `block-shape-voxel-model-impl`.
+
+Client consumers:
+
 - `client-chunk-mesh-voxel-models-impl`;
 - `client-item-model-ui-mod`.
 
@@ -329,6 +334,7 @@ Contracts:
 - `client-camera-api`;
 - `client-player-controller-api`;
 - `collision-api`;
+- `block-shape-api`;
 - `player-block-collision-api`;
 - `player-hitbox-api`;
 - `player-gravity-api`;

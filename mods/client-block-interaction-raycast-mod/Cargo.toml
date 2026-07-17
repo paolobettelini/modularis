@@ -15,8 +15,7 @@ init = [
     "client-input-api",
     "client-camera-api",
     "client-chunk-cache-api",
-    "client-player-controller-api",
-    "client-player-render-api",
+    "block-shape-api",
     "client-game-state-api",
     "client-block-interaction-rules-api",
 ]
@@ -29,6 +28,7 @@ bevy-mod = { path = "../bevy-mod" }
 block-edit-events-api = { path = "../block-edit-events-api" }
 block-edit-events-mod = { path = "../block-edit-events-mod" }
 block-manager-api = { path = "../block-manager-api" }
+block-shape-api = { path = "../block-shape-api" }
 client-block-interaction-events-api = { path = "../client-block-interaction-events-api" }
 client-block-interaction-events-mod = { path = "../client-block-interaction-events-mod" }
 client-block-interaction-rules-api = { path = "../client-block-interaction-rules-api" }
@@ -36,9 +36,6 @@ client-camera-api = { path = "../client-camera-api" }
 client-chunk-cache-api = { path = "../client-chunk-cache-api" }
 client-game-state-api = { path = "../client-game-state-api" }
 client-input-api = { path = "../client-input-api" }
-client-player-controller-api = { path = "../client-player-controller-api" }
-client-player-render-api = { path = "../client-player-render-api" }
 item-use-api = { path = "../item-use-api" }
-player-hitbox-api = { path = "../player-hitbox-api" }
 tokio = { version = "1.48.0", features = ["full"] }
 voxel-raycast-api = { path = "../voxel-raycast-api" }

@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use block_shape_api::BlockShape;
 use voxel_math_api::BlockPos;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -23,6 +24,8 @@ pub struct SetClientBlockOutline {
     pub owner: String,
     /// `None` removes the outline owned by `owner`.
     pub block: Option<BlockPos>,
+    /// Local-space geometry to outline when `block` is present.
+    pub shape: BlockShape,
     pub style: BlockOutlineStyle,
 }
 

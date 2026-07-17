@@ -13,6 +13,7 @@ init = [
     "server-chunk-world-api",
     "server-player-registry-api",
     "server-player-gravity-api",
+    "block-shape-api",
     "network-protocol-mod",
 ]
 run = []
@@ -22,6 +23,7 @@ ownership = []
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 block-manager-api = { path = "../block-manager-api" }
+block-shape-api = { path = "../block-shape-api" }
 generated-network-messages = "0.1.0"
 player-block-collision-api = { path = "../player-block-collision-api" }
 player-gravity-api = { path = "../player-gravity-api" }

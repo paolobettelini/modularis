@@ -15,6 +15,8 @@ init = [
     "server-player-registry-api",
     "server-player-gravity-api",
     "server-block-interaction-rules-api",
+    "block-manager-api",
+    "block-shape-api",
 ]
 run = []
 ownership = []
@@ -24,6 +26,9 @@ bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 block-edit-events-api = { path = "../block-edit-events-api" }
 block-edit-events-mod = { path = "../block-edit-events-mod" }
+block-instance-api = { path = "../block-instance-api" }
+block-manager-api = { path = "../block-manager-api" }
+block-shape-api = { path = "../block-shape-api" }
 inventory-events-api = { path = "../inventory-events-api" }
 inventory-events-mod = { path = "../inventory-events-mod" }
 item-place-block-meta = { path = "../item-place-block-meta" }

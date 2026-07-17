@@ -4,14 +4,15 @@ use std::{
     sync::{Arc, Mutex},
 };
 use tokio::task::JoinHandle;
-use voxel_model_api::{VoxelModelApi, VoxelModelLoadResult, VoxelModelService};
+use voxel_model_api::{VoxelModelApi, VoxelModelData, VoxelModelLoadResult, VoxelModelService};
 use voxel_models_lib::{
     BakeOptions, ModAssetsResourcePack, ModelResolver, ResourceLocation, bake_model,
+    bake_model_boxes,
 };
 
-pub struct ClientVoxelModelAssetsFsImpl;
+pub struct VoxelModelAssetsFsImpl;
 
-impl ClientVoxelModelAssetsFsImpl {
+impl VoxelModelAssetsFsImpl {
     pub fn init(bevy: &mut BevyMod) -> Self {
         let source = Arc::new(ModAssetsResourcePack::new("assets"));
         let cache = Arc::new(Mutex::new(HashMap::<String, VoxelModelLoadResult>::new()));
@@ -26,9 +27,14 @@ impl ClientVoxelModelAssetsFsImpl {
                 let resolved = ModelResolver::new(source.as_ref())
                     .resolve(&location)
                     .map_err(|error| Arc::<str>::from(error.to_string()))?;
-                Ok(bake_model(&resolved, &BakeOptions::default())
-                    .map_err(|error| Arc::<str>::from(error.to_string()))?
-                    .into())
+                let options = BakeOptions::default();
+                let quads = bake_model(&resolved, &options)
+                    .map_err(|error| Arc::<str>::from(error.to_string()))?;
+                let boxes = bake_model_boxes(&resolved, &options);
+                Ok(Arc::new(VoxelModelData {
+                    quads: quads.into(),
+                    boxes: boxes.into(),
+                }))
             })();
             cache
                 .lock()
@@ -44,4 +50,4 @@ impl ClientVoxelModelAssetsFsImpl {
     }
 }
 
-impl VoxelModelApi for ClientVoxelModelAssetsFsImpl {}
+impl VoxelModelApi for VoxelModelAssetsFsImpl {}

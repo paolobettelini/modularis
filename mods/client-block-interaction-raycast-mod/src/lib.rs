@@ -3,6 +3,7 @@ use bevy_mod::BevyMod;
 use block_edit_events_api::BlockBreakRequested;
 use block_edit_events_mod::BlockEditEventsMod;
 use block_manager_api::BlockManagerApi;
+use block_shape_api::{BlockShape, BlockShapeApi, BlockShapeService};
 use client_block_interaction_events_api::{ClientBlockInteractionSet, LocalBlockUseIntent};
 use client_block_interaction_events_mod::ClientBlockInteractionEventsMod;
 use client_block_interaction_rules_api::{
@@ -12,13 +13,10 @@ use client_camera_api::{CameraApi, PlayerCamera};
 use client_chunk_cache_api::{ClientChunkCache, ClientChunkCacheApi};
 use client_game_state_api::{GameStateApi, InGameOverlayState};
 use client_input_api::{InputApi, PlayerInput};
-use client_player_controller_api::{Player, PlayerControllerApi};
-use client_player_render_api::{ClientPlayerRenderApi, RenderedNetworkPlayers};
 use item_use_api::ItemUseTarget;
-use player_hitbox_api::player_intersects_block;
 use std::marker::PhantomData;
 use tokio::task::JoinHandle;
-use voxel_raycast_api::raycast_voxels;
+use voxel_raycast_api::raycast_voxel_shapes;
 
 pub struct ClientBlockInteractionRaycastMod<B>(PhantomData<B>);
 
@@ -27,8 +25,7 @@ impl<B: BlockManagerApi> ClientBlockInteractionRaycastMod<B> {
         I: InputApi,
         C: CameraApi,
         K: ClientChunkCacheApi,
-        P: PlayerControllerApi,
-        R: ClientPlayerRenderApi,
+        S: BlockShapeApi,
         G: GameStateApi,
         Rules: ClientBlockInteractionRulesApi,
     >(
@@ -39,8 +36,7 @@ impl<B: BlockManagerApi> ClientBlockInteractionRaycastMod<B> {
         _input: &mut I,
         _camera: &mut C,
         _cache: &mut K,
-        _player: &mut P,
-        _player_render: &mut R,
+        _shapes: &mut S,
         _game_state: &mut G,
         _rules: &mut Rules,
     ) -> Self {
@@ -62,10 +58,8 @@ fn interact_with_blocks<B: BlockManagerApi>(
     input: Res<PlayerInput>,
     rules: Res<ClientBlockInteractionRules>,
     cache: Res<ClientChunkCache>,
+    shapes: Res<BlockShapeService>,
     camera: Query<&GlobalTransform, With<PlayerCamera>>,
-    local_player: Query<&Transform, With<Player>>,
-    remote_players: Res<RenderedNetworkPlayers>,
-    transforms: Query<&Transform, Without<Player>>,
     mut breaks: MessageWriter<BlockBreakRequested>,
     mut uses: MessageWriter<LocalBlockUseIntent>,
     mut counter: Local<u64>,
@@ -77,14 +71,20 @@ fn interact_with_blocks<B: BlockManagerApi>(
         return;
     };
     let transform = camera.compute_transform();
-    let Some(hit) = raycast_voxels(
+    let Some(hit) = raycast_voxel_shapes(
         transform.translation,
         transform.forward().as_vec3(),
         rules.max_reach,
         |position| {
             cache
                 .block(position)
-                .is_some_and(|block| !B::is_air(block.block))
+                .map_or_else(BlockShape::empty, |block| {
+                    if B::is_air(block.block) {
+                        BlockShape::empty()
+                    } else {
+                        shapes.shape(&block)
+                    }
+                })
         },
     ) else {
         return;
@@ -96,17 +96,6 @@ fn interact_with_blocks<B: BlockManagerApi>(
         });
     }
     if input.use_item_pressed {
-        let local_blocked = local_player.single().is_ok_and(|player| {
-            player_intersects_block(player.translation.to_array(), hit.adjacent)
-        });
-        let remote_blocked = remote_players.entities.values().any(|visual| {
-            transforms.get(visual.avatar).is_ok_and(|player| {
-                player_intersects_block(player.translation.to_array(), hit.adjacent)
-            })
-        });
-        if local_blocked || remote_blocked {
-            return;
-        }
         *counter = counter.wrapping_add(1);
         uses.write(LocalBlockUseIntent {
             operation_id: *counter,

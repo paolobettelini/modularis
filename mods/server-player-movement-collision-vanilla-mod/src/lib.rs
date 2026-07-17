@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
-use block_manager_api::{BlockId, BlockManagerApi};
+use block_manager_api::BlockManagerApi;
+use block_shape_api::{BlockShape, BlockShapeApi, BlockShapeService};
 use player_block_collision_api::resolve_player_collision;
 use player_hitbox_api::{PLAYER_HEIGHT, PLAYER_RADIUS};
 use server_chunk_world_api::{ServerChunkWorld, ServerChunkWorldApi};
@@ -25,6 +26,7 @@ impl<B: BlockManagerApi> ServerPlayerMovementCollisionVanillaMod<B> {
         S: ServerPlayerSpeedApi,
         F: ServerPlayerFlightApi,
         FS: ServerPlayerFlightSpeedApi,
+        H: BlockShapeApi,
     >(
         bevy: &mut BevyMod,
         _blocks: &mut B,
@@ -33,6 +35,7 @@ impl<B: BlockManagerApi> ServerPlayerMovementCollisionVanillaMod<B> {
         _speed: &mut S,
         _flight: &mut F,
         _flight_speed: &mut FS,
+        _shapes: &mut H,
     ) -> Self {
         bevy.app.add_systems(
             Update,
@@ -51,6 +54,7 @@ fn validate_player_movement_collision<B: BlockManagerApi>(
     speeds: Res<ServerPlayerSpeeds>,
     flight_capabilities: Res<ServerPlayerFlightCapabilities>,
     flight_speeds: Res<ServerPlayerFlightSpeeds>,
+    shapes: Res<BlockShapeService>,
     mut moves: ResMut<PendingServerPlayerMoves>,
 ) {
     for movement in &mut moves.moves {
@@ -72,7 +76,7 @@ fn validate_player_movement_collision<B: BlockManagerApi>(
             delta,
             PLAYER_RADIUS,
             PLAYER_HEIGHT,
-            &|position| solid_block::<B>(&world, movement.player_id, position),
+            &|position| collision_shape::<B>(&world, &shapes, movement.player_id, position),
         )
         .position;
     }
@@ -91,13 +95,18 @@ fn clamp_requested_movement(current: Vec3, requested: Vec3, speed_multiplier: f3
     }
 }
 
-fn solid_block<B: BlockManagerApi>(
+fn collision_shape<B: BlockManagerApi>(
     world: &ServerChunkWorld,
+    shapes: &BlockShapeService,
     player_id: player_network_message_types::PlayerId,
     position: BlockPos,
-) -> bool {
+) -> BlockShape {
     let Some(block) = world.block_for_player(player_id, position) else {
-        return false;
+        return BlockShape::empty();
     };
-    block.block != BlockId::Air && B::is_solid(block.block)
+    if B::is_solid(block.block) {
+        shapes.shape(&block)
+    } else {
+        BlockShape::empty()
+    }
 }

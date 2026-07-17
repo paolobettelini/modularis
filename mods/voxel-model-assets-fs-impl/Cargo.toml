@@ -1,10 +1,10 @@
 [package]
-name = "client-voxel-model-assets-fs-impl"
+name = "voxel-model-assets-fs-impl"
 version = "0.1.0"
 edition = "2024"
 
 [package.metadata.mod]
-entry = "ClientVoxelModelAssetsFsImpl"
+entry = "VoxelModelAssetsFsImpl"
 provides = "voxel-model-api"
 
 [package.metadata.mod.dependencies]

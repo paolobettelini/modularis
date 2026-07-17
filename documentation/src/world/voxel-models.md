@@ -1,18 +1,21 @@
 # JSON voxel models and textures
 
 Block and item geometry is data-driven. Content mods export Minecraft-style
-JSON models and texture files, while client provider mods decide how those
-files are loaded, baked, meshed, and presented.
+JSON models and texture files, while provider mods decide how those files are
+loaded and baked and separate consumers decide how geometry is used.
 
 This keeps three concerns independent:
 
 - a block or item mod declares which model belongs to its domain ID;
 - template mods provide reusable model inheritance without gameplay code;
-- client mods choose the model source, chunk mesher, and UI renderer.
+- a model provider exposes resolved quads and element bounds;
+- client mods choose the chunk mesher and UI renderer;
+- collision, raycast, and outline mods consume a replaceable block-shape API.
 
-The server does not parse presentation assets. It still composes the content
-mods because block and item identities are shared, but model loading belongs to
-the client provider selected in `client.toml`.
+The active server also resolves block-model element bounds, but it never owns
+texture loading or rendering. This is a composition choice rather than a core
+rule: another server can provide authored collision shapes without loading JSON
+models at all.
 
 ## Asset layout
 
@@ -62,29 +65,32 @@ The model pipeline is split across small crates.
 
 | Crate | Responsibility |
 | --- | --- |
-| `voxel-models-lib` | Engine-neutral JSON parsing, inheritance, texture-variable resolution, and quad baking |
-| `voxel-model-api` | Replaceable runtime service for resolving a model ID into baked quads |
-| `client-voxel-model-assets-fs-impl` | Filesystem provider for Patchwork's composed asset layout, with result caching |
+| `voxel-models-lib` | Engine-neutral JSON parsing, inheritance, texture-variable resolution, quad baking, and element-bound baking |
+| `voxel-model-api` | Replaceable runtime service for resolving a model ID into baked quads and boxes |
+| `voxel-model-assets-fs-impl` | Generic filesystem provider for Patchwork's composed asset layout, with result caching |
+| `block-shape-api` | Replaceable block-instance-to-local-AABB-union contract |
+| `block-shape-voxel-model-impl` | Derives one local AABB from each resolved JSON `element` |
 | `block-render-api` | Associates a block ID with an optional model ID |
 | `item-render-api` | Associates an item ID with an optional model ID |
 | `client-chunk-mesh-voxel-models-impl` | Builds chunk geometry from baked block-model quads |
 | `client-item-model-ui-mod` | Uses item models as the default inventory presentation |
 
 `voxel-model-api` is intentionally not tied to filesystem loading. Another
-client can provide models from an archive, embedded bytes, a development hot
-reload service, or a resource-pack stack without changing block contributors
-or the chunk renderer.
+composition can provide models from an archive, embedded bytes, a development
+hot-reload service, or a resource-pack stack without changing block
+contributors or consumers.
 
 ## Data flow
 
 ```text
 block/item contributor
   -> generated registry render_info(id)
-  -> VoxelModelService.bake(namespaced model ID)
+  -> VoxelModelService.load(namespaced model ID)
   -> JSON parent and texture resolution
-  -> baked texture-tagged quads
-  -> chunk mesher or item presentation
-  -> Bevy assets and entities
+  -> cached baked quads + cached element boxes
+       |                         |
+       -> client mesh/UI         -> BlockShapeService
+                                  -> collision/raycast/outline
 ```
 
 Successful and failed resolutions are cached. A bad model therefore reports a
@@ -171,10 +177,18 @@ Use `cullface` only when a face lies on the corresponding full block boundary.
 Internal faces and partial-shape faces normally omit it. The client mesher
 culls a tagged face when the neighboring block is opaque.
 
-Rendering shape and collision shape remain separate contracts. The current
-collision provider still treats every `solid` block as a full-block AABB, so
-the new partial visual models do not yet imply stair- or cauldron-shaped
-collision. A future collision-shape API can be added independently.
+Visual geometry and physical geometry remain separate contracts even though
+the default composition derives both from the same JSON elements.
+`block-shape-voxel-model-impl` converts every resolved element to a normalized
+local AABB. A stair therefore becomes a union of boxes, while an anvil or
+cauldron follows its own element layout. Element rotations are represented by
+their smallest enclosing AABB; this is conservative collision, not an oriented
+box solver.
+
+`BlockInfo::solid` remains an independent gameplay policy. Client/server
+collision ignore the shape for non-solid blocks, while selection raycasts and
+outlines can still use the geometry. A custom composition can replace only the
+shape provider without replacing rendering or block identity.
 
 ## Defining an item model
 
@@ -234,7 +248,15 @@ per-frame remesh budgets. Model parsing does not own those concerns.
 ## Adding another model source or renderer
 
 To replace filesystem loading, implement `VoxelModelApi` and insert a
-`VoxelModelService`. Select exactly one provider in the client modpack.
+`VoxelModelService`. Select exactly one provider in every composition that
+needs model data.
+
+To author physical geometry independently, implement `BlockShapeApi` and
+insert a `BlockShapeService`. The service returns local-space AABB unions for a
+`BlockInstance`, not only a block ID. The default provider ignores metadata,
+but a future orientation or open/closed metadata provider can change geometry
+without breaking the API. Collision, precise raycast, placement occupancy
+checks, and outlines do not need to know where those boxes came from.
 
 To replace chunk geometry generation, implement `ChunkMeshApi` and insert a
 `ChunkMeshService`. A greedy or asynchronous mesher can consume the same baked
@@ -255,5 +277,6 @@ When adding a model-owning mod:
 4. run Patchwork composition so registries and assets are regenerated;
 5. check the composed `assets/<mod-name>/` tree;
 6. check both client and server compositions when shared IDs changed;
-7. keep model geometry, collision policy, and gameplay behavior in separate
-   contracts.
+7. test element-derived collision and selection for partial models;
+8. keep model geometry, shape provisioning, solidity policy, and gameplay
+   behavior in separate contracts.

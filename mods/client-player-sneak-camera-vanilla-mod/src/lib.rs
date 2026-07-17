@@ -10,13 +10,20 @@ use tokio::task::JoinHandle;
 #[derive(Resource, Debug, Clone, Copy)]
 pub struct SneakCameraConfig {
     pub eye_offset: f32,
+    pub transition_seconds: f32,
 }
 
 impl Default for SneakCameraConfig {
     fn default() -> Self {
-        Self { eye_offset: 0.2 }
+        Self {
+            eye_offset: 0.2,
+            transition_seconds: 0.12,
+        }
     }
 }
+
+#[derive(Resource, Debug, Default)]
+struct SneakCameraOffset(f32);
 
 pub struct ClientPlayerSneakCameraVanillaMod;
 
@@ -35,13 +42,17 @@ impl ClientPlayerSneakCameraVanillaMod {
         _gravity: &mut V,
         _sneak: &mut S,
     ) -> Self {
-        bevy.app.init_resource::<SneakCameraConfig>().add_systems(
-            Update,
-            lower_sneaking_camera
-                .in_set(PlayerControllerSet::CameraModifiers)
-                .after(PlayerSneakSet::Input)
-                .run_if(in_state(GameState::InGame)),
-        );
+        bevy.app
+            .init_resource::<SneakCameraConfig>()
+            .init_resource::<SneakCameraOffset>()
+            .add_systems(
+                Update,
+                lower_sneaking_camera
+                    .in_set(PlayerControllerSet::CameraModifiers)
+                    .after(PlayerSneakSet::Input)
+                    .run_if(in_state(GameState::InGame)),
+            )
+            .add_systems(OnExit(GameState::InGame), reset_sneak_camera_offset);
         Self
     }
 
@@ -54,13 +65,33 @@ fn lower_sneaking_camera(
     sneak: Res<LocalPlayerSneak>,
     config: Res<SneakCameraConfig>,
     gravity: Res<Gravity>,
+    time: Res<Time>,
+    mut offset: ResMut<SneakCameraOffset>,
     mut camera: Query<&mut Transform, With<PlayerCamera>>,
 ) {
-    if !sneak.active {
-        return;
-    }
+    let target = if sneak.active {
+        config.eye_offset.max(0.0)
+    } else {
+        0.0
+    };
+    let transition = config.transition_seconds.max(1.0e-3);
+    let transition_distance = config.eye_offset.max(offset.0).max(target).max(1.0e-3);
+    let maximum_step = transition_distance / transition * time.delta_secs();
+    offset.0 = move_towards(offset.0, target, maximum_step);
     let Ok(mut camera) = camera.single_mut() else {
         return;
     };
-    camera.translation -= gravity.up() * config.eye_offset.max(0.0);
+    camera.translation -= gravity.up() * offset.0;
+}
+
+fn move_towards(current: f32, target: f32, maximum_step: f32) -> f32 {
+    if current < target {
+        (current + maximum_step).min(target)
+    } else {
+        (current - maximum_step).max(target)
+    }
+}
+
+fn reset_sneak_camera_offset(mut offset: ResMut<SneakCameraOffset>) {
+    offset.0 = 0.0;
 }

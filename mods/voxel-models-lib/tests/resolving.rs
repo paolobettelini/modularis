@@ -3,7 +3,7 @@ use std::{fs, path::Path};
 use tempfile::tempdir;
 use voxel_models_lib::{
     BakeOptions, FsResourcePack, ModAssetsResourcePack, ModelResolver, ResourceLocation,
-    bake_model, group_quads_by_texture,
+    bake_model, bake_model_boxes, group_quads_by_texture,
 };
 
 fn put(root: &Path, relative: &str, contents: &str) {
@@ -119,4 +119,30 @@ fn child_textures_override_parent_variables() {
             .iter()
             .all(|quad| quad.texture.to_string() == "example:block/child")
     );
+}
+
+#[test]
+fn model_elements_become_independent_normalized_boxes() {
+    let dir = tempdir().unwrap();
+    put(
+        dir.path(),
+        "assets/example/models/block/steps.json",
+        r##"{
+            "textures": { "all": "example:block/steps" },
+            "elements": [
+                { "from": [0, 0, 0], "to": [16, 8, 16], "faces": {} },
+                { "from": [8, 8, 0], "to": [16, 16, 16], "faces": {} }
+            ]
+        }"##,
+    );
+    let pack = FsResourcePack::new(dir.path());
+    let id = ResourceLocation::parse("example:block/steps").unwrap();
+    let resolved = ModelResolver::new(&pack).resolve(&id).unwrap();
+    let boxes = bake_model_boxes(&resolved, &BakeOptions::default());
+
+    assert_eq!(boxes.len(), 2);
+    assert_eq!(boxes[0].min, [0.0, 0.0, 0.0]);
+    assert_eq!(boxes[0].max, [1.0, 0.5, 1.0]);
+    assert_eq!(boxes[1].min, [0.5, 0.5, 0.0]);
+    assert_eq!(boxes[1].max, [1.0, 1.0, 1.0]);
 }

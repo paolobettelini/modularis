@@ -18,7 +18,8 @@ mod source;
 pub mod bevy;
 
 pub use bake::{
-    BakeOptions, BakedMeshPart, BakedQuad, ModelTransform, bake_model, bake_model_with_transform,
+    BakeOptions, BakedMeshPart, BakedModelBox, BakedQuad, ModelTransform, bake_model,
+    bake_model_boxes, bake_model_boxes_with_transform, bake_model_with_transform,
     group_quads_by_texture,
 };
 pub use blockstate::{

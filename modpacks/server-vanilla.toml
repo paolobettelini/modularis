@@ -26,6 +26,8 @@ mods = [
     "player-gravity-network-messages-mod",
     "server-player-gravity-state-mod",
     "player-jump-network-messages-mod",
+    "voxel-model-assets-fs-impl",
+    "block-shape-voxel-model-impl",
     "server-player-movement-collision-vanilla-mod",
     "server-player-gravity-network-sync-mod",
     "server-player-speed-state-mod",

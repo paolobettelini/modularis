@@ -78,9 +78,11 @@ and are referenced with namespaced resource IDs. Shared cube, column, stairs,
 item, and anvil templates are exported by asset-only mods. See
 [JSON voxel models and textures](./voxel-models.md).
 
-Logical properties such as `solid` and `opaque` are still Rust data. They are
-not inferred from the JSON model because collision, culling, and presentation
-must remain independently replaceable.
+Logical properties such as `solid` and `opaque` are still Rust data. The active
+shape provider derives local collision/selection boxes from JSON `elements`,
+but `solid` decides whether movement collision uses those boxes. A different
+provider can supply unrelated physical geometry, so culling, shape generation,
+solidity, and presentation remain independently replaceable.
 
 ## Block manager
 

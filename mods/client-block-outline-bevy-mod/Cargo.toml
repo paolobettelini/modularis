@@ -15,6 +15,7 @@ ownership = []
 [dependencies]
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
+block-shape-api = { path = "../block-shape-api" }
 client-bevy-default-plugins-mod = { path = "../client-bevy-default-plugins-mod" }
 client-block-outline-api = { path = "../client-block-outline-api" }
 client-game-state-api = { path = "../client-game-state-api" }

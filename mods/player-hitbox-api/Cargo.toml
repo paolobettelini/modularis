@@ -4,4 +4,11 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+bevy = "0.17.3"
+block-shape-api = { path = "../block-shape-api" }
+collision-api = { path = "../collision-api" }
 voxel-math-api = { path = "../voxel-math-api" }
+
+[patch.crates-io]
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }

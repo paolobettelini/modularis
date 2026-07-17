@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use block_manager_api::BlockManagerApi;
+use block_shape_api::{BlockShape, BlockShapeApi, BlockShapeService};
 use generated_network_messages::{NetworkMessageSet, PlayerJumpRequestReceived};
 use network_protocol_mod::NetworkProtocolMod;
 use player_block_collision_api::collides_at;
@@ -16,12 +17,18 @@ use tokio::task::JoinHandle;
 pub struct ServerPlayerJumpVanillaMod<B>(PhantomData<B>);
 
 impl<B: BlockManagerApi> ServerPlayerJumpVanillaMod<B> {
-    pub fn init<W: ServerChunkWorldApi, P: ServerPlayerRegistryApi, G: ServerPlayerGravityApi>(
+    pub fn init<
+        W: ServerChunkWorldApi,
+        P: ServerPlayerRegistryApi,
+        G: ServerPlayerGravityApi,
+        H: BlockShapeApi,
+    >(
         bevy: &mut BevyMod,
         _blocks: &mut B,
         _world: &mut W,
         _players: &mut P,
         _gravity: &mut G,
+        _shapes: &mut H,
         _protocol: &mut NetworkProtocolMod,
     ) -> Self {
         bevy.app.init_resource::<JumpConfig>().add_systems(
@@ -41,6 +48,7 @@ fn handle_jump_requests<B: BlockManagerApi>(
     jump: Res<JumpConfig>,
     world: Res<ServerChunkWorld>,
     registry: Res<ServerPlayerRegistry>,
+    shapes: Res<BlockShapeService>,
     mut requests: MessageReader<PlayerJumpRequestReceived>,
 ) {
     for request in requests.read() {
@@ -54,7 +62,7 @@ fn handle_jump_requests<B: BlockManagerApi>(
             continue;
         }
         let position = Vec3::from_array(player.position);
-        if !is_grounded::<B>(&world, player.id, position, direction) {
+        if !is_grounded::<B>(&world, &shapes, player.id, position, direction) {
             debug!(
                 "ignored airborne jump request for player {} at {:?}",
                 player.id, position
@@ -70,6 +78,7 @@ fn handle_jump_requests<B: BlockManagerApi>(
 
 fn is_grounded<B: BlockManagerApi>(
     world: &ServerChunkWorld,
+    shapes: &BlockShapeService,
     player_id: player_network_message_types::PlayerId,
     position: Vec3,
     gravity_direction: Vec3,
@@ -81,7 +90,13 @@ fn is_grounded<B: BlockManagerApi>(
         &|position| {
             world
                 .block_for_player(player_id, position)
-                .is_some_and(|block| B::is_solid(block.block))
+                .map_or_else(BlockShape::empty, |block| {
+                    if B::is_solid(block.block) {
+                        shapes.shape(&block)
+                    } else {
+                        BlockShape::empty()
+                    }
+                })
         },
     )
 }

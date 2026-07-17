@@ -150,8 +150,10 @@ controller. The vanilla sneak camera mod uses this phase to lower eye height.
 
 `collision-api` exposes a closure-backed `CollisionService`.
 
-The active implementation reads blocks from `ClientChunkCache` and uses shared
-player/block AABB helpers.
+The active implementation reads block instances from `ClientChunkCache`, asks
+`BlockShapeService` for each solid block's local AABB union, and resolves the
+player against the translated boxes. The server validator uses the same shape
+contract against its authoritative world route.
 
 The resolver:
 
@@ -165,6 +167,11 @@ The resolver:
 Resolving height first lets a rising player clear a ledge before planar motion
 is tested. This avoids alternating vertical/side corrections when jumping onto
 a block.
+
+Partial blocks use their actual top and side coordinates. Standing on a lower
+slab-like element therefore grounds the player near `y + 0.5`, not `y + 1.0`.
+The collision algorithm is independent from JSON: replacing
+`BlockShapeService` replaces the geometry source without changing movement.
 
 ## Grounded state
 

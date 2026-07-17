@@ -156,6 +156,7 @@ The outline API defines:
 SetClientBlockOutline {
     owner,
     block: Option<BlockPos>,
+    shape: BlockShape,
     style,
 }
 ```
@@ -168,12 +169,13 @@ The pipeline is:
 Collect -> Apply -> Draw
 ```
 
-The Bevy provider creates only twelve thin, unlit edge meshes around the block.
-It does not create a screen-space cursor; the crosshair remains owned entirely
-by `client-crosshair-bevy-mod`.
+The Bevy provider creates thin, unlit edge meshes around every local AABB in
+`shape`. Full cubes use twelve edges; stairs, anvils, cauldrons, and other
+element models follow their box union. It does not create a screen-space
+cursor; the crosshair remains owned entirely by `client-crosshair-bevy-mod`.
 
-The looked-block vanilla mod performs a reach-limited voxel raycast and owns the
-key `vanilla:looked-block`.
+The looked-block vanilla mod performs a reach-limited shape raycast and owns
+the key `vanilla:looked-block`.
 
 The current client composition selects the renderer in `client.toml` and the
 looked-block policy in `client-vanilla.toml`. Both are required: the provider

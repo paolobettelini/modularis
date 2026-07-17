@@ -35,8 +35,8 @@ Current limits:
   item-property trees;
 - inventory block-item previews use a resolved texture instead of a full
   isometric model render;
-- visual model shape and collision shape are independent, but the active
-  collision provider still uses full-block AABBs for every solid block;
+- the active shape provider derives AABB unions from JSON elements, but rotated
+  elements use conservative enclosing AABBs rather than oriented collision;
 - no transparent block pass;
 - no greedy meshing;
 - no background mesh jobs;
@@ -50,7 +50,8 @@ Design direction:
 - preserve mesh/render APIs while replacing implementations;
 - add blockstate and per-instance model selection as separate providers;
 - add a replaceable full-model inventory preview adapter;
-- add a generated or data-driven collision-shape contract;
+- add optional authored shape contributors for blocks whose physical geometry
+  should differ from their visual model;
 - keep graphics stages composable;
 - add explicit opaque/transparent render contracts.
 

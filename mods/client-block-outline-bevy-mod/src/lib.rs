@@ -3,6 +3,7 @@ use bevy::{
     prelude::*,
 };
 use bevy_mod::BevyMod;
+use block_shape_api::BlockShape;
 use client_bevy_default_plugins_mod::ClientBevyDefaultPluginsMod;
 use client_block_outline_api::{
     BlockOutlineStyle, ClientBlockOutlineApi, ClientBlockOutlineSet, SetClientBlockOutline,
@@ -93,6 +94,7 @@ fn apply_block_outline_commands(
             &mesh.0,
             &mut materials,
             block,
+            &command.shape,
             command.style,
         );
         active.0.insert(command.owner.clone(), outline);
@@ -104,6 +106,7 @@ fn spawn_outline(
     mesh: &Handle<Mesh>,
     materials: &mut Assets<StandardMaterial>,
     block: BlockPos,
+    shape: &BlockShape,
     style: BlockOutlineStyle,
 ) -> ActiveBlockOutline {
     let color = Color::srgba(
@@ -122,42 +125,15 @@ fn spawn_outline(
         unlit: true,
         ..default()
     });
-    let size = 1.0 + style.expansion.max(0.0) * 2.0;
-    let half = size * 0.5;
     let thickness = OUTLINE_EDGE_THICKNESS;
-    let length = size + thickness;
-    let mut edges = Vec::with_capacity(12);
-    for y in [-half, half] {
-        for z in [-half, half] {
-            edges.push((
-                Vec3::new(0.0, y, z),
-                Vec3::new(length, thickness, thickness),
-            ));
-        }
+    let expansion = style.expansion.max(0.0);
+    let mut edges = Vec::with_capacity(shape.boxes().len() * 12);
+    for bounds in shape.boxes() {
+        append_box_edges(&mut edges, bounds.min, bounds.max, expansion, thickness);
     }
-    for x in [-half, half] {
-        for z in [-half, half] {
-            edges.push((
-                Vec3::new(x, 0.0, z),
-                Vec3::new(thickness, length, thickness),
-            ));
-        }
-    }
-    for x in [-half, half] {
-        for y in [-half, half] {
-            edges.push((
-                Vec3::new(x, y, 0.0),
-                Vec3::new(thickness, thickness, length),
-            ));
-        }
-    }
-    let center = Vec3::new(
-        block.x as f32 + 0.5,
-        block.y as f32 + 0.5,
-        block.z as f32 + 0.5,
-    );
+    let origin = Vec3::new(block.x as f32, block.y as f32, block.z as f32);
     let entity = commands
-        .spawn((Transform::from_translation(center), Visibility::default()))
+        .spawn((Transform::from_translation(origin), Visibility::default()))
         .with_children(|parent| {
             for (translation, scale) in edges {
                 parent.spawn((
@@ -172,6 +148,43 @@ fn spawn_outline(
         })
         .id();
     ActiveBlockOutline { entity, material }
+}
+
+fn append_box_edges(
+    edges: &mut Vec<(Vec3, Vec3)>,
+    min: Vec3,
+    max: Vec3,
+    expansion: f32,
+    thickness: f32,
+) {
+    let min = min - Vec3::splat(expansion);
+    let max = max + Vec3::splat(expansion);
+    let center = (min + max) * 0.5;
+    let size = max - min;
+    for y in [min.y, max.y] {
+        for z in [min.z, max.z] {
+            edges.push((
+                Vec3::new(center.x, y, z),
+                Vec3::new(size.x + thickness, thickness, thickness),
+            ));
+        }
+    }
+    for x in [min.x, max.x] {
+        for z in [min.z, max.z] {
+            edges.push((
+                Vec3::new(x, center.y, z),
+                Vec3::new(thickness, size.y + thickness, thickness),
+            ));
+        }
+    }
+    for x in [min.x, max.x] {
+        for y in [min.y, max.y] {
+            edges.push((
+                Vec3::new(x, y, center.z),
+                Vec3::new(thickness, thickness, size.z + thickness),
+            ));
+        }
+    }
 }
 
 fn remove_outline(

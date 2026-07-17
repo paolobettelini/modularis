@@ -5,7 +5,9 @@ server validation, mutation, and synchronization.
 
 ## Voxel raycast
 
-`voxel-raycast-api` implements a 3D DDA traversal.
+`voxel-raycast-api` implements a 3D DDA traversal. Its shape-aware entry point
+uses DDA only to choose candidate cells, then intersects the local AABB union
+provided by `BlockShapeService`.
 
 It returns:
 
@@ -18,8 +20,9 @@ VoxelRayHit {
 }
 ```
 
-`block` is the solid voxel hit. `adjacent` is the empty voxel immediately
-outside the entered face.
+`block` is the selected voxel. `adjacent` is the voxel outside the exact model
+element face that was hit. Rays pass through empty regions of partial blocks;
+for example, the empty upper half beside a lower slab is not selectable.
 
 The traversal advances several axes only on an exact equal-time grid crossing.
 It does not use a broad epsilon. Treating a near-edge ray as an exact edge can
@@ -42,11 +45,12 @@ When playing:
 2. raycast searches the client chunk cache;
 3. left click emits `BlockBreakRequested`;
 4. right click emits `LocalBlockUseIntent`;
-5. placement is rejected locally if the target voxel overlaps local or visible
-   remote player hitboxes.
+5. the resulting target carries the exact face normal and adjacent cell.
 
-The local hitbox check is immediate feedback. The server performs its own
-authoritative check.
+The raycast mod does not decide whether a placement overlaps a player. The
+server placement policy performs that authoritative check against the placed
+block's actual shape. This avoids coupling a generic input/raycast feature to
+one client player renderer or visibility policy.
 
 ## Right-click handler chain
 
@@ -168,7 +172,7 @@ The vanilla placement mod requires:
 - a block target with adjacent position;
 - authoritative reach;
 - resolvable world scope;
-- no player hitbox in the target voxel;
+- no visible player hitbox overlapping any AABB of the placed shape;
 - target block is air.
 
 It calls `place_block_for_player` and emits:
@@ -208,8 +212,9 @@ than relying on system order to overwrite a boolean.
 Outlines are an independent client feature family:
 
 - API defines owner-keyed outline commands;
-- Bevy provider renders only twelve thin edge meshes around each selected block;
-- looked-block vanilla policy performs its own raycast.
+- Bevy provider renders thin edge meshes for every box in the selected shape;
+- looked-block vanilla policy performs the same shape-aware raycast used by
+  interaction.
 
 An owner key lets several mods maintain independent outlines.
 
