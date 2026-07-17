@@ -184,7 +184,7 @@ vanilla composition assembles it from independent mods:
 | `client-player-sneak-input-vanilla-mod` | maps the configured held key to local sneak state |
 | `client-player-sneak-speed-vanilla-mod` | multiplies planar speed while sneaking |
 | `client-player-sneak-edge-protection-vanilla-mod` | constrains supported movement before collision resolution |
-| `client-player-sneak-camera-vanilla-mod` | quickly interpolates the local camera to a lower eye offset after normal camera synchronization |
+| `client-player-sneak-camera-vanilla-mod` | quickly interpolates the local camera to a lower eye offset, proportional to player scale, after normal camera synchronization |
 | `client-player-sneak-block-interaction-bypass-vanilla-mod` | routes right-click directly to the held item before block handlers |
 
 The speed multiplier, camera offset/transition time, and edge-probe constants

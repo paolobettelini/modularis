@@ -13,6 +13,7 @@ init = [
     "client-camera-api",
     "client-player-controller-api",
     "player-gravity-api",
+    "player-scale-api",
     "player-sneak-api",
 ]
 run = []
@@ -25,5 +26,6 @@ client-camera-api = { path = "../client-camera-api" }
 client-game-state-api = { path = "../client-game-state-api" }
 client-player-controller-api = { path = "../client-player-controller-api" }
 player-gravity-api = { path = "../player-gravity-api" }
+player-scale-api = { path = "../player-scale-api" }
 player-sneak-api = { path = "../player-sneak-api" }
 tokio = { version = "1.48.0", features = ["full"] }

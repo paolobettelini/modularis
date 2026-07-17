@@ -4,6 +4,7 @@ use client_camera_api::{CameraApi, PlayerCamera};
 use client_game_state_api::{GameState, GameStateApi};
 use client_player_controller_api::{PlayerControllerApi, PlayerControllerSet};
 use player_gravity_api::{Gravity, PlayerGravityApi};
+use player_scale_api::{PlayerScale, PlayerScaleApi};
 use player_sneak_api::{LocalPlayerSneak, PlayerSneakApi, PlayerSneakSet};
 use tokio::task::JoinHandle;
 
@@ -33,6 +34,7 @@ impl ClientPlayerSneakCameraVanillaMod {
         C: CameraApi,
         P: PlayerControllerApi,
         V: PlayerGravityApi,
+        Z: PlayerScaleApi,
         S: PlayerSneakApi,
     >(
         bevy: &mut BevyMod,
@@ -40,6 +42,7 @@ impl ClientPlayerSneakCameraVanillaMod {
         _camera: &mut C,
         _controller: &mut P,
         _gravity: &mut V,
+        _scale: &mut Z,
         _sneak: &mut S,
     ) -> Self {
         bevy.app
@@ -64,18 +67,16 @@ impl ClientPlayerSneakCameraVanillaMod {
 fn lower_sneaking_camera(
     sneak: Res<LocalPlayerSneak>,
     config: Res<SneakCameraConfig>,
+    scale: Res<PlayerScale>,
     gravity: Res<Gravity>,
     time: Res<Time>,
     mut offset: ResMut<SneakCameraOffset>,
     mut camera: Query<&mut Transform, With<PlayerCamera>>,
 ) {
-    let target = if sneak.active {
-        config.eye_offset.max(0.0)
-    } else {
-        0.0
-    };
+    let scaled_eye_offset = config.eye_offset.max(0.0) * scale.0.max(0.0);
+    let target = if sneak.active { scaled_eye_offset } else { 0.0 };
     let transition = config.transition_seconds.max(1.0e-3);
-    let transition_distance = config.eye_offset.max(offset.0).max(target).max(1.0e-3);
+    let transition_distance = scaled_eye_offset.max(offset.0).max(target).max(1.0e-3);
     let maximum_step = transition_distance / transition * time.delta_secs();
     offset.0 = move_towards(offset.0, target, maximum_step);
     let Ok(mut camera) = camera.single_mut() else {
