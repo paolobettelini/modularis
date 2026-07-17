@@ -119,7 +119,7 @@ Duplicate frame/scope insertions are ignored.
 The vanilla travel mod runs after authoritative movement apply. It:
 
 1. resolves the player's current world scope;
-2. finds an active portal intersecting the player hitbox;
+2. finds an active portal intersecting that player's current scaled hitbox;
 3. checks a cooldown;
 4. emits `RequestPlayerDimensionChange`;
 5. remembers enough information to create a return portal.

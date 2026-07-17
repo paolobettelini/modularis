@@ -59,8 +59,11 @@ Design direction:
 
 Current limits:
 
-- local prediction exposes one controlled-player gravity resource, while server
-  authority is per player;
+- local prediction exposes one controlled-player gravity and scale resource,
+  while visibility-scoped client maps retain the gravity and visual scale of
+  remote subjects;
+- the selected vanilla policy scales hitboxes uniformly with model scale, but
+  the collision volume is still an axis-aligned radius/height box;
 - server validates displacement, collision, speed, and flight limits but does
   not simulate full velocity;
 - sprint state is not explicitly validated server-side;

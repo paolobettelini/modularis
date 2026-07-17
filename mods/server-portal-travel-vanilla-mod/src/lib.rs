@@ -10,6 +10,7 @@ use server_dimension_api::{
     Dimension, RequestPlayerDimensionChange, ServerDimensionApi, ServerDimensionSet,
     ServerPlayerDimensionChanged,
 };
+use server_player_hitbox_api::{ServerPlayerHitboxApi, ServerPlayerHitboxes};
 use server_player_registry_api::{
     ServerPlayerMovementSet, ServerPlayerRegistry, ServerPlayerRegistryApi,
 };
@@ -20,8 +21,6 @@ use std::collections::HashMap;
 use tokio::task::JoinHandle;
 use voxel_math_api::BlockPos;
 
-const PLAYER_RADIUS: f32 = 0.3;
-const PLAYER_HEIGHT: f32 = 1.8;
 const PORTAL_COOLDOWN_SECONDS: f64 = 1.5;
 
 #[derive(Debug, Clone)]
@@ -47,6 +46,7 @@ impl ServerPortalTravelVanillaMod {
         D: ServerDimensionApi,
         W: ServerChunkWorldApi,
         R: ServerPlayerRegistryApi,
+        H: ServerPlayerHitboxApi,
     >(
         bevy: &mut BevyMod,
         _block_events: &mut BlockEditEventsMod,
@@ -54,6 +54,7 @@ impl ServerPortalTravelVanillaMod {
         _dimensions: &mut D,
         _world: &mut W,
         _players: &mut R,
+        _hitboxes: &mut H,
     ) -> Self {
         bevy.app.init_resource::<PortalTravelState>().add_systems(
             Update,
@@ -76,6 +77,7 @@ fn detect_portal_travel(
     world: Res<ServerChunkWorld>,
     dimensions: Res<server_dimension_api::ServerDimensions>,
     players: Res<ServerPlayerRegistry>,
+    hitboxes: Res<ServerPlayerHitboxes>,
     portals: Res<ServerPortals>,
     mut state: ResMut<PortalTravelState>,
     mut requests: MessageWriter<RequestPlayerDimensionChange>,
@@ -107,10 +109,11 @@ fn detect_portal_travel(
         else {
             continue;
         };
+        let hitbox = hitboxes.hitbox(player.id);
         let Some(portal) = portals.in_scope(&scope).find(|portal| {
             portal
                 .frame
-                .contains_player(player.position, PLAYER_RADIUS, PLAYER_HEIGHT)
+                .contains_player(player.position, hitbox.radius, hitbox.height)
         }) else {
             continue;
         };

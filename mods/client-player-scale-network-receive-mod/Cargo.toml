@@ -1,0 +1,31 @@
+[package]
+name = "client-player-scale-network-receive-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientPlayerScaleNetworkReceiveMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "player-scale-api",
+    "client-player-scale-map-api",
+    "client-session-api",
+    "network-protocol-mod",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-player-scale-map-api = { path = "../client-player-scale-map-api" }
+client-session-api = { path = "../client-session-api" }
+generated-network-messages = "0.1.0"
+network-protocol-mod = { path = "../network-protocol-mod" }
+player-scale-api = { path = "../player-scale-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-network-messages = { path = "../generated-network-messages" }

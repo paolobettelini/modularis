@@ -9,12 +9,15 @@ use inventory_events_api::{HeldItemUseDispatched, InventoryServerSet, ItemUseSuc
 use inventory_events_mod::InventoryEventsMod;
 use item_use_api::ItemUseTarget;
 use player_gravity_api::gravity_up;
-use player_hitbox_api::player_intersects_shape;
+use player_hitbox_api::player_intersects_shape_with_hitbox;
 use server_block_interaction_rules_api::{
     ServerBlockInteractionRules, ServerBlockInteractionRulesApi,
 };
 use server_chunk_world_api::{ServerChunkWorld, ServerChunkWorldApi};
 use server_player_gravity_api::{ServerPlayerGravities, ServerPlayerGravityApi};
+use server_player_hitbox_api::{
+    ServerPlayerHitboxApi, ServerPlayerHitboxSet, ServerPlayerHitboxes,
+};
 use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
 use std::marker::PhantomData;
 use tokio::task::JoinHandle;
@@ -26,6 +29,7 @@ impl<B: BlockManagerApi> ServerPlaceBlockItemUseMod<B> {
         W: ServerChunkWorldApi,
         P: ServerPlayerRegistryApi,
         G: ServerPlayerGravityApi,
+        HB: ServerPlayerHitboxApi,
         R: ServerBlockInteractionRulesApi,
         H: BlockShapeApi,
     >(
@@ -35,13 +39,16 @@ impl<B: BlockManagerApi> ServerPlaceBlockItemUseMod<B> {
         _world: &mut W,
         _players: &mut P,
         _gravity: &mut G,
+        _hitbox: &mut HB,
         _rules: &mut R,
         _blocks: &mut B,
         _shapes: &mut H,
     ) -> Self {
         bevy.app.add_systems(
             Update,
-            apply_place_block_item::<B>.in_set(InventoryServerSet::ApplyWorldEffects),
+            apply_place_block_item::<B>
+                .in_set(InventoryServerSet::ApplyWorldEffects)
+                .after(ServerPlayerHitboxSet),
         );
         Self(PhantomData)
     }
@@ -55,6 +62,7 @@ fn apply_place_block_item<B: BlockManagerApi>(
     world: Res<ServerChunkWorld>,
     players: Res<ServerPlayerRegistry>,
     gravities: Res<ServerPlayerGravities>,
+    hitboxes: Res<ServerPlayerHitboxes>,
     rules: Res<ServerBlockInteractionRules>,
     shapes: Res<BlockShapeService>,
     mut uses: MessageReader<HeldItemUseDispatched>,
@@ -71,9 +79,10 @@ fn apply_place_block_item<B: BlockManagerApi>(
         let Some(actor) = players.player(item_use.player_id) else {
             continue;
         };
-        if !rules.player_can_reach(
+        if !rules.player_can_reach_from_eye(
             actor.position,
             gravity_up(gravities.gravity(actor.id)),
+            hitboxes.hitbox(actor.id).eye_height,
             adjacent,
         ) {
             continue;
@@ -90,7 +99,12 @@ fn apply_place_block_item<B: BlockManagerApi>(
                 world
                     .resident_key_for_player(player.id, adjacent.chunk())
                     .is_some_and(|key| key.scope() == scope)
-                    && player_intersects_shape(player.position, adjacent, &placed_shape)
+                    && player_intersects_shape_with_hitbox(
+                        player.position,
+                        hitboxes.hitbox(player.id),
+                        adjacent,
+                        &placed_shape,
+                    )
             });
         if occupied_by_visible_player {
             continue;

@@ -7,6 +7,7 @@ pub struct NetworkPlayerVisual {
     pub avatar: Entity,
     pub label: Entity,
     pub last_seen_at: f64,
+    pub yaw: f32,
 }
 
 #[derive(Resource, Default)]

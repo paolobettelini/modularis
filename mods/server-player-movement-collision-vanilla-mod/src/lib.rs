@@ -3,10 +3,12 @@ use bevy_mod::BevyMod;
 use block_manager_api::BlockManagerApi;
 use block_shape_api::{BlockShape, BlockShapeApi, BlockShapeService};
 use player_block_collision_api::resolve_player_collision;
-use player_hitbox_api::{PLAYER_HEIGHT, PLAYER_RADIUS};
 use server_chunk_world_api::{ServerChunkWorld, ServerChunkWorldApi};
 use server_player_flight_api::{ServerPlayerFlightApi, ServerPlayerFlightCapabilities};
 use server_player_flight_speed_api::{ServerPlayerFlightSpeedApi, ServerPlayerFlightSpeeds};
+use server_player_hitbox_api::{
+    ServerPlayerHitboxApi, ServerPlayerHitboxSet, ServerPlayerHitboxes,
+};
 use server_player_registry_api::{
     PendingServerPlayerMoves, ServerPlayerMovementSet, ServerPlayerRegistryApi,
 };
@@ -26,6 +28,7 @@ impl<B: BlockManagerApi> ServerPlayerMovementCollisionVanillaMod<B> {
         S: ServerPlayerSpeedApi,
         F: ServerPlayerFlightApi,
         FS: ServerPlayerFlightSpeedApi,
+        HB: ServerPlayerHitboxApi,
         H: BlockShapeApi,
     >(
         bevy: &mut BevyMod,
@@ -35,11 +38,14 @@ impl<B: BlockManagerApi> ServerPlayerMovementCollisionVanillaMod<B> {
         _speed: &mut S,
         _flight: &mut F,
         _flight_speed: &mut FS,
+        _hitboxes: &mut HB,
         _shapes: &mut H,
     ) -> Self {
         bevy.app.add_systems(
             Update,
-            validate_player_movement_collision::<B>.in_set(ServerPlayerMovementSet::Validate),
+            validate_player_movement_collision::<B>
+                .in_set(ServerPlayerMovementSet::Validate)
+                .after(ServerPlayerHitboxSet),
         );
         Self(PhantomData)
     }
@@ -54,6 +60,7 @@ fn validate_player_movement_collision<B: BlockManagerApi>(
     speeds: Res<ServerPlayerSpeeds>,
     flight_capabilities: Res<ServerPlayerFlightCapabilities>,
     flight_speeds: Res<ServerPlayerFlightSpeeds>,
+    hitboxes: Res<ServerPlayerHitboxes>,
     shapes: Res<BlockShapeService>,
     mut moves: ResMut<PendingServerPlayerMoves>,
 ) {
@@ -71,11 +78,12 @@ fn validate_player_movement_collision<B: BlockManagerApi>(
             allowed_speed,
         );
         let delta = requested - movement.current_position;
+        let hitbox = hitboxes.hitbox(movement.player_id);
         movement.accepted_position = resolve_player_collision(
             movement.current_position,
             delta,
-            PLAYER_RADIUS,
-            PLAYER_HEIGHT,
+            hitbox.radius,
+            hitbox.height,
             &|position| collision_shape::<B>(&world, &shapes, movement.player_id, position),
         )
         .position;

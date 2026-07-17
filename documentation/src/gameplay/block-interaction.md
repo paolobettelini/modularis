@@ -172,7 +172,8 @@ The vanilla placement mod requires:
 - a block target with adjacent position;
 - authoritative reach;
 - resolvable world scope;
-- no visible player hitbox overlapping any AABB of the placed shape;
+- no visible player's current per-player hitbox overlapping any AABB of the
+  placed shape;
 - target block is air.
 
 It calls `place_block_for_player` and emits:

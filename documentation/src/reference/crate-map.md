@@ -323,7 +323,7 @@ Policies and implementations:
 - `server-chat-global-vanilla-mod`;
 - `server-chat-command-router-mod`;
 - `server-command-brigadier-mod`;
-- clear-chat, flight, flight-speed, kick, teleport, speed, gravity, and TPS
+- clear-chat, flight, flight-speed, kick, teleport, speed, scale, gravity, and TPS
   vanilla command mods.
 
 ## Player movement
@@ -338,6 +338,9 @@ Contracts:
 - `player-block-collision-api`;
 - `player-hitbox-api`;
 - `player-gravity-api`;
+- `player-scale-api`;
+- `client-player-gravity-map-api`;
+- `client-player-scale-map-api`;
 - `player-speed-api`;
 - `player-jump-api`;
 - `player-flight-api`;
@@ -346,6 +349,8 @@ Contracts:
 - `server-player-flight-api`;
 - `server-player-flight-speed-api`;
 - `server-player-gravity-api`;
+- `server-player-hitbox-api`;
+- `server-player-scale-api`;
 - `server-player-speed-api`.
 
 Implementations/features:
@@ -357,6 +362,10 @@ Implementations/features:
 - `client-player-spawn-mod`;
 - gravity prediction/network mods;
 - per-player server gravity state/sync mods;
+- visibility-scoped client gravity/scale maps and server scale state/sync mods;
+- optional scaled-eye-height camera policy;
+- neutral client/server hitbox state plus optional scale-to-hitbox vanilla
+  adapters;
 - local and server player speed state/sync mods;
 - client/server jump vanilla mods;
 - client sprint vanilla mod;

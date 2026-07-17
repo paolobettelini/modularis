@@ -38,14 +38,62 @@ plus optional per-player overrides.
 - `server-player-gravity-api`: per-player state and change contracts;
 - `server-player-gravity-state-mod`: neutral authoritative storage;
 - gravity network message contributors;
-- `server-player-gravity-network-sync-mod`: target-specific join/runtime synchronization;
-- `client-player-gravity-network-receive-mod`: applies server state;
+- `server-player-gravity-network-sync-mod`: visibility-scoped join/runtime synchronization;
+- `client-player-gravity-map-state-mod`: cache keyed by the subject `PlayerId`;
+- `client-player-gravity-network-receive-mod`: updates the subject cache and applies only the local subject to the prediction resource;
 - `client-player-gravity-prediction-vanilla-mod`: local force integration.
 
 Server gameplay rules query the actor's gravity rather than a global policy.
 This includes jump direction, gravity integration, reach origin, block
 placement checks, and movement validation. Server authority chooses gravity;
 client prediction applies the synchronized local value immediately.
+
+`PlayerGravityChanged` contains both `player_id` and `gravity`. This is
+important: a client can render two visible players with different up axes. A
+gravity update for a remote subject never overwrites the controlled player's
+local prediction resource. The Blocky and fallback renderers read
+`ClientPlayerGravities` by avatar ID for rotation, walk-plane detection, and
+name-label placement.
+
+## Player model scale
+
+Scale uses a parallel but independent set of contracts:
+
+- `player-scale-api` owns the controlled client's `PlayerScale`, default `1`;
+- `server-player-scale-api` owns per-player authoritative values and ordered
+  set/change events;
+- `server-player-scale-state-mod` stores state without choosing who may change
+  it;
+- the scale packet contributor adds `PlayerScaleChanged { player_id, scale }`;
+- server sync sends the subject's value only to that player and currently
+  visible viewers;
+- `client-player-scale-map-state-mod` caches values for rendered subjects;
+- `client-player-scale-network-receive-mod` updates both the map and, when the
+  subject is local, `PlayerScale`;
+- `client-player-scale-camera-vanilla-mod` applies the scaled eye height after
+  normal camera synchronization.
+
+Renderers multiply their asset-defined model scale by the synchronized player
+scale. Name-label height is scaled and gravity-relative as well.
+
+Physical dimensions remain a separate contract even though the selected
+vanilla policy links them to model scale:
+
+- `player-hitbox-api` defines `PlayerHitbox { radius, height, eye_height }`;
+- `client-player-hitbox-state-mod` owns the controlled player's neutral hitbox;
+- `client-player-hitbox-scale-vanilla-mod` derives it from `PlayerScale`;
+- `server-player-hitbox-api` exposes per-player authoritative hitboxes and
+  set/change events;
+- `server-player-hitbox-state-mod` stores those values;
+- `server-player-hitbox-scale-vanilla-mod` converts applied server scale
+  changes into hitbox changes.
+
+The FPS controller, grounded probe, sneak edge protection, server movement and
+jump validation, reach eye origin, player occupancy checks, and portal overlap
+all use the resulting dimensions. A player at scale `0.5` is therefore `0.9`
+blocks high and can fit below a one-block ceiling. A custom composition can
+omit either scale-to-hitbox adapter and install a different size policy without
+changing model replication or collision algorithms.
 
 ## Base movement speed
 
@@ -246,14 +294,15 @@ fn grant_admin_flight(
 The policy does not send packets directly. The existing sync mod observes the
 applied change.
 
-## Adding a gravity or speed policy
+## Adding a gravity, scale, or speed policy
 
-A policy mod should emit `SetServerPlayerGravity`, `SetServerPlayerSpeed`, or
-`SetServerPlayerFlightSpeed`. It should not mutate the maps or send packets
-directly. Examples include dimension defaults, random gravity on join,
-level-based ground or flight speed, temporary effects, and admin commands.
+A policy mod should emit `SetServerPlayerGravity`, `SetServerPlayerScale`,
+`SetServerPlayerSpeed`, or `SetServerPlayerFlightSpeed`. It should not mutate
+the maps or send packets directly. Examples include dimension defaults, random
+gravity on join, level-based scale or speed, temporary effects, and admin
+commands.
 
-The current client protocol synchronizes the controlled player's value. If a
-renderer needs every remote player's gravity or speed, add a separate
-visibility-scoped replication/cache contract instead of turning the local
-prediction resource into a global player map.
+Gravity and model scale have visibility-scoped subject caches because they
+change remote avatar presentation. Ground and flight speed remain local-only
+protocol state because remote rendering does not currently need them. Keep the
+controlled-player resources separate from the keyed presentation maps.

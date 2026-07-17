@@ -185,6 +185,13 @@ cauldron follows its own element layout. Element rotations are represented by
 their smallest enclosing AABB; this is conservative collision, not an oriented
 box solver.
 
+`BlockShape` precalculates the boundary edges of the complete AABB union when
+the shape is created. Coplanar subdivisions and internal contacts are removed:
+eight half-size boxes arranged as one cube still produce only the twelve outer
+edges. Consecutive collinear segments are merged. The cached result is shared
+by cheap `BlockShape` clones and can be consumed by outline renderers without
+rebuilding topology every frame.
+
 `BlockInfo::solid` remains an independent gameplay policy. Client/server
 collision ignore the shape for non-solid blocks, while selection raycasts and
 outlines can still use the geometry. A custom composition can replace only the

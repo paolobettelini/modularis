@@ -1,0 +1,20 @@
+[package]
+name = "server-player-hitbox-scale-vanilla-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerPlayerHitboxScaleVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-player-scale-api", "server-player-hitbox-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+player-hitbox-api = { path = "../player-hitbox-api" }
+server-player-hitbox-api = { path = "../server-player-hitbox-api" }
+server-player-scale-api = { path = "../server-player-scale-api" }
+tokio = { version = "1.48.0", features = ["full"] }

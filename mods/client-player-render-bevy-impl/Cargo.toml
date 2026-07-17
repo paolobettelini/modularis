@@ -11,7 +11,8 @@ provides = "client-player-render-api"
 init = [
     "bevy-mod",
     "client-camera-api",
-    "player-gravity-api",
+    "client-player-gravity-map-api",
+    "client-player-scale-map-api",
     "client-game-state-api",
     "network-protocol-mod",
 ]
@@ -23,7 +24,9 @@ bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 client-camera-api = { path = "../client-camera-api" }
 client-game-state-api = { path = "../client-game-state-api" }
+client-player-gravity-map-api = { path = "../client-player-gravity-map-api" }
 client-player-render-api = { path = "../client-player-render-api" }
+client-player-scale-map-api = { path = "../client-player-scale-map-api" }
 generated-network-messages = "0.1.0"
 player-network-message-types = { path = "../player-network-message-types" }
 player-gravity-api = { path = "../player-gravity-api" }

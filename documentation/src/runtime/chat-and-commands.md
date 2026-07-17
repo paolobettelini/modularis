@@ -163,7 +163,7 @@ the generic dispatcher.
 ## Vanilla command feature pack
 
 `server-commands-vanilla.toml` is an optional policy pack. It currently selects
-eight independent command mods:
+nine independent command mods:
 
 | Mod | Syntax | Domain intention |
 | --- | --- | --- |
@@ -173,6 +173,7 @@ eight independent command mods:
 | `server-command-kick-vanilla-mod` | `/kick <player> [reason]` | emits a generic server kick request |
 | `server-command-teleport-vanilla-mod` | `/teleport <x> <y> <z>`, `/teleport <destination>`, `/teleport <subject> <x> <y> <z>`, `/teleport <subject> <destination>` | requests a dimension-aware reposition |
 | `server-command-speed-vanilla-mod` | `/speed <amount>`, `/speed <player> <amount>` | changes the authoritative movement multiplier |
+| `server-command-scale-vanilla-mod` | `/setscale <scale>`, `/setscale <player> <scale>` | changes authoritative model scale through the scale state contract |
 | `server-command-gravity-vanilla-mod` | `/setgravity <g>`, `/setgravity <x> <y> <z>`, and both forms prefixed by a player | changes that player's gravity vector |
 | `server-command-tps-vanilla-mod` | `/tps` | reports measured and target server tick rate to the caller |
 
@@ -187,7 +188,7 @@ spaces can be used in forms such as `/teleport Player1 Player 2`.
 
 Each command queues a narrow ECS intention. Flight emits the existing
 capability change, ground and flight speed use different per-player state
-contracts, gravity emits its per-player state change, teleport emits
+contracts, gravity and scale emit their per-player state changes, teleport emits
 `RequestPlayerDimensionChange`, and kick emits `ServerKickRequested`. The TPS
 command only reads neutral tick metrics and publishes personal feedback. None
 of these command mods sends its domain packet directly.

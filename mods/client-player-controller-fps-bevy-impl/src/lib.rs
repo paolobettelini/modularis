@@ -4,13 +4,13 @@ use client_camera_api::{CameraApi, PlayerCamera};
 use client_game_state_api::{GameState, GameStateApi, InGameOverlayState};
 use client_input_api::{InputApi, PlayerInput};
 use client_player_controller_api::{
-    Grounded, PLAYER_EYE_HEIGHT, PLAYER_HEIGHT, PLAYER_RADIUS, Player, PlayerControllerApi,
-    PlayerControllerSet, PlayerMovementConfig, PlayerPlanarMovementIntent, PlayerVelocity,
-    PreviousPlayerPosition,
+    Grounded, PLAYER_EYE_HEIGHT, Player, PlayerControllerApi, PlayerControllerSet,
+    PlayerMovementConfig, PlayerPlanarMovementIntent, PlayerVelocity, PreviousPlayerPosition,
 };
 use client_player_physics_tick_api::ClientPlayerPhysicsTickApi;
 use collision_api::{CollisionApi, CollisionService};
 use player_gravity_api::{Gravity, PlayerGravityApi, project_on_gravity_plane};
+use player_hitbox_api::{PlayerHitbox, PlayerHitboxApi};
 use player_speed_api::{PlayerSpeedApi, PlayerSpeedMultiplier};
 use tokio::task::JoinHandle;
 
@@ -26,6 +26,7 @@ impl FpsPlayerControllerBevyImpl {
         I: InputApi,
         C: CameraApi,
         K: CollisionApi,
+        H: PlayerHitboxApi,
         V: PlayerGravityApi,
         M: PlayerSpeedApi,
         G: GameStateApi,
@@ -35,6 +36,7 @@ impl FpsPlayerControllerBevyImpl {
         _input: &mut I,
         _camera: &mut C,
         _collision: &mut K,
+        _hitbox: &mut H,
         _gravity: &mut V,
         _speed: &mut M,
         _game_state: &mut G,
@@ -135,6 +137,7 @@ fn collect_planar_movement_intent(
 
 fn update_grounded_probe(
     gravity: Res<Gravity>,
+    hitbox: Res<PlayerHitbox>,
     collision: Res<CollisionService>,
     mut players: Query<(&Transform, &PlayerVelocity, &mut Grounded), With<Player>>,
 ) {
@@ -148,13 +151,14 @@ fn update_grounded_probe(
         // transition an airborne player back to grounded.
         grounded.0 = grounded.0
             && !moving_away_from_ground
-            && is_grounded_at(&collision, transform.translation, direction);
+            && is_grounded_at(&collision, *hitbox, transform.translation, direction);
     }
 }
 
 fn move_player(
     time: Res<Time>,
     gravity: Res<Gravity>,
+    hitbox: Res<PlayerHitbox>,
     collision: Res<CollisionService>,
     mut player: Query<
         (
@@ -173,7 +177,7 @@ fn move_player(
     let start = transform.translation;
     previous.0 = start;
     let movement = velocity.0 * time.delta_secs();
-    let result = collision.resolve(start, movement, PLAYER_RADIUS, PLAYER_HEIGHT);
+    let result = collision.resolve(start, movement, hitbox.radius, hitbox.height);
     transform.translation = result.position;
     if result.hit_x {
         velocity.0.x = 0.0;
@@ -190,7 +194,7 @@ fn move_player(
     let moving_into_ground = gravity_direction.length_squared() > 0.0
         && movement.dot(gravity_direction) > 0.0
         && blocked_movement.dot(gravity_direction) > 0.0001;
-    let near_ground = is_grounded_at(&collision, result.position, gravity_direction);
+    let near_ground = is_grounded_at(&collision, *hitbox, result.position, gravity_direction);
     let gravity_speed = velocity.0.dot(gravity_direction);
     let moving_away_from_ground = velocity.0.dot(gravity_direction) < -GROUND_LEAVE_SPEED_EPSILON;
     let stable_near_ground = was_grounded
@@ -206,12 +210,17 @@ fn move_player(
     }
 }
 
-fn is_grounded_at(collision: &CollisionService, position: Vec3, gravity_direction: Vec3) -> bool {
+fn is_grounded_at(
+    collision: &CollisionService,
+    hitbox: PlayerHitbox,
+    position: Vec3,
+    gravity_direction: Vec3,
+) -> bool {
     gravity_direction.length_squared() > 0.0
         && collision.collides(
             position + gravity_direction * GROUND_PROBE_DISTANCE,
-            PLAYER_RADIUS,
-            PLAYER_HEIGHT,
+            hitbox.radius,
+            hitbox.height,
         )
 }
 

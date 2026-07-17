@@ -14,6 +14,7 @@ init = [
     "client-input-api",
     "client-camera-api",
     "collision-api",
+    "player-hitbox-api",
     "player-gravity-api",
     "player-speed-api",
     "client-game-state-api",
@@ -31,5 +32,6 @@ client-input-api = { path = "../client-input-api" }
 client-player-physics-tick-api = { path = "../client-player-physics-tick-api" }
 client-player-controller-api = { path = "../client-player-controller-api" }
 player-gravity-api = { path = "../player-gravity-api" }
+player-hitbox-api = { path = "../player-hitbox-api" }
 player-speed-api = { path = "../player-speed-api" }
 tokio = { version = "1.48.0", features = ["full"] }

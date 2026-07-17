@@ -238,7 +238,8 @@ The renderer:
 3. requests a Blocky model spawn;
 4. associates spawn IDs with player IDs;
 5. starts looping idle;
-6. updates transform from movement/rotation packets;
+6. updates transform from movement/rotation packets and per-subject gravity or
+   scale state;
 7. switches to walk on lateral movement;
 8. returns to idle after `0.20` seconds without lateral motion;
 9. projects player name labels into viewport space;
@@ -248,7 +249,9 @@ Movement detection removes the gravity-up component before testing lateral
 distance.
 
 Player root rotation combines gravity alignment, network yaw, and asset yaw
-offset.
+offset. Gravity is looked up by the rendered player's ID, so different avatars
+can have different up axes in the same client view. Root scale combines the
+asset's configured model scale with the server-controlled player scale.
 
 ## Name labels
 
@@ -256,7 +259,7 @@ Labels are Bevy UI text entities, not children in world space.
 
 Every frame, the renderer:
 
-- computes a world point above the avatar;
+- computes a gravity-relative, scale-aware world point above the avatar;
 - calls `world_to_viewport`;
 - updates absolute UI coordinates;
 - hides labels behind/outside the camera.

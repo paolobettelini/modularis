@@ -10,6 +10,8 @@ entry = "ClientPlayerGravityNetworkReceiveMod"
 init = [
     "bevy-mod",
     "player-gravity-api",
+    "client-player-gravity-map-api",
+    "client-session-api",
     "network-protocol-mod",
 ]
 run = []
@@ -18,6 +20,8 @@ ownership = []
 [dependencies]
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
+client-player-gravity-map-api = { path = "../client-player-gravity-map-api" }
+client-session-api = { path = "../client-session-api" }
 generated-network-messages = "0.1.0"
 network-protocol-mod = { path = "../network-protocol-mod" }
 player-gravity-api = { path = "../player-gravity-api" }

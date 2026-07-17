@@ -127,19 +127,31 @@ fn spawn_outline(
     });
     let thickness = OUTLINE_EDGE_THICKNESS;
     let expansion = style.expansion.max(0.0);
-    let mut edges = Vec::with_capacity(shape.boxes().len() * 12);
-    for bounds in shape.boxes() {
-        append_box_edges(&mut edges, bounds.min, bounds.max, expansion, thickness);
-    }
     let origin = Vec3::new(block.x as f32, block.y as f32, block.z as f32);
     let entity = commands
         .spawn((Transform::from_translation(origin), Visibility::default()))
         .with_children(|parent| {
-            for (translation, scale) in edges {
+            for edge in shape.boundary_edges() {
+                let axis_direction = (edge.end - edge.start).normalize_or_zero();
+                let start =
+                    edge.start - axis_direction * expansion + edge.expansion_direction * expansion;
+                let end =
+                    edge.end + axis_direction * expansion + edge.expansion_direction * expansion;
+                let length = end - start;
+                let mut scale = Vec3::splat(thickness);
+                let absolute = length.abs();
+                let axis = if absolute.x > 0.0 {
+                    0
+                } else if absolute.y > 0.0 {
+                    1
+                } else {
+                    2
+                };
+                scale[axis] = length[axis].abs() + thickness;
                 parent.spawn((
                     Mesh3d(mesh.clone()),
                     MeshMaterial3d(material.clone()),
-                    Transform::from_translation(translation).with_scale(scale),
+                    Transform::from_translation((start + end) * 0.5).with_scale(scale),
                     NotShadowCaster,
                     NotShadowReceiver,
                     Pickable::IGNORE,
@@ -148,43 +160,6 @@ fn spawn_outline(
         })
         .id();
     ActiveBlockOutline { entity, material }
-}
-
-fn append_box_edges(
-    edges: &mut Vec<(Vec3, Vec3)>,
-    min: Vec3,
-    max: Vec3,
-    expansion: f32,
-    thickness: f32,
-) {
-    let min = min - Vec3::splat(expansion);
-    let max = max + Vec3::splat(expansion);
-    let center = (min + max) * 0.5;
-    let size = max - min;
-    for y in [min.y, max.y] {
-        for z in [min.z, max.z] {
-            edges.push((
-                Vec3::new(center.x, y, z),
-                Vec3::new(size.x + thickness, thickness, thickness),
-            ));
-        }
-    }
-    for x in [min.x, max.x] {
-        for z in [min.z, max.z] {
-            edges.push((
-                Vec3::new(x, center.y, z),
-                Vec3::new(thickness, size.y + thickness, thickness),
-            ));
-        }
-    }
-    for x in [min.x, max.x] {
-        for y in [min.y, max.y] {
-            edges.push((
-                Vec3::new(x, y, center.z),
-                Vec3::new(thickness, thickness, size.z + thickness),
-            ));
-        }
-    }
 }
 
 fn remove_outline(

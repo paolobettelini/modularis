@@ -4,4 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+player-network-message-types = { path = "../player-network-message-types" }
 serde = { version = "1.0.228", features = ["derive"] }

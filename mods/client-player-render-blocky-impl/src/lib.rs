@@ -10,15 +10,21 @@ use client_game_state_api::{GameState, GameStateApi};
 use client_player_blocky_model_paths_api::{
     ClientPlayerBlockyModelPaths, ClientPlayerBlockyModelPathsApi,
 };
+use client_player_gravity_map_api::{
+    ClientPlayerGravities, ClientPlayerGravityMapApi, ClientPlayerGravityMapSet,
+};
 use client_player_render_api::{
     ClientPlayerRenderApi, NetworkPlayerVisual, RenderedNetworkPlayers,
+};
+use client_player_scale_map_api::{
+    ClientPlayerScaleMapApi, ClientPlayerScaleMapSet, ClientPlayerScales,
 };
 use generated_network_messages::{
     JoinAcceptedReceived, NetworkMessageSet, PlayerJoinedReceived, PlayerLeftReceived,
     PlayerMovedReceived, PlayerRotationChangedReceived,
 };
 use network_protocol_mod::NetworkProtocolMod;
-use player_gravity_api::{Gravity, PlayerGravityApi};
+use player_gravity_api::Gravity;
 use player_network_message_types::{NetworkPlayer, PlayerId};
 use std::collections::HashMap;
 use tokio::task::JoinHandle;
@@ -31,7 +37,8 @@ pub struct ClientPlayerRenderBlockyImpl;
 impl ClientPlayerRenderBlockyImpl {
     pub fn init<
         C: CameraApi,
-        V: PlayerGravityApi,
+        V: ClientPlayerGravityMapApi,
+        S: ClientPlayerScaleMapApi,
         G: GameStateApi,
         M: BlockyModelApi,
         A: BlockyAnimationApi,
@@ -39,7 +46,8 @@ impl ClientPlayerRenderBlockyImpl {
     >(
         bevy: &mut BevyMod,
         _camera: &mut C,
-        _gravity: &mut V,
+        _gravity_map: &mut V,
+        _scale_map: &mut S,
         _game_state: &mut G,
         _protocol: &mut NetworkProtocolMod,
         _models: &mut M,
@@ -57,6 +65,7 @@ impl ClientPlayerRenderBlockyImpl {
                     attach_spawned_players,
                     move_players,
                     rotate_players,
+                    sync_player_attributes,
                     settle_idle_players,
                     project_labels_to_viewport,
                     remove_players,
@@ -64,6 +73,8 @@ impl ClientPlayerRenderBlockyImpl {
                 )
                     .chain()
                     .after(NetworkMessageSet::DispatchPackets)
+                    .after(ClientPlayerGravityMapSet)
+                    .after(ClientPlayerScaleMapSet)
                     .run_if(in_state(GameState::InGame)),
             )
             .add_systems(OnExit(GameState::InGame), clear_rendered_players);
@@ -108,7 +119,8 @@ fn request_initial_players(
     mut pending: ResMut<PendingBlockyPlayerSpawns>,
     rendered: Res<RenderedNetworkPlayers>,
     paths: Res<ClientPlayerBlockyModelPaths>,
-    gravity: Res<Gravity>,
+    gravities: Res<ClientPlayerGravities>,
+    scales: Res<ClientPlayerScales>,
     time: Res<Time>,
     mut spawns: MessageWriter<SpawnBlockyModel>,
 ) {
@@ -122,7 +134,8 @@ fn request_initial_players(
                 &mut pending,
                 &rendered,
                 &paths,
-                *gravity,
+                gravities.gravity(player.id),
+                scales.scale(player.id),
                 time.elapsed_secs_f64(),
                 &mut spawns,
             );
@@ -135,7 +148,8 @@ fn request_joined_players(
     mut pending: ResMut<PendingBlockyPlayerSpawns>,
     rendered: Res<RenderedNetworkPlayers>,
     paths: Res<ClientPlayerBlockyModelPaths>,
-    gravity: Res<Gravity>,
+    gravities: Res<ClientPlayerGravities>,
+    scales: Res<ClientPlayerScales>,
     time: Res<Time>,
     mut spawns: MessageWriter<SpawnBlockyModel>,
 ) {
@@ -145,7 +159,8 @@ fn request_joined_players(
             &mut pending,
             &rendered,
             &paths,
-            *gravity,
+            gravities.gravity(joined.0.player.id),
+            scales.scale(joined.0.player.id),
             time.elapsed_secs_f64(),
             &mut spawns,
         );
@@ -158,6 +173,7 @@ fn request_player_spawn(
     rendered: &RenderedNetworkPlayers,
     paths: &ClientPlayerBlockyModelPaths,
     gravity: Gravity,
+    player_scale: f32,
     now: f64,
     spawns: &mut MessageWriter<SpawnBlockyModel>,
 ) {
@@ -184,7 +200,7 @@ fn request_player_spawn(
             rotation: avatar_rotation(gravity, player.yaw, paths.yaw_offset_radians),
             ..default()
         },
-        scale: paths.model_scale,
+        scale: paths.model_scale * player_scale,
         primitive_scale: paths.primitive_scale,
     });
 }
@@ -195,8 +211,11 @@ fn attach_spawned_players(
     mut pending: ResMut<PendingBlockyPlayerSpawns>,
     mut rendered: ResMut<RenderedNetworkPlayers>,
     paths: Res<ClientPlayerBlockyModelPaths>,
+    gravities: Res<ClientPlayerGravities>,
+    scales: Res<ClientPlayerScales>,
     roots: Query<&BlockyModelRoot>,
     nodes: Query<&BlockyModelNode>,
+    mut transforms: Query<&mut Transform>,
     mut animations: MessageWriter<PlayBlockyAnimation>,
 ) {
     for spawned in spawned.read() {
@@ -208,6 +227,16 @@ fn attach_spawned_players(
         };
         pending.by_player_id.remove(&pending_spawn.player.id);
         let position = Vec3::from_array(pending_spawn.player.position);
+        if let Ok(mut transform) = transforms.get_mut(spawned.root) {
+            transform.translation = position;
+            transform.rotation = avatar_rotation(
+                gravities.gravity(pending_spawn.player.id),
+                pending_spawn.player.yaw,
+                paths.yaw_offset_radians,
+            );
+            transform.scale =
+                Vec3::splat(paths.model_scale * scales.scale(pending_spawn.player.id));
+        }
         commands
             .entity(spawned.root)
             .insert(BlockyNetworkPlayerAnimation {
@@ -247,6 +276,7 @@ fn attach_spawned_players(
                 avatar: spawned.root,
                 label,
                 last_seen_at: pending_spawn.last_seen_at,
+                yaw: pending_spawn.player.yaw,
             },
         );
         animations.write(PlayBlockyAnimation {
@@ -292,7 +322,7 @@ fn move_players(
     mut rendered: ResMut<RenderedNetworkPlayers>,
     mut transforms: Query<&mut Transform>,
     time: Res<Time>,
-    gravity: Res<Gravity>,
+    gravities: Res<ClientPlayerGravities>,
     paths: Res<ClientPlayerBlockyModelPaths>,
     mut animation_states: Query<&mut BlockyNetworkPlayerAnimation>,
     mut animations: MessageWriter<PlayBlockyAnimation>,
@@ -312,10 +342,12 @@ fn move_players(
             continue;
         };
         visual.last_seen_at = now;
+        visual.yaw = moved.0.yaw;
+        let gravity = gravities.gravity(moved.0.player_id);
         let position = Vec3::from_array(moved.0.position);
         if let Ok(mut avatar) = transforms.get_mut(visual.avatar) {
             avatar.translation = position;
-            avatar.rotation = avatar_rotation(*gravity, moved.0.yaw, paths.yaw_offset_radians);
+            avatar.rotation = avatar_rotation(gravity, moved.0.yaw, paths.yaw_offset_radians);
         }
         if let Ok(mut state) = animation_states.get_mut(visual.avatar) {
             let delta = position - state.last_position;
@@ -404,7 +436,7 @@ fn rotate_players(
     mut rendered: ResMut<RenderedNetworkPlayers>,
     mut transforms: Query<&mut Transform>,
     time: Res<Time>,
-    gravity: Res<Gravity>,
+    gravities: Res<ClientPlayerGravities>,
     paths: Res<ClientPlayerBlockyModelPaths>,
 ) {
     for rotated in rotated.read() {
@@ -420,15 +452,44 @@ fn rotate_players(
             continue;
         };
         visual.last_seen_at = time.elapsed_secs_f64();
+        visual.yaw = rotated.0.yaw;
         if let Ok(mut avatar) = transforms.get_mut(visual.avatar) {
-            avatar.rotation = avatar_rotation(*gravity, rotated.0.yaw, paths.yaw_offset_radians);
+            avatar.rotation = avatar_rotation(
+                gravities.gravity(rotated.0.player_id),
+                rotated.0.yaw,
+                paths.yaw_offset_radians,
+            );
         }
+    }
+}
+
+fn sync_player_attributes(
+    rendered: Res<RenderedNetworkPlayers>,
+    gravities: Res<ClientPlayerGravities>,
+    scales: Res<ClientPlayerScales>,
+    paths: Res<ClientPlayerBlockyModelPaths>,
+    mut transforms: Query<&mut Transform>,
+) {
+    if !gravities.is_changed() && !scales.is_changed() {
+        return;
+    }
+    for (player_id, visual) in &rendered.entities {
+        let Ok(mut avatar) = transforms.get_mut(visual.avatar) else {
+            continue;
+        };
+        avatar.rotation = avatar_rotation(
+            gravities.gravity(*player_id),
+            visual.yaw,
+            paths.yaw_offset_radians,
+        );
+        avatar.scale = Vec3::splat(paths.model_scale * scales.scale(*player_id));
     }
 }
 
 fn project_labels_to_viewport(
     camera: Query<(&Camera, &GlobalTransform), With<PlayerCamera>>,
-    gravity: Res<Gravity>,
+    gravities: Res<ClientPlayerGravities>,
+    scales: Res<ClientPlayerScales>,
     rendered: Res<RenderedNetworkPlayers>,
     avatars: Query<&GlobalTransform>,
     mut labels: Query<(&mut Node, &mut Visibility)>,
@@ -436,13 +497,14 @@ fn project_labels_to_viewport(
     let Ok((camera, camera_transform)) = camera.single() else {
         return;
     };
-    for visual in rendered.entities.values() {
+    for (player_id, visual) in &rendered.entities {
         let (Ok(avatar), Ok((mut node, mut visibility))) =
             (avatars.get(visual.avatar), labels.get_mut(visual.label))
         else {
             continue;
         };
-        let world_position = avatar.translation() + gravity.up() * 2.0;
+        let world_position = avatar.translation()
+            + gravities.gravity(*player_id).up() * 2.0 * scales.scale(*player_id);
         match camera.world_to_viewport(camera_transform, world_position) {
             Ok(viewport) => {
                 node.left = px(viewport.x);

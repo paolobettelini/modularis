@@ -132,7 +132,14 @@ It also computes all viewers of one subject.
 The active `server-player-visibility-world-instance-mod` compares the world
 scope resolved for viewer and subject. Players in different dimensions or
 provider-backed instances do not receive each other's join, movement, rotation,
-or leave updates.
+leave, gravity, or model-scale updates.
+
+Gravity and scale synchronization are subject-oriented. On join, the new
+client receives attributes for itself and every subject it may currently see;
+existing viewers receive the joining subject's attributes. Later changes go to
+the subject plus `viewers_of(subject)`. This avoids leaking per-player state
+across dimensions and prevents one player's gravity from rotating every avatar
+on another client.
 
 ## Movement synchronization
 

@@ -2,15 +2,21 @@ use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use client_camera_api::{CameraApi, PlayerCamera};
 use client_game_state_api::{GameState, GameStateApi};
+use client_player_gravity_map_api::{
+    ClientPlayerGravities, ClientPlayerGravityMapApi, ClientPlayerGravityMapSet,
+};
 use client_player_render_api::{
     ClientPlayerRenderApi, NetworkPlayerVisual, RenderedNetworkPlayers,
+};
+use client_player_scale_map_api::{
+    ClientPlayerScaleMapApi, ClientPlayerScaleMapSet, ClientPlayerScales,
 };
 use generated_network_messages::{
     JoinAcceptedReceived, NetworkMessageSet, PlayerJoinedReceived, PlayerLeftReceived,
     PlayerMovedReceived, PlayerRotationChangedReceived,
 };
 use network_protocol_mod::NetworkProtocolMod;
-use player_gravity_api::{Gravity, PlayerGravityApi};
+use player_gravity_api::Gravity;
 use player_network_message_types::NetworkPlayer;
 use tokio::task::JoinHandle;
 
@@ -23,10 +29,16 @@ struct PlayerVisualAssets {
 pub struct ClientPlayerRenderBevyImpl;
 
 impl ClientPlayerRenderBevyImpl {
-    pub fn init<C: CameraApi, V: PlayerGravityApi, G: GameStateApi>(
+    pub fn init<
+        C: CameraApi,
+        V: ClientPlayerGravityMapApi,
+        S: ClientPlayerScaleMapApi,
+        G: GameStateApi,
+    >(
         bevy: &mut BevyMod,
         _camera: &mut C,
-        _gravity: &mut V,
+        _gravity_map: &mut V,
+        _scale_map: &mut S,
         _game_state: &mut G,
         _protocol: &mut NetworkProtocolMod,
     ) -> Self {
@@ -40,12 +52,15 @@ impl ClientPlayerRenderBevyImpl {
                     render_joined_players,
                     move_players,
                     rotate_players,
+                    sync_player_attributes,
                     project_labels_to_viewport,
                     remove_players,
                     remove_stale_players,
                 )
                     .chain()
                     .after(NetworkMessageSet::DispatchPackets)
+                    .after(ClientPlayerGravityMapSet)
+                    .after(ClientPlayerScaleMapSet)
                     .run_if(in_state(GameState::InGame)),
             )
             .add_systems(OnExit(GameState::InGame), clear_rendered_players);
@@ -80,7 +95,8 @@ fn render_initial_players(
     mut accepted: MessageReader<JoinAcceptedReceived>,
     mut rendered: ResMut<RenderedNetworkPlayers>,
     time: Res<Time>,
-    gravity: Res<Gravity>,
+    gravities: Res<ClientPlayerGravities>,
+    scales: Res<ClientPlayerScales>,
 ) {
     let Some(assets) = assets else {
         return;
@@ -96,7 +112,8 @@ fn render_initial_players(
                 &mut rendered,
                 player,
                 time.elapsed_secs_f64(),
-                *gravity,
+                gravities.gravity(player.id),
+                scales.scale(player.id),
             );
         }
     }
@@ -108,7 +125,8 @@ fn render_joined_players(
     mut joined: MessageReader<PlayerJoinedReceived>,
     mut rendered: ResMut<RenderedNetworkPlayers>,
     time: Res<Time>,
-    gravity: Res<Gravity>,
+    gravities: Res<ClientPlayerGravities>,
+    scales: Res<ClientPlayerScales>,
 ) {
     let Some(assets) = assets else {
         return;
@@ -120,7 +138,8 @@ fn render_joined_players(
             &mut rendered,
             &joined.0.player,
             time.elapsed_secs_f64(),
-            *gravity,
+            gravities.gravity(joined.0.player.id),
+            scales.scale(joined.0.player.id),
         );
     }
 }
@@ -130,17 +149,18 @@ fn move_players(
     mut rendered: ResMut<RenderedNetworkPlayers>,
     mut transforms: Query<&mut Transform>,
     time: Res<Time>,
-    gravity: Res<Gravity>,
+    gravities: Res<ClientPlayerGravities>,
 ) {
     for moved in moved.read() {
         let Some(visual) = rendered.entities.get_mut(&moved.0.player_id) else {
             continue;
         };
         visual.last_seen_at = time.elapsed_secs_f64();
+        visual.yaw = moved.0.yaw;
         let position = Vec3::from_array(moved.0.position);
         if let Ok(mut avatar) = transforms.get_mut(visual.avatar) {
             avatar.translation = position;
-            avatar.rotation = avatar_rotation(*gravity, moved.0.yaw);
+            avatar.rotation = avatar_rotation(gravities.gravity(moved.0.player_id), moved.0.yaw);
         }
     }
 }
@@ -150,22 +170,43 @@ fn rotate_players(
     mut rendered: ResMut<RenderedNetworkPlayers>,
     mut transforms: Query<&mut Transform>,
     time: Res<Time>,
-    gravity: Res<Gravity>,
+    gravities: Res<ClientPlayerGravities>,
 ) {
     for rotated in rotated.read() {
         let Some(visual) = rendered.entities.get_mut(&rotated.0.player_id) else {
             continue;
         };
         visual.last_seen_at = time.elapsed_secs_f64();
+        visual.yaw = rotated.0.yaw;
         if let Ok(mut avatar) = transforms.get_mut(visual.avatar) {
-            avatar.rotation = avatar_rotation(*gravity, rotated.0.yaw);
+            avatar.rotation =
+                avatar_rotation(gravities.gravity(rotated.0.player_id), rotated.0.yaw);
         }
+    }
+}
+
+fn sync_player_attributes(
+    rendered: Res<RenderedNetworkPlayers>,
+    gravities: Res<ClientPlayerGravities>,
+    scales: Res<ClientPlayerScales>,
+    mut transforms: Query<&mut Transform>,
+) {
+    if !gravities.is_changed() && !scales.is_changed() {
+        return;
+    }
+    for (player_id, visual) in &rendered.entities {
+        let Ok(mut avatar) = transforms.get_mut(visual.avatar) else {
+            continue;
+        };
+        avatar.rotation = avatar_rotation(gravities.gravity(*player_id), visual.yaw);
+        avatar.scale = Vec3::splat(scales.scale(*player_id));
     }
 }
 
 fn project_labels_to_viewport(
     camera: Query<(&Camera, &GlobalTransform), With<PlayerCamera>>,
-    gravity: Res<Gravity>,
+    gravities: Res<ClientPlayerGravities>,
+    scales: Res<ClientPlayerScales>,
     rendered: Res<RenderedNetworkPlayers>,
     avatars: Query<&GlobalTransform>,
     mut labels: Query<(&mut Node, &mut Visibility)>,
@@ -173,13 +214,14 @@ fn project_labels_to_viewport(
     let Ok((camera, camera_transform)) = camera.single() else {
         return;
     };
-    for visual in rendered.entities.values() {
+    for (player_id, visual) in &rendered.entities {
         let (Ok(avatar), Ok((mut node, mut visibility))) =
             (avatars.get(visual.avatar), labels.get_mut(visual.label))
         else {
             continue;
         };
-        let world_position = avatar.translation() + gravity.up() * 2.0;
+        let world_position = avatar.translation()
+            + gravities.gravity(*player_id).up() * 2.0 * scales.scale(*player_id);
         match camera.world_to_viewport(camera_transform, world_position) {
             Ok(viewport) => {
                 node.left = px(viewport.x);
@@ -234,6 +276,7 @@ fn spawn_player(
     player: &NetworkPlayer,
     now: f64,
     gravity: Gravity,
+    player_scale: f32,
 ) {
     if rendered.entities.contains_key(&player.id) {
         return;
@@ -244,6 +287,7 @@ fn spawn_player(
             Transform {
                 translation: position,
                 rotation: avatar_rotation(gravity, player.yaw),
+                scale: Vec3::splat(player_scale),
                 ..default()
             },
             Visibility::Inherited,
@@ -286,6 +330,7 @@ fn spawn_player(
             avatar,
             label,
             last_seen_at: now,
+            yaw: player.yaw,
         },
     );
 }
