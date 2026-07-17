@@ -292,6 +292,12 @@ local AABB. A stair therefore becomes a union of boxes, while an anvil or
 cauldron follows its own element layout. Element rotations are represented by
 their smallest enclosing AABB; this is conservative collision, not an oriented
 box solver.</p>
+<p><code>BlockShape</code> precalculates the boundary edges of the complete AABB union when
+the shape is created. Coplanar subdivisions and internal contacts are removed:
+eight half-size boxes arranged as one cube still produce only the twelve outer
+edges. Consecutive collinear segments are merged. The cached result is shared
+by cheap <code>BlockShape</code> clones and can be consumed by outline renderers without
+rebuilding topology every frame.</p>
 <p><code>BlockInfo::solid</code> remains an independent gameplay policy. Client/server
 collision ignore the shape for non-solid blocks, while selection raycasts and
 outlines can still use the geometry. A custom composition can replace only the

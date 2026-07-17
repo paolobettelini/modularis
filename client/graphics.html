@@ -275,10 +275,12 @@ light. Removing it keeps directional lighting but disables shadows.</p>
 <p>The pipeline is:</p>
 <pre><code class="language-text">Collect -&gt; Apply -&gt; Draw
 </code></pre>
-<p>The Bevy provider creates thin, unlit edge meshes around every local AABB in
-<code>shape</code>. Full cubes use twelve edges; stairs, anvils, cauldrons, and other
-element models follow their box union. It does not create a screen-space
-cursor; the crosshair remains owned entirely by <code>client-crosshair-bevy-mod</code>.</p>
+<p>The Bevy provider creates thin, unlit edge meshes around the external boundary
+of the local AABB union. Full cubes use twelve edges; stairs, anvils,
+cauldrons, and other element models follow their box union. It consumes the
+precalculated external boundary, so internal contacts and coplanar subdivisions
+are not drawn. It does not create a screen-space cursor; the crosshair remains
+owned entirely by <code>client-crosshair-bevy-mod</code>.</p>
 <p>The looked-block vanilla mod performs a reach-limited shape raycast and owns
 the key <code>vanilla:looked-block</code>.</p>
 <p>The current client composition selects the renderer in <code>client.toml</code> and the

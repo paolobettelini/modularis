@@ -199,8 +199,11 @@ should differ from their visual model;</li>
 <h2 id="movement-and-authority"><a class="header" href="#movement-and-authority">Movement and authority</a></h2>
 <p>Current limits:</p>
 <ul>
-<li>local prediction exposes one controlled-player gravity resource, while server
-authority is per player;</li>
+<li>local prediction exposes one controlled-player gravity and scale resource,
+while visibility-scoped client maps retain the gravity and visual scale of
+remote subjects;</li>
+<li>the selected vanilla policy scales hitboxes uniformly with model scale, but
+the collision volume is still an axis-aligned radius/height box;</li>
 <li>server validates displacement, collision, speed, and flight limits but does
 not simulate full velocity;</li>
 <li>sprint state is not explicitly validated server-side;</li>

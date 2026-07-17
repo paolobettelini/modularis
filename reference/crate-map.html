@@ -450,7 +450,7 @@ sync bridges;</li>
 <li><code>server-chat-global-vanilla-mod</code>;</li>
 <li><code>server-chat-command-router-mod</code>;</li>
 <li><code>server-command-brigadier-mod</code>;</li>
-<li>clear-chat, flight, flight-speed, kick, teleport, speed, gravity, and TPS
+<li>clear-chat, flight, flight-speed, kick, teleport, speed, scale, gravity, and TPS
 vanilla command mods.</li>
 </ul>
 <h2 id="player-movement"><a class="header" href="#player-movement">Player movement</a></h2>
@@ -464,6 +464,9 @@ vanilla command mods.</li>
 <li><code>player-block-collision-api</code>;</li>
 <li><code>player-hitbox-api</code>;</li>
 <li><code>player-gravity-api</code>;</li>
+<li><code>player-scale-api</code>;</li>
+<li><code>client-player-gravity-map-api</code>;</li>
+<li><code>client-player-scale-map-api</code>;</li>
 <li><code>player-speed-api</code>;</li>
 <li><code>player-jump-api</code>;</li>
 <li><code>player-flight-api</code>;</li>
@@ -472,6 +475,8 @@ vanilla command mods.</li>
 <li><code>server-player-flight-api</code>;</li>
 <li><code>server-player-flight-speed-api</code>;</li>
 <li><code>server-player-gravity-api</code>;</li>
+<li><code>server-player-hitbox-api</code>;</li>
+<li><code>server-player-scale-api</code>;</li>
 <li><code>server-player-speed-api</code>.</li>
 </ul>
 <p>Implementations/features:</p>
@@ -483,6 +488,10 @@ vanilla command mods.</li>
 <li><code>client-player-spawn-mod</code>;</li>
 <li>gravity prediction/network mods;</li>
 <li>per-player server gravity state/sync mods;</li>
+<li>visibility-scoped client gravity/scale maps and server scale state/sync mods;</li>
+<li>optional scaled-eye-height camera policy;</li>
+<li>neutral client/server hitbox state plus optional scale-to-hitbox vanilla
+adapters;</li>
 <li>local and server player speed state/sync mods;</li>
 <li>client/server jump vanilla mods;</li>
 <li>client sprint vanilla mod;</li>

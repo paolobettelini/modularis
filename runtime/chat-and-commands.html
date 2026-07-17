@@ -281,7 +281,7 @@ Permissions should be another rule/mod in that stage rather than hardcoded in
 the generic dispatcher.</p>
 <h2 id="vanilla-command-feature-pack"><a class="header" href="#vanilla-command-feature-pack">Vanilla command feature pack</a></h2>
 <p><code>server-commands-vanilla.toml</code> is an optional policy pack. It currently selects
-eight independent command mods:</p>
+nine independent command mods:</p>
 <table><thead><tr><th>Mod</th><th>Syntax</th><th>Domain intention</th></tr></thead><tbody>
 <tr><td><code>server-command-clear-vanilla-mod</code></td><td><code>/clear</code></td><td>requests clearing the caller's client chat log</td></tr>
 <tr><td><code>server-command-flight-vanilla-mod</code></td><td><code>/flight [player]</code></td><td>changes flight capability</td></tr>
@@ -289,6 +289,7 @@ eight independent command mods:</p>
 <tr><td><code>server-command-kick-vanilla-mod</code></td><td><code>/kick &lt;player&gt; [reason]</code></td><td>emits a generic server kick request</td></tr>
 <tr><td><code>server-command-teleport-vanilla-mod</code></td><td><code>/teleport &lt;x&gt; &lt;y&gt; &lt;z&gt;</code>, <code>/teleport &lt;destination&gt;</code>, <code>/teleport &lt;subject&gt; &lt;x&gt; &lt;y&gt; &lt;z&gt;</code>, <code>/teleport &lt;subject&gt; &lt;destination&gt;</code></td><td>requests a dimension-aware reposition</td></tr>
 <tr><td><code>server-command-speed-vanilla-mod</code></td><td><code>/speed &lt;amount&gt;</code>, <code>/speed &lt;player&gt; &lt;amount&gt;</code></td><td>changes the authoritative movement multiplier</td></tr>
+<tr><td><code>server-command-scale-vanilla-mod</code></td><td><code>/setscale &lt;scale&gt;</code>, <code>/setscale &lt;player&gt; &lt;scale&gt;</code></td><td>changes authoritative model scale through the scale state contract</td></tr>
 <tr><td><code>server-command-gravity-vanilla-mod</code></td><td><code>/setgravity &lt;g&gt;</code>, <code>/setgravity &lt;x&gt; &lt;y&gt; &lt;z&gt;</code>, and both forms prefixed by a player</td><td>changes that player's gravity vector</td></tr>
 <tr><td><code>server-command-tps-vanilla-mod</code></td><td><code>/tps</code></td><td>reports measured and target server tick rate to the caller</td></tr>
 </tbody></table>
@@ -301,7 +302,7 @@ case-insensitively. The longest matching name prefix wins, so names containing
 spaces can be used in forms such as <code>/teleport Player1 Player 2</code>.</p>
 <p>Each command queues a narrow ECS intention. Flight emits the existing
 capability change, ground and flight speed use different per-player state
-contracts, gravity emits its per-player state change, teleport emits
+contracts, gravity and scale emit their per-player state changes, teleport emits
 <code>RequestPlayerDimensionChange</code>, and kick emits <code>ServerKickRequested</code>. The TPS
 command only reads neutral tick metrics and publishes personal feedback. None
 of these command mods sends its domain packet directly.</p>

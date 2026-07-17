@@ -242,7 +242,7 @@ dimensions or instances.</p>
 <p>The vanilla travel mod runs after authoritative movement apply. It:</p>
 <ol>
 <li>resolves the player's current world scope;</li>
-<li>finds an active portal intersecting the player hitbox;</li>
+<li>finds an active portal intersecting that player's current scaled hitbox;</li>
 <li>checks a cooldown;</li>
 <li>emits <code>RequestPlayerDimensionChange</code>;</li>
 <li>remembers enough information to create a return portal.</li>

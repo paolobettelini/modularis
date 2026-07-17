@@ -176,14 +176,58 @@ plus optional per-player overrides.</p>
 <li><code>server-player-gravity-api</code>: per-player state and change contracts;</li>
 <li><code>server-player-gravity-state-mod</code>: neutral authoritative storage;</li>
 <li>gravity network message contributors;</li>
-<li><code>server-player-gravity-network-sync-mod</code>: target-specific join/runtime synchronization;</li>
-<li><code>client-player-gravity-network-receive-mod</code>: applies server state;</li>
+<li><code>server-player-gravity-network-sync-mod</code>: visibility-scoped join/runtime synchronization;</li>
+<li><code>client-player-gravity-map-state-mod</code>: cache keyed by the subject <code>PlayerId</code>;</li>
+<li><code>client-player-gravity-network-receive-mod</code>: updates the subject cache and applies only the local subject to the prediction resource;</li>
 <li><code>client-player-gravity-prediction-vanilla-mod</code>: local force integration.</li>
 </ul>
 <p>Server gameplay rules query the actor's gravity rather than a global policy.
 This includes jump direction, gravity integration, reach origin, block
 placement checks, and movement validation. Server authority chooses gravity;
 client prediction applies the synchronized local value immediately.</p>
+<p><code>PlayerGravityChanged</code> contains both <code>player_id</code> and <code>gravity</code>. This is
+important: a client can render two visible players with different up axes. A
+gravity update for a remote subject never overwrites the controlled player's
+local prediction resource. The Blocky and fallback renderers read
+<code>ClientPlayerGravities</code> by avatar ID for rotation, walk-plane detection, and
+name-label placement.</p>
+<h2 id="player-model-scale"><a class="header" href="#player-model-scale">Player model scale</a></h2>
+<p>Scale uses a parallel but independent set of contracts:</p>
+<ul>
+<li><code>player-scale-api</code> owns the controlled client's <code>PlayerScale</code>, default <code>1</code>;</li>
+<li><code>server-player-scale-api</code> owns per-player authoritative values and ordered
+set/change events;</li>
+<li><code>server-player-scale-state-mod</code> stores state without choosing who may change
+it;</li>
+<li>the scale packet contributor adds <code>PlayerScaleChanged { player_id, scale }</code>;</li>
+<li>server sync sends the subject's value only to that player and currently
+visible viewers;</li>
+<li><code>client-player-scale-map-state-mod</code> caches values for rendered subjects;</li>
+<li><code>client-player-scale-network-receive-mod</code> updates both the map and, when the
+subject is local, <code>PlayerScale</code>;</li>
+<li><code>client-player-scale-camera-vanilla-mod</code> applies the scaled eye height after
+normal camera synchronization.</li>
+</ul>
+<p>Renderers multiply their asset-defined model scale by the synchronized player
+scale. Name-label height is scaled and gravity-relative as well.</p>
+<p>Physical dimensions remain a separate contract even though the selected
+vanilla policy links them to model scale:</p>
+<ul>
+<li><code>player-hitbox-api</code> defines <code>PlayerHitbox { radius, height, eye_height }</code>;</li>
+<li><code>client-player-hitbox-state-mod</code> owns the controlled player's neutral hitbox;</li>
+<li><code>client-player-hitbox-scale-vanilla-mod</code> derives it from <code>PlayerScale</code>;</li>
+<li><code>server-player-hitbox-api</code> exposes per-player authoritative hitboxes and
+set/change events;</li>
+<li><code>server-player-hitbox-state-mod</code> stores those values;</li>
+<li><code>server-player-hitbox-scale-vanilla-mod</code> converts applied server scale
+changes into hitbox changes.</li>
+</ul>
+<p>The FPS controller, grounded probe, sneak edge protection, server movement and
+jump validation, reach eye origin, player occupancy checks, and portal overlap
+all use the resulting dimensions. A player at scale <code>0.5</code> is therefore <code>0.9</code>
+blocks high and can fit below a one-block ceiling. A custom composition can
+omit either scale-to-hitbox adapter and install a different size policy without
+changing model replication or collision algorithms.</p>
 <h2 id="base-movement-speed"><a class="header" href="#base-movement-speed">Base movement speed</a></h2>
 <p><code>player-speed-api</code> defines the local <code>PlayerSpeedMultiplier</code>; <code>1</code> is normal
 base speed. The FPS controller applies it before optional movement modifiers
@@ -349,15 +393,16 @@ can remain enabled.</p>
 </span></code></pre></pre>
 <p>The policy does not send packets directly. The existing sync mod observes the
 applied change.</p>
-<h2 id="adding-a-gravity-or-speed-policy"><a class="header" href="#adding-a-gravity-or-speed-policy">Adding a gravity or speed policy</a></h2>
-<p>A policy mod should emit <code>SetServerPlayerGravity</code>, <code>SetServerPlayerSpeed</code>, or
-<code>SetServerPlayerFlightSpeed</code>. It should not mutate the maps or send packets
-directly. Examples include dimension defaults, random gravity on join,
-level-based ground or flight speed, temporary effects, and admin commands.</p>
-<p>The current client protocol synchronizes the controlled player's value. If a
-renderer needs every remote player's gravity or speed, add a separate
-visibility-scoped replication/cache contract instead of turning the local
-prediction resource into a global player map.</p>
+<h2 id="adding-a-gravity-scale-or-speed-policy"><a class="header" href="#adding-a-gravity-scale-or-speed-policy">Adding a gravity, scale, or speed policy</a></h2>
+<p>A policy mod should emit <code>SetServerPlayerGravity</code>, <code>SetServerPlayerScale</code>,
+<code>SetServerPlayerSpeed</code>, or <code>SetServerPlayerFlightSpeed</code>. It should not mutate
+the maps or send packets directly. Examples include dimension defaults, random
+gravity on join, level-based scale or speed, temporary effects, and admin
+commands.</p>
+<p>Gravity and model scale have visibility-scoped subject caches because they
+change remote avatar presentation. Ground and flight speed remain local-only
+protocol state because remote rendering does not currently need them. Keep the
+controlled-player resources separate from the keyed presentation maps.</p>
 
                     </main>
 

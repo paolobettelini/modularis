@@ -2029,7 +2029,13 @@ available;</li>
 <p>The active <code>server-player-visibility-world-instance-mod</code> compares the world
 scope resolved for viewer and subject. Players in different dimensions or
 provider-backed instances do not receive each other's join, movement, rotation,
-or leave updates.</p>
+leave, gravity, or model-scale updates.</p>
+<p>Gravity and scale synchronization are subject-oriented. On join, the new
+client receives attributes for itself and every subject it may currently see;
+existing viewers receive the joining subject's attributes. Later changes go to
+the subject plus <code>viewers_of(subject)</code>. This avoids leaking per-player state
+across dimensions and prevents one player's gravity from rotating every avatar
+on another client.</p>
 <h2 id="movement-synchronization"><a class="header" href="#movement-synchronization">Movement synchronization</a></h2>
 <p>Movement packets enter:</p>
 <pre><code class="language-text">ServerPlayerMovementSet::Receive
@@ -2213,7 +2219,7 @@ Permissions should be another rule/mod in that stage rather than hardcoded in
 the generic dispatcher.</p>
 <h2 id="vanilla-command-feature-pack"><a class="header" href="#vanilla-command-feature-pack">Vanilla command feature pack</a></h2>
 <p><code>server-commands-vanilla.toml</code> is an optional policy pack. It currently selects
-eight independent command mods:</p>
+nine independent command mods:</p>
 <table><thead><tr><th>Mod</th><th>Syntax</th><th>Domain intention</th></tr></thead><tbody>
 <tr><td><code>server-command-clear-vanilla-mod</code></td><td><code>/clear</code></td><td>requests clearing the caller's client chat log</td></tr>
 <tr><td><code>server-command-flight-vanilla-mod</code></td><td><code>/flight [player]</code></td><td>changes flight capability</td></tr>
@@ -2221,6 +2227,7 @@ eight independent command mods:</p>
 <tr><td><code>server-command-kick-vanilla-mod</code></td><td><code>/kick &lt;player&gt; [reason]</code></td><td>emits a generic server kick request</td></tr>
 <tr><td><code>server-command-teleport-vanilla-mod</code></td><td><code>/teleport &lt;x&gt; &lt;y&gt; &lt;z&gt;</code>, <code>/teleport &lt;destination&gt;</code>, <code>/teleport &lt;subject&gt; &lt;x&gt; &lt;y&gt; &lt;z&gt;</code>, <code>/teleport &lt;subject&gt; &lt;destination&gt;</code></td><td>requests a dimension-aware reposition</td></tr>
 <tr><td><code>server-command-speed-vanilla-mod</code></td><td><code>/speed &lt;amount&gt;</code>, <code>/speed &lt;player&gt; &lt;amount&gt;</code></td><td>changes the authoritative movement multiplier</td></tr>
+<tr><td><code>server-command-scale-vanilla-mod</code></td><td><code>/setscale &lt;scale&gt;</code>, <code>/setscale &lt;player&gt; &lt;scale&gt;</code></td><td>changes authoritative model scale through the scale state contract</td></tr>
 <tr><td><code>server-command-gravity-vanilla-mod</code></td><td><code>/setgravity &lt;g&gt;</code>, <code>/setgravity &lt;x&gt; &lt;y&gt; &lt;z&gt;</code>, and both forms prefixed by a player</td><td>changes that player's gravity vector</td></tr>
 <tr><td><code>server-command-tps-vanilla-mod</code></td><td><code>/tps</code></td><td>reports measured and target server tick rate to the caller</td></tr>
 </tbody></table>
@@ -2233,7 +2240,7 @@ case-insensitively. The longest matching name prefix wins, so names containing
 spaces can be used in forms such as <code>/teleport Player1 Player 2</code>.</p>
 <p>Each command queues a narrow ECS intention. Flight emits the existing
 capability change, ground and flight speed use different per-player state
-contracts, gravity emits its per-player state change, teleport emits
+contracts, gravity and scale emit their per-player state changes, teleport emits
 <code>RequestPlayerDimensionChange</code>, and kick emits <code>ServerKickRequested</code>. The TPS
 command only reads neutral tick metrics and publishes personal feedback. None
 of these command mods sends its domain packet directly.</p>
@@ -2749,6 +2756,12 @@ local AABB. A stair therefore becomes a union of boxes, while an anvil or
 cauldron follows its own element layout. Element rotations are represented by
 their smallest enclosing AABB; this is conservative collision, not an oriented
 box solver.</p>
+<p><code>BlockShape</code> precalculates the boundary edges of the complete AABB union when
+the shape is created. Coplanar subdivisions and internal contacts are removed:
+eight half-size boxes arranged as one cube still produce only the twelve outer
+edges. Consecutive collinear segments are merged. The cached result is shared
+by cheap <code>BlockShape</code> clones and can be consumed by outline renderers without
+rebuilding topology every frame.</p>
 <p><code>BlockInfo::solid</code> remains an independent gameplay policy. Client/server
 collision ignore the shape for non-solid blocks, while selection raycasts and
 outlines can still use the geometry. A custom composition can replace only the
@@ -3956,7 +3969,7 @@ dimensions or instances.</p>
 <p>The vanilla travel mod runs after authoritative movement apply. It:</p>
 <ol>
 <li>resolves the player's current world scope;</li>
-<li>finds an active portal intersecting the player hitbox;</li>
+<li>finds an active portal intersecting that player's current scaled hitbox;</li>
 <li>checks a cooldown;</li>
 <li>emits <code>RequestPlayerDimensionChange</code>;</li>
 <li>remembers enough information to create a return portal.</li>
@@ -4324,14 +4337,58 @@ plus optional per-player overrides.</p>
 <li><code>server-player-gravity-api</code>: per-player state and change contracts;</li>
 <li><code>server-player-gravity-state-mod</code>: neutral authoritative storage;</li>
 <li>gravity network message contributors;</li>
-<li><code>server-player-gravity-network-sync-mod</code>: target-specific join/runtime synchronization;</li>
-<li><code>client-player-gravity-network-receive-mod</code>: applies server state;</li>
+<li><code>server-player-gravity-network-sync-mod</code>: visibility-scoped join/runtime synchronization;</li>
+<li><code>client-player-gravity-map-state-mod</code>: cache keyed by the subject <code>PlayerId</code>;</li>
+<li><code>client-player-gravity-network-receive-mod</code>: updates the subject cache and applies only the local subject to the prediction resource;</li>
 <li><code>client-player-gravity-prediction-vanilla-mod</code>: local force integration.</li>
 </ul>
 <p>Server gameplay rules query the actor's gravity rather than a global policy.
 This includes jump direction, gravity integration, reach origin, block
 placement checks, and movement validation. Server authority chooses gravity;
 client prediction applies the synchronized local value immediately.</p>
+<p><code>PlayerGravityChanged</code> contains both <code>player_id</code> and <code>gravity</code>. This is
+important: a client can render two visible players with different up axes. A
+gravity update for a remote subject never overwrites the controlled player's
+local prediction resource. The Blocky and fallback renderers read
+<code>ClientPlayerGravities</code> by avatar ID for rotation, walk-plane detection, and
+name-label placement.</p>
+<h2 id="player-model-scale"><a class="header" href="#player-model-scale">Player model scale</a></h2>
+<p>Scale uses a parallel but independent set of contracts:</p>
+<ul>
+<li><code>player-scale-api</code> owns the controlled client's <code>PlayerScale</code>, default <code>1</code>;</li>
+<li><code>server-player-scale-api</code> owns per-player authoritative values and ordered
+set/change events;</li>
+<li><code>server-player-scale-state-mod</code> stores state without choosing who may change
+it;</li>
+<li>the scale packet contributor adds <code>PlayerScaleChanged { player_id, scale }</code>;</li>
+<li>server sync sends the subject's value only to that player and currently
+visible viewers;</li>
+<li><code>client-player-scale-map-state-mod</code> caches values for rendered subjects;</li>
+<li><code>client-player-scale-network-receive-mod</code> updates both the map and, when the
+subject is local, <code>PlayerScale</code>;</li>
+<li><code>client-player-scale-camera-vanilla-mod</code> applies the scaled eye height after
+normal camera synchronization.</li>
+</ul>
+<p>Renderers multiply their asset-defined model scale by the synchronized player
+scale. Name-label height is scaled and gravity-relative as well.</p>
+<p>Physical dimensions remain a separate contract even though the selected
+vanilla policy links them to model scale:</p>
+<ul>
+<li><code>player-hitbox-api</code> defines <code>PlayerHitbox { radius, height, eye_height }</code>;</li>
+<li><code>client-player-hitbox-state-mod</code> owns the controlled player's neutral hitbox;</li>
+<li><code>client-player-hitbox-scale-vanilla-mod</code> derives it from <code>PlayerScale</code>;</li>
+<li><code>server-player-hitbox-api</code> exposes per-player authoritative hitboxes and
+set/change events;</li>
+<li><code>server-player-hitbox-state-mod</code> stores those values;</li>
+<li><code>server-player-hitbox-scale-vanilla-mod</code> converts applied server scale
+changes into hitbox changes.</li>
+</ul>
+<p>The FPS controller, grounded probe, sneak edge protection, server movement and
+jump validation, reach eye origin, player occupancy checks, and portal overlap
+all use the resulting dimensions. A player at scale <code>0.5</code> is therefore <code>0.9</code>
+blocks high and can fit below a one-block ceiling. A custom composition can
+omit either scale-to-hitbox adapter and install a different size policy without
+changing model replication or collision algorithms.</p>
 <h2 id="base-movement-speed"><a class="header" href="#base-movement-speed">Base movement speed</a></h2>
 <p><code>player-speed-api</code> defines the local <code>PlayerSpeedMultiplier</code>; <code>1</code> is normal
 base speed. The FPS controller applies it before optional movement modifiers
@@ -4497,15 +4554,16 @@ can remain enabled.</p>
 </span></code></pre></pre>
 <p>The policy does not send packets directly. The existing sync mod observes the
 applied change.</p>
-<h2 id="adding-a-gravity-or-speed-policy"><a class="header" href="#adding-a-gravity-or-speed-policy">Adding a gravity or speed policy</a></h2>
-<p>A policy mod should emit <code>SetServerPlayerGravity</code>, <code>SetServerPlayerSpeed</code>, or
-<code>SetServerPlayerFlightSpeed</code>. It should not mutate the maps or send packets
-directly. Examples include dimension defaults, random gravity on join,
-level-based ground or flight speed, temporary effects, and admin commands.</p>
-<p>The current client protocol synchronizes the controlled player's value. If a
-renderer needs every remote player's gravity or speed, add a separate
-visibility-scoped replication/cache contract instead of turning the local
-prediction resource into a global player map.</p>
+<h2 id="adding-a-gravity-scale-or-speed-policy"><a class="header" href="#adding-a-gravity-scale-or-speed-policy">Adding a gravity, scale, or speed policy</a></h2>
+<p>A policy mod should emit <code>SetServerPlayerGravity</code>, <code>SetServerPlayerScale</code>,
+<code>SetServerPlayerSpeed</code>, or <code>SetServerPlayerFlightSpeed</code>. It should not mutate
+the maps or send packets directly. Examples include dimension defaults, random
+gravity on join, level-based scale or speed, temporary effects, and admin
+commands.</p>
+<p>Gravity and model scale have visibility-scoped subject caches because they
+change remote avatar presentation. Ground and flight speed remain local-only
+protocol state because remote rendering does not currently need them. Keep the
+controlled-player resources separate from the keyed presentation maps.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="block-interaction-and-world-edits"><a class="header" href="#block-interaction-and-world-edits">Block interaction and world edits</a></h1>
 <p>Block interaction separates raycasting, block-specific use, held-item fallback,
 server validation, mutation, and synchronization.</p>
@@ -4648,7 +4706,8 @@ handler.</p>
 <li>a block target with adjacent position;</li>
 <li>authoritative reach;</li>
 <li>resolvable world scope;</li>
-<li>no visible player hitbox overlapping any AABB of the placed shape;</li>
+<li>no visible player's current per-player hitbox overlapping any AABB of the
+placed shape;</li>
 <li>target block is air.</li>
 </ul>
 <p>It calls <code>place_block_for_player</code> and emits:</p>
@@ -5467,10 +5526,12 @@ light. Removing it keeps directional lighting but disables shadows.</p>
 <p>The pipeline is:</p>
 <pre><code class="language-text">Collect -&gt; Apply -&gt; Draw
 </code></pre>
-<p>The Bevy provider creates thin, unlit edge meshes around every local AABB in
-<code>shape</code>. Full cubes use twelve edges; stairs, anvils, cauldrons, and other
-element models follow their box union. It does not create a screen-space
-cursor; the crosshair remains owned entirely by <code>client-crosshair-bevy-mod</code>.</p>
+<p>The Bevy provider creates thin, unlit edge meshes around the external boundary
+of the local AABB union. Full cubes use twelve edges; stairs, anvils,
+cauldrons, and other element models follow their box union. It consumes the
+precalculated external boundary, so internal contacts and coplanar subdivisions
+are not drawn. It does not create a screen-space cursor; the crosshair remains
+owned entirely by <code>client-crosshair-bevy-mod</code>.</p>
 <p>The looked-block vanilla mod performs a reach-limited shape raycast and owns
 the key <code>vanilla:looked-block</code>.</p>
 <p>The current client composition selects the renderer in <code>client.toml</code> and the
@@ -5702,7 +5763,8 @@ and behavior remain compatible.</p>
 <li>requests a Blocky model spawn;</li>
 <li>associates spawn IDs with player IDs;</li>
 <li>starts looping idle;</li>
-<li>updates transform from movement/rotation packets;</li>
+<li>updates transform from movement/rotation packets and per-subject gravity or
+scale state;</li>
 <li>switches to walk on lateral movement;</li>
 <li>returns to idle after <code>0.20</code> seconds without lateral motion;</li>
 <li>projects player name labels into viewport space;</li>
@@ -5711,12 +5773,14 @@ and behavior remain compatible.</p>
 <p>Movement detection removes the gravity-up component before testing lateral
 distance.</p>
 <p>Player root rotation combines gravity alignment, network yaw, and asset yaw
-offset.</p>
+offset. Gravity is looked up by the rendered player's ID, so different avatars
+can have different up axes in the same client view. Root scale combines the
+asset's configured model scale with the server-controlled player scale.</p>
 <h2 id="name-labels"><a class="header" href="#name-labels">Name labels</a></h2>
 <p>Labels are Bevy UI text entities, not children in world space.</p>
 <p>Every frame, the renderer:</p>
 <ul>
-<li>computes a world point above the avatar;</li>
+<li>computes a gravity-relative, scale-aware world point above the avatar;</li>
 <li>calls <code>world_to_viewport</code>;</li>
 <li>updates absolute UI coordinates;</li>
 <li>hides labels behind/outside the camera.</li>
@@ -6839,7 +6903,7 @@ sync bridges;</li>
 <li><code>server-chat-global-vanilla-mod</code>;</li>
 <li><code>server-chat-command-router-mod</code>;</li>
 <li><code>server-command-brigadier-mod</code>;</li>
-<li>clear-chat, flight, flight-speed, kick, teleport, speed, gravity, and TPS
+<li>clear-chat, flight, flight-speed, kick, teleport, speed, scale, gravity, and TPS
 vanilla command mods.</li>
 </ul>
 <h2 id="player-movement"><a class="header" href="#player-movement">Player movement</a></h2>
@@ -6853,6 +6917,9 @@ vanilla command mods.</li>
 <li><code>player-block-collision-api</code>;</li>
 <li><code>player-hitbox-api</code>;</li>
 <li><code>player-gravity-api</code>;</li>
+<li><code>player-scale-api</code>;</li>
+<li><code>client-player-gravity-map-api</code>;</li>
+<li><code>client-player-scale-map-api</code>;</li>
 <li><code>player-speed-api</code>;</li>
 <li><code>player-jump-api</code>;</li>
 <li><code>player-flight-api</code>;</li>
@@ -6861,6 +6928,8 @@ vanilla command mods.</li>
 <li><code>server-player-flight-api</code>;</li>
 <li><code>server-player-flight-speed-api</code>;</li>
 <li><code>server-player-gravity-api</code>;</li>
+<li><code>server-player-hitbox-api</code>;</li>
+<li><code>server-player-scale-api</code>;</li>
 <li><code>server-player-speed-api</code>.</li>
 </ul>
 <p>Implementations/features:</p>
@@ -6872,6 +6941,10 @@ vanilla command mods.</li>
 <li><code>client-player-spawn-mod</code>;</li>
 <li>gravity prediction/network mods;</li>
 <li>per-player server gravity state/sync mods;</li>
+<li>visibility-scoped client gravity/scale maps and server scale state/sync mods;</li>
+<li>optional scaled-eye-height camera policy;</li>
+<li>neutral client/server hitbox state plus optional scale-to-hitbox vanilla
+adapters;</li>
 <li>local and server player speed state/sync mods;</li>
 <li>client/server jump vanilla mods;</li>
 <li>client sprint vanilla mod;</li>
@@ -7081,8 +7154,11 @@ should differ from their visual model;</li>
 <h2 id="movement-and-authority"><a class="header" href="#movement-and-authority">Movement and authority</a></h2>
 <p>Current limits:</p>
 <ul>
-<li>local prediction exposes one controlled-player gravity resource, while server
-authority is per player;</li>
+<li>local prediction exposes one controlled-player gravity and scale resource,
+while visibility-scoped client maps retain the gravity and visual scale of
+remote subjects;</li>
+<li>the selected vanilla policy scales hitboxes uniformly with model scale, but
+the collision volume is still an axis-aligned radius/height box;</li>
 <li>server validates displacement, collision, speed, and flight limits but does
 not simulate full velocity;</li>
 <li>sprint state is not explicitly validated server-side;</li>

@@ -258,7 +258,13 @@ available;</li>
 <p>The active <code>server-player-visibility-world-instance-mod</code> compares the world
 scope resolved for viewer and subject. Players in different dimensions or
 provider-backed instances do not receive each other's join, movement, rotation,
-or leave updates.</p>
+leave, gravity, or model-scale updates.</p>
+<p>Gravity and scale synchronization are subject-oriented. On join, the new
+client receives attributes for itself and every subject it may currently see;
+existing viewers receive the joining subject's attributes. Later changes go to
+the subject plus <code>viewers_of(subject)</code>. This avoids leaking per-player state
+across dimensions and prevents one player's gravity from rotating every avatar
+on another client.</p>
 <h2 id="movement-synchronization"><a class="header" href="#movement-synchronization">Movement synchronization</a></h2>
 <p>Movement packets enter:</p>
 <pre><code class="language-text">ServerPlayerMovementSet::Receive
