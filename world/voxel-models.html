@@ -1,0 +1,405 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>JSON voxel models and textures - Minecraft Simple Demo Architecture</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting-started/project-overview.html"><strong aria-hidden="true">1.1.</strong> Project overview</a></li><li class="chapter-item expanded "><a href="../getting-started/build-and-run.html"><strong aria-hidden="true">1.2.</strong> Build and run</a></li></ol></li><li class="chapter-item expanded "><a href="../architecture/foundations.html"><strong aria-hidden="true">2.</strong> Architecture foundations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../architecture/patchwork-composition.html"><strong aria-hidden="true">2.1.</strong> Patchwork composition</a></li><li class="chapter-item expanded "><a href="../architecture/mod-anatomy.html"><strong aria-hidden="true">2.2.</strong> Mod anatomy and lifecycle</a></li><li class="chapter-item expanded "><a href="../architecture/apis-and-events.html"><strong aria-hidden="true">2.3.</strong> APIs, providers, and ECS contracts</a></li><li class="chapter-item expanded "><a href="../architecture/code-generation.html"><strong aria-hidden="true">2.4.</strong> Code generation and registries</a></li><li class="chapter-item expanded "><a href="../architecture/modpacks.html"><strong aria-hidden="true">2.5.</strong> Modpacks and feature boundaries</a></li><li class="chapter-item expanded "><a href="../architecture/assets-and-output.html"><strong aria-hidden="true">2.6.</strong> Assets and generated output</a></li></ol></li><li class="chapter-item expanded "><a href="../runtime/runtime-overview.html"><strong aria-hidden="true">3.</strong> Runtime and networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../runtime/bevy-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Bevy application lifecycle</a></li><li class="chapter-item expanded "><a href="../runtime/networking.html"><strong aria-hidden="true">3.2.</strong> Protocol, transport, and framing</a></li><li class="chapter-item expanded "><a href="../runtime/sessions-and-visibility.html"><strong aria-hidden="true">3.3.</strong> Sessions, routing, and visibility</a></li><li class="chapter-item expanded "><a href="../runtime/chat-and-commands.html"><strong aria-hidden="true">3.4.</strong> Chat, commands, and completion</a></li></ol></li><li class="chapter-item expanded "><a href="../world/world-overview.html"><strong aria-hidden="true">4.</strong> World architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../world/blocks-and-items.html"><strong aria-hidden="true">4.1.</strong> Blocks, items, and metadata</a></li><li class="chapter-item expanded "><a href="../world/voxel-models.html" class="active"><strong aria-hidden="true">4.2.</strong> JSON voxel models and textures</a></li><li class="chapter-item expanded "><a href="../world/chunk-storage.html"><strong aria-hidden="true">4.3.</strong> Chunk coordinates and storage</a></li><li class="chapter-item expanded "><a href="../world/server-world.html"><strong aria-hidden="true">4.4.</strong> Server world providers and residency</a></li><li class="chapter-item expanded "><a href="../world/biomes.html"><strong aria-hidden="true">4.5.</strong> Biomes and world-generation features</a></li><li class="chapter-item expanded "><a href="../world/client-chunks.html"><strong aria-hidden="true">4.6.</strong> Client streaming, meshing, and rendering</a></li><li class="chapter-item expanded "><a href="../world/dimensions.html"><strong aria-hidden="true">4.7.</strong> Dimensions and world scopes</a></li><li class="chapter-item expanded "><a href="../world/portals.html"><strong aria-hidden="true">4.8.</strong> Portals</a></li></ol></li><li class="chapter-item expanded "><a href="../gameplay/gameplay-overview.html"><strong aria-hidden="true">5.</strong> Gameplay systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../gameplay/movement.html"><strong aria-hidden="true">5.1.</strong> Player movement and prediction</a></li><li class="chapter-item expanded "><a href="../gameplay/movement-features.html"><strong aria-hidden="true">5.2.</strong> Gravity, jump, sprint, and flight</a></li><li class="chapter-item expanded "><a href="../gameplay/block-interaction.html"><strong aria-hidden="true">5.3.</strong> Block interaction and world edits</a></li><li class="chapter-item expanded "><a href="../gameplay/inventory.html"><strong aria-hidden="true">5.4.</strong> Inventory, hotbar, and item use</a></li><li class="chapter-item expanded "><a href="../gameplay/cell-menus.html"><strong aria-hidden="true">5.5.</strong> Cell menus, audiences, and crafting tables</a></li></ol></li><li class="chapter-item expanded "><a href="../client/client-overview.html"><strong aria-hidden="true">6.</strong> Client systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../client/input-settings-menus.html"><strong aria-hidden="true">6.1.</strong> Input, settings, menus, and game state</a></li><li class="chapter-item expanded "><a href="../client/graphics.html"><strong aria-hidden="true">6.2.</strong> Graphics, lighting, sky, and outlines</a></li><li class="chapter-item expanded "><a href="../client/blocky-models.html"><strong aria-hidden="true">6.3.</strong> Blocky models and animation</a></li></ol></li><li class="chapter-item expanded "><a href="../development/developer-guide.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../development/extension-cookbook.html"><strong aria-hidden="true">7.1.</strong> Extension cookbook</a></li><li class="chapter-item expanded "><a href="../development/testing-and-performance.html"><strong aria-hidden="true">7.2.</strong> Testing, debugging, and performance</a></li><li class="chapter-item expanded "><a href="../reference/crate-map.html"><strong aria-hidden="true">7.3.</strong> Crate map</a></li><li class="chapter-item expanded "><a href="../reference/current-limits.html"><strong aria-hidden="true">7.4.</strong> Current limits and design direction</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Minecraft Simple Demo Architecture</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="json-voxel-models-and-textures"><a class="header" href="#json-voxel-models-and-textures">JSON voxel models and textures</a></h1>
+<p>Block and item geometry is data-driven. Content mods export Minecraft-style
+JSON models and texture files, while client provider mods decide how those
+files are loaded, baked, meshed, and presented.</p>
+<p>This keeps three concerns independent:</p>
+<ul>
+<li>a block or item mod declares which model belongs to its domain ID;</li>
+<li>template mods provide reusable model inheritance without gameplay code;</li>
+<li>client mods choose the model source, chunk mesher, and UI renderer.</li>
+</ul>
+<p>The server does not parse presentation assets. It still composes the content
+mods because block and item identities are shared, but model loading belongs to
+the client provider selected in <code>client.toml</code>.</p>
+<h2 id="asset-layout"><a class="header" href="#asset-layout">Asset layout</a></h2>
+<p>An asset-owning content mod uses this layout:</p>
+<pre><code class="language-text">mods/block-marble/
+├── Cargo.toml
+├── src/lib.rs
+└── assets/
+    ├── models/
+    │   └── block/
+    │       └── marble.json
+    └── textures/
+        └── block/
+            └── marble.png
+</code></pre>
+<p>Item models use <code>assets/models/item/</code> and item textures use
+<code>assets/textures/item/</code>.</p>
+<p>Patchwork copies this tree to:</p>
+<pre><code class="language-text">build-client/client/assets/block-marble/
+</code></pre>
+<p>The mod crate name is therefore the resource namespace. The model ID
+<code>block-marble:block/marble</code> resolves to:</p>
+<pre><code class="language-text">assets/block-marble/models/block/marble.json
+</code></pre>
+<p>and the texture ID <code>block-marble:block/marble</code> resolves to:</p>
+<pre><code class="language-text">assets/block-marble/textures/block/marble.png
+</code></pre>
+<p>Resource IDs should always be namespaced. A bare <code>block/marble</code> would use the
+default <code>minecraft</code> namespace and would not point at the owning Patchwork mod.</p>
+<h2 id="runtime-parts"><a class="header" href="#runtime-parts">Runtime parts</a></h2>
+<p>The model pipeline is split across small crates.</p>
+<table><thead><tr><th>Crate</th><th>Responsibility</th></tr></thead><tbody>
+<tr><td><code>voxel-models-lib</code></td><td>Engine-neutral JSON parsing, inheritance, texture-variable resolution, and quad baking</td></tr>
+<tr><td><code>voxel-model-api</code></td><td>Replaceable runtime service for resolving a model ID into baked quads</td></tr>
+<tr><td><code>client-voxel-model-assets-fs-impl</code></td><td>Filesystem provider for Patchwork's composed asset layout, with result caching</td></tr>
+<tr><td><code>block-render-api</code></td><td>Associates a block ID with an optional model ID</td></tr>
+<tr><td><code>item-render-api</code></td><td>Associates an item ID with an optional model ID</td></tr>
+<tr><td><code>client-chunk-mesh-voxel-models-impl</code></td><td>Builds chunk geometry from baked block-model quads</td></tr>
+<tr><td><code>client-item-model-ui-mod</code></td><td>Uses item models as the default inventory presentation</td></tr>
+</tbody></table>
+<p><code>voxel-model-api</code> is intentionally not tied to filesystem loading. Another
+client can provide models from an archive, embedded bytes, a development hot
+reload service, or a resource-pack stack without changing block contributors
+or the chunk renderer.</p>
+<h2 id="data-flow"><a class="header" href="#data-flow">Data flow</a></h2>
+<pre><code class="language-text">block/item contributor
+  -&gt; generated registry render_info(id)
+  -&gt; VoxelModelService.bake(namespaced model ID)
+  -&gt; JSON parent and texture resolution
+  -&gt; baked texture-tagged quads
+  -&gt; chunk mesher or item presentation
+  -&gt; Bevy assets and entities
+</code></pre>
+<p>Successful and failed resolutions are cached. A bad model therefore reports a
+stable error instead of repeatedly reading and parsing the same files during
+chunk remeshing.</p>
+<h2 id="reusable-template-mods"><a class="header" href="#reusable-template-mods">Reusable template mods</a></h2>
+<p><code>voxel-model-block-templates-mod</code> contains generic block parents such as:</p>
+<ul>
+<li><code>block/block</code>;</li>
+<li><code>block/cube</code>;</li>
+<li><code>block/cube_all</code>;</li>
+<li><code>block/cube_column</code>;</li>
+<li><code>block/stairs</code>.</li>
+</ul>
+<p><code>voxel-model-item-templates-mod</code> contains <code>item/generated</code> and
+<code>item/handheld</code>. <code>voxel-model-anvil-template-mod</code> contains the reusable anvil
+geometry and itself depends on the generic block template mod.</p>
+<p>These are real Patchwork mods even though their Rust entry types do no runtime
+work. A child content mod declares the template mod as a formal <code>init</code>
+dependency and receives it in <code>init</code>:</p>
+<pre><code class="language-toml">[package.metadata.mod.dependencies]
+init = [&quot;voxel-model-block-templates-mod&quot;]
+
+[dependencies]
+voxel-model-block-templates-mod = {
+    path = &quot;../voxel-model-block-templates-mod&quot;
+}
+</code></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn init(
+    _templates: &amp;mut voxel_model_block_templates_mod::VoxelModelBlockTemplatesMod,
+) -&gt; Self {
+    Self
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>The argument is deliberately unused at runtime. It makes the asset inheritance
+edge visible to Patchwork, so a composition cannot select the child model while
+silently omitting its parent assets.</p>
+<h2 id="defining-a-cube-block"><a class="header" href="#defining-a-cube-block">Defining a cube block</a></h2>
+<p>The block crate keeps logical properties in Rust and points presentation at a
+model:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl BlockRender for MarbleBlock {
+    const RENDER: BlockRenderInfo = BlockRenderInfo {
+        shape: RenderShape::Model,
+        model: Some(&quot;block-marble:block/marble&quot;),
+        textures: None,
+    };
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Its JSON supplies the texture variable expected by the shared parent:</p>
+<pre><code class="language-json">{
+  &quot;parent&quot;: &quot;voxel-model-block-templates-mod:block/cube_all&quot;,
+  &quot;textures&quot;: {
+    &quot;all&quot;: &quot;block-marble:block/marble&quot;
+  }
+}
+</code></pre>
+<p>For different faces, inherit <code>block/cube</code> and define <code>down</code>, <code>up</code>, <code>north</code>,
+<code>south</code>, <code>west</code>, and <code>east</code>. Geometry is no longer hardcoded in the block
+contributor.</p>
+<h2 id="defining-a-non-cube-block"><a class="header" href="#defining-a-non-cube-block">Defining a non-cube block</a></h2>
+<p>A non-cube model is just another JSON model containing <code>elements</code>. The anvil,
+oak stairs, and cauldron use the same block render API as a full cube. The
+mesher does not contain branches for those IDs.</p>
+<p>Use <code>cullface</code> only when a face lies on the corresponding full block boundary.
+Internal faces and partial-shape faces normally omit it. The client mesher
+culls a tagged face when the neighboring block is opaque.</p>
+<p>Rendering shape and collision shape remain separate contracts. The current
+collision provider still treats every <code>solid</code> block as a full-block AABB, so
+the new partial visual models do not yet imply stair- or cauldron-shaped
+collision. A future collision-shape API can be added independently.</p>
+<h2 id="defining-an-item-model"><a class="header" href="#defining-an-item-model">Defining an item model</a></h2>
+<p>Item contributors export <code>ITEM_RENDER_INFO</code> in addition to <code>ITEM_INFO</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl ItemRender for StickItem {
+    const RENDER: ItemRenderInfo = ItemRenderInfo {
+        model: Some(&quot;item-stick:item/stick&quot;),
+    };
+}
+
+pub const ITEM_RENDER_INFO: ItemRenderInfo =
+    &lt;StickItem as ItemRender&gt;::RENDER;
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>item-registry-codegen</code> collects both constants and generates
+<code>render_info(ItemId)</code>. Item identity code does not need to know which client
+presentation provider is selected.</p>
+<p>A flat generated item can inherit the shared template:</p>
+<pre><code class="language-json">{
+  &quot;parent&quot;: &quot;voxel-model-item-templates-mod:item/handheld&quot;,
+  &quot;textures&quot;: {
+    &quot;layer0&quot;: &quot;item-stick:item/stick&quot;
+  }
+}
+</code></pre>
+<p>A block item may inherit its block model directly. This expresses that both
+presentations share geometry while retaining separate item and block IDs.</p>
+<p>The current Bevy inventory adapter uses the first resolved model texture as a
+2D slot image. Generated items therefore display their <code>layer0</code> texture, while
+block items get a texture-based preview. Full isometric model rendering in UI
+can be implemented later as another item presentation mod without changing
+item contributors or registries. Explicit <code>ItemFavicon</code> instance metadata is
+still supported as an override and is owned by its separate decorator mod.</p>
+<h2 id="lighting-and-mesh-output"><a class="header" href="#lighting-and-mesh-output">Lighting and mesh output</a></h2>
+<p>The model mesher preserves the existing chunk pipeline:</p>
+<ul>
+<li>quads are grouped by resolved texture;</li>
+<li>model normals select the face-lighting direction;</li>
+<li><code>shade: false</code> bypasses directional shading;</li>
+<li>light emission raises the minimum vertex brightness;</li>
+<li>the ambient-occlusion pipeline samples nearby opaque blocks;</li>
+<li>the quad diagonal follows the AO gradient;</li>
+<li>uniform-air and fully-hidden uniform-chunk fast paths remain active.</li>
+</ul>
+<p>The renderer still owns Bevy materials, texture loading, mesh entities, and
+per-frame remesh budgets. Model parsing does not own those concerns.</p>
+<h2 id="adding-another-model-source-or-renderer"><a class="header" href="#adding-another-model-source-or-renderer">Adding another model source or renderer</a></h2>
+<p>To replace filesystem loading, implement <code>VoxelModelApi</code> and insert a
+<code>VoxelModelService</code>. Select exactly one provider in the client modpack.</p>
+<p>To replace chunk geometry generation, implement <code>ChunkMeshApi</code> and insert a
+<code>ChunkMeshService</code>. A greedy or asynchronous mesher can consume the same baked
+models.</p>
+<p>To replace inventory presentation, add another mod that listens to
+<code>InventorySlotVisualCreated</code>. It can render a full 3D preview, use an atlas, or
+apply model display transforms. It should not change the authoritative item
+instance.</p>
+<h2 id="validation-checklist"><a class="header" href="#validation-checklist">Validation checklist</a></h2>
+<p>When adding a model-owning mod:</p>
+<ol>
+<li>use namespaced model and texture IDs;</li>
+<li>declare formal dependencies for every cross-mod parent;</li>
+<li>add the contributor and template to the appropriate modpack;</li>
+<li>run Patchwork composition so registries and assets are regenerated;</li>
+<li>check the composed <code>assets/&lt;mod-name&gt;/</code> tree;</li>
+<li>check both client and server compositions when shared IDs changed;</li>
+<li>keep model geometry, collision policy, and gameplay behavior in separate
+contracts.</li>
+</ol>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../world/blocks-and-items.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../world/chunk-storage.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../world/blocks-and-items.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../world/chunk-storage.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>
