@@ -147,7 +147,9 @@
 <p>Block interaction separates raycasting, block-specific use, held-item fallback,
 server validation, mutation, and synchronization.</p>
 <h2 id="voxel-raycast"><a class="header" href="#voxel-raycast">Voxel raycast</a></h2>
-<p><code>voxel-raycast-api</code> implements a 3D DDA traversal.</p>
+<p><code>voxel-raycast-api</code> implements a 3D DDA traversal. Its shape-aware entry point
+uses DDA only to choose candidate cells, then intersects the local AABB union
+provided by <code>BlockShapeService</code>.</p>
 <p>It returns:</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
@@ -160,8 +162,9 @@ server validation, mutation, and synchronization.</p>
 }
 <span class="boring">}
 </span></code></pre></pre>
-<p><code>block</code> is the solid voxel hit. <code>adjacent</code> is the empty voxel immediately
-outside the entered face.</p>
+<p><code>block</code> is the selected voxel. <code>adjacent</code> is the voxel outside the exact model
+element face that was hit. Rays pass through empty regions of partial blocks;
+for example, the empty upper half beside a lower slab is not selectable.</p>
 <p>The traversal advances several axes only on an exact equal-time grid crossing.
 It does not use a broad epsilon. Treating a near-edge ray as an exact edge can
 select a diagonal voxel and place a block on the wrong face.</p>
@@ -177,11 +180,12 @@ client can replace it, but server validation remains required.</p>
 <li>raycast searches the client chunk cache;</li>
 <li>left click emits <code>BlockBreakRequested</code>;</li>
 <li>right click emits <code>LocalBlockUseIntent</code>;</li>
-<li>placement is rejected locally if the target voxel overlaps local or visible
-remote player hitboxes.</li>
+<li>the resulting target carries the exact face normal and adjacent cell.</li>
 </ol>
-<p>The local hitbox check is immediate feedback. The server performs its own
-authoritative check.</p>
+<p>The raycast mod does not decide whether a placement overlaps a player. The
+server placement policy performs that authoritative check against the placed
+block's actual shape. This avoids coupling a generic input/raycast feature to
+one client player renderer or visibility policy.</p>
 <h2 id="right-click-handler-chain"><a class="header" href="#right-click-handler-chain">Right-click handler chain</a></h2>
 <pre><code class="language-text">ClientBlockInteractionSet::Raycast
   -&gt; RoutingRules
@@ -281,7 +285,7 @@ handler.</p>
 <li>a block target with adjacent position;</li>
 <li>authoritative reach;</li>
 <li>resolvable world scope;</li>
-<li>no player hitbox in the target voxel;</li>
+<li>no visible player hitbox overlapping any AABB of the placed shape;</li>
 <li>target block is air.</li>
 </ul>
 <p>It calls <code>place_block_for_player</code> and emits:</p>
@@ -320,8 +324,9 @@ than relying on system order to overwrite a boolean.</p>
 <p>Outlines are an independent client feature family:</p>
 <ul>
 <li>API defines owner-keyed outline commands;</li>
-<li>Bevy provider renders only twelve thin edge meshes around each selected block;</li>
-<li>looked-block vanilla policy performs its own raycast.</li>
+<li>Bevy provider renders thin edge meshes for every box in the selected shape;</li>
+<li>looked-block vanilla policy performs the same shape-aware raycast used by
+interaction.</li>
 </ul>
 <p>An owner key lets several mods maintain independent outlines.</p>
 <p>The active client selects the renderer in <code>client.toml</code> and the optional

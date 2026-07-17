@@ -209,9 +209,11 @@ assets/textures/block/&lt;name&gt;.png
 <p>and are referenced with namespaced resource IDs. Shared cube, column, stairs,
 item, and anvil templates are exported by asset-only mods. See
 <a href="./voxel-models.html">JSON voxel models and textures</a>.</p>
-<p>Logical properties such as <code>solid</code> and <code>opaque</code> are still Rust data. They are
-not inferred from the JSON model because collision, culling, and presentation
-must remain independently replaceable.</p>
+<p>Logical properties such as <code>solid</code> and <code>opaque</code> are still Rust data. The active
+shape provider derives local collision/selection boxes from JSON <code>elements</code>,
+but <code>solid</code> decides whether movement collision uses those boxes. A different
+provider can supply unrelated physical geometry, so culling, shape generation,
+solidity, and presentation remain independently replaceable.</p>
 <h2 id="block-manager"><a class="header" href="#block-manager">Block manager</a></h2>
 <p><code>block-manager-api</code> exposes:</p>
 <pre><pre class="playground"><code class="language-rust">

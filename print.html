@@ -2421,9 +2421,11 @@ assets/textures/block/&lt;name&gt;.png
 <p>and are referenced with namespaced resource IDs. Shared cube, column, stairs,
 item, and anvil templates are exported by asset-only mods. See
 <a href="world/./voxel-models.html">JSON voxel models and textures</a>.</p>
-<p>Logical properties such as <code>solid</code> and <code>opaque</code> are still Rust data. They are
-not inferred from the JSON model because collision, culling, and presentation
-must remain independently replaceable.</p>
+<p>Logical properties such as <code>solid</code> and <code>opaque</code> are still Rust data. The active
+shape provider derives local collision/selection boxes from JSON <code>elements</code>,
+but <code>solid</code> decides whether movement collision uses those boxes. A different
+provider can supply unrelated physical geometry, so culling, shape generation,
+solidity, and presentation remain independently replaceable.</p>
 <h2 id="block-manager"><a class="header" href="#block-manager">Block manager</a></h2>
 <p><code>block-manager-api</code> exposes:</p>
 <pre><pre class="playground"><code class="language-rust">
@@ -2600,17 +2602,20 @@ generated item registry, not by coupling block codegen to item codegen. A custom
 server is still free to omit any of those item contributors.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="json-voxel-models-and-textures"><a class="header" href="#json-voxel-models-and-textures">JSON voxel models and textures</a></h1>
 <p>Block and item geometry is data-driven. Content mods export Minecraft-style
-JSON models and texture files, while client provider mods decide how those
-files are loaded, baked, meshed, and presented.</p>
+JSON models and texture files, while provider mods decide how those files are
+loaded and baked and separate consumers decide how geometry is used.</p>
 <p>This keeps three concerns independent:</p>
 <ul>
 <li>a block or item mod declares which model belongs to its domain ID;</li>
 <li>template mods provide reusable model inheritance without gameplay code;</li>
-<li>client mods choose the model source, chunk mesher, and UI renderer.</li>
+<li>a model provider exposes resolved quads and element bounds;</li>
+<li>client mods choose the chunk mesher and UI renderer;</li>
+<li>collision, raycast, and outline mods consume a replaceable block-shape API.</li>
 </ul>
-<p>The server does not parse presentation assets. It still composes the content
-mods because block and item identities are shared, but model loading belongs to
-the client provider selected in <code>client.toml</code>.</p>
+<p>The active server also resolves block-model element bounds, but it never owns
+texture loading or rendering. This is a composition choice rather than a core
+rule: another server can provide authored collision shapes without loading JSON
+models at all.</p>
 <h2 id="asset-layout"><a class="header" href="#asset-layout">Asset layout</a></h2>
 <p>An asset-owning content mod uses this layout:</p>
 <pre><code class="language-text">mods/block-marble/
@@ -2641,26 +2646,29 @@ default <code>minecraft</code> namespace and would not point at the owning Patch
 <h2 id="runtime-parts"><a class="header" href="#runtime-parts">Runtime parts</a></h2>
 <p>The model pipeline is split across small crates.</p>
 <table><thead><tr><th>Crate</th><th>Responsibility</th></tr></thead><tbody>
-<tr><td><code>voxel-models-lib</code></td><td>Engine-neutral JSON parsing, inheritance, texture-variable resolution, and quad baking</td></tr>
-<tr><td><code>voxel-model-api</code></td><td>Replaceable runtime service for resolving a model ID into baked quads</td></tr>
-<tr><td><code>client-voxel-model-assets-fs-impl</code></td><td>Filesystem provider for Patchwork's composed asset layout, with result caching</td></tr>
+<tr><td><code>voxel-models-lib</code></td><td>Engine-neutral JSON parsing, inheritance, texture-variable resolution, quad baking, and element-bound baking</td></tr>
+<tr><td><code>voxel-model-api</code></td><td>Replaceable runtime service for resolving a model ID into baked quads and boxes</td></tr>
+<tr><td><code>voxel-model-assets-fs-impl</code></td><td>Generic filesystem provider for Patchwork's composed asset layout, with result caching</td></tr>
+<tr><td><code>block-shape-api</code></td><td>Replaceable block-instance-to-local-AABB-union contract</td></tr>
+<tr><td><code>block-shape-voxel-model-impl</code></td><td>Derives one local AABB from each resolved JSON <code>element</code></td></tr>
 <tr><td><code>block-render-api</code></td><td>Associates a block ID with an optional model ID</td></tr>
 <tr><td><code>item-render-api</code></td><td>Associates an item ID with an optional model ID</td></tr>
 <tr><td><code>client-chunk-mesh-voxel-models-impl</code></td><td>Builds chunk geometry from baked block-model quads</td></tr>
 <tr><td><code>client-item-model-ui-mod</code></td><td>Uses item models as the default inventory presentation</td></tr>
 </tbody></table>
 <p><code>voxel-model-api</code> is intentionally not tied to filesystem loading. Another
-client can provide models from an archive, embedded bytes, a development hot
-reload service, or a resource-pack stack without changing block contributors
-or the chunk renderer.</p>
+composition can provide models from an archive, embedded bytes, a development
+hot-reload service, or a resource-pack stack without changing block
+contributors or consumers.</p>
 <h2 id="data-flow"><a class="header" href="#data-flow">Data flow</a></h2>
 <pre><code class="language-text">block/item contributor
   -&gt; generated registry render_info(id)
-  -&gt; VoxelModelService.bake(namespaced model ID)
+  -&gt; VoxelModelService.load(namespaced model ID)
   -&gt; JSON parent and texture resolution
-  -&gt; baked texture-tagged quads
-  -&gt; chunk mesher or item presentation
-  -&gt; Bevy assets and entities
+  -&gt; cached baked quads + cached element boxes
+       |                         |
+       -&gt; client mesh/UI         -&gt; BlockShapeService
+                                  -&gt; collision/raycast/outline
 </code></pre>
 <p>Successful and failed resolutions are cached. A bad model therefore reports a
 stable error instead of repeatedly reading and parsing the same files during
@@ -2734,10 +2742,17 @@ mesher does not contain branches for those IDs.</p>
 <p>Use <code>cullface</code> only when a face lies on the corresponding full block boundary.
 Internal faces and partial-shape faces normally omit it. The client mesher
 culls a tagged face when the neighboring block is opaque.</p>
-<p>Rendering shape and collision shape remain separate contracts. The current
-collision provider still treats every <code>solid</code> block as a full-block AABB, so
-the new partial visual models do not yet imply stair- or cauldron-shaped
-collision. A future collision-shape API can be added independently.</p>
+<p>Visual geometry and physical geometry remain separate contracts even though
+the default composition derives both from the same JSON elements.
+<code>block-shape-voxel-model-impl</code> converts every resolved element to a normalized
+local AABB. A stair therefore becomes a union of boxes, while an anvil or
+cauldron follows its own element layout. Element rotations are represented by
+their smallest enclosing AABB; this is conservative collision, not an oriented
+box solver.</p>
+<p><code>BlockInfo::solid</code> remains an independent gameplay policy. Client/server
+collision ignore the shape for non-solid blocks, while selection raycasts and
+outlines can still use the geometry. A custom composition can replace only the
+shape provider without replacing rendering or block identity.</p>
 <h2 id="defining-an-item-model"><a class="header" href="#defining-an-item-model">Defining an item model</a></h2>
 <p>Item contributors export <code>ITEM_RENDER_INFO</code> in addition to <code>ITEM_INFO</code>:</p>
 <pre><pre class="playground"><code class="language-rust">
@@ -2787,7 +2802,14 @@ still supported as an override and is owned by its separate decorator mod.</p>
 per-frame remesh budgets. Model parsing does not own those concerns.</p>
 <h2 id="adding-another-model-source-or-renderer"><a class="header" href="#adding-another-model-source-or-renderer">Adding another model source or renderer</a></h2>
 <p>To replace filesystem loading, implement <code>VoxelModelApi</code> and insert a
-<code>VoxelModelService</code>. Select exactly one provider in the client modpack.</p>
+<code>VoxelModelService</code>. Select exactly one provider in every composition that
+needs model data.</p>
+<p>To author physical geometry independently, implement <code>BlockShapeApi</code> and
+insert a <code>BlockShapeService</code>. The service returns local-space AABB unions for a
+<code>BlockInstance</code>, not only a block ID. The default provider ignores metadata,
+but a future orientation or open/closed metadata provider can change geometry
+without breaking the API. Collision, precise raycast, placement occupancy
+checks, and outlines do not need to know where those boxes came from.</p>
 <p>To replace chunk geometry generation, implement <code>ChunkMeshApi</code> and insert a
 <code>ChunkMeshService</code>. A greedy or asynchronous mesher can consume the same baked
 models.</p>
@@ -2804,8 +2826,9 @@ instance.</p>
 <li>run Patchwork composition so registries and assets are regenerated;</li>
 <li>check the composed <code>assets/&lt;mod-name&gt;/</code> tree;</li>
 <li>check both client and server compositions when shared IDs changed;</li>
-<li>keep model geometry, collision policy, and gameplay behavior in separate
-contracts.</li>
+<li>test element-derived collision and selection for partial models;</li>
+<li>keep model geometry, shape provisioning, solidity policy, and gameplay
+behavior in separate contracts.</li>
 </ol>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="chunk-coordinates-and-storage"><a class="header" href="#chunk-coordinates-and-storage">Chunk coordinates and storage</a></h1>
 <p>Chunks are cubic and vertically unbounded.</p>
@@ -4168,8 +4191,10 @@ therefore add a frame-local offset without accumulating it or changing the
 controller. The vanilla sneak camera mod uses this phase to lower eye height.</p>
 <h2 id="collision-service"><a class="header" href="#collision-service">Collision service</a></h2>
 <p><code>collision-api</code> exposes a closure-backed <code>CollisionService</code>.</p>
-<p>The active implementation reads blocks from <code>ClientChunkCache</code> and uses shared
-player/block AABB helpers.</p>
+<p>The active implementation reads block instances from <code>ClientChunkCache</code>, asks
+<code>BlockShapeService</code> for each solid block's local AABB union, and resolves the
+player against the translated boxes. The server validator uses the same shape
+contract against its authoritative world route.</p>
 <p>The resolver:</p>
 <ol>
 <li>depenetrates an already overlapping player;</li>
@@ -4182,6 +4207,10 @@ player/block AABB helpers.</p>
 <p>Resolving height first lets a rising player clear a ledge before planar motion
 is tested. This avoids alternating vertical/side corrections when jumping onto
 a block.</p>
+<p>Partial blocks use their actual top and side coordinates. Standing on a lower
+slab-like element therefore grounds the player near <code>y + 0.5</code>, not <code>y + 1.0</code>.
+The collision algorithm is independent from JSON: replacing
+<code>BlockShapeService</code> replaces the geometry source without changing movement.</p>
 <h2 id="grounded-state"><a class="header" href="#grounded-state">Grounded state</a></h2>
 <p>Grounding uses two sources:</p>
 <ul>
@@ -4370,12 +4399,12 @@ vanilla composition assembles it from independent mods:</p>
 <tr><td><code>client-player-sneak-input-vanilla-mod</code></td><td>maps the configured held key to local sneak state</td></tr>
 <tr><td><code>client-player-sneak-speed-vanilla-mod</code></td><td>multiplies planar speed while sneaking</td></tr>
 <tr><td><code>client-player-sneak-edge-protection-vanilla-mod</code></td><td>constrains supported movement before collision resolution</td></tr>
-<tr><td><code>client-player-sneak-camera-vanilla-mod</code></td><td>lowers the local camera after normal camera synchronization</td></tr>
+<tr><td><code>client-player-sneak-camera-vanilla-mod</code></td><td>quickly interpolates the local camera to a lower eye offset after normal camera synchronization</td></tr>
 <tr><td><code>client-player-sneak-block-interaction-bypass-vanilla-mod</code></td><td>routes right-click directly to the held item before block handlers</td></tr>
 </tbody></table>
-<p>The speed multiplier, camera offset, and edge-probe constants live in the mods
-that own those policies. A client may keep configurable sneak input but replace
-only its movement speed or camera presentation.</p>
+<p>The speed multiplier, camera offset/transition time, and edge-probe constants
+live in the mods that own those policies. A client may keep configurable sneak
+input but replace only its movement speed or camera presentation.</p>
 <p>Edge protection applies only while grounded. It samples the requested planar
 path along two gravity-relative axes and clamps each component at the last
 supported point. Jumping and flight are not converted into grounded movement.</p>
@@ -4481,7 +4510,9 @@ prediction resource into a global player map.</p>
 <p>Block interaction separates raycasting, block-specific use, held-item fallback,
 server validation, mutation, and synchronization.</p>
 <h2 id="voxel-raycast"><a class="header" href="#voxel-raycast">Voxel raycast</a></h2>
-<p><code>voxel-raycast-api</code> implements a 3D DDA traversal.</p>
+<p><code>voxel-raycast-api</code> implements a 3D DDA traversal. Its shape-aware entry point
+uses DDA only to choose candidate cells, then intersects the local AABB union
+provided by <code>BlockShapeService</code>.</p>
 <p>It returns:</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
@@ -4494,8 +4525,9 @@ server validation, mutation, and synchronization.</p>
 }
 <span class="boring">}
 </span></code></pre></pre>
-<p><code>block</code> is the solid voxel hit. <code>adjacent</code> is the empty voxel immediately
-outside the entered face.</p>
+<p><code>block</code> is the selected voxel. <code>adjacent</code> is the voxel outside the exact model
+element face that was hit. Rays pass through empty regions of partial blocks;
+for example, the empty upper half beside a lower slab is not selectable.</p>
 <p>The traversal advances several axes only on an exact equal-time grid crossing.
 It does not use a broad epsilon. Treating a near-edge ray as an exact edge can
 select a diagonal voxel and place a block on the wrong face.</p>
@@ -4511,11 +4543,12 @@ client can replace it, but server validation remains required.</p>
 <li>raycast searches the client chunk cache;</li>
 <li>left click emits <code>BlockBreakRequested</code>;</li>
 <li>right click emits <code>LocalBlockUseIntent</code>;</li>
-<li>placement is rejected locally if the target voxel overlaps local or visible
-remote player hitboxes.</li>
+<li>the resulting target carries the exact face normal and adjacent cell.</li>
 </ol>
-<p>The local hitbox check is immediate feedback. The server performs its own
-authoritative check.</p>
+<p>The raycast mod does not decide whether a placement overlaps a player. The
+server placement policy performs that authoritative check against the placed
+block's actual shape. This avoids coupling a generic input/raycast feature to
+one client player renderer or visibility policy.</p>
 <h2 id="right-click-handler-chain"><a class="header" href="#right-click-handler-chain">Right-click handler chain</a></h2>
 <pre><code class="language-text">ClientBlockInteractionSet::Raycast
   -&gt; RoutingRules
@@ -4615,7 +4648,7 @@ handler.</p>
 <li>a block target with adjacent position;</li>
 <li>authoritative reach;</li>
 <li>resolvable world scope;</li>
-<li>no player hitbox in the target voxel;</li>
+<li>no visible player hitbox overlapping any AABB of the placed shape;</li>
 <li>target block is air.</li>
 </ul>
 <p>It calls <code>place_block_for_player</code> and emits:</p>
@@ -4654,8 +4687,9 @@ than relying on system order to overwrite a boolean.</p>
 <p>Outlines are an independent client feature family:</p>
 <ul>
 <li>API defines owner-keyed outline commands;</li>
-<li>Bevy provider renders only twelve thin edge meshes around each selected block;</li>
-<li>looked-block vanilla policy performs its own raycast.</li>
+<li>Bevy provider renders thin edge meshes for every box in the selected shape;</li>
+<li>looked-block vanilla policy performs the same shape-aware raycast used by
+interaction.</li>
 </ul>
 <p>An owner key lets several mods maintain independent outlines.</p>
 <p>The active client selects the renderer in <code>client.toml</code> and the optional
@@ -5424,6 +5458,7 @@ light. Removing it keeps directional lighting but disables shadows.</p>
 </span>SetClientBlockOutline {
     owner,
     block: Option&lt;BlockPos&gt;,
+    shape: BlockShape,
     style,
 }
 <span class="boring">}
@@ -5432,11 +5467,12 @@ light. Removing it keeps directional lighting but disables shadows.</p>
 <p>The pipeline is:</p>
 <pre><code class="language-text">Collect -&gt; Apply -&gt; Draw
 </code></pre>
-<p>The Bevy provider creates only twelve thin, unlit edge meshes around the block.
-It does not create a screen-space cursor; the crosshair remains owned entirely
-by <code>client-crosshair-bevy-mod</code>.</p>
-<p>The looked-block vanilla mod performs a reach-limited voxel raycast and owns the
-key <code>vanilla:looked-block</code>.</p>
+<p>The Bevy provider creates thin, unlit edge meshes around every local AABB in
+<code>shape</code>. Full cubes use twelve edges; stairs, anvils, cauldrons, and other
+element models follow their box union. It does not create a screen-space
+cursor; the crosshair remains owned entirely by <code>client-crosshair-bevy-mod</code>.</p>
+<p>The looked-block vanilla mod performs a reach-limited shape raycast and owns
+the key <code>vanilla:looked-block</code>.</p>
 <p>The current client composition selects the renderer in <code>client.toml</code> and the
 looked-block policy in <code>client-vanilla.toml</code>. Both are required: the provider
 draws owner-keyed outline state, while the policy performs the raycast and
@@ -6618,9 +6654,14 @@ without inventory items or multiple items for one block.</p>
 <li><code>voxel-model-item-templates-mod</code>;</li>
 <li><code>voxel-model-anvil-template-mod</code>.</li>
 </ul>
-<p>Client providers and consumers:</p>
+<p>Shared providers and contracts:</p>
 <ul>
-<li><code>client-voxel-model-assets-fs-impl</code>;</li>
+<li><code>voxel-model-assets-fs-impl</code>;</li>
+<li><code>block-shape-api</code>;</li>
+<li><code>block-shape-voxel-model-impl</code>.</li>
+</ul>
+<p>Client consumers:</p>
+<ul>
 <li><code>client-chunk-mesh-voxel-models-impl</code>;</li>
 <li><code>client-item-model-ui-mod</code>.</li>
 </ul>
@@ -6808,6 +6849,7 @@ vanilla command mods.</li>
 <li><code>client-camera-api</code>;</li>
 <li><code>client-player-controller-api</code>;</li>
 <li><code>collision-api</code>;</li>
+<li><code>block-shape-api</code>;</li>
 <li><code>player-block-collision-api</code>;</li>
 <li><code>player-hitbox-api</code>;</li>
 <li><code>player-gravity-api</code>;</li>
@@ -7016,8 +7058,8 @@ simple.</p>
 item-property trees;</li>
 <li>inventory block-item previews use a resolved texture instead of a full
 isometric model render;</li>
-<li>visual model shape and collision shape are independent, but the active
-collision provider still uses full-block AABBs for every solid block;</li>
+<li>the active shape provider derives AABB unions from JSON elements, but rotated
+elements use conservative enclosing AABBs rather than oriented collision;</li>
 <li>no transparent block pass;</li>
 <li>no greedy meshing;</li>
 <li>no background mesh jobs;</li>
@@ -7031,7 +7073,8 @@ collision provider still uses full-block AABBs for every solid block;</li>
 <li>preserve mesh/render APIs while replacing implementations;</li>
 <li>add blockstate and per-instance model selection as separate providers;</li>
 <li>add a replaceable full-model inventory preview adapter;</li>
-<li>add a generated or data-driven collision-shape contract;</li>
+<li>add optional authored shape contributors for blocks whose physical geometry
+should differ from their visual model;</li>
 <li>keep graphics stages composable;</li>
 <li>add explicit opaque/transparent render contracts.</li>
 </ul>

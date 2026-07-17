@@ -176,8 +176,8 @@ simple.</p>
 item-property trees;</li>
 <li>inventory block-item previews use a resolved texture instead of a full
 isometric model render;</li>
-<li>visual model shape and collision shape are independent, but the active
-collision provider still uses full-block AABBs for every solid block;</li>
+<li>the active shape provider derives AABB unions from JSON elements, but rotated
+elements use conservative enclosing AABBs rather than oriented collision;</li>
 <li>no transparent block pass;</li>
 <li>no greedy meshing;</li>
 <li>no background mesh jobs;</li>
@@ -191,7 +191,8 @@ collision provider still uses full-block AABBs for every solid block;</li>
 <li>preserve mesh/render APIs while replacing implementations;</li>
 <li>add blockstate and per-instance model selection as separate providers;</li>
 <li>add a replaceable full-model inventory preview adapter;</li>
-<li>add a generated or data-driven collision-shape contract;</li>
+<li>add optional authored shape contributors for blocks whose physical geometry
+should differ from their visual model;</li>
 <li>keep graphics stages composable;</li>
 <li>add explicit opaque/transparent render contracts.</li>
 </ul>
