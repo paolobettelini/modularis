@@ -114,7 +114,9 @@ Create:
 mods/block-marble/
 ├── Cargo.toml
 ├── src/lib.rs
-└── assets/marble.png
+└── assets/
+    ├── models/block/marble.json
+    └── textures/block/marble.png
 ```
 
 Cargo metadata:
@@ -122,26 +124,34 @@ Cargo metadata:
 ```toml
 [package.metadata.block]
 id = "example:marble"
+
+[package.metadata.mod.dependencies]
+init = ["voxel-model-block-templates-mod"]
 ```
 
 Export `BLOCK_INFO` and `RENDER_INFO` as shown in
 [Blocks, items, and metadata](../world/blocks-and-items.md).
 
 Add `"block-marble"` to `blocks.toml`, recompose both applications, and use the
-generated `BlockId::Marble`.
+generated `BlockId::Marble`. The contributor points at
+`block-marble:block/marble` through `BlockRenderInfo`.
 
-For six textures:
+The model can reuse the generic cube template:
 
-```rust
-textures: Some(BlockTextures::PerFace {
-    east: "block-marble/east.png",
-    west: "block-marble/west.png",
-    top: "block-marble/top.png",
-    bottom: "block-marble/bottom.png",
-    south: "block-marble/south.png",
-    north: "block-marble/north.png",
-})
+```json
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_all",
+  "textures": {
+    "all": "block-marble:block/marble"
+  }
+}
 ```
+
+For six different textures, inherit
+`voxel-model-block-templates-mod:block/cube` and provide `east`, `west`, `up`,
+`down`, `south`, and `north`. For custom geometry, provide `elements` or create
+a reusable asset-only template mod. See
+[JSON voxel models and textures](../world/voxel-models.md).
 
 ## Add an item
 
@@ -155,13 +165,27 @@ id = "example:wand"
 Export:
 
 ```rust
-pub const ITEM_INFO: ItemInfo = ItemInfo {
-    id: "example:wand",
-    label: "Wand",
-};
+impl Item for WandItem {
+    const INFO: ItemInfo = ItemInfo {
+        id: "example:wand",
+        label: "Wand",
+    };
+}
+
+impl ItemRender for WandItem {
+    const RENDER: ItemRenderInfo = ItemRenderInfo {
+        model: Some("item-wand:item/wand"),
+    };
+}
+
+pub const ITEM_INFO: ItemInfo = WandItem::INFO;
+pub const ITEM_RENDER_INFO: ItemRenderInfo =
+    <WandItem as ItemRender>::RENDER;
 ```
 
-Add it to `items.toml` and recompose.
+Add its JSON under `assets/models/item/wand.json`, its texture under
+`assets/textures/item/wand.png`, declare the item template mod as a formal
+dependency, add it to `items.toml`, and recompose.
 
 The contributor defines identity/label. Item-use behavior belongs in another
 mod listening to `HeldItemUseDispatched`.

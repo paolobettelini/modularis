@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 generated-item-registry = "0.1.0"
 item-api = { path = "../item-api" }
+item-render-api = { path = "../item-render-api" }
 
 [patch.crates-io]
 generated-item-registry = { path = "../generated-item-registry" }

@@ -1,5 +1,5 @@
 use block_api::{Block, BlockInfo};
-use block_render_api::{BlockRender, BlockRenderInfo, BlockTextures, RenderShape};
+use block_render_api::{BlockRender, BlockRenderInfo, RenderShape};
 use tokio::task::JoinHandle;
 
 pub struct CrimsonNyliumBlock;
@@ -13,22 +13,18 @@ impl Block for CrimsonNyliumBlock {
 }
 impl BlockRender for CrimsonNyliumBlock {
     const RENDER: BlockRenderInfo = BlockRenderInfo {
-        shape: RenderShape::Cube,
-        textures: Some(BlockTextures::PerFace {
-            east: "block-crimson-nylium/crimson_nylium_side.png",
-            west: "block-crimson-nylium/crimson_nylium_side.png",
-            top: "block-crimson-nylium/crimson_nylium_top.png",
-            bottom: "block-crimson-nylium/crimson_nylium_side.png",
-            south: "block-crimson-nylium/crimson_nylium_side.png",
-            north: "block-crimson-nylium/crimson_nylium_side.png",
-        }),
+        shape: RenderShape::Model,
+        model: Some("block-crimson-nylium:block/crimson_nylium"),
+        textures: None,
     };
 }
 pub const BLOCK_INFO: BlockInfo = CrimsonNyliumBlock::INFO;
 pub const RENDER_INFO: BlockRenderInfo = CrimsonNyliumBlock::RENDER;
 pub struct BlockCrimsonNyliumMod;
 impl BlockCrimsonNyliumMod {
-    pub fn init() -> Self {
+    pub fn init(
+        _templates: &mut voxel_model_block_templates_mod::VoxelModelBlockTemplatesMod,
+    ) -> Self {
         Self
     }
     pub fn run(&self) -> Option<Vec<JoinHandle<()>>> {

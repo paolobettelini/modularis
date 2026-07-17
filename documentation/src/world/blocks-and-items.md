@@ -16,9 +16,7 @@ The Rust crate exports logical and render definitions:
 
 ```rust
 use block_api::{Block, BlockInfo};
-use block_render_api::{
-    BlockRender, BlockRenderInfo, BlockTextures, RenderShape,
-};
+use block_render_api::{BlockRender, BlockRenderInfo, RenderShape};
 
 pub struct MarbleBlock;
 
@@ -33,10 +31,9 @@ impl Block for MarbleBlock {
 
 impl BlockRender for MarbleBlock {
     const RENDER: BlockRenderInfo = BlockRenderInfo {
-        shape: RenderShape::Cube,
-        textures: Some(BlockTextures::Uniform(
-            "block-marble/marble.png",
-        )),
+        shape: RenderShape::Model,
+        model: Some("block-marble:block/marble"),
+        textures: None,
     };
 }
 
@@ -63,37 +60,27 @@ solid but not opaque.
 
 ## Block rendering
 
-Current render shapes:
+Render shapes are:
 
 - `Invisible`;
-- `Cube`.
+- `Model` for JSON-backed geometry;
+- the legacy `Cube` variant, retained for alternate or transitional meshers.
 
-Textures are:
+The active client composition uses `RenderShape::Model`. Model and texture
+assets live under:
 
-```rust
-BlockTextures::Uniform("mod/file.png")
+```text
+assets/models/block/<name>.json
+assets/textures/block/<name>.png
 ```
 
-or:
+and are referenced with namespaced resource IDs. Shared cube, column, stairs,
+item, and anvil templates are exported by asset-only mods. See
+[JSON voxel models and textures](./voxel-models.md).
 
-```rust
-BlockTextures::PerFace {
-    east,
-    west,
-    top,
-    bottom,
-    south,
-    north,
-}
-```
-
-Per-face definitions require all six paths. This avoids silent fallback to an
-incorrect face.
-
-A visible block with `textures: None` renders white. There is no fallback block
-color field.
-
-The crafting table demonstrates per-face texture mapping.
+Logical properties such as `solid` and `opaque` are still Rust data. They are
+not inferred from the JSON model because collision, culling, and presentation
+must remain independently replaceable.
 
 ## Block manager
 
@@ -178,14 +165,26 @@ id = "example:marble_block"
 and exports:
 
 ```rust
-pub const ITEM_INFO: ItemInfo = ItemInfo {
-    id: "example:marble_block",
-    label: "Marble",
-};
+impl Item for MarbleBlockItem {
+    const INFO: ItemInfo = ItemInfo {
+        id: "example:marble_block",
+        label: "Marble",
+    };
+}
+
+impl ItemRender for MarbleBlockItem {
+    const RENDER: ItemRenderInfo = ItemRenderInfo {
+        model: Some("item-marble-block:item/marble_block"),
+    };
+}
+
+pub const ITEM_INFO: ItemInfo = MarbleBlockItem::INFO;
+pub const ITEM_RENDER_INFO: ItemRenderInfo =
+    <MarbleBlockItem as ItemRender>::RENDER;
 ```
 
 The item registry generates `ItemId` and lookup functions. The manager API
-exposes all items, IDs, labels, and string conversion.
+exposes all items, IDs, labels, string conversion, and render information.
 
 ## Item instances
 
@@ -212,7 +211,7 @@ Current metadata:
 | --- | --- |
 | `Quantity` | `Finite(u32)` or `Infinite` |
 | `PlaceBlock` | Block placed by vanilla item-use behavior |
-| `ItemFavicon` | Client UI image path |
+| `ItemFavicon` | Optional per-instance client UI image override |
 | `PortalIgniter` | Marker understood by portal ignition |
 
 Each metadata type is a separate contributor mod.
@@ -243,9 +242,6 @@ ItemInstance::with_metadata(
         place_block: Some(PlaceBlock {
             block: BlockId::Marble,
         }),
-        favicon: Some(ItemFavicon::new(
-            "block-marble/marble.png",
-        )),
         ..Default::default()
     },
 )
@@ -256,20 +252,21 @@ constructor.
 
 ## Adding a block and its item
 
-1. Create the block contributor and asset.
+1. Create the block contributor, JSON model, and texture assets.
 2. Add it to `blocks.toml`.
 3. Create an item contributor.
 4. Add it to `items.toml`.
 5. If it should be placeable, create `PlaceBlock` metadata when instantiating
    the item.
 6. If it should appear in a default loadout, update or replace the loadout mod.
-7. Recompose both client and server.
+7. Give the item a JSON model and export `ITEM_RENDER_INFO`.
+8. Recompose both client and server.
 
 Do not add place behavior to the item contributor itself. The item definition
 must remain usable in servers with different rules.
 
-The demo currently follows this process for every non-air block: 30 block
-contributors have 30 matching block-item contributors, while `block-air`
+The demo currently follows this process for every non-air block: 33 block
+contributors have 33 matching block-item contributors, while `block-air`
 intentionally has no inventory item. This is checked at composition through the
 generated item registry, not by coupling block codegen to item codegen. A custom
 server is still free to omit any of those item contributors.

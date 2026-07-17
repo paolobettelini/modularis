@@ -1,0 +1,7 @@
+{
+  "parent": "voxel-model-anvil-template-mod:block/anvil_template",
+  "textures": {
+    "body": "block-anvil:block/anvil",
+    "top": "block-anvil:block/anvil_top"
+  }
+}

@@ -52,11 +52,13 @@ Generated manager:
 Current block contributors:
 
 - `block-air`;
+- `block-anvil`;
 - `block-basalt`;
 - `block-bedrock`;
 - `block-birch-leaves` and `block-birch-log`;
 - `block-blackstone`;
 - `block-cactus` and `block-calcite`;
+- `block-cauldron`;
 - `block-crafting-table`;
 - `block-crimson-nylium` and `block-warped-nylium`;
 - `block-diamond-block`;
@@ -70,6 +72,7 @@ Current block contributors:
 - `block-netherrack`;
 - `block-oak-leaves`;
 - `block-oak-log`;
+- `block-oak-stairs`;
 - `block-obsidian`;
 - `block-packed-ice`;
 - `block-red-sand` and `block-sand`;
@@ -88,6 +91,7 @@ Block edit networking:
 Contracts:
 
 - `item-api`;
+- `item-render-api`;
 - `item-instance-api`;
 - `item-manager-api`;
 - `item-use-api`.
@@ -105,13 +109,33 @@ Metadata:
 
 Block item contributors follow the `item-<block>-block` naming family. The
 current composition contains one for every non-air block contributor listed
-above: 30 placeable block items. This one-to-one relation is a selected demo
+above: 33 placeable block items. This one-to-one relation is a selected demo
 policy, not a registry requirement; a custom composition may expose blocks
 without inventory items or multiple items for one block.
 
-Tool item:
+Standalone and tool items:
 
-- `item-flint-and-steel`.
+- `item-flint-and-steel`;
+- `item-stick`.
+
+## JSON voxel models
+
+Contracts and library:
+
+- `voxel-models-lib`;
+- `voxel-model-api`.
+
+Template asset mods:
+
+- `voxel-model-block-templates-mod`;
+- `voxel-model-item-templates-mod`;
+- `voxel-model-anvil-template-mod`.
+
+Client providers and consumers:
+
+- `client-voxel-model-assets-fs-impl`;
+- `client-chunk-mesh-voxel-models-impl`;
+- `client-item-model-ui-mod`.
 
 ## Chunk data and math
 
@@ -209,7 +233,8 @@ Infrastructure and providers:
 - `client-chunk-work-priority-mod`;
 - `client-chunk-layered-priority-vanilla-mod`;
 - `client-chunk-request-network-mod`;
-- `client-chunk-mesh-naive-cubes-impl`;
+- `client-chunk-mesh-voxel-models-impl` (active JSON model provider);
+- `client-chunk-mesh-naive-cubes-impl` (legacy alternate provider);
 - `client-chunk-render-bevy-impl`;
 - `client-chunk-vertex-lighting-pipeline-mod`;
 - face-shading and ambient-occlusion vanilla mods.

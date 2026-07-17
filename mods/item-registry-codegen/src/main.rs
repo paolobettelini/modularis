@@ -44,15 +44,31 @@ fn run() -> Result<(), Box<dyn Error>> {
     }
     let project = project.ok_or("missing --project")?.canonicalize()?;
     let output = output.ok_or("missing --output-crate")?;
-    let (items, item_api_path) = collect_items(&project)?;
-    write_registry(&output, &package, &version, &items, &item_api_path)?;
+    let (items, item_api_path, render_api_path) = collect_items(&project)?;
+    write_registry(
+        &output,
+        &package,
+        &version,
+        &items,
+        &item_api_path,
+        &render_api_path,
+    )?;
     if let Some(dev_crate) = dev_crate {
-        write_registry(&dev_crate, &package, &version, &items, &item_api_path)?;
+        write_registry(
+            &dev_crate,
+            &package,
+            &version,
+            &items,
+            &item_api_path,
+            &render_api_path,
+        )?;
     }
     Ok(())
 }
 
-fn collect_items(project: &Path) -> Result<(Vec<ItemDeclaration>, PathBuf), Box<dyn Error>> {
+fn collect_items(
+    project: &Path,
+) -> Result<(Vec<ItemDeclaration>, PathBuf, PathBuf), Box<dyn Error>> {
     let manifest = read_toml(&project.join("Cargo.toml"))?;
     let dependencies = manifest
         .get("dependencies")
@@ -62,6 +78,7 @@ fn collect_items(project: &Path) -> Result<(Vec<ItemDeclaration>, PathBuf), Box<
     let mut ids = HashSet::new();
     let mut variants = HashSet::new();
     let mut item_api_path = None;
+    let mut render_api_path = None;
     for (dependency_key, dependency) in dependencies {
         let Some(mod_dir) = dependency_path(project, dependency)? else {
             continue;
@@ -79,6 +96,9 @@ fn collect_items(project: &Path) -> Result<(Vec<ItemDeclaration>, PathBuf), Box<
         let _label = required_string(item, "label")?;
         if item_api_path.is_none() {
             item_api_path = find_path_dependency(&mod_manifest, &mod_dir, "item-api")?;
+        }
+        if render_api_path.is_none() {
+            render_api_path = find_path_dependency(&mod_manifest, &mod_dir, "item-render-api")?;
         }
         if !ids.insert(id.clone()) {
             return Err(format!("duplicate item id '{id}'").into());
@@ -101,6 +121,7 @@ fn collect_items(project: &Path) -> Result<(Vec<ItemDeclaration>, PathBuf), Box<
     Ok((
         items,
         item_api_path.ok_or("no item contributor exposed item-api")?,
+        render_api_path.ok_or("no item contributor exposed item-render-api")?,
     ))
 }
 
@@ -110,6 +131,7 @@ fn write_registry(
     version: &str,
     items: &[ItemDeclaration],
     item_api_path: &Path,
+    render_api_path: &Path,
 ) -> Result<(), Box<dyn Error>> {
     if output.exists() {
         fs::remove_dir_all(output)?;
@@ -127,6 +149,10 @@ fn write_registry(
         .chain(std::iter::once(format!(
             "item-api = {{ path = \"{}\" }}",
             toml_path(&relative_path(output, item_api_path))
+        )))
+        .chain(std::iter::once(format!(
+            "item-render-api = {{ path = \"{}\" }}",
+            toml_path(&relative_path(output, render_api_path))
         )))
         .chain(std::iter::once(
             "serde = { version = \"1.0\", features = [\"derive\"] }".to_string(),
@@ -170,14 +196,26 @@ fn generate_source(items: &[ItemDeclaration]) -> String {
         })
         .collect::<Vec<_>>()
         .join("\n");
+    let render = items
+        .iter()
+        .map(|item| {
+            format!(
+                "        ItemId::{} => &{}::ITEM_RENDER_INFO,",
+                item.variant,
+                item.dependency_key.replace('-', "_")
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
     format!(
-        "use item_api::ItemInfo;\n\n\
+        "use item_api::ItemInfo;\nuse item_render_api::ItemRenderInfo;\n\n\
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]\n\
 pub enum ItemId {{\n{variants}\n}}\n\n\
 pub const ALL_ITEMS: &[ItemId] = &[\n{all}\n];\n\n\
 pub fn all_items() -> &'static [ItemId] {{ ALL_ITEMS }}\n\n\
 pub fn from_str(id: &str) -> Option<ItemId> {{\n    match id {{\n{from_id}\n        _ => None,\n    }}\n}}\n\n\
 pub fn info(item: ItemId) -> &'static ItemInfo {{\n    match item {{\n{info}\n    }}\n}}\n\n\
+pub fn render_info(item: ItemId) -> &'static ItemRenderInfo {{\n    match item {{\n{render}\n    }}\n}}\n\n\
 pub fn id(item: ItemId) -> &'static str {{ info(item).id }}\n\
 pub fn label(item: ItemId) -> &'static str {{ info(item).label }}\n"
     )

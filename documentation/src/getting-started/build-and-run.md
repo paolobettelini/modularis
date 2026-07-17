@@ -143,7 +143,7 @@ variant.
 Assets are copied under `assets/<mod-id>/`. A path must include that namespace:
 
 ```rust
-asset_server.load("block-stone/stone.png")
+asset_server.load("block-stone/textures/block/stone.png")
 ```
 
 Do not assume another mod owns or copies the file unless the dependency is

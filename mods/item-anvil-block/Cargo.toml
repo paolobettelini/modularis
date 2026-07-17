@@ -1,0 +1,22 @@
+[package]
+name = "item-anvil-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemAnvilBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-anvil"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:anvil_block"
+label = "Anvil"
+
+[dependencies]
+block-anvil = { path = "../block-anvil" }
+item-api = { path = "../item-api" }
+item-render-api = { path = "../item-render-api" }
+tokio = { version = "1.48.0", features = ["full"] }

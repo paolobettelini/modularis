@@ -1,0 +1,28 @@
+[package]
+name = "client-item-model-ui-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientItemModelUiMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "inventory-events-mod",
+    "client-inventory-ui-api",
+    "item-manager-api",
+    "voxel-model-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-inventory-ui-api = { path = "../client-inventory-ui-api" }
+inventory-events-api = { path = "../inventory-events-api" }
+inventory-events-mod = { path = "../inventory-events-mod" }
+item-manager-api = { path = "../item-manager-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-model-api = { path = "../voxel-model-api" }

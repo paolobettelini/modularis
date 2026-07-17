@@ -16,7 +16,6 @@ init = [
     "item-metadata-registry-codegen",
     "server-player-lifecycle-events-mod",
     "server-inventory-api",
-    "item-favicon-meta",
     "item-portal-igniter-meta",
 ]
 run = []
@@ -30,7 +29,6 @@ generated-item-metadata = "0.1.0"
 inventory-core-api = { path = "../inventory-core-api" }
 inventory-events-api = { path = "../inventory-events-api" }
 inventory-events-mod = { path = "../inventory-events-mod" }
-item-favicon-meta = { path = "../item-favicon-meta" }
 item-instance-api = { path = "../item-instance-api" }
 item-manager-api = { path = "../item-manager-api" }
 item-metadata-registry-codegen = { path = "../item-metadata-registry-codegen" }

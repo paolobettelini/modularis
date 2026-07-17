@@ -5,7 +5,7 @@ edition = "2024"
 [package.metadata.mod]
 entry = "ItemCrimsonNyliumBlockMod"
 [package.metadata.mod.dependencies]
-init = []
+init = ["block-crimson-nylium"]
 run = []
 ownership = []
 [package.metadata.item]
@@ -13,4 +13,6 @@ id = "demo:crimson_nylium_block"
 label = "Crimson Nylium"
 [dependencies]
 item-api = { path = "../item-api" }
+item-render-api = { path = "../item-render-api" }
+block-crimson-nylium = { path = "../block-crimson-nylium" }
 tokio = { version = "1.48.0", features = ["full"] }

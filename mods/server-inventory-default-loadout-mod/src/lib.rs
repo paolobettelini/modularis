@@ -6,7 +6,6 @@ use inventory_events_api::{
     InventoryResetRequested, InventorySyncRequested, InventoryValidationSet,
 };
 use inventory_events_mod::InventoryEventsMod;
-use item_favicon_meta::ItemFavicon;
 use item_instance_api::ItemInstance;
 use item_manager_api::ItemManagerApi;
 use item_place_block_meta::PlaceBlock;
@@ -33,7 +32,6 @@ impl<L: ServerInventoryLayoutApi, I: ItemManagerApi, B: BlockManagerApi>
         _metadata: &mut item_metadata_registry_codegen::ItemMetadataRegistryCodegenMod,
         _lifecycle: &mut ServerPlayerLifecycleEventsMod,
         _inventories: &mut S,
-        _favicon: &mut item_favicon_meta::ItemFaviconMetaMod,
         _portal_igniter: &mut item_portal_igniter_meta::ItemPortalIgniterMetaMod,
     ) -> Self {
         bevy.app.add_systems(
@@ -84,6 +82,14 @@ fn write_default_reset<L: ServerInventoryLayoutApi, I: ItemManagerApi, B: BlockM
             Some(flint_and_steel::<I>()),
         )
         .expect("default flint-and-steel hotbar cell must exist");
+    for (index, spec) in STORAGE_ITEMS.iter().enumerate() {
+        inventory
+            .set(
+                InventoryCell::new("storage", index as u32),
+                Some(storage_item::<I, B>(spec)),
+            )
+            .expect("default storage cell must exist");
+    }
     resets.write(InventoryResetRequested {
         player_id,
         inventory,
@@ -95,7 +101,6 @@ struct BlockItemSpec {
     item_id: &'static str,
     block_id: &'static str,
     quantity: Quantity,
-    favicon: &'static str,
 }
 
 const BLOCK_ITEMS: &[BlockItemSpec] = &[
@@ -103,61 +108,51 @@ const BLOCK_ITEMS: &[BlockItemSpec] = &[
         item_id: "demo:grass_block",
         block_id: "demo:grass",
         quantity: Quantity::Finite(64),
-        favicon: "block-grass/grass.png",
     },
     BlockItemSpec {
         item_id: "demo:stone_block",
         block_id: "demo:stone",
         quantity: Quantity::Infinite,
-        favicon: "block-stone/stone.png",
     },
     BlockItemSpec {
         item_id: "demo:bedrock_block",
         block_id: "demo:bedrock",
         quantity: Quantity::Infinite,
-        favicon: "block-bedrock/bedrock.png",
     },
     BlockItemSpec {
         item_id: "demo:crafting_table_block",
         block_id: "demo:crafting-table",
         quantity: Quantity::Infinite,
-        favicon: "block-crafting-table/crafting_table_top.png",
     },
     BlockItemSpec {
         item_id: "demo:diamond_block",
         block_id: "demo:diamond-block",
         quantity: Quantity::Infinite,
-        favicon: "block-diamond-block/diamond_block.png",
     },
     BlockItemSpec {
         item_id: "demo:diamond_ore_block",
         block_id: "demo:diamond-ore",
         quantity: Quantity::Infinite,
-        favicon: "block-diamond-ore/diamond_ore.png",
     },
     BlockItemSpec {
         item_id: "demo:netherrack_block",
         block_id: "demo:netherrack",
         quantity: Quantity::Infinite,
-        favicon: "block-netherrack/netherrack.png",
     },
     BlockItemSpec {
         item_id: "demo:glowstone_block",
         block_id: "demo:glowstone",
         quantity: Quantity::Infinite,
-        favicon: "block-glowstone/glowstone.png",
     },
     BlockItemSpec {
         item_id: "demo:end_stone_block",
         block_id: "demo:end-stone",
         quantity: Quantity::Infinite,
-        favicon: "block-end-stone/end_stone.png",
     },
     BlockItemSpec {
         item_id: "demo:obsidian_block",
         block_id: "demo:obsidian",
         quantity: Quantity::Infinite,
-        favicon: "block-obsidian/obsidian.png",
     },
 ];
 
@@ -169,7 +164,6 @@ fn block_item<I: ItemManagerApi, B: BlockManagerApi>(spec: &BlockItemSpec) -> It
             place_block: Some(PlaceBlock {
                 block: B::from_string(spec.block_id).expect("default block must exist"),
             }),
-            favicon: Some(ItemFavicon::new(spec.favicon)),
             ..Default::default()
         },
     )
@@ -180,9 +174,48 @@ fn flint_and_steel<I: ItemManagerApi>() -> ItemInstance {
         I::from_string("demo:flint-and-steel").expect("flint-and-steel item must exist"),
         generated_item_metadata::ItemMetaSet {
             quantity: Some(Quantity::Infinite),
-            favicon: Some(ItemFavicon::new("item-flint-and-steel/flint-and-steel.png")),
             portal_igniter: Some(PortalIgniter::new()),
             ..Default::default()
         },
+    )
+}
+
+struct StorageItemSpec {
+    item_id: &'static str,
+    block_id: Option<&'static str>,
+}
+
+const STORAGE_ITEMS: &[StorageItemSpec] = &[
+    StorageItemSpec {
+        item_id: "demo:stick",
+        block_id: None,
+    },
+    StorageItemSpec {
+        item_id: "demo:anvil_block",
+        block_id: Some("demo:anvil"),
+    },
+    StorageItemSpec {
+        item_id: "demo:oak_stairs_block",
+        block_id: Some("demo:oak-stairs"),
+    },
+    StorageItemSpec {
+        item_id: "demo:cauldron_block",
+        block_id: Some("demo:cauldron"),
+    },
+];
+
+fn storage_item<I: ItemManagerApi, B: BlockManagerApi>(spec: &StorageItemSpec) -> ItemInstance {
+    let mut metadata = generated_item_metadata::ItemMetaSet {
+        quantity: Some(Quantity::Infinite),
+        ..Default::default()
+    };
+    if let Some(block_id) = spec.block_id {
+        metadata.place_block = Some(PlaceBlock {
+            block: B::from_string(block_id).expect("default storage block must exist"),
+        });
+    }
+    ItemInstance::with_metadata(
+        I::from_string(spec.item_id).expect("default storage item must exist"),
+        metadata,
     )
 }

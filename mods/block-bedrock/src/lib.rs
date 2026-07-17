@@ -1,5 +1,5 @@
 use block_api::{Block, BlockInfo};
-use block_render_api::{BlockRender, BlockRenderInfo, BlockTextures, RenderShape};
+use block_render_api::{BlockRender, BlockRenderInfo, RenderShape};
 use tokio::task::JoinHandle;
 
 pub struct BedrockBlock;
@@ -15,8 +15,9 @@ impl Block for BedrockBlock {
 
 impl BlockRender for BedrockBlock {
     const RENDER: BlockRenderInfo = BlockRenderInfo {
-        shape: RenderShape::Cube,
-        textures: Some(BlockTextures::Uniform("block-bedrock/bedrock.png")),
+        shape: RenderShape::Model,
+        model: Some("block-bedrock:block/bedrock"),
+        textures: None,
     };
 }
 
@@ -26,7 +27,9 @@ pub const RENDER_INFO: BlockRenderInfo = BedrockBlock::RENDER;
 pub struct BlockBedrockMod;
 
 impl BlockBedrockMod {
-    pub fn init() -> Self {
+    pub fn init(
+        _templates: &mut voxel_model_block_templates_mod::VoxelModelBlockTemplatesMod,
+    ) -> Self {
         Self
     }
 

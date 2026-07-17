@@ -4,6 +4,7 @@ modpacks = ["blocks"]
 ignore = []
 
 mods = [
+    "voxel-model-item-templates-mod",
     "item-dirt-block",
     "item-grass-block",
     "item-stone-block",
@@ -35,6 +36,10 @@ mods = [
     "item-terracotta-block",
     "item-warped-nylium-block",
     "item-flint-and-steel",
+    "item-stick",
+    "item-anvil-block",
+    "item-oak-stairs-block",
+    "item-cauldron-block",
     "item-quantity-meta",
     "item-place-block-meta",
     "item-favicon-meta",

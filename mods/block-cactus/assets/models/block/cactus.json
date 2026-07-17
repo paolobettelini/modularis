@@ -1,0 +1,11 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube",
+  "textures": {
+    "down": "block-cactus:block/cactus_bottom",
+    "up": "block-cactus:block/cactus_top",
+    "north": "block-cactus:block/cactus_side",
+    "south": "block-cactus:block/cactus_side",
+    "west": "block-cactus:block/cactus_side",
+    "east": "block-cactus:block/cactus_side"
+  }
+}

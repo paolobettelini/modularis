@@ -16,6 +16,7 @@ impl Block for AirBlock {
 impl BlockRender for AirBlock {
     const RENDER: BlockRenderInfo = BlockRenderInfo {
         shape: RenderShape::Invisible,
+        model: None,
         textures: None,
     };
 }
@@ -26,7 +27,9 @@ pub const RENDER_INFO: BlockRenderInfo = AirBlock::RENDER;
 pub struct BlockAirMod;
 
 impl BlockAirMod {
-    pub fn init() -> Self {
+    pub fn init(
+        _templates: &mut voxel_model_block_templates_mod::VoxelModelBlockTemplatesMod,
+    ) -> Self {
         Self
     }
 

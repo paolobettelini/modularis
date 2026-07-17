@@ -1,5 +1,5 @@
 use block_api::{Block, BlockInfo};
-use block_render_api::{BlockRender, BlockRenderInfo, BlockTextures, RenderShape};
+use block_render_api::{BlockRender, BlockRenderInfo, RenderShape};
 use tokio::task::JoinHandle;
 
 pub struct BasaltBlock;
@@ -13,22 +13,18 @@ impl Block for BasaltBlock {
 }
 impl BlockRender for BasaltBlock {
     const RENDER: BlockRenderInfo = BlockRenderInfo {
-        shape: RenderShape::Cube,
-        textures: Some(BlockTextures::PerFace {
-            east: "block-basalt/basalt_side.png",
-            west: "block-basalt/basalt_side.png",
-            top: "block-basalt/basalt_top.png",
-            bottom: "block-basalt/basalt_top.png",
-            south: "block-basalt/basalt_side.png",
-            north: "block-basalt/basalt_side.png",
-        }),
+        shape: RenderShape::Model,
+        model: Some("block-basalt:block/basalt"),
+        textures: None,
     };
 }
 pub const BLOCK_INFO: BlockInfo = BasaltBlock::INFO;
 pub const RENDER_INFO: BlockRenderInfo = BasaltBlock::RENDER;
 pub struct BlockBasaltMod;
 impl BlockBasaltMod {
-    pub fn init() -> Self {
+    pub fn init(
+        _templates: &mut voxel_model_block_templates_mod::VoxelModelBlockTemplatesMod,
+    ) -> Self {
         Self
     }
     pub fn run(&self) -> Option<Vec<JoinHandle<()>>> {

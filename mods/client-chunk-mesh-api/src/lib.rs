@@ -38,7 +38,7 @@ impl ChunkMeshNeighborhood {
 
 #[derive(Debug, Clone, Default)]
 pub struct ChunkMeshPart {
-    pub texture: Option<&'static str>,
+    pub texture: Option<String>,
     pub positions: Vec<[f32; 3]>,
     pub normals: Vec<[f32; 3]>,
     pub colors: Vec<[f32; 4]>,
@@ -63,9 +63,9 @@ impl ChunkMeshData {
     }
 }
 
-pub trait ChunkMeshApi: Send + Sync + 'static {
-    fn mesh_chunk(neighborhood: &ChunkMeshNeighborhood) -> ChunkMeshData;
-}
+/// Marker implemented by the selected provider. Concrete providers install a
+/// `ChunkMeshService`, which also supports stateful/cached model resolvers.
+pub trait ChunkMeshApi: Send + Sync + 'static {}
 
 pub type ChunkMeshFunction =
     dyn Fn(&ChunkMeshNeighborhood) -> ChunkMeshData + Send + Sync + 'static;
@@ -76,12 +76,6 @@ pub struct ChunkMeshService {
 }
 
 impl ChunkMeshService {
-    pub fn from_api<M: ChunkMeshApi>() -> Self {
-        Self {
-            mesh_chunk: Arc::new(M::mesh_chunk),
-        }
-    }
-
     pub fn new(
         mesh_chunk: impl Fn(&ChunkMeshNeighborhood) -> ChunkMeshData + Send + Sync + 'static,
     ) -> Self {

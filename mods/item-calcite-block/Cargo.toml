@@ -5,7 +5,7 @@ edition = "2024"
 [package.metadata.mod]
 entry = "ItemCalciteBlockMod"
 [package.metadata.mod.dependencies]
-init = []
+init = ["block-calcite"]
 run = []
 ownership = []
 [package.metadata.item]
@@ -13,4 +13,6 @@ id = "demo:calcite_block"
 label = "Calcite"
 [dependencies]
 item-api = { path = "../item-api" }
+item-render-api = { path = "../item-render-api" }
+block-calcite = { path = "../block-calcite" }
 tokio = { version = "1.48.0", features = ["full"] }

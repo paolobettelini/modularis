@@ -7,7 +7,7 @@ edition = "2024"
 entry = "ItemGrassBlockMod"
 
 [package.metadata.mod.dependencies]
-init = []
+init = ["block-grass"]
 run = []
 ownership = []
 
@@ -17,6 +17,8 @@ label = "Grass"
 
 [dependencies]
 item-api = { path = "../item-api" }
+item-render-api = { path = "../item-render-api" }
+block-grass = { path = "../block-grass" }
 
 
 

@@ -1,5 +1,5 @@
 use block_api::{Block, BlockInfo};
-use block_render_api::{BlockRender, BlockRenderInfo, BlockTextures, RenderShape};
+use block_render_api::{BlockRender, BlockRenderInfo, RenderShape};
 use tokio::task::JoinHandle;
 
 pub struct GlowstoneBlock;
@@ -15,8 +15,9 @@ impl Block for GlowstoneBlock {
 
 impl BlockRender for GlowstoneBlock {
     const RENDER: BlockRenderInfo = BlockRenderInfo {
-        shape: RenderShape::Cube,
-        textures: Some(BlockTextures::Uniform("block-glowstone/glowstone.png")),
+        shape: RenderShape::Model,
+        model: Some("block-glowstone:block/glowstone"),
+        textures: None,
     };
 }
 
@@ -26,7 +27,9 @@ pub const RENDER_INFO: BlockRenderInfo = GlowstoneBlock::RENDER;
 pub struct BlockGlowstoneMod;
 
 impl BlockGlowstoneMod {
-    pub fn init() -> Self {
+    pub fn init(
+        _templates: &mut voxel_model_block_templates_mod::VoxelModelBlockTemplatesMod,
+    ) -> Self {
         Self
     }
 

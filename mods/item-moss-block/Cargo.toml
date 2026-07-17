@@ -5,7 +5,7 @@ edition = "2024"
 [package.metadata.mod]
 entry = "ItemMossBlockMod"
 [package.metadata.mod.dependencies]
-init = []
+init = ["block-moss"]
 run = []
 ownership = []
 [package.metadata.item]
@@ -13,4 +13,6 @@ id = "demo:moss_block"
 label = "Moss"
 [dependencies]
 item-api = { path = "../item-api" }
+item-render-api = { path = "../item-render-api" }
+block-moss = { path = "../block-moss" }
 tokio = { version = "1.48.0", features = ["full"] }

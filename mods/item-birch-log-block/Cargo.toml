@@ -5,7 +5,7 @@ edition = "2024"
 [package.metadata.mod]
 entry = "ItemBirchLogBlockMod"
 [package.metadata.mod.dependencies]
-init = []
+init = ["block-birch-log"]
 run = []
 ownership = []
 [package.metadata.item]
@@ -13,4 +13,6 @@ id = "demo:birch_log_block"
 label = "Birch Log"
 [dependencies]
 item-api = { path = "../item-api" }
+item-render-api = { path = "../item-render-api" }
+block-birch-log = { path = "../block-birch-log" }
 tokio = { version = "1.48.0", features = ["full"] }

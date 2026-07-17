@@ -1,0 +1,7 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_column",
+  "textures": {
+    "side": "block-basalt:block/basalt_side",
+    "end": "block-basalt:block/basalt_top"
+  }
+}

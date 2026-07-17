@@ -1,6 +1,7 @@
 use item_api::ItemInfo;
 use item_manager_api::{ItemId, ItemManagerApi};
 use item_registry_codegen::ItemRegistryCodegenMod;
+use item_render_api::ItemRenderInfo;
 use tokio::task::JoinHandle;
 
 pub struct GeneratedItemManager;
@@ -18,6 +19,10 @@ impl GeneratedItemManager {
 impl ItemManagerApi for GeneratedItemManager {
     fn info(item: ItemId) -> &'static ItemInfo {
         generated_item_registry::info(item)
+    }
+
+    fn render_info(item: ItemId) -> &'static ItemRenderInfo {
+        generated_item_registry::render_info(item)
     }
 
     fn all() -> &'static [ItemId] {

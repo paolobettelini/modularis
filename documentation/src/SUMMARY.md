@@ -17,6 +17,7 @@
   - [Chat, commands, and completion](./runtime/chat-and-commands.md)
 - [World architecture](./world/world-overview.md)
   - [Blocks, items, and metadata](./world/blocks-and-items.md)
+  - [JSON voxel models and textures](./world/voxel-models.md)
   - [Chunk coordinates and storage](./world/chunk-storage.md)
   - [Server world providers and residency](./world/server-world.md)
   - [Biomes and world-generation features](./world/biomes.md)

@@ -5,7 +5,7 @@ edition = "2024"
 [package.metadata.mod]
 entry = "ItemTerracottaBlockMod"
 [package.metadata.mod.dependencies]
-init = []
+init = ["block-terracotta"]
 run = []
 ownership = []
 [package.metadata.item]
@@ -13,4 +13,6 @@ id = "demo:terracotta_block"
 label = "Terracotta"
 [dependencies]
 item-api = { path = "../item-api" }
+item-render-api = { path = "../item-render-api" }
+block-terracotta = { path = "../block-terracotta" }
 tokio = { version = "1.48.0", features = ["full"] }

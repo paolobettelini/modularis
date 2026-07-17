@@ -18,13 +18,13 @@ This prevents two mods from accidentally owning the same path.
 A stone texture stored at:
 
 ```text
-mods/block-stone/assets/stone.png
+mods/block-stone/assets/textures/block/stone.png
 ```
 
 is loaded as:
 
 ```rust
-asset_server.load("block-stone/stone.png")
+asset_server.load("block-stone/textures/block/stone.png")
 ```
 
 The source path is not used at runtime.
@@ -32,7 +32,9 @@ The source path is not used at runtime.
 Current asset owners include:
 
 - each textured block mod;
-- `item-flint-and-steel`;
+- item mods with dedicated textures, such as `item-flint-and-steel` and
+  `item-stick`;
+- asset-only JSON model template mods;
 - `client-ui-font-dejavu-mod`;
 - `client-player-blocky-model-paths-mod`.
 
@@ -53,14 +55,21 @@ mods non-portable and create hidden dependencies.
 
 ## References across mods
 
-Cross-mod asset references are allowed when the dependency is intentional. The
-default inventory loadout uses block textures as item favicon metadata:
+Cross-mod asset references are allowed when the dependency is intentional. For
+example, a block model can inherit a parent exported by another mod:
 
-```rust
-favicon: Some(ItemFavicon::new("block-stone/stone.png"))
+```json
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_all",
+  "textures": {
+    "all": "block-stone:block/stone"
+  }
+}
 ```
 
-That loadout already depends on the selected block and item registries.
+The block mod declares `voxel-model-block-templates-mod` as a formal Patchwork
+dependency even though the template entry type performs no runtime work. This
+ensures the parent model is copied in every valid composition.
 
 If a feature requires an asset from another mod, make the relationship visible
 in Cargo/Patchwork dependencies. Otherwise a valid-looking path may disappear
@@ -68,15 +77,17 @@ in another composition.
 
 ## Runtime file loading
 
-Most Bevy assets use `AssetServer`. The Blocky parser currently also supports
-direct filesystem loading. Its resolver interprets a relative runtime path as:
+Most Bevy assets use `AssetServer`. The Blocky player parser and JSON voxel
+model provider also support direct filesystem loading. The voxel provider maps
+the resource ID `block-stone:block/stone` to:
 
 ```text
-assets/<relative-path>
+assets/block-stone/models/block/stone.json
 ```
 
-This works in generated applications because Patchwork has already copied the
-asset namespace.
+and maps its texture ID to
+`assets/block-stone/textures/block/stone.png`. This works in generated
+applications because Patchwork has already copied each asset namespace.
 
 ## Generated crate output
 
@@ -114,5 +125,6 @@ modpacks.
 5. Recompose.
 6. Confirm the file exists under the generated application's assets.
 
-Prefer lowercase stable filenames. Asset paths are serialized in item metadata
-and stored in resources, so renaming them is a data compatibility change.
+Prefer lowercase stable filenames. Model IDs are generated registry data and
+some asset paths may be serialized in metadata or stored in resources, so
+renaming them is a compatibility change.

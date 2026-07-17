@@ -1,5 +1,5 @@
 use block_api::{Block, BlockInfo};
-use block_render_api::{BlockRender, BlockRenderInfo, BlockTextures, RenderShape};
+use block_render_api::{BlockRender, BlockRenderInfo, RenderShape};
 use tokio::task::JoinHandle;
 
 pub struct DirtBlock;
@@ -15,8 +15,9 @@ impl Block for DirtBlock {
 
 impl BlockRender for DirtBlock {
     const RENDER: BlockRenderInfo = BlockRenderInfo {
-        shape: RenderShape::Cube,
-        textures: Some(BlockTextures::Uniform("block-dirt/dirt.png")),
+        shape: RenderShape::Model,
+        model: Some("block-dirt:block/dirt"),
+        textures: None,
     };
 }
 
@@ -26,7 +27,9 @@ pub const RENDER_INFO: BlockRenderInfo = DirtBlock::RENDER;
 pub struct BlockDirtMod;
 
 impl BlockDirtMod {
-    pub fn init() -> Self {
+    pub fn init(
+        _templates: &mut voxel_model_block_templates_mod::VoxelModelBlockTemplatesMod,
+    ) -> Self {
         Self
     }
 

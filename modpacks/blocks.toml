@@ -4,6 +4,8 @@ modpacks = []
 ignore = []
 
 mods = [
+    "voxel-model-block-templates-mod",
+    "voxel-model-anvil-template-mod",
     "block-air",
     "block-grass",
     "block-dirt",
@@ -35,6 +37,9 @@ mods = [
     "block-warped-nylium",
     "block-moss",
     "block-calcite",
+    "block-anvil",
+    "block-oak-stairs",
+    "block-cauldron",
     "block-metadata-registry-codegen",
     "block-registry-codegen",
     "block-manager-generated-impl",

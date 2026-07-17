@@ -136,22 +136,32 @@ The renderer includes all 26 neighboring chunk positions for invalidation
 because vertex ambient occlusion can sample across edges and corners, not only
 six face neighbors.
 
-## Naive cube mesher
+## JSON model mesher
 
-`client-chunk-mesh-naive-cubes-impl`:
+The active `client-chunk-mesh-voxel-models-impl`:
 
 1. iterates all blocks in the center chunk;
-2. ignores air and invisible shapes;
-3. tests each of six neighboring blocks;
-4. emits only faces adjacent to a non-opaque or missing block;
-5. groups mesh parts by texture;
-6. computes optional vertex lighting;
+2. looks up each block's model ID through `BlockManagerApi`;
+3. reuses models baked and cached by `VoxelModelService`;
+4. culls only model faces tagged with `cullface` when the corresponding
+   neighbor is opaque;
+5. groups baked quads by their resolved texture;
+6. computes optional vertex lighting from model normals;
 7. chooses the better quad diagonal for AO gradients.
 
 Each mesh part contains positions, normals, colors, UVs, and indices.
 
+Model geometry may contain any number of elements, so anvil, stair, and
+cauldron rendering does not require block-ID branches in the mesher. JSON model
+inheritance and texture resolution are described in
+[JSON voxel models and textures](./voxel-models.md).
+
+`client-chunk-mesh-naive-cubes-impl` remains available as a simpler alternate
+provider for compositions that intentionally use the legacy cube render data.
+
 The API is replaceable. A greedy mesher should implement the same
-`ChunkMeshApi` and install a `ChunkMeshService`.
+`ChunkMeshApi`, consume the model service if needed, and install a
+`ChunkMeshService`.
 
 ## Empty and uniform fast paths
 

@@ -1,0 +1,6 @@
+{
+  "parent": "voxel-model-item-templates-mod:item/handheld",
+  "textures": {
+    "layer0": "item-flint-and-steel:item/flint_and_steel"
+  }
+}

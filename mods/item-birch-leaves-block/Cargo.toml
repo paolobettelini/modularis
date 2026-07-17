@@ -5,7 +5,7 @@ edition = "2024"
 [package.metadata.mod]
 entry = "ItemBirchLeavesBlockMod"
 [package.metadata.mod.dependencies]
-init = []
+init = ["block-birch-leaves"]
 run = []
 ownership = []
 [package.metadata.item]
@@ -13,4 +13,6 @@ id = "demo:birch_leaves_block"
 label = "Birch Leaves"
 [dependencies]
 item-api = { path = "../item-api" }
+item-render-api = { path = "../item-render-api" }
+block-birch-leaves = { path = "../block-birch-leaves" }
 tokio = { version = "1.48.0", features = ["full"] }

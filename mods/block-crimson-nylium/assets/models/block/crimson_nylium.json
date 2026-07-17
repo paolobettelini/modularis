@@ -1,0 +1,11 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube",
+  "textures": {
+    "down": "block-crimson-nylium:block/crimson_nylium_side",
+    "up": "block-crimson-nylium:block/crimson_nylium_top",
+    "north": "block-crimson-nylium:block/crimson_nylium_side",
+    "south": "block-crimson-nylium:block/crimson_nylium_side",
+    "west": "block-crimson-nylium:block/crimson_nylium_side",
+    "east": "block-crimson-nylium:block/crimson_nylium_side"
+  }
+}

@@ -1,5 +1,5 @@
 use block_api::{Block, BlockInfo};
-use block_render_api::{BlockRender, BlockRenderInfo, BlockTextures, RenderShape};
+use block_render_api::{BlockRender, BlockRenderInfo, RenderShape};
 use tokio::task::JoinHandle;
 
 pub struct BlackstoneBlock;
@@ -13,22 +13,18 @@ impl Block for BlackstoneBlock {
 }
 impl BlockRender for BlackstoneBlock {
     const RENDER: BlockRenderInfo = BlockRenderInfo {
-        shape: RenderShape::Cube,
-        textures: Some(BlockTextures::PerFace {
-            east: "block-blackstone/blackstone_side.png",
-            west: "block-blackstone/blackstone_side.png",
-            top: "block-blackstone/blackstone_top.png",
-            bottom: "block-blackstone/blackstone_top.png",
-            south: "block-blackstone/blackstone_side.png",
-            north: "block-blackstone/blackstone_side.png",
-        }),
+        shape: RenderShape::Model,
+        model: Some("block-blackstone:block/blackstone"),
+        textures: None,
     };
 }
 pub const BLOCK_INFO: BlockInfo = BlackstoneBlock::INFO;
 pub const RENDER_INFO: BlockRenderInfo = BlackstoneBlock::RENDER;
 pub struct BlockBlackstoneMod;
 impl BlockBlackstoneMod {
-    pub fn init() -> Self {
+    pub fn init(
+        _templates: &mut voxel_model_block_templates_mod::VoxelModelBlockTemplatesMod,
+    ) -> Self {
         Self
     }
     pub fn run(&self) -> Option<Vec<JoinHandle<()>>> {

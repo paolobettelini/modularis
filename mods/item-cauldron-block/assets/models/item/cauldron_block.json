@@ -1,0 +1,6 @@
+{
+  "parent": "voxel-model-item-templates-mod:item/generated",
+  "textures": {
+    "layer0": "item-cauldron-block:item/cauldron"
+  }
+}

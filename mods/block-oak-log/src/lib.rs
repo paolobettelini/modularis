@@ -1,5 +1,5 @@
 use block_api::{Block, BlockInfo};
-use block_render_api::{BlockRender, BlockRenderInfo, BlockTextures, RenderShape};
+use block_render_api::{BlockRender, BlockRenderInfo, RenderShape};
 use tokio::task::JoinHandle;
 
 pub struct OakLogBlock;
@@ -15,15 +15,9 @@ impl Block for OakLogBlock {
 
 impl BlockRender for OakLogBlock {
     const RENDER: BlockRenderInfo = BlockRenderInfo {
-        shape: RenderShape::Cube,
-        textures: Some(BlockTextures::PerFace {
-            east: "block-oak-log/oak_log_side.png",
-            west: "block-oak-log/oak_log_side.png",
-            top: "block-oak-log/oak_log_top.png",
-            bottom: "block-oak-log/oak_log_top.png",
-            south: "block-oak-log/oak_log_side.png",
-            north: "block-oak-log/oak_log_side.png",
-        }),
+        shape: RenderShape::Model,
+        model: Some("block-oak-log:block/oak_log"),
+        textures: None,
     };
 }
 
@@ -33,7 +27,9 @@ pub const RENDER_INFO: BlockRenderInfo = OakLogBlock::RENDER;
 pub struct BlockOakLogMod;
 
 impl BlockOakLogMod {
-    pub fn init() -> Self {
+    pub fn init(
+        _templates: &mut voxel_model_block_templates_mod::VoxelModelBlockTemplatesMod,
+    ) -> Self {
         Self
     }
     pub fn run(&self) -> Option<Vec<JoinHandle<()>>> {

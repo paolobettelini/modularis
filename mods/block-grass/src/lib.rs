@@ -1,5 +1,5 @@
 use block_api::{Block, BlockInfo};
-use block_render_api::{BlockRender, BlockRenderInfo, BlockTextures, RenderShape};
+use block_render_api::{BlockRender, BlockRenderInfo, RenderShape};
 use tokio::task::JoinHandle;
 
 pub struct GrassBlock;
@@ -15,8 +15,9 @@ impl Block for GrassBlock {
 
 impl BlockRender for GrassBlock {
     const RENDER: BlockRenderInfo = BlockRenderInfo {
-        shape: RenderShape::Cube,
-        textures: Some(BlockTextures::Uniform("block-grass/grass.png")),
+        shape: RenderShape::Model,
+        model: Some("block-grass:block/grass"),
+        textures: None,
     };
 }
 
@@ -26,7 +27,9 @@ pub const RENDER_INFO: BlockRenderInfo = GrassBlock::RENDER;
 pub struct BlockGrassMod;
 
 impl BlockGrassMod {
-    pub fn init() -> Self {
+    pub fn init(
+        _templates: &mut voxel_model_block_templates_mod::VoxelModelBlockTemplatesMod,
+    ) -> Self {
         Self
     }
 

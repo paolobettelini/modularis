@@ -7,7 +7,7 @@ edition = "2024"
 entry = "ItemBedrockBlockMod"
 
 [package.metadata.mod.dependencies]
-init = []
+init = ["block-bedrock"]
 run = []
 ownership = []
 
@@ -17,4 +17,6 @@ label = "Bedrock"
 
 [dependencies]
 item-api = { path = "../item-api" }
+item-render-api = { path = "../item-render-api" }
+block-bedrock = { path = "../block-bedrock" }
 tokio = { version = "1.48.0", features = ["full"] }

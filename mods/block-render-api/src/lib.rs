@@ -1,7 +1,10 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RenderShape {
     Invisible,
+    /// Transitional legacy cube path. New block mods should export a JSON
+    /// model instead.
     Cube,
+    Model,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -56,13 +59,17 @@ impl BlockTextures {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BlockRenderInfo {
     pub shape: RenderShape,
+    /// Namespaced JSON model ID, for example `block-stone:block/stone`.
+    pub model: Option<&'static str>,
+    /// Legacy cube textures retained so old custom mesh providers remain
+    /// source-compatible during the model migration.
     /// `None` renders a visible shape as plain white.
     pub textures: Option<BlockTextures>,
 }
 
 impl BlockRenderInfo {
     pub const fn should_render(self) -> bool {
-        matches!(self.shape, RenderShape::Cube)
+        !matches!(self.shape, RenderShape::Invisible)
     }
 }
 

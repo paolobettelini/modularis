@@ -7,7 +7,7 @@ edition = "2024"
 entry = "BlockBirchLogMod"
 
 [package.metadata.mod.dependencies]
-init = []
+init = ["voxel-model-block-templates-mod"]
 run = []
 ownership = []
 
@@ -17,4 +17,5 @@ id = "demo:birch-log"
 [dependencies]
 block-api = { path = "../block-api" }
 block-render-api = { path = "../block-render-api" }
+voxel-model-block-templates-mod = { path = "../voxel-model-block-templates-mod" }
 tokio = { version = "1.48.0", features = ["full"] }

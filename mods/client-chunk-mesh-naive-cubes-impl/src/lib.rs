@@ -35,13 +35,13 @@ impl<B: BlockManagerApi> NaiveCubeChunkMesher<B> {
     pub fn run(&self) -> Option<Vec<JoinHandle<()>>> {
         None
     }
-}
 
-impl<B: BlockManagerApi> ChunkMeshApi for NaiveCubeChunkMesher<B> {
-    fn mesh_chunk(neighborhood: &ChunkMeshNeighborhood) -> ChunkMeshData {
+    pub fn mesh_chunk(neighborhood: &ChunkMeshNeighborhood) -> ChunkMeshData {
         mesh_chunk_with_lighting::<B>(neighborhood, &ChunkVertexLightingSnapshot::default())
     }
 }
+
+impl<B: BlockManagerApi> ChunkMeshApi for NaiveCubeChunkMesher<B> {}
 
 fn mesh_chunk_with_lighting<B: BlockManagerApi>(
     neighborhood: &ChunkMeshNeighborhood,
@@ -102,10 +102,10 @@ fn mesh_part<'a>(
     let index = mesh
         .parts
         .iter()
-        .position(|part| part.texture == texture)
+        .position(|part| part.texture.as_deref() == texture)
         .unwrap_or_else(|| {
             mesh.parts.push(ChunkMeshPart {
-                texture,
+                texture: texture.map(str::to_string),
                 ..Default::default()
             });
             mesh.parts.len() - 1
@@ -326,10 +326,12 @@ mod tests {
     };
     static AIR_RENDER: BlockRenderInfo = BlockRenderInfo {
         shape: RenderShape::Invisible,
+        model: None,
         textures: None,
     };
     static STONE_RENDER: BlockRenderInfo = BlockRenderInfo {
         shape: RenderShape::Cube,
+        model: None,
         textures: None,
     };
     static ALL_BLOCKS: [BlockId; 2] = [BlockId::Air, BlockId::Stone];

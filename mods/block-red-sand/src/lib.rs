@@ -1,5 +1,5 @@
 use block_api::{Block, BlockInfo};
-use block_render_api::{BlockRender, BlockRenderInfo, BlockTextures, RenderShape};
+use block_render_api::{BlockRender, BlockRenderInfo, RenderShape};
 use tokio::task::JoinHandle;
 
 pub struct RedSandBlock;
@@ -15,8 +15,9 @@ impl Block for RedSandBlock {
 
 impl BlockRender for RedSandBlock {
     const RENDER: BlockRenderInfo = BlockRenderInfo {
-        shape: RenderShape::Cube,
-        textures: Some(BlockTextures::Uniform("block-red-sand/red_sand.png")),
+        shape: RenderShape::Model,
+        model: Some("block-red-sand:block/red_sand"),
+        textures: None,
     };
 }
 
@@ -25,7 +26,9 @@ pub const RENDER_INFO: BlockRenderInfo = RedSandBlock::RENDER;
 
 pub struct BlockRedSandMod;
 impl BlockRedSandMod {
-    pub fn init() -> Self {
+    pub fn init(
+        _templates: &mut voxel_model_block_templates_mod::VoxelModelBlockTemplatesMod,
+    ) -> Self {
         Self
     }
     pub fn run(&self) -> Option<Vec<JoinHandle<()>>> {

@@ -1,0 +1,23 @@
+[package]
+name = "item-cauldron-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemCauldronBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-cauldron", "voxel-model-item-templates-mod"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:cauldron_block"
+label = "Cauldron"
+
+[dependencies]
+block-cauldron = { path = "../block-cauldron" }
+item-api = { path = "../item-api" }
+item-render-api = { path = "../item-render-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-model-item-templates-mod = { path = "../voxel-model-item-templates-mod" }

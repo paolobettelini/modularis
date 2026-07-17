@@ -1,5 +1,5 @@
 use block_api::{Block, BlockInfo};
-use block_render_api::{BlockRender, BlockRenderInfo, BlockTextures, RenderShape};
+use block_render_api::{BlockRender, BlockRenderInfo, RenderShape};
 use tokio::task::JoinHandle;
 
 pub struct NetherrackBlock;
@@ -15,8 +15,9 @@ impl Block for NetherrackBlock {
 
 impl BlockRender for NetherrackBlock {
     const RENDER: BlockRenderInfo = BlockRenderInfo {
-        shape: RenderShape::Cube,
-        textures: Some(BlockTextures::Uniform("block-netherrack/netherrack.png")),
+        shape: RenderShape::Model,
+        model: Some("block-netherrack:block/netherrack"),
+        textures: None,
     };
 }
 
@@ -26,7 +27,9 @@ pub const RENDER_INFO: BlockRenderInfo = NetherrackBlock::RENDER;
 pub struct BlockNetherrackMod;
 
 impl BlockNetherrackMod {
-    pub fn init() -> Self {
+    pub fn init(
+        _templates: &mut voxel_model_block_templates_mod::VoxelModelBlockTemplatesMod,
+    ) -> Self {
         Self
     }
 

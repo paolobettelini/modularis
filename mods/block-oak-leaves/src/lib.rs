@@ -1,5 +1,5 @@
 use block_api::{Block, BlockInfo};
-use block_render_api::{BlockRender, BlockRenderInfo, BlockTextures, RenderShape};
+use block_render_api::{BlockRender, BlockRenderInfo, RenderShape};
 use tokio::task::JoinHandle;
 
 pub struct OakLeavesBlock;
@@ -15,8 +15,9 @@ impl Block for OakLeavesBlock {
 
 impl BlockRender for OakLeavesBlock {
     const RENDER: BlockRenderInfo = BlockRenderInfo {
-        shape: RenderShape::Cube,
-        textures: Some(BlockTextures::Uniform("block-oak-leaves/oak_leaves.png")),
+        shape: RenderShape::Model,
+        model: Some("block-oak-leaves:block/oak_leaves"),
+        textures: None,
     };
 }
 
@@ -26,7 +27,9 @@ pub const RENDER_INFO: BlockRenderInfo = OakLeavesBlock::RENDER;
 pub struct BlockOakLeavesMod;
 
 impl BlockOakLeavesMod {
-    pub fn init() -> Self {
+    pub fn init(
+        _templates: &mut voxel_model_block_templates_mod::VoxelModelBlockTemplatesMod,
+    ) -> Self {
         Self
     }
     pub fn run(&self) -> Option<Vec<JoinHandle<()>>> {

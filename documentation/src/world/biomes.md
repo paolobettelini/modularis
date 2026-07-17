@@ -369,8 +369,9 @@ policy. Provider selection stays in the server's world composition.
 
 ## Texture ownership
 
-Every block mod owns its texture files and Patchwork copies them to
-`assets/<mod-name>/`. The expanded biome set adds textures for birch logs and
+Every block mod owns its model and texture files, and Patchwork copies them to
+`assets/<mod-name>/`. Textures conventionally live below
+`textures/block/`. The expanded biome set adds textures for birch logs and
 leaves, red sand, terracotta, soul sand, soul soil, basalt, blackstone, crimson
 and warped nylium, moss, and calcite. These files were copied from the local
 vanilla texture pack into their owning mods; no provider has a central texture

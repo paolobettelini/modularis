@@ -1,0 +1,7 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_column",
+  "textures": {
+    "side": "block-blackstone:block/blackstone_side",
+    "end": "block-blackstone:block/blackstone_top"
+  }
+}

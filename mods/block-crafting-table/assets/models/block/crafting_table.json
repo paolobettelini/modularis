@@ -1,0 +1,11 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube",
+  "textures": {
+    "down": "block-crafting-table:block/crafting_table_side",
+    "up": "block-crafting-table:block/crafting_table_top",
+    "north": "block-crafting-table:block/crafting_table_side",
+    "south": "block-crafting-table:block/crafting_table_front",
+    "west": "block-crafting-table:block/crafting_table_side",
+    "east": "block-crafting-table:block/crafting_table_side"
+  }
+}

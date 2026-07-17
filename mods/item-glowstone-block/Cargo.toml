@@ -7,7 +7,7 @@ edition = "2024"
 entry = "ItemGlowstoneBlockMod"
 
 [package.metadata.mod.dependencies]
-init = []
+init = ["block-glowstone"]
 run = []
 ownership = []
 
@@ -17,4 +17,6 @@ label = "Glowstone"
 
 [dependencies]
 item-api = { path = "../item-api" }
+item-render-api = { path = "../item-render-api" }
+block-glowstone = { path = "../block-glowstone" }
 tokio = { version = "1.48.0", features = ["full"] }

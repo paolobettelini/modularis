@@ -116,7 +116,7 @@ Log at the layer that understands the failure:
 - framing errors in transport;
 - unknown/unavailable route in world API caller;
 - validation denial in gameplay validator;
-- model parse error in Blocky renderer;
+- Blocky or voxel-model parse error in the selected model provider;
 - missing asset in presentation;
 - duplicate provider at registration.
 
@@ -165,7 +165,8 @@ Improve these in transport/scheduling mods.
 
 ## Rendering performance
 
-The naive mesher emits one quad for every visible block face.
+The active JSON model mesher emits the visible baked quads of every block. It
+does not merge adjacent coplanar model faces.
 
 Likely next improvements:
 

@@ -5,7 +5,7 @@ edition = "2024"
 [package.metadata.mod]
 entry = "ItemOakLeavesBlockMod"
 [package.metadata.mod.dependencies]
-init = []
+init = ["block-oak-leaves"]
 run = []
 ownership = []
 [package.metadata.item]
@@ -13,4 +13,6 @@ id = "demo:oak_leaves_block"
 label = "Oak Leaves"
 [dependencies]
 item-api = { path = "../item-api" }
+item-render-api = { path = "../item-render-api" }
+block-oak-leaves = { path = "../block-oak-leaves" }
 tokio = { version = "1.48.0", features = ["full"] }

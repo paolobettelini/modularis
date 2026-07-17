@@ -1,0 +1,11 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube",
+  "textures": {
+    "down": "block-warped-nylium:block/warped_nylium_side",
+    "up": "block-warped-nylium:block/warped_nylium_top",
+    "north": "block-warped-nylium:block/warped_nylium_side",
+    "south": "block-warped-nylium:block/warped_nylium_side",
+    "west": "block-warped-nylium:block/warped_nylium_side",
+    "east": "block-warped-nylium:block/warped_nylium_side"
+  }
+}

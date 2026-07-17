@@ -1,0 +1,16 @@
+[package]
+name = "voxel-model-anvil-template-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "VoxelModelAnvilTemplateMod"
+
+[package.metadata.mod.dependencies]
+init = ["voxel-model-block-templates-mod"]
+run = []
+ownership = []
+
+[dependencies]
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-model-block-templates-mod = { path = "../voxel-model-block-templates-mod" }

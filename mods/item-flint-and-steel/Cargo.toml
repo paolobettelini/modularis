@@ -7,7 +7,7 @@ edition = "2024"
 entry = "ItemFlintAndSteelMod"
 
 [package.metadata.mod.dependencies]
-init = []
+init = ["voxel-model-item-templates-mod"]
 run = []
 ownership = []
 
@@ -17,4 +17,6 @@ label = "Flint and Steel"
 
 [dependencies]
 item-api = { path = "../item-api" }
+item-render-api = { path = "../item-render-api" }
+voxel-model-item-templates-mod = { path = "../voxel-model-item-templates-mod" }
 tokio = { version = "1.48.0", features = ["full"] }

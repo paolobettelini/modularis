@@ -1,0 +1,6 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_all",
+  "textures": {
+    "all": "block-diamond-ore:block/diamond_ore"
+  }
+}

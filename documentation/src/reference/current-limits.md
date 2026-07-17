@@ -30,7 +30,13 @@ Design direction:
 
 Current limits:
 
-- naive visible-face meshing;
+- JSON model quads are emitted without greedy merging;
+- block/item model selection does not yet evaluate runtime blockstate or modern
+  item-property trees;
+- inventory block-item previews use a resolved texture instead of a full
+  isometric model render;
+- visual model shape and collision shape are independent, but the active
+  collision provider still uses full-block AABBs for every solid block;
 - no transparent block pass;
 - no greedy meshing;
 - no background mesh jobs;
@@ -42,6 +48,9 @@ Current limits:
 Design direction:
 
 - preserve mesh/render APIs while replacing implementations;
+- add blockstate and per-instance model selection as separate providers;
+- add a replaceable full-model inventory preview adapter;
+- add a generated or data-driven collision-shape contract;
 - keep graphics stages composable;
 - add explicit opaque/transparent render contracts.
 

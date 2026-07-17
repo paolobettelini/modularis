@@ -150,14 +150,15 @@ fn process_chunk_remeshes<B: BlockManagerApi>(
                 continue;
             }
 
-            let material_key = material_key(part.texture);
+            let material_key = material_key(part.texture.as_deref());
+            let texture_path = part.texture.clone();
             let material = chunk_materials
                 .0
                 .entry(material_key)
                 .or_insert_with(|| {
                     materials.add(StandardMaterial {
                         base_color: Color::WHITE,
-                        base_color_texture: part.texture.map(|path| asset_server.load(path)),
+                        base_color_texture: texture_path.map(|path| asset_server.load(path)),
                         perceptual_roughness: 1.0,
                         cull_mode: None,
                         ..default()

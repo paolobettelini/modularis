@@ -1,5 +1,5 @@
 use block_api::{Block, BlockInfo};
-use block_render_api::{BlockRender, BlockRenderInfo, BlockTextures, RenderShape};
+use block_render_api::{BlockRender, BlockRenderInfo, RenderShape};
 use tokio::task::JoinHandle;
 
 pub struct DiamondBlockBlock;
@@ -15,10 +15,9 @@ impl Block for DiamondBlockBlock {
 
 impl BlockRender for DiamondBlockBlock {
     const RENDER: BlockRenderInfo = BlockRenderInfo {
-        shape: RenderShape::Cube,
-        textures: Some(BlockTextures::Uniform(
-            "block-diamond-block/diamond_block.png",
-        )),
+        shape: RenderShape::Model,
+        model: Some("block-diamond-block:block/diamond_block"),
+        textures: None,
     };
 }
 
@@ -28,7 +27,9 @@ pub const RENDER_INFO: BlockRenderInfo = DiamondBlockBlock::RENDER;
 pub struct BlockDiamondBlockMod;
 
 impl BlockDiamondBlockMod {
-    pub fn init() -> Self {
+    pub fn init(
+        _templates: &mut voxel_model_block_templates_mod::VoxelModelBlockTemplatesMod,
+    ) -> Self {
         Self
     }
 
