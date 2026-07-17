@@ -1,13 +1,6 @@
 name = "Minecraft demo biome identities"
-description = "Biome id contributors and the generated biome registry shared by composed applications."
-modpacks = ["blocks"]
+description = "Dimension-scoped biome ID contributors and the generated biome registry."
+modpacks = ["blocks", "dimensions", "biomes-overworld", "biomes-nether", "biomes-aether"]
 ignore = []
 
-mods = [
-    "biome-plains",
-    "biome-forest",
-    "biome-desert",
-    "biome-tundra",
-    "biome-rocky-peaks",
-    "biome-registry-codegen",
-]
+mods = ["biome-registry-codegen"]

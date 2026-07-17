@@ -3,6 +3,7 @@ use block_instance_api::BlockInstance;
 use chunk_api::Chunk;
 pub use generated_biome_registry::BiomeId;
 use generated_block_registry::BlockId;
+pub use generated_dimension_registry::Dimension;
 use server_chunk_provider_api::ChunkGenerationRequest;
 use std::collections::BTreeMap;
 use std::fmt;
@@ -59,6 +60,8 @@ impl fmt::Display for BiomeFeatureId {
 #[derive(Debug, Clone, PartialEq)]
 pub struct BiomeDefinition {
     pub id: BiomeId,
+    /// Dimension in which this definition may be selected.
+    pub dimension: Dimension,
     pub name: &'static str,
     pub climate: BiomeClimate,
     pub terrain: BiomeTerrain,
@@ -281,6 +284,17 @@ impl ServerBiomeRegistry {
             .collect()
     }
 
+    pub fn definitions_for_dimension(&self, dimension: Dimension) -> Vec<BiomeDefinition> {
+        self.0
+            .read()
+            .expect("server biome registry lock poisoned")
+            .definitions
+            .values()
+            .filter(|definition| definition.dimension == dimension)
+            .cloned()
+            .collect()
+    }
+
     pub fn feature(&self, id: &BiomeFeatureId) -> Option<Arc<dyn ServerBiomeFeature>> {
         self.0
             .read()
@@ -326,6 +340,7 @@ mod tests {
     fn definition(features: Vec<BiomeFeatureId>) -> BiomeDefinition {
         BiomeDefinition {
             id: BiomeId::Plains,
+            dimension: Dimension::Overworld,
             name: "Plains",
             climate: BiomeClimate {
                 temperature: 0.5,
@@ -371,5 +386,29 @@ mod tests {
         let range = FeatureVerticalRange::RelativeToSurface { min: 1, max: 7 };
         assert!(range.intersects(16, 31, 10, 20));
         assert!(!range.intersects(64, 79, 10, 20));
+    }
+
+    #[test]
+    fn definitions_are_filtered_by_dimension() {
+        let registry = ServerBiomeRegistry::default();
+        registry.register_biome(definition(Vec::new())).unwrap();
+        let mut nether = definition(Vec::new());
+        nether.id = BiomeId::NetherWastes;
+        nether.dimension = Dimension::Nether;
+        registry.register_biome(nether).unwrap();
+
+        assert_eq!(
+            registry.definitions_for_dimension(Dimension::Overworld)[0].id,
+            BiomeId::Plains
+        );
+        assert_eq!(
+            registry.definitions_for_dimension(Dimension::Nether)[0].id,
+            BiomeId::NetherWastes
+        );
+        assert!(
+            registry
+                .definitions_for_dimension(Dimension::Aether)
+                .is_empty()
+        );
     }
 }

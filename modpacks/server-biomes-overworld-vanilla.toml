@@ -1,0 +1,21 @@
+name = "Minecraft demo vanilla Overworld biomes"
+description = "Vanilla-style Overworld biome definitions and their generation features."
+modpacks = ["biomes-overworld"]
+ignore = []
+
+mods = [
+    "server-biome-feature-caves-vanilla-mod",
+    "server-biome-feature-ores-vanilla-mod",
+    "server-biome-feature-oak-trees-vanilla-mod",
+    "server-biome-feature-birch-trees-vanilla-mod",
+    "server-biome-feature-cacti-vanilla-mod",
+    "server-biome-feature-ice-patches-vanilla-mod",
+    "server-biome-feature-boulders-vanilla-mod",
+    "server-biome-plains-vanilla-mod",
+    "server-biome-forest-vanilla-mod",
+    "server-biome-birch-forest-vanilla-mod",
+    "server-biome-desert-vanilla-mod",
+    "server-biome-badlands-vanilla-mod",
+    "server-biome-tundra-vanilla-mod",
+    "server-biome-rocky-peaks-vanilla-mod",
+]

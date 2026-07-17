@@ -45,9 +45,14 @@ pub struct DimensionDefinition {
 
 The current definitions are:
 
-- Overworld: primary biome-driven provider, blue sky, default spawn;
-- Nether: Nether provider, dark red sky;
-- Aether: Aether provider, blue sky, elevated spawn.
+- Overworld: continuous biome-driven heightmap, blue sky, default spawn;
+- Nether: biome-driven ground over bedrock, dark red sky;
+- Aether: biome-driven floating islands, blue sky, elevated spawn.
+
+Each provider requests only `BiomeDefinition` values whose `dimension` matches
+the active dimension. They reuse biome sampling infrastructure but remain
+separate provider implementations, so a server can replace one dimension's
+geometry without replacing the others.
 
 The Overworld registration explicitly marks itself as default. Registration
 order does not choose the default.

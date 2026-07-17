@@ -139,8 +139,8 @@ Providers:
 
 - `server-chunk-provider-biomes-mod` (active Overworld provider);
 - `server-chunk-provider-perlin-mod`;
-- `server-chunk-provider-nether-mod`;
-- `server-chunk-provider-aether-mod`;
+- `server-chunk-provider-nether-mod` (active biome-driven Nether provider);
+- `server-chunk-provider-aether-mod` (active biome-driven Aether provider);
 - `server-chunk-provider-checkerboard-mod`.
 
 Routing:
@@ -158,7 +158,7 @@ Identity and codegen:
 
 - `biome-registry-codegen`;
 - `generated-biome-registry`;
-- Plains, Forest, Desert, Tundra, and Rocky Peaks contributor mods.
+- seven Overworld, five Nether, and three Aether identity contributors.
 
 Contracts and providers:
 
@@ -166,6 +166,7 @@ Contracts and providers:
 - `server-biome-selection-api`;
 - `server-biome-registry-mod`;
 - `server-biome-climate-selector-vanilla-mod`;
+- `server-biome-sampling-api` shared provider support;
 - one vanilla definition mod per biome.
 
 Phased features:
@@ -175,7 +176,10 @@ Phased features:
 - sparse/dense oak trees;
 - cacti;
 - packed-ice patches;
-- rock boulders.
+- rock boulders;
+- birch trees;
+- glowstone clusters;
+- crystal spires.
 
 ## Client chunks
 

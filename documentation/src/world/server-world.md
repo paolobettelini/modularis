@@ -35,10 +35,9 @@ Registration rejects duplicate IDs.
 The demo selects:
 
 - `server-chunk-provider-biomes-mod`: biome-driven Overworld terrain;
-- `server-chunk-provider-nether-mod`: netherrack/bedrock terrain with occasional
-  obsidian;
-- `server-chunk-provider-aether-mod`: floating grass, dirt, and stone islands
-  with glowstone;
+- `server-chunk-provider-nether-mod`: biome-driven Nether terrain over a
+  bedrock floor;
+- `server-chunk-provider-aether-mod`: biome-driven floating islands;
 - `server-chunk-provider-perlin-mod`: alternate single-biome terrain, not active
   in the main server;
 - `server-chunk-provider-checkerboard-mod`: alternate test provider, not active
@@ -46,19 +45,24 @@ The demo selects:
 
 Providers answer all integer `ChunkPos` values.
 
+The biome-aware providers share `server-biome-sampling-api` for dimension
+filtering, cached selection, terrain-parameter blending, feature bounds, and
+phased feature dispatch. They do not share geometry policy.
+
 They use uniform fast paths for guaranteed regions:
 
 - the biome Overworld provider combines local surface bounds with declared
   feature ranges, returning uniform air or underground chunks when no feature
   can affect them;
-- Nether returns air above and netherrack below its mixed layer;
-- Aether returns air outside its island altitude;
+- Nether returns air above every local surface and relevant feature;
+- Aether returns air outside all island columns and feature bounds;
 - checkerboard returns simple uniform deep/sky chunks.
 
 Exact terrain policy belongs to each provider.
 
-The Overworld biome registry, climate selector, phased features, and generation
-algorithm are described in [Biomes and world-generation features](biomes.md).
+The dimension-scoped registry, selector, shared sampler, phased features, and
+provider responsibilities are described in
+[Biomes and world-generation features](biomes.md).
 
 ## Adding a provider
 

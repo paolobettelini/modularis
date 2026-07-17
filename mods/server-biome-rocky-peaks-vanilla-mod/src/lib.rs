@@ -2,7 +2,8 @@ use bevy_mod::BevyMod;
 use generated_biome_registry::BiomeId;
 use generated_block_registry::BlockId;
 use server_biome_api::{
-    BiomeClimate, BiomeDefinition, BiomeTerrain, BiomeVisuals, ServerBiomeApi, ServerBiomeRegistry,
+    BiomeClimate, BiomeDefinition, BiomeTerrain, BiomeVisuals, Dimension, ServerBiomeApi,
+    ServerBiomeRegistry,
 };
 use server_biome_feature_boulders_vanilla_mod::{
     ServerBiomeFeatureBouldersVanillaMod, boulders_feature_id,
@@ -27,6 +28,7 @@ impl ServerBiomeRockyPeaksVanillaMod {
             .resource::<ServerBiomeRegistry>()
             .register_biome(BiomeDefinition {
                 id: BiomeId::RockyPeaks,
+                dimension: Dimension::Overworld,
                 name: "Rocky Peaks",
                 climate: BiomeClimate {
                     temperature: 0.32,

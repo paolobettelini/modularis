@@ -1,0 +1,14 @@
+name = "Minecraft demo vanilla Nether biomes"
+description = "Vanilla-style Nether biome definitions and their generation features."
+modpacks = ["biomes-nether"]
+ignore = []
+
+mods = [
+    "server-biome-feature-caves-vanilla-mod",
+    "server-biome-feature-glowstone-clusters-vanilla-mod",
+    "server-biome-nether-wastes-vanilla-mod",
+    "server-biome-soul-sand-valley-vanilla-mod",
+    "server-biome-crimson-forest-vanilla-mod",
+    "server-biome-warped-forest-vanilla-mod",
+    "server-biome-basalt-deltas-vanilla-mod",
+]

@@ -24,3 +24,4 @@ voxel-math-api = { path = "../voxel-math-api" }
 generated-biome-registry = { path = "../generated-biome-registry" }
 generated-block-metadata = { path = "../generated-block-metadata" }
 generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }

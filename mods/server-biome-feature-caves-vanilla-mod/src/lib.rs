@@ -68,9 +68,9 @@ impl ServerBiomeFeature for CavesFeature {
                     );
                     let tunnel = a * 0.62 + b * 0.38;
                     if tunnel.abs() < 0.045
-                        && context
-                            .block(world)
-                            .is_some_and(|block| block.block != BlockId::Air)
+                        && context.block(world).is_some_and(|block| {
+                            block.block != BlockId::Air && block.block != BlockId::Bedrock
+                        })
                     {
                         context.set_block(world, BlockId::Air);
                     }

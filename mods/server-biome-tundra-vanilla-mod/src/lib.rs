@@ -2,7 +2,8 @@ use bevy_mod::BevyMod;
 use generated_biome_registry::BiomeId;
 use generated_block_registry::BlockId;
 use server_biome_api::{
-    BiomeClimate, BiomeDefinition, BiomeTerrain, BiomeVisuals, ServerBiomeApi, ServerBiomeRegistry,
+    BiomeClimate, BiomeDefinition, BiomeTerrain, BiomeVisuals, Dimension, ServerBiomeApi,
+    ServerBiomeRegistry,
 };
 use server_biome_feature_caves_vanilla_mod::{ServerBiomeFeatureCavesVanillaMod, caves_feature_id};
 use server_biome_feature_ice_patches_vanilla_mod::{
@@ -27,6 +28,7 @@ impl ServerBiomeTundraVanillaMod {
             .resource::<ServerBiomeRegistry>()
             .register_biome(BiomeDefinition {
                 id: BiomeId::Tundra,
+                dimension: Dimension::Overworld,
                 name: "Frozen Tundra",
                 climate: BiomeClimate {
                     temperature: 0.08,

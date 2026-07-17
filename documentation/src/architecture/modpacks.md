@@ -24,9 +24,11 @@ generated `BlockId`.
 `network.toml` imports blocks and dimensions because packets serialize block
 instances, chunks, and dimension IDs.
 
-`biomes.toml` imports blocks and selects biome identity contributors plus
-`biome-registry-codegen`. It is not part of `common.toml` yet because the
-current network protocol does not transmit biome IDs.
+`biomes-overworld.toml`, `biomes-nether.toml`, and `biomes-aether.toml` select
+dimension-specific biome identity contributors. `biomes.toml` imports those
+packs, blocks, and dimensions, then selects `biome-registry-codegen`. It is not
+part of `common.toml` yet because the current network protocol does not transmit
+biome IDs.
 
 ## Client composition
 
@@ -92,9 +94,9 @@ changing controls or graphics.
 
 `server-vanilla.toml` contains selected policy:
 
-- the imported `server-biomes-vanilla.toml` pack with climate selection,
-  biome definitions, and phased generation features;
-- the biome runtime registry and the selected primary Overworld provider;
+- the imported `server-biomes-vanilla.toml` umbrella, whose separate
+  Overworld, Nether, and Aether packs contain definitions and phased features;
+- the biome runtime registry, vanilla selector, and shared biome sampler;
 - player-interest chunk residency;
 - world-scope player visibility;
 - default dimension lifecycle;
@@ -115,12 +117,12 @@ changing controls or graphics.
 - dimension registry;
 - Overworld, Nether, and Aether definitions;
 - dimension-aware chunk routing;
-- biome-driven Overworld, Nether, and Aether providers;
+- independent biome-driven Overworld, Nether, and Aether providers;
 - dynamic world cache and edit overlay.
 
-The biome pack is separate from `server-base.toml`. A server can omit it and
-select the simple Perlin provider, checkerboard provider, a file-backed world,
-or a custom biome composition.
+The biome packs are separate from `server-base.toml`. A server can import only
+chosen dimension packs, omit them, or select the simple Perlin provider,
+checkerboard provider, a file-backed world, or a custom biome composition.
 
 ## Why vanilla is not base
 

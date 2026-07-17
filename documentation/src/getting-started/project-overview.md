@@ -48,14 +48,16 @@ The current compositions are:
 | `blocks.toml` | Block contributors, block metadata, generated block registry |
 | `items.toml` | Item contributors, item metadata, generated item registry |
 | `dimensions.toml` | Dimension contributors and generated `Dimension` enum |
-| `biomes.toml` | Biome identity contributors and generated `BiomeId` enum |
+| `biomes-{overworld,nether,aether}.toml` | Dimension-specific biome identity contributors |
+| `biomes.toml` | All demo biome identities and generated `BiomeId` enum |
 | `network.toml` | Network message contributors and generated protocol |
 | `common.toml` | Shared Bevy foundation plus blocks, items, and protocol |
 | `client-vanilla.toml` | Optional Minecraft-like client behavior |
 | `client-graphics.toml` | Optional lighting and voxel shading |
 | `client.toml` | Playable client composition |
 | `server-base.toml` | Neutral server transport and authoritative pipelines |
-| `server-biomes-vanilla.toml` | Optional vanilla biome definitions, features, and selector |
+| `server-biomes-{overworld,nether,aether}-vanilla.toml` | Optional definitions and features for one dimension |
+| `server-biomes-vanilla.toml` | Umbrella vanilla biome packs and selector |
 | `server-vanilla.toml` | Optional Minecraft-like server rules and selected biome runtime/provider |
 | `server.toml` | Demo server composition and concrete world providers |
 

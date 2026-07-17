@@ -1,0 +1,13 @@
+name = "Minecraft demo vanilla Aether biomes"
+description = "Vanilla-style Aether biome definitions and their generation features."
+modpacks = ["biomes-aether"]
+ignore = []
+
+mods = [
+    "server-biome-feature-oak-trees-vanilla-mod",
+    "server-biome-feature-glowstone-clusters-vanilla-mod",
+    "server-biome-feature-crystal-spires-vanilla-mod",
+    "server-biome-aether-highlands-vanilla-mod",
+    "server-biome-aether-golden-grove-vanilla-mod",
+    "server-biome-aether-crystal-peaks-vanilla-mod",
+]

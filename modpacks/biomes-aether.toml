@@ -1,0 +1,10 @@
+name = "Minecraft demo Aether biome identities"
+description = "Biome ID contributors for the Aether."
+modpacks = []
+ignore = []
+
+mods = [
+    "biome-aether-highlands",
+    "biome-aether-golden-grove",
+    "biome-aether-crystal-peaks",
+]

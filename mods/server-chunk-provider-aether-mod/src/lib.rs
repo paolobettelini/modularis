@@ -3,30 +3,49 @@ use block_manager_api::BlockManagerApi;
 use chunk_api::Chunk;
 use coherent_noise_api::PerlinNoise2d;
 use generated_block_registry::BlockId;
+use server_biome_api::{BiomeTerrain, Dimension, ServerBiomeApi, ServerBiomeRegistry};
+use server_biome_sampling_api::ServerBiomeSampler;
+use server_biome_selection_api::{ServerBiomeSelectionApi, ServerBiomeSelectorResource};
 use server_chunk_provider_api::{
     ChunkGenerationRequest, ChunkProviderId, ServerChunkProvider, ServerChunkProviderRegistry,
 };
 use server_chunk_provider_registry_mod::ServerChunkProviderRegistryMod;
+use std::cell::RefCell;
+use std::collections::{BTreeSet, HashMap};
+use std::sync::{Arc, OnceLock};
 use tokio::task::JoinHandle;
-use voxel_math_api::{BlockPos, CHUNK_SIZE, LocalBlockPos};
+use voxel_math_api::{CHUNK_SIZE, LocalBlockPos};
 
 pub const AETHER_PROVIDER_ID: &str = "demo:aether-islands";
 const AETHER_SEED: u32 = 0x4145_5448;
+const FEATURE_HORIZONTAL_MARGIN: i32 = 2;
 
 pub struct ServerChunkProviderAetherMod;
 
 impl ServerChunkProviderAetherMod {
-    pub fn init<B: BlockManagerApi>(
+    pub fn init<B: BlockManagerApi, A: ServerBiomeApi, S: ServerBiomeSelectionApi>(
         bevy: &mut BevyMod,
         _registry: &mut ServerChunkProviderRegistryMod,
         _blocks: &mut B,
+        _biomes: &mut A,
+        _selection: &mut S,
     ) -> Self {
+        let biomes = bevy.app.world().resource::<ServerBiomeRegistry>().clone();
+        let selector = bevy
+            .app
+            .world()
+            .resource::<ServerBiomeSelectorResource>()
+            .clone();
         bevy.app
             .world()
             .resource::<ServerChunkProviderRegistry>()
             .register(
                 ChunkProviderId::new(AETHER_PROVIDER_ID),
-                AetherIslandProvider,
+                AetherIslandProvider {
+                    biomes,
+                    selector,
+                    validated: Arc::new(OnceLock::new()),
+                },
             )
             .expect("the Aether chunk provider id must be unique");
         Self
@@ -37,102 +56,207 @@ impl ServerChunkProviderAetherMod {
     }
 }
 
-struct AetherIslandProvider;
+struct AetherIslandProvider {
+    biomes: ServerBiomeRegistry,
+    selector: ServerBiomeSelectorResource,
+    validated: Arc<OnceLock<()>>,
+}
 
 impl ServerChunkProvider for AetherIslandProvider {
     fn generate(&self, request: &ChunkGenerationRequest) -> Option<Chunk> {
-        Some(build_chunk(request.position))
+        self.validated
+            .get_or_init(|| validate_registry(&self.biomes));
+        let biomes =
+            ServerBiomeSampler::new(request, &self.biomes, &self.selector, Dimension::Aether);
+        assert!(
+            !biomes.is_empty(),
+            "the Aether provider requires at least one Aether biome"
+        );
+        Some(AetherWorldSampler::new(request, biomes, &self.biomes).build_chunk())
     }
 }
 
-fn build_chunk(position: voxel_math_api::ChunkPos) -> Chunk {
-    if position.y != 0 {
-        return Chunk::filled(position, BlockId::Air);
+fn validate_registry(registry: &ServerBiomeRegistry) {
+    let missing = registry.missing_features();
+    assert!(
+        missing.is_empty(),
+        "biome definitions reference unregistered features: {}",
+        missing
+            .iter()
+            .map(|missing| format!("{:?} -> {}", missing.biome, missing.feature))
+            .collect::<Vec<_>>()
+            .join(", ")
+    );
+}
+
+#[derive(Clone, Copy)]
+struct IslandColumn {
+    terrain: BiomeTerrain,
+    surface: i32,
+    thickness: i32,
+}
+
+struct AetherWorldSampler<'a> {
+    request: &'a ChunkGenerationRequest,
+    biomes: ServerBiomeSampler<'a>,
+    registry: &'a ServerBiomeRegistry,
+    world_seed: u64,
+    island_cache: RefCell<HashMap<(i32, i32), Option<IslandColumn>>>,
+}
+
+impl<'a> AetherWorldSampler<'a> {
+    fn new(
+        request: &'a ChunkGenerationRequest,
+        biomes: ServerBiomeSampler<'a>,
+        registry: &'a ServerBiomeRegistry,
+    ) -> Self {
+        Self {
+            request,
+            biomes,
+            registry,
+            world_seed: AETHER_SEED as u64 ^ stable_string_hash(&request.instance.0),
+            island_cache: RefCell::new(HashMap::new()),
+        }
     }
-    let mut chunk = Chunk::filled(position, BlockId::Air);
-    for local_y in 0..CHUNK_SIZE {
+
+    fn build_chunk(&self) -> Chunk {
+        let position = self.request.position;
+        let origin = position.world_origin();
+        let mut columns = Vec::with_capacity((CHUNK_SIZE * CHUNK_SIZE) as usize);
         for z in 0..CHUNK_SIZE {
             for x in 0..CHUNK_SIZE {
-                let local = LocalBlockPos::new(x, local_y, z).unwrap();
-                chunk.set(local, aether_block(local.to_world(position)));
+                columns.push(self.island_column(origin.x + x, origin.z + z));
             }
         }
-    }
-    chunk
-}
 
-fn aether_block(position: BlockPos) -> BlockId {
-    let Some((surface, thickness)) = island_column(position.x, position.z) else {
-        return BlockId::Air;
-    };
-    let depth = surface - position.y;
-    match depth {
-        i32::MIN..=-1 => BlockId::Air,
-        0 => BlockId::Grass,
-        1..=2 => BlockId::Dirt,
-        depth if depth <= thickness => {
-            if aether_hash(position) % 113 == 0 {
-                BlockId::Glowstone
-            } else {
-                BlockId::Stone
+        let mut active_biomes = BTreeSet::new();
+        let mut minimum_surface = i32::MAX;
+        let mut maximum_surface = i32::MIN;
+        let mut minimum_bottom = i32::MAX;
+        for z in -FEATURE_HORIZONTAL_MARGIN..(CHUNK_SIZE + FEATURE_HORIZONTAL_MARGIN) {
+            for x in -FEATURE_HORIZONTAL_MARGIN..(CHUNK_SIZE + FEATURE_HORIZONTAL_MARGIN) {
+                let world_x = origin.x + x;
+                let world_z = origin.z + z;
+                let Some(column) = self.island_column(world_x, world_z) else {
+                    continue;
+                };
+                if let Some(biome) = self.biomes.biome_at(world_x, world_z) {
+                    active_biomes.insert(biome);
+                }
+                minimum_surface = minimum_surface.min(column.surface);
+                maximum_surface = maximum_surface.max(column.surface);
+                minimum_bottom = minimum_bottom.min(column.surface - column.thickness);
             }
         }
-        _ => BlockId::Air,
-    }
-}
+        if active_biomes.is_empty() {
+            return Chunk::filled(position, BlockId::Air);
+        }
 
-fn island_column(x: i32, z: i32) -> Option<(i32, i32)> {
-    let distance = ((x as f32).powi(2) + (z as f32).powi(2)).sqrt();
-    if distance <= 8.0 {
-        return Some((9, 4));
-    }
-    let noise = PerlinNoise2d::new(AETHER_SEED);
-    let continents = noise.sample(x as f32 * 0.035, z as f32 * 0.035);
-    let breakup = noise.sample(x as f32 * 0.085 + 31.0, z as f32 * 0.085 - 17.0);
-    if continents + breakup * 0.38 < 0.12 {
-        return None;
-    }
-    let height = noise.sample(x as f32 * 0.055 - 8.0, z as f32 * 0.055 + 12.0);
-    let thickness = noise.sample(x as f32 * 0.071 + 19.0, z as f32 * 0.071 + 3.0);
-    Some((
-        (9.0 + height * 2.0).round() as i32,
-        (3.5 + thickness * 1.5).round() as i32,
-    ))
-}
-
-fn aether_hash(position: BlockPos) -> u32 {
-    let mut value = AETHER_SEED
-        ^ (position.x as u32).wrapping_mul(0x9e37_79b9)
-        ^ (position.y as u32).wrapping_mul(0x85eb_ca6b)
-        ^ (position.z as u32).wrapping_mul(0xc2b2_ae35);
-    value ^= value >> 16;
-    value = value.wrapping_mul(0x7feb_352d);
-    value ^ (value >> 15)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn spawn_island_has_air_below_and_safe_grass_above() {
-        assert_eq!(aether_block(BlockPos::new(0, 9, 0)), BlockId::Grass);
-        assert_eq!(aether_block(BlockPos::new(0, 10, 0)), BlockId::Air);
-        assert_eq!(aether_block(BlockPos::new(0, 4, 0)), BlockId::Air);
-    }
-
-    #[test]
-    fn distant_columns_include_air_gaps() {
-        assert!(
-            (-256..=256)
-                .step_by(8)
-                .any(|x| island_column(x, 160).is_none())
+        let chunk_bottom = origin.y;
+        let chunk_top = origin.y + CHUNK_SIZE - 1;
+        let features_intersect = self.biomes.features_intersect(
+            self.registry,
+            &active_biomes,
+            chunk_bottom,
+            chunk_top,
+            minimum_surface,
+            maximum_surface,
         );
+        if (chunk_bottom > maximum_surface || chunk_top < minimum_bottom) && !features_intersect {
+            return Chunk::filled(position, BlockId::Air);
+        }
+
+        let mut chunk = Chunk::filled(position, BlockId::Air);
+        for local_y in 0..CHUNK_SIZE {
+            for z in 0..CHUNK_SIZE {
+                for x in 0..CHUNK_SIZE {
+                    let Some(column) = columns[(x + z * CHUNK_SIZE) as usize] else {
+                        continue;
+                    };
+                    let local = LocalBlockPos::new(x, local_y, z).unwrap();
+                    let depth = column.surface - (origin.y + local_y);
+                    let block = match depth {
+                        i32::MIN..=-1 => BlockId::Air,
+                        0 => column.terrain.surface,
+                        depth if depth <= column.terrain.subsurface_depth as i32 => {
+                            column.terrain.subsurface
+                        }
+                        depth if depth <= column.thickness => column.terrain.underground,
+                        _ => BlockId::Air,
+                    };
+                    chunk.set(local, block);
+                }
+            }
+        }
+
+        let surface_height_at = |x, z| {
+            self.island_column(x, z)
+                .map(|column| column.surface)
+                .unwrap_or(0)
+        };
+        let biome_at = |x, z| {
+            self.island_column(x, z)?;
+            self.biomes.biome_at(x, z)
+        };
+        self.biomes.apply_features(
+            self.registry,
+            &mut chunk,
+            self.world_seed,
+            &active_biomes,
+            minimum_surface,
+            maximum_surface,
+            &surface_height_at,
+            &biome_at,
+        );
+        chunk
     }
 
-    #[test]
-    fn layers_outside_the_island_altitude_are_uniform_air() {
-        let chunk = build_chunk(voxel_math_api::ChunkPos::new(0, 100, 0));
-        assert_eq!(chunk.uniform_block().unwrap().block, BlockId::Air);
+    fn island_column(&self, x: i32, z: i32) -> Option<IslandColumn> {
+        if let Some(column) = self.island_cache.borrow().get(&(x, z)).copied() {
+            return column;
+        }
+        let terrain = self.biomes.terrain_at(x, z)?;
+        let distance = ((x as f32).powi(2) + (z as f32).powi(2)).sqrt();
+        let column = if distance <= 8.0 {
+            Some(IslandColumn {
+                terrain,
+                surface: 9,
+                thickness: 4.max(terrain.subsurface_depth as i32 + 1),
+            })
+        } else {
+            let continents = PerlinNoise2d::new(AETHER_SEED ^ self.world_seed as u32)
+                .sample(x as f32 * 0.026, z as f32 * 0.026);
+            let breakup = PerlinNoise2d::new(AETHER_SEED ^ self.world_seed as u32 ^ 0x9e37_79b9)
+                .sample(x as f32 * 0.071 + 31.0, z as f32 * 0.071 - 17.0);
+            if continents + breakup * 0.36 < 0.08 {
+                None
+            } else {
+                const SAMPLES: &[(i32, f32)] = &[(-8, 1.0), (0, 2.0), (8, 1.0)];
+                let (base, variation, detail_variation) = self
+                    .biomes
+                    .blended_terrain_parameters(x, z, SAMPLES)
+                    .unwrap_or((9.0, 3.0, 1.0));
+                let height = PerlinNoise2d::new(AETHER_SEED ^ self.world_seed as u32 ^ 0x4845_4947)
+                    .sample(x as f32 * 0.047 - 8.0, z as f32 * 0.047 + 12.0);
+                let detail = PerlinNoise2d::new(AETHER_SEED ^ self.world_seed as u32 ^ 0x5448_4943)
+                    .sample(x as f32 * 0.083 + 19.0, z as f32 * 0.083 + 3.0);
+                Some(IslandColumn {
+                    terrain,
+                    surface: (base + height * variation + detail * detail_variation).round() as i32,
+                    thickness: (terrain.subsurface_depth as i32
+                        + 2
+                        + (detail.abs() * 3.0).round() as i32)
+                        .max(3),
+                })
+            }
+        };
+        self.island_cache.borrow_mut().insert((x, z), column);
+        column
     }
+}
+
+fn stable_string_hash(value: &str) -> u64 {
+    value.bytes().fold(0xcbf2_9ce4_8422_2325, |hash, byte| {
+        (hash ^ byte as u64).wrapping_mul(0x1000_0000_01b3)
+    })
 }

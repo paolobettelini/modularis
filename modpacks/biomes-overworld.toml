@@ -1,0 +1,14 @@
+name = "Minecraft demo Overworld biome identities"
+description = "Biome ID contributors for the Overworld."
+modpacks = []
+ignore = []
+
+mods = [
+    "biome-plains",
+    "biome-forest",
+    "biome-birch-forest",
+    "biome-desert",
+    "biome-badlands",
+    "biome-tundra",
+    "biome-rocky-peaks",
+]

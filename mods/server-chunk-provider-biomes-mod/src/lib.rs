@@ -2,15 +2,10 @@ use bevy_mod::BevyMod;
 use block_manager_api::BlockManagerApi;
 use chunk_api::Chunk;
 use coherent_noise_api::PerlinNoise2d;
-use generated_biome_registry::BiomeId;
 use generated_block_registry::BlockId;
-use server_biome_api::{
-    BIOME_FEATURE_PHASES, BiomeDefinition, BiomeTerrain, ServerBiomeApi, ServerBiomeFeature,
-    ServerBiomeRegistry,
-};
-use server_biome_selection_api::{
-    BiomeSelectionRequest, ServerBiomeSelectionApi, ServerBiomeSelectorResource,
-};
+use server_biome_api::{BiomeTerrain, Dimension, ServerBiomeApi, ServerBiomeRegistry};
+use server_biome_sampling_api::ServerBiomeSampler;
+use server_biome_selection_api::{ServerBiomeSelectionApi, ServerBiomeSelectorResource};
 use server_chunk_provider_api::{
     ChunkGenerationRequest, ChunkProviderId, ServerChunkProvider, ServerChunkProviderRegistry,
 };
@@ -83,11 +78,12 @@ impl ServerChunkProvider for BiomeTerrainProvider {
                     .join(", ")
             );
         });
-        let definitions = self.biomes.definitions();
-        if definitions.is_empty() {
+        let biomes =
+            ServerBiomeSampler::new(request, &self.biomes, &self.selector, Dimension::Overworld);
+        if biomes.is_empty() {
             return None;
         }
-        Some(WorldSampler::new(request, &definitions, &self.selector, &self.biomes).build_chunk())
+        Some(WorldSampler::new(request, biomes, &self.biomes).build_chunk())
     }
 }
 
@@ -97,35 +93,25 @@ struct ColumnSample {
     surface: i32,
 }
 
-struct ActiveFeature {
-    biome: BiomeId,
-    feature: Arc<dyn ServerBiomeFeature>,
-}
-
 struct WorldSampler<'a> {
     request: &'a ChunkGenerationRequest,
-    definitions: &'a [BiomeDefinition],
-    selector: &'a ServerBiomeSelectorResource,
+    biomes: ServerBiomeSampler<'a>,
     registry: &'a ServerBiomeRegistry,
     world_seed: u64,
-    biome_cache: RefCell<HashMap<(i32, i32), BiomeId>>,
     height_cache: RefCell<HashMap<(i32, i32), i32>>,
 }
 
 impl<'a> WorldSampler<'a> {
     fn new(
         request: &'a ChunkGenerationRequest,
-        definitions: &'a [BiomeDefinition],
-        selector: &'a ServerBiomeSelectorResource,
+        biomes: ServerBiomeSampler<'a>,
         registry: &'a ServerBiomeRegistry,
     ) -> Self {
         Self {
             request,
-            definitions,
-            selector,
+            biomes,
             registry,
             world_seed: TERRAIN_SEED ^ stable_string_hash(&request.instance.0),
-            biome_cache: RefCell::new(HashMap::new()),
             height_cache: RefCell::new(HashMap::new()),
         }
     }
@@ -147,7 +133,7 @@ impl<'a> WorldSampler<'a> {
             for x in -FEATURE_HORIZONTAL_MARGIN..(CHUNK_SIZE + FEATURE_HORIZONTAL_MARGIN) {
                 let world_x = origin.x + x;
                 let world_z = origin.z + z;
-                if let Some(biome) = self.biome_at(world_x, world_z) {
+                if let Some(biome) = self.biomes.biome_at(world_x, world_z) {
                     active_biomes.insert(biome);
                 }
                 let surface = self.surface_height(world_x, world_z);
@@ -156,17 +142,16 @@ impl<'a> WorldSampler<'a> {
             }
         }
 
-        let active_features = self.active_features(&active_biomes);
         let chunk_bottom = origin.y;
         let chunk_top = origin.y + CHUNK_SIZE - 1;
-        let features_intersect = active_features.iter().any(|active| {
-            active.feature.vertical_range().intersects(
-                chunk_bottom,
-                chunk_top,
-                minimum_surface,
-                maximum_surface,
-            )
-        });
+        let features_intersect = self.biomes.features_intersect(
+            self.registry,
+            &active_biomes,
+            chunk_bottom,
+            chunk_top,
+            minimum_surface,
+            maximum_surface,
+        );
 
         if chunk_bottom > maximum_surface && !features_intersect {
             return Chunk::filled(position, BlockId::Air);
@@ -174,18 +159,19 @@ impl<'a> WorldSampler<'a> {
 
         let maximum_subsurface_depth = active_biomes
             .iter()
-            .filter_map(|biome| self.definition(*biome))
+            .filter_map(|biome| self.biomes.definition(*biome))
             .map(|definition| definition.terrain.subsurface_depth as i32)
             .max()
             .unwrap_or(0);
         let common_underground = active_biomes
             .iter()
-            .filter_map(|biome| self.definition(*biome))
+            .filter_map(|biome| self.biomes.definition(*biome))
             .map(|definition| definition.terrain.underground)
             .reduce(|left, right| (left == right).then_some(left).unwrap_or(left));
         let underground_is_common = common_underground.is_some_and(|block| {
             active_biomes.iter().all(|biome| {
-                self.definition(*biome)
+                self.biomes
+                    .definition(*biome)
                     .is_some_and(|definition| definition.terrain.underground == block)
             })
         });
@@ -218,97 +204,28 @@ impl<'a> WorldSampler<'a> {
         }
 
         let surface_height_at = |x, z| self.surface_height(x, z);
-        let biome_at = |x, z| self.biome_at(x, z);
-        for phase in BIOME_FEATURE_PHASES {
-            for active in active_features
-                .iter()
-                .filter(|active| active.feature.phase() == *phase)
-            {
-                if !active.feature.vertical_range().intersects(
-                    chunk_bottom,
-                    chunk_top,
-                    minimum_surface,
-                    maximum_surface,
-                ) {
-                    continue;
-                }
-                let definition = self
-                    .definition(active.biome)
-                    .expect("an active biome must have a registered definition");
-                let mut context = server_biome_api::BiomeFeatureContext::new(
-                    self.request,
-                    &mut chunk,
-                    active.biome,
-                    definition,
-                    self.world_seed,
-                    &surface_height_at,
-                    &biome_at,
-                );
-                active.feature.generate(&mut context);
-            }
-        }
+        let biome_at = |x, z| self.biomes.biome_at(x, z);
+        self.biomes.apply_features(
+            self.registry,
+            &mut chunk,
+            self.world_seed,
+            &active_biomes,
+            minimum_surface,
+            maximum_surface,
+            &surface_height_at,
+            &biome_at,
+        );
         chunk
     }
 
-    fn active_features(&self, biomes: &BTreeSet<BiomeId>) -> Vec<ActiveFeature> {
-        let mut result = Vec::new();
-        for biome in biomes {
-            let Some(definition) = self.definition(*biome) else {
-                continue;
-            };
-            for id in &definition.features {
-                let feature = self.registry.feature(id).unwrap_or_else(|| {
-                    panic!("biome {:?} references missing feature '{}'", biome, id)
-                });
-                result.push(ActiveFeature {
-                    biome: *biome,
-                    feature,
-                });
-            }
-        }
-        result.sort_by(|left, right| {
-            left.feature
-                .phase()
-                .cmp(&right.feature.phase())
-                .then_with(|| left.biome.cmp(&right.biome))
-        });
-        result
-    }
-
     fn column(&self, x: i32, z: i32) -> ColumnSample {
-        let biome = self
-            .biome_at(x, z)
-            .expect("the selected biome registry must not be empty");
-        let definition = self
-            .definition(biome)
-            .expect("a selector must return a registered biome");
         ColumnSample {
-            terrain: definition.terrain,
+            terrain: self
+                .biomes
+                .terrain_at(x, z)
+                .expect("the selected biome registry must not be empty"),
             surface: self.surface_height(x, z),
         }
-    }
-
-    fn biome_at(&self, x: i32, z: i32) -> Option<BiomeId> {
-        if let Some(biome) = self.biome_cache.borrow().get(&(x, z)).copied() {
-            return Some(biome);
-        }
-        let biome = self.selector.select(
-            &BiomeSelectionRequest {
-                generation: self.request,
-                x,
-                z,
-            },
-            self.definitions,
-        )?;
-        self.biome_cache.borrow_mut().insert((x, z), biome);
-        Some(biome)
-    }
-
-    fn definition(&self, biome: BiomeId) -> Option<&BiomeDefinition> {
-        self.definitions
-            .binary_search_by_key(&biome, |definition| definition.id)
-            .ok()
-            .map(|index| &self.definitions[index])
     }
 
     fn surface_height(&self, x: i32, z: i32) -> i32 {
@@ -316,8 +233,10 @@ impl<'a> WorldSampler<'a> {
             return height;
         }
 
-        let (base_height, height_variation, detail_variation) =
-            self.blended_terrain_parameters(x, z);
+        let (base_height, height_variation, detail_variation) = self
+            .biomes
+            .blended_terrain_parameters(x, z, &[(-8, 1.0), (0, 2.0), (8, 1.0)])
+            .unwrap_or((1.0, 0.0, 0.0));
         let seed = self.world_seed as u32;
         let macro_noise =
             PerlinNoise2d::new(seed ^ 0x4d41_4352).sample(x as f32 * 0.018, z as f32 * 0.018);
@@ -338,37 +257,6 @@ impl<'a> WorldSampler<'a> {
         self.height_cache.borrow_mut().insert((x, z), height);
         height
     }
-
-    fn blended_terrain_parameters(&self, x: i32, z: i32) -> (f32, f32, f32) {
-        const SAMPLES: &[(i32, f32)] = &[(-8, 1.0), (0, 2.0), (8, 1.0)];
-        let mut base_height = 0.0;
-        let mut height_variation = 0.0;
-        let mut detail_variation = 0.0;
-        let mut total_weight = 0.0;
-        for (offset_x, weight_x) in SAMPLES {
-            for (offset_z, weight_z) in SAMPLES {
-                let weight = weight_x * weight_z;
-                let Some(biome) = self.biome_at(x + offset_x, z + offset_z) else {
-                    continue;
-                };
-                let Some(definition) = self.definition(biome) else {
-                    continue;
-                };
-                base_height += definition.terrain.base_height * weight;
-                height_variation += definition.terrain.height_variation * weight;
-                detail_variation += definition.terrain.detail_variation * weight;
-                total_weight += weight;
-            }
-        }
-        if total_weight == 0.0 {
-            return (1.0, 0.0, 0.0);
-        }
-        (
-            base_height / total_weight,
-            height_variation / total_weight,
-            detail_variation / total_weight,
-        )
-    }
 }
 
 fn stable_string_hash(value: &str) -> u64 {
@@ -385,7 +273,7 @@ fn smoothstep(value: f32) -> f32 {
 mod tests {
     use super::*;
     use generated_biome_registry::BiomeId;
-    use server_biome_api::{BiomeClimate, BiomeVisuals};
+    use server_biome_api::{BiomeClimate, BiomeDefinition, BiomeVisuals};
     use server_biome_selection_api::{BiomeSelectionRequest, ServerBiomeSelector};
     use server_chunk_provider_api::ChunkViewer;
     use voxel_math_api::ChunkPos;
@@ -408,6 +296,7 @@ mod tests {
         registry
             .register_biome(BiomeDefinition {
                 id: BiomeId::Plains,
+                dimension: Dimension::Overworld,
                 name: "Test plains",
                 climate: BiomeClimate {
                     temperature: 0.5,
@@ -476,10 +365,14 @@ mod tests {
     #[test]
     fn spawn_surface_remains_at_one() {
         let provider = provider();
-        let definitions = provider.biomes.definitions();
         let request = request(ChunkPos::new(0, 0, 0));
-        let sampler =
-            WorldSampler::new(&request, &definitions, &provider.selector, &provider.biomes);
+        let biomes = ServerBiomeSampler::new(
+            &request,
+            &provider.biomes,
+            &provider.selector,
+            Dimension::Overworld,
+        );
+        let sampler = WorldSampler::new(&request, biomes, &provider.biomes);
         assert_eq!(sampler.surface_height(0, 0), 1);
     }
 }

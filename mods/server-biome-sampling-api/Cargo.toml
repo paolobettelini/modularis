@@ -1,0 +1,18 @@
+[package]
+name = "server-biome-sampling-api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+chunk-api = { path = "../chunk-api" }
+generated-biome-registry = "0.1.0"
+server-biome-api = { path = "../server-biome-api" }
+server-biome-selection-api = { path = "../server-biome-selection-api" }
+server-chunk-provider-api = { path = "../server-chunk-provider-api" }
+voxel-math-api = { path = "../voxel-math-api" }
+
+[patch.crates-io]
+generated-biome-registry = { path = "../generated-biome-registry" }
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }

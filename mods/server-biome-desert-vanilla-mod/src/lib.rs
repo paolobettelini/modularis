@@ -2,7 +2,8 @@ use bevy_mod::BevyMod;
 use generated_biome_registry::BiomeId;
 use generated_block_registry::BlockId;
 use server_biome_api::{
-    BiomeClimate, BiomeDefinition, BiomeTerrain, BiomeVisuals, ServerBiomeApi, ServerBiomeRegistry,
+    BiomeClimate, BiomeDefinition, BiomeTerrain, BiomeVisuals, Dimension, ServerBiomeApi,
+    ServerBiomeRegistry,
 };
 use server_biome_feature_cacti_vanilla_mod::{ServerBiomeFeatureCactiVanillaMod, cacti_feature_id};
 use server_biome_feature_caves_vanilla_mod::{ServerBiomeFeatureCavesVanillaMod, caves_feature_id};
@@ -25,6 +26,7 @@ impl ServerBiomeDesertVanillaMod {
             .resource::<ServerBiomeRegistry>()
             .register_biome(BiomeDefinition {
                 id: BiomeId::Desert,
+                dimension: Dimension::Overworld,
                 name: "Dry Desert",
                 climate: BiomeClimate {
                     temperature: 0.92,

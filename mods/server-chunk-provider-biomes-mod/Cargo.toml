@@ -26,6 +26,7 @@ coherent-noise-api = { path = "../coherent-noise-api" }
 generated-biome-registry = "0.1.0"
 generated-block-registry = "0.1.0"
 server-biome-api = { path = "../server-biome-api" }
+server-biome-sampling-api = { path = "../server-biome-sampling-api" }
 server-biome-selection-api = { path = "../server-biome-selection-api" }
 server-chunk-provider-api = { path = "../server-chunk-provider-api" }
 server-chunk-provider-registry-mod = { path = "../server-chunk-provider-registry-mod" }
@@ -38,3 +39,4 @@ world-instance-api = { path = "../world-instance-api" }
 generated-biome-registry = { path = "../generated-biome-registry" }
 generated-block-metadata = { path = "../generated-block-metadata" }
 generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }

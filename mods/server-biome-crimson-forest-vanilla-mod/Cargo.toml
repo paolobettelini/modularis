@@ -1,0 +1,34 @@
+[package]
+name = "server-biome-crimson-forest-vanilla-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerBiomeCrimsonForestVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "server-biome-api",
+    "biome-crimson-forest",
+    "server-biome-feature-caves-vanilla-mod",
+    "server-biome-feature-glowstone-clusters-vanilla-mod",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+biome-crimson-forest = { path = "../biome-crimson-forest" }
+generated-biome-registry = "0.1.0"
+generated-block-registry = "0.1.0"
+server-biome-api = { path = "../server-biome-api" }
+server-biome-feature-caves-vanilla-mod = { path = "../server-biome-feature-caves-vanilla-mod" }
+server-biome-feature-glowstone-clusters-vanilla-mod = { path = "../server-biome-feature-glowstone-clusters-vanilla-mod" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-biome-registry = { path = "../generated-biome-registry" }
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }

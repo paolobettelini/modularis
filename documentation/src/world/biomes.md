@@ -1,77 +1,70 @@
 # Biomes and world-generation features
 
-The Overworld generator is assembled from four independent layers:
+Biomes are available in every current dimension. The system is assembled from
+independent layers:
 
 ```text
-generated BiomeId
-        │
-runtime biome definitions + feature registry
-        │
+generated BiomeId contributors
+             │
+dimension-scoped runtime definitions + feature registry
+             │
 viewer/instance-aware biome selector
-        │
-biome-driven primary chunk provider
+             │
+shared request-local biome sampler
+             │
+Overworld, Nether, or Aether geometry provider
 ```
 
-This separation is important. A biome ID is shared domain identity. Climate
-selection is policy. A cave or tree is an optional generation feature. Turning
-those pieces into a `Chunk` is one provider implementation. A custom server can
-replace one layer without forking the other three.
+The split is intentional. A biome ID is domain identity, a definition is
+server content, selection is policy, and a tree or cave is an optional feature.
+The sampler only shares lookup, caching, terrain blending, and phased feature
+dispatch. It does not decide whether terrain is a heightmap, Nether ground, or
+floating islands.
 
 ## Generated biome identity
 
-Every biome contributor is a small mod with one namespaced ID:
+Every biome identity contributor is a small mod with one namespaced ID:
 
 ```toml
 [package.metadata.biome]
 id = "example:lavender-fields"
 ```
 
-`biome-registry-codegen` scans the final composed project and generates:
+`biome-registry-codegen` scans the composed project and generates `BiomeId`,
+`ALL_BIOMES`, string conversion, and lookup. Only the ID belongs in Cargo
+metadata. Dimension, climate, terrain, visuals, and features stay in Rust code.
 
-```rust
-pub enum BiomeId {
-    Desert,
-    Forest,
-    Plains,
-    RockyPeaks,
-    Tundra,
-}
-
-pub const ALL_BIOMES: &[BiomeId];
-
-pub fn from_str(id: &str) -> Option<BiomeId>;
-pub fn id(biome: BiomeId) -> &'static str;
-```
-
-Only `id` belongs in Cargo metadata. Terrain blocks, climate targets, visuals,
-and features stay in Rust code. This keeps the manifest a contributor discovery
-surface instead of turning it into a second programming language.
-
-Duplicate namespaced IDs and duplicate generated variant names fail during
-composition. The selected contributors live in `biomes.toml`; removing one and
-recomposing removes its enum variant.
-
-The identity contributor and server definition are separate mods. For example:
+The identity and server definition are separate mods:
 
 ```text
 biome-forest
-    declares demo:forest for codegen
+    contributes demo:forest to codegen
 
 server-biome-forest-vanilla-mod
-    registers the demo server's runtime Forest definition
+    registers the demo server's runtime definition
 ```
 
-This allows a client or shared protocol to know a biome ID without importing a
-server terrain policy. The current protocol does not transmit biomes, so the
-biome pack is selected only by the vanilla server pack for now.
+This allows a protocol or client to know the ID without importing server world
+policy. Duplicate IDs and duplicate generated Rust variants fail during
+composition.
+
+Identity packs are split by dimension:
+
+- `biomes-overworld.toml`;
+- `biomes-nether.toml`;
+- `biomes-aether.toml`;
+- `biomes.toml`, which imports all three for the demo composition.
+
+A custom server may import only the dimensions it supports.
 
 ## Runtime definitions
 
-`server-biome-api` defines the data registered for each selected biome:
+`server-biome-api` owns the runtime contract:
 
 ```rust
 pub struct BiomeDefinition {
     pub id: BiomeId,
+    pub dimension: Dimension,
     pub name: &'static str,
     pub climate: BiomeClimate,
     pub terrain: BiomeTerrain,
@@ -80,57 +73,50 @@ pub struct BiomeDefinition {
 }
 ```
 
+`dimension` prevents the Nether selector from considering Overworld or Aether
+definitions. `ServerBiomeRegistry::definitions_for_dimension` returns a sorted
+copy containing only the requested dimension.
+
 ### Climate
 
-`BiomeClimate` contains:
+`BiomeClimate` stores target temperature, humidity, continentalness,
+precipitation support, and downfall. These values are hints for selectors, not
+fixed universal ranges.
 
-- target temperature;
-- target humidity;
-- target continentalness;
-- precipitation capability;
-- downfall amount.
+The vanilla selector combines two signals:
 
-The first three values are targets, not hardcoded ranges. A selector decides
-how to interpret them. The vanilla selector samples broad noise fields and
-chooses the registered definition with the nearest climate point. A different
-selector may use ranges, weighted tables, latitude, player state, a saved map,
-or no climate values at all.
+- an independent broad Perlin field per biome, giving every selected biome a
+  similar chance to own regions;
+- a smaller climate-distance penalty, preserving hot, cold, wet, and dry
+  character without letting central climate points dominate the map.
+
+The region frequency is intentionally broad enough for readable areas while
+still showing several biomes during local flight. The current multiplier is
+`4.0`, half the previous test value, so regions are about twice as wide along
+each horizontal axis.
+
+A replacement selector may use ranges, latitude, Voronoi regions, player
+state, saved maps, or no climate data.
 
 ### Terrain
 
-`BiomeTerrain` contains:
+`BiomeTerrain` stores base height, broad and detail variation, surface,
+subsurface and underground blocks, and subsurface depth.
 
-- base height;
-- broad height variation;
-- detail variation;
-- surface block;
-- subsurface block;
-- underground block;
-- subsurface depth.
-
-These fields describe the current heightmap provider. They are not universal
-requirements for every possible chunk provider. A floating-island or
-file-backed provider may ignore them while still using `BiomeId` and registered
-features.
+Providers interpret these fields. The Overworld uses them for a normal
+heightmap, the Nether for low terrain above bedrock, and the Aether for island
+height and material layers. A file-backed provider may ignore all height fields
+while still using biome IDs and features.
 
 ### Visuals
 
-`BiomeVisuals` currently records:
-
-- sky color;
-- fog color;
-- water color;
-- grass tint;
-- foliage tint.
-
-They are code-side biome data and an extension point for future client
-synchronization. The current chunk protocol does not send a biome map, and the
-renderer does not apply these tints yet.
+`BiomeVisuals` records sky, fog, water, grass, and foliage colors. They are an
+extension point for client synchronization. The current chunk protocol does
+not transmit biome maps, so the renderer does not apply these values yet.
 
 ### Feature list
 
-A definition stores an ordered list of `BiomeFeatureId`. It does not call
-feature implementations directly:
+A definition stores ordered feature IDs rather than concrete implementations:
 
 ```rust
 features: vec![
@@ -140,9 +126,8 @@ features: vec![
 ]
 ```
 
-The concrete feature mods register those IDs in `ServerBiomeRegistry`. Missing
-features are reported when the selected biome provider first validates the
-composed registry. Duplicate biome or feature registrations are rejected.
+Feature mods register those IDs separately. Missing implementations and
+duplicate registrations are rejected by registry validation.
 
 ## World-generation feature contract
 
@@ -160,74 +145,28 @@ pub trait ServerBiomeFeature: Send + Sync + 'static {
 }
 ```
 
-The phases are:
+Public phases provide deterministic cooperation between unrelated mods:
 
 ```text
-Carving
-  -> Underground
-  -> Surface
-  -> Decoration
-  -> Finalization
+Carving -> Underground -> Surface -> Decoration -> Finalization
 ```
 
-Examples:
+Examples include caves in `Carving`, ores in `Underground`, ice in `Surface`,
+and trees, boulders, glowstone clusters, and crystal spires in `Decoration`.
 
-- caves run in `Carving`;
-- ore replacement runs in `Underground`;
-- ice patches run in `Surface`;
-- trees, cacti, and boulders run in `Decoration`.
+Each feature also declares a conservative vertical range. Providers can then
+return uniform air or underground chunks without running irrelevant feature
+code. A bound must never be narrower than the feature's possible writes.
 
-The definition's feature order is preserved within the same biome and phase.
-The explicit phases let independent mods cooperate without private
-`.before(function)` relationships.
+`BiomeFeatureContext` exposes the generation request, target biome, world seed,
+surface and biome sampling callbacks, current-chunk reads, clipped writes, and
+deterministic position hashing. Cross-chunk shapes inspect neighboring anchors
+but only write the current chunk. This makes output independent of generation
+order.
 
-### Vertical bounds
+## Selection and request scope
 
-Each feature declares a conservative vertical range:
-
-```rust
-FeatureVerticalRange::Absolute { min: -48, max: 32 }
-
-FeatureVerticalRange::RelativeToSurface { min: 1, max: 8 }
-```
-
-The provider uses this information to avoid running surface decorations in a
-deep chunk or scanning cave logic in very high sky chunks. A feature must never
-declare a range narrower than the blocks it can write. An incorrect bound can
-make valid feature blocks disappear.
-
-### Feature context
-
-`BiomeFeatureContext` exposes:
-
-- the complete `ChunkGenerationRequest`;
-- current chunk position;
-- target biome and its definition;
-- deterministic world seed;
-- biome and surface-height sampling at arbitrary X/Z coordinates;
-- current-chunk block reads;
-- clipped world-position writes;
-- deterministic position hashing.
-
-Writes are intentionally clipped to the chunk being generated. A feature that
-crosses chunk boundaries evaluates neighboring anchors, then writes only the
-part inside the current chunk. The same feature is evaluated independently when
-the neighbor chunk is generated.
-
-The oak-tree feature demonstrates this pattern:
-
-1. scan candidate anchors two blocks beyond the current X/Z edge;
-2. choose anchors with a deterministic hash;
-3. derive trunk height from the same hash;
-4. attempt all trunk and crown writes in world coordinates;
-5. let the context keep only writes inside the current chunk.
-
-This produces the same tree regardless of chunk request order and avoids a
-mutable cross-chunk generation queue.
-
-## Biome selection
-
-Biome selection is an exclusive provider API:
+Selection is an exclusive API:
 
 ```rust
 pub trait ServerBiomeSelector {
@@ -239,197 +178,136 @@ pub trait ServerBiomeSelector {
 }
 ```
 
-`BiomeSelectionRequest` includes:
+The request contains the original `ChunkGenerationRequest`, world X/Z,
+viewer, and world instance. A custom selector can therefore vary by instance
+or player. If it varies by player, chunk routing and edit identity must use a
+matching scope; otherwise two different logical worlds would share edits.
 
-- the original `ChunkGenerationRequest`;
-- world X and Z.
+The vanilla selector derives stable noise seeds from `WorldInstanceId` and
+uses stable ID tie-breaking. Only an Overworld definition set containing
+`BiomeId::Plains` receives the small safe Plains area around spawn. Nether and
+Aether selections cannot accidentally select Plains because definitions are
+filtered first.
 
-The original request contains viewer, world instance, and chunk position. A
-custom selector can therefore choose biomes per instance or even per player.
-If selection varies by player, routing and edit scope must use matching world
-identity; otherwise two players could edit logically different terrain under
-the same resident key.
+## Shared biome sampler
 
-### Vanilla climate selector
+`server-biome-sampling-api` is a pure support crate used by all three current
+providers. A `ServerBiomeSampler`:
 
-`server-biome-climate-selector-vanilla-mod`:
+- filters definitions to one `Dimension`;
+- caches `(x, z) -> BiomeId` per chunk request;
+- resolves definitions and terrain data;
+- blends neighboring terrain parameters;
+- finds active feature implementations;
+- tests feature vertical intersections;
+- dispatches features in public phase order.
 
-1. derives a stable seed from `WorldInstanceId`;
-2. samples low-frequency temperature, humidity, and continentalness noise;
-3. compares the sample with every registered biome climate target;
-4. selects the closest target with stable ID tie-breaking.
+It does not register a provider and does not create blocks. This is important
+for Patchwork replacement: a custom island or saved-world provider can reuse
+the sampler, while a server with no biomes can omit it.
 
-The area near the shared spawn is forced to Plains when that definition is
-present. This preserves the server's spawn-at-Y=2 contract and avoids spawning
-inside a tree, cactus, or steep peak.
+## Dimension-specific providers
 
-This selector is vanilla policy. Another provider can select from a saved biome
-map, use Voronoi cells, attach biome state to world instances, or expose a
-scripted query service.
+### Overworld
 
-## Biome-driven chunk provider
+`server-chunk-provider-biomes-mod` creates a continuous heightmap. It blends
+height parameters across biome boundaries, applies biome-specific strata,
+keeps a safe spawn blend, and runs features. Uniform sky and deep underground
+chunks use compact one-entry palettes where possible.
 
-`server-chunk-provider-biomes-mod` is the selected primary Overworld provider.
-It implements the normal `ServerChunkProvider` contract and registers
-`ChunkProviderId::primary()`.
+### Nether
 
-For each request it performs the following work.
+`server-chunk-provider-nether-mod` keeps its own Nether geometry and provider
+ID. It places bedrock at world Y zero, derives surface shape from Nether biome
+terrain, and applies Nether features. Cave carving preserves bedrock. Chunks
+above every relevant surface and feature are returned as uniform air.
 
-### 1. Validate the selected registry
+### Aether
 
-Every feature referenced by every definition must have a registered
-implementation. Validation happens lazily once, after all Patchwork mods have
-completed initialization.
+`server-chunk-provider-aether-mod` generates sparse floating-island columns.
+Biome terrain controls island material and height character, while the provider
+owns island presence and thickness. Columns outside islands remain air and
+features run only where an island exists. A small spawn island remains
+guaranteed.
 
-### 2. Create a request-local sampler
-
-The sampler owns request-local caches for:
-
-- `(x, z) -> BiomeId`;
-- `(x, z) -> surface height`.
-
-Generation features repeatedly ask the same biome and height questions. These
-caches avoid repeating climate and terrain noise for every block.
-
-### 3. Build column samples
-
-For each of the 256 X/Z columns, the provider records:
-
-- selected biome;
-- copied terrain parameters;
-- surface height.
-
-Height parameters are blended across nearby biome samples before noise is
-applied. Surface block identity remains biome-specific, while height transitions
-are less likely to create a vertical wall at a climate boundary.
-
-The shared spawn blends from height one into distant generated terrain.
-
-### 4. Find active biomes and features
-
-The provider samples a small margin around the chunk. This includes tree crowns
-and boulders whose anchor lies in a neighboring chunk.
-
-It then resolves the feature lists for every biome present in that area and
-orders them by public phase.
-
-### 5. Use uniform fast paths
-
-Before visiting 4096 cells, the provider compares the vertical chunk range with:
-
-- minimum and maximum local surface height;
-- active feature bounds;
-- maximum subsurface depth;
-- common underground block.
-
-It can return immediately when the result is guaranteed to be:
-
-- uniform air above terrain and all relevant decorations;
-- uniform underground material below all relevant feature ranges.
-
-`Chunk::filled` creates a one-entry palette with zero packed data words. Empty
-sky therefore stays cheap in memory, on the network, and in the client mesher.
-
-### 6. Generate base strata
-
-Mixed chunks receive:
-
-```text
-air
-surface block
-subsurface block for configured depth
-underground block below it
-```
-
-There is no hard vertical world boundary. Very deep chunks become homogeneous
-stone after absolute cave/ore feature ranges end.
-
-### 7. Apply features
-
-The provider runs active features phase by phase. Features are responsible for
-checking that a candidate column belongs to their target biome.
-
-The current provider is synchronous because `ServerChunkProvider::generate` is
-synchronous. Expensive future structure or file generation should move behind
-an asynchronous generation pipeline rather than hiding blocking work in a
-feature.
+The three providers are independent implementation mods. Sharing a sampler is
+not the same as merging their terrain policy.
 
 ## Default biomes
 
-The vanilla server biome pack currently registers:
+### Overworld
 
-| Biome | Main surface | Climate role | Features |
-| --- | --- | --- | --- |
-| Plains | grass/dirt | temperate, medium humidity | caves, ores, sparse oak trees |
-| Oak Forest | grass/dirt | temperate, high humidity | caves, ores, dense oak trees |
-| Dry Desert | sand | hot and dry | caves, ores, cacti |
-| Frozen Tundra | snow/dirt | cold, medium humidity | caves, ores, packed-ice patches |
-| Rocky Peaks | stone/gravel | high continentalness | caves, ores, boulders |
+| Biome | Main layers | Main features |
+| --- | --- | --- |
+| Plains | grass, dirt, stone | caves, ores, sparse oak trees |
+| Oak Forest | grass, dirt, stone | caves, ores, dense oak trees |
+| Birch Forest | grass, dirt, stone | caves, ores, birch trees |
+| Dry Desert | sand, stone | caves, ores, cacti |
+| Red Badlands | red sand, terracotta, stone | caves, ores, boulders |
+| Frozen Tundra | snow, dirt, stone | caves, ores, packed-ice patches |
+| Rocky Peaks | stone, gravel | caves, ores, boulders |
 
-These definitions are separate mods. A server can omit one, replace its
-definition while keeping its generated ID, or compose a different definition
-set with a custom selector.
+### Nether
+
+| Biome | Main layers | Main features |
+| --- | --- | --- |
+| Nether Wastes | netherrack | caves, glowstone clusters |
+| Soul Sand Valley | soul sand, soul soil, netherrack | caves |
+| Crimson Forest | crimson nylium, netherrack | caves, glowstone clusters |
+| Warped Forest | warped nylium, netherrack | caves, glowstone clusters |
+| Basalt Deltas | basalt, blackstone, netherrack | caves, glowstone clusters |
+
+### Aether
+
+| Biome | Main layers | Main features |
+| --- | --- | --- |
+| Aether Highlands | grass, dirt, stone | sparse oak trees |
+| Golden Grove | moss, dirt, calcite | dense oak trees, glowstone clusters |
+| Crystal Peaks | calcite, stone | crystal spires |
+
+Each definition is a separate mod. A server can omit or replace one without
+editing a central biome switch.
 
 ## Default feature mods
 
-| Mod | Registered feature IDs | Phase |
+| Mod | Purpose | Phase |
 | --- | --- | --- |
-| `server-biome-feature-caves-vanilla-mod` | `demo:caves` | Carving |
-| `server-biome-feature-ores-vanilla-mod` | `demo:diamond-ores` | Underground |
-| `server-biome-feature-oak-trees-vanilla-mod` | sparse and dense oak trees | Decoration |
-| `server-biome-feature-cacti-vanilla-mod` | `demo:cacti` | Decoration |
-| `server-biome-feature-ice-patches-vanilla-mod` | `demo:ice-patches` | Surface |
-| `server-biome-feature-boulders-vanilla-mod` | `demo:rock-boulders` | Decoration |
+| `server-biome-feature-caves-vanilla-mod` | deterministic caves | Carving |
+| `server-biome-feature-ores-vanilla-mod` | diamond ore replacement | Underground |
+| `server-biome-feature-oak-trees-vanilla-mod` | sparse/dense oak trees | Decoration |
+| `server-biome-feature-birch-trees-vanilla-mod` | birch trees | Decoration |
+| `server-biome-feature-cacti-vanilla-mod` | cacti | Decoration |
+| `server-biome-feature-ice-patches-vanilla-mod` | packed ice | Surface |
+| `server-biome-feature-boulders-vanilla-mod` | rock boulders | Decoration |
+| `server-biome-feature-glowstone-clusters-vanilla-mod` | glowstone clusters | Decoration |
+| `server-biome-feature-crystal-spires-vanilla-mod` | calcite/glowstone spires | Decoration |
 
-The labels "sparse" and "dense" are two registered configurations of the same
-tree algorithm. A feature mod may register several IDs when the behavior is
-shared but its placement policy differs.
+A feature mod may register multiple IDs when one algorithm supports several
+configurations.
 
 ## Adding a biome
 
-### 1. Add the identity contributor
+### 1. Contribute identity
 
 ```toml
-[package]
-name = "biome-lavender-fields"
-
-[package.metadata.mod]
-entry = "BiomeLavenderFieldsMod"
-
-[package.metadata.mod.dependencies]
-init = []
-run = []
-ownership = []
-
 [package.metadata.biome]
 id = "example:lavender-fields"
 ```
 
-The entry can be an empty contributor mod. Add it to `biomes.toml` and
-recompose so `BiomeId::LavenderFields` exists.
+Add it to the appropriate dimension identity pack and recompose.
 
-### 2. Add optional features
+### 2. Add optional generation features
 
-Register each independently useful generator behind an ID:
-
-```rust
-pub const LAVENDER_PATCHES: &str = "example:lavender-patches";
-
-registry.register_feature(
-    BiomeFeatureId::new(LAVENDER_PATCHES),
-    LavenderPatchesFeature,
-)?;
-```
-
-Give the feature a correct phase and conservative vertical range. Depend on
-the feature mod from the runtime biome definition so Patchwork initializes it
-first.
+Create a separate mod implementing `ServerBiomeFeature`, register a namespaced
+`BiomeFeatureId`, and declare its phase and conservative vertical range. The
+definition mod should depend on the feature mod so it is initialized first.
 
 ### 3. Register the server definition
 
 ```rust
 registry.register_biome(BiomeDefinition {
     id: BiomeId::LavenderFields,
+    dimension: Dimension::Overworld,
     name: "Lavender Fields",
     climate: BiomeClimate {
         temperature: 0.62,
@@ -454,87 +332,56 @@ registry.register_biome(BiomeDefinition {
         grass_tint: [0.52, 0.70, 0.38],
         foliage_tint: [0.44, 0.64, 0.34],
     },
-    features: vec![
-        caves_feature_id(),
-        ores_feature_id(),
-        BiomeFeatureId::new(LAVENDER_PATCHES),
-    ],
+    features: vec![BiomeFeatureId::new("example:lavender-patches")],
 })?;
 ```
 
-This is normal Rust. The definition may call constructors, use constants from
-other mods, or build feature lists conditionally from compile-time feature
-choices. There is no biome JSON loader in the current architecture.
+Definitions are normal Rust. There is no biome JSON loader in the current
+architecture.
 
-### 4. Select it in a server feature pack
+### 4. Select it in a server pack
 
-Add the runtime definition and feature mods to a server modpack. Do not add
-custom server world policy to `server-base.toml`.
-
-The vanilla climate selector automatically considers every registered
-definition. A custom selector may require an explicit mapping for the new ID.
+Add the identity to a `biomes-<dimension>.toml` pack and the definition plus
+features to a `server-biomes-<dimension>-*.toml` pack. Do not put custom world
+policy in `server-base.toml`.
 
 ## Replacing larger pieces
 
-Use the narrowest replacement that matches the desired change:
+Use the narrowest replacement:
 
-- different climate layout: provide `server-biome-selection-api`;
-- different cave algorithm: register another feature ID and use it in chosen
-  definitions;
-- different terrain strata using the same biomes: provide another primary
-  chunk provider;
-- saved biome map: selector reads a non-blocking cached map;
-- per-player terrain: inspect `ChunkViewer`, and ensure routing creates separate
-  world scopes;
-- no biomes: omit `server-biomes-vanilla.toml`, remove or ignore
-  `server-chunk-provider-biomes-mod`, and select another primary provider.
+- change one biome: replace only its definition mod;
+- change a decoration: register a new feature and reference it;
+- change placement policy: provide `server-biome-selection-api`;
+- change geometry: provide a chunk provider while optionally reusing
+  `server-biome-sampling-api`;
+- use saved biomes: provide a selector backed by a non-blocking cache;
+- use player-specific terrain: inspect `ChunkViewer` and use matching routing
+  and edit scopes;
+- use no biomes: omit biome packs and select another provider.
 
-`server-biomes-vanilla.toml` owns only the vanilla biome content and selection
-policy. `server-vanilla.toml` selects the generic runtime registry and the
-biome-aware primary chunk provider. This keeps biome definitions reusable while
-making the server's provider choice explicit in the server policy pack.
+The vanilla packs are split into Overworld, Nether, and Aether content packs.
+`server-biomes-vanilla.toml` imports them and selects the vanilla climate
+policy. Provider selection stays in the server's world composition.
 
-Do not add a special case to `server-chunk-world-dynamic-impl`. The world cache
-already treats generation as a provider concern.
+## Texture ownership
 
-## Required block textures
-
-The biome block mods already declare namespaced asset paths. Add these files to
-their owning mods:
-
-```text
-mods/block-sand/assets/sand.png
-mods/block-snow/assets/snow.png
-mods/block-gravel/assets/gravel.png
-mods/block-packed-ice/assets/packed_ice.png
-mods/block-oak-leaves/assets/oak_leaves.png
-mods/block-oak-log/assets/oak_log_side.png
-mods/block-oak-log/assets/oak_log_top.png
-mods/block-cactus/assets/cactus_side.png
-mods/block-cactus/assets/cactus_top.png
-mods/block-cactus/assets/cactus_bottom.png
-```
-
-Patchwork copies each directory to `assets/<mod-name>/`, which matches the
-paths in each `BlockRenderInfo`. Until the PNG files are present, those texture
-loads are expected to fail at runtime; the Rust composition still compiles.
+Every block mod owns its texture files and Patchwork copies them to
+`assets/<mod-name>/`. The expanded biome set adds textures for birch logs and
+leaves, red sand, terracotta, soul sand, soul soil, basalt, blackstone, crimson
+and warped nylium, moss, and calcite. These files were copied from the local
+vanilla texture pack into their owning mods; no provider has a central texture
+directory.
 
 ## Current limits
 
-The biome system intentionally does not yet implement every field found in a
-large production voxel game:
-
-- no biome map is sent to the client;
-- visual colors are not applied by the renderer;
-- no water or precipitation simulation;
-- no biome-specific music or audio contract;
-- no creature spawn tables;
-- no generated structure registry;
-- registries are populated at startup rather than changed during play;
-- generation remains synchronous;
-- features can write only the current chunk and must use deterministic clipped
+- biome maps and visual colors are not synchronized to clients;
+- there is no water or precipitation simulation;
+- there are no biome-specific audio or creature-spawn contracts;
+- there is no generated structure registry;
+- registries are startup-time resources;
+- generation is synchronous;
+- features write only the current chunk and must use deterministic clipped
   generation for cross-boundary shapes.
 
-These should become separate APIs and feature mods when implemented. They do
-not belong as extra responsibilities inside the current climate selector or
-chunk provider.
+These should become separate APIs and feature mods when implemented, not extra
+responsibilities in the selector or chunk providers.

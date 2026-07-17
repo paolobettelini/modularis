@@ -9,6 +9,7 @@ block-instance-api = { path = "../block-instance-api" }
 chunk-api = { path = "../chunk-api" }
 generated-biome-registry = "0.1.0"
 generated-block-registry = "0.1.0"
+generated-dimension-registry = "0.1.0"
 server-chunk-provider-api = { path = "../server-chunk-provider-api" }
 voxel-math-api = { path = "../voxel-math-api" }
 
@@ -16,3 +17,4 @@ voxel-math-api = { path = "../voxel-math-api" }
 generated-biome-registry = { path = "../generated-biome-registry" }
 generated-block-metadata = { path = "../generated-block-metadata" }
 generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }

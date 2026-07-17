@@ -3,7 +3,8 @@ use bevy_mod::BevyMod;
 use client_game_state_api::{GameState, GameStateApi, InGameOverlayState};
 use client_keybinding_api::parse_key_code;
 use client_player_controller_api::{
-    Grounded, Player, PlayerControllerApi, PlayerControllerSet, PlayerVelocity,
+    Grounded, Player, PlayerControllerApi, PlayerControllerSet, PlayerPlanarMovementIntent,
+    PlayerVelocity,
 };
 use client_settings_api::{SettingsApi, SettingsStore};
 use client_settings_registry_codegen::SettingsRegistryCodegenMod;
@@ -40,6 +41,12 @@ impl ClientPlayerFlightVanillaMod {
             .add_systems(
                 Update,
                 toggle_flight.run_if(in_state(InGameOverlayState::Playing)),
+            )
+            .add_systems(
+                Update,
+                apply_flight_planar_speed
+                    .in_set(PlayerControllerSet::MovementModifiers)
+                    .run_if(in_state(InGameOverlayState::Playing)),
             )
             .add_systems(
                 Update,
@@ -91,6 +98,16 @@ fn toggle_flight(
             velocity.0 = Vec3::ZERO;
             grounded.0 = false;
         }
+    }
+}
+
+fn apply_flight_planar_speed(
+    config: Res<FlightConfig>,
+    flight: Res<LocalPlayerFlight>,
+    mut movement: ResMut<PlayerPlanarMovementIntent>,
+) {
+    if flight.capability_enabled && flight.flying {
+        movement.speed_multiplier *= config.planar_speed_multiplier;
     }
 }
 

@@ -361,22 +361,24 @@ Create a small identity contributor:
 id = "example:crystal-fields"
 ```
 
-Add it to `biomes.toml` and recompose to generate
-`BiomeId::CrystalFields`.
+Add it to the appropriate `biomes-<dimension>.toml` pack and recompose to
+generate `BiomeId::CrystalFields`.
 
 Create a separate server definition mod that registers `BiomeDefinition` in
-`ServerBiomeRegistry`. Put climate targets, terrain blocks, visual data, and an
-ordered list of feature IDs in that Rust definition.
+`ServerBiomeRegistry`. Set its generated `Dimension`, climate targets, terrain
+blocks, visual data, and ordered feature IDs in that Rust definition.
 
 If the biome needs new generation behavior, create a feature mod implementing
 `ServerBiomeFeature`, register a namespaced `BiomeFeatureId`, and give it a
 public phase plus a conservative vertical range. Make the definition mod depend
 on the feature mod so registration happens first.
 
-The vanilla climate selector automatically considers registered definitions.
-Replace `server-biome-selection-api` when the desired placement policy is not
-nearest climate-point selection. Replace the primary chunk provider when the
-desired terrain shape does not fit the current heightmap/strata model.
+The vanilla selector automatically considers definitions for the provider's
+dimension. Replace `server-biome-selection-api` for another placement policy.
+Replace one dimension's chunk provider when its desired geometry does not fit
+the current heightmap, Nether ground, or floating-island model. A replacement
+provider may reuse `server-biome-sampling-api` without inheriting any of those
+geometry rules.
 
 The complete contract and examples are in
 [Biomes and world-generation features](../world/biomes.md).

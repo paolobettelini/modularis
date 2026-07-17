@@ -1,0 +1,12 @@
+name = "Minecraft demo Nether biome identities"
+description = "Biome ID contributors for the Nether."
+modpacks = []
+ignore = []
+
+mods = [
+    "biome-nether-wastes",
+    "biome-soul-sand-valley",
+    "biome-crimson-forest",
+    "biome-warped-forest",
+    "biome-basalt-deltas",
+]

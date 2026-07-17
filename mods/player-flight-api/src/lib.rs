@@ -9,13 +9,15 @@ pub struct LocalPlayerFlight {
 #[derive(Resource, Debug, Clone, Copy)]
 pub struct FlightConfig {
     pub vertical_speed: f32,
+    pub planar_speed_multiplier: f32,
     pub double_tap_seconds: f64,
 }
 
 impl Default for FlightConfig {
     fn default() -> Self {
         Self {
-            vertical_speed: 7.0,
+            vertical_speed: 21.0,
+            planar_speed_multiplier: 3.0,
             double_tap_seconds: 0.3,
         }
     }
