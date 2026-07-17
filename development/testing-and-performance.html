@@ -1,0 +1,387 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Testing, debugging, and performance - Minecraft Simple Demo Architecture</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting-started/project-overview.html"><strong aria-hidden="true">1.1.</strong> Project overview</a></li><li class="chapter-item expanded "><a href="../getting-started/build-and-run.html"><strong aria-hidden="true">1.2.</strong> Build and run</a></li></ol></li><li class="chapter-item expanded "><a href="../architecture/foundations.html"><strong aria-hidden="true">2.</strong> Architecture foundations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../architecture/patchwork-composition.html"><strong aria-hidden="true">2.1.</strong> Patchwork composition</a></li><li class="chapter-item expanded "><a href="../architecture/mod-anatomy.html"><strong aria-hidden="true">2.2.</strong> Mod anatomy and lifecycle</a></li><li class="chapter-item expanded "><a href="../architecture/apis-and-events.html"><strong aria-hidden="true">2.3.</strong> APIs, providers, and ECS contracts</a></li><li class="chapter-item expanded "><a href="../architecture/code-generation.html"><strong aria-hidden="true">2.4.</strong> Code generation and registries</a></li><li class="chapter-item expanded "><a href="../architecture/modpacks.html"><strong aria-hidden="true">2.5.</strong> Modpacks and feature boundaries</a></li><li class="chapter-item expanded "><a href="../architecture/assets-and-output.html"><strong aria-hidden="true">2.6.</strong> Assets and generated output</a></li></ol></li><li class="chapter-item expanded "><a href="../runtime/runtime-overview.html"><strong aria-hidden="true">3.</strong> Runtime and networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../runtime/bevy-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Bevy application lifecycle</a></li><li class="chapter-item expanded "><a href="../runtime/networking.html"><strong aria-hidden="true">3.2.</strong> Protocol, transport, and framing</a></li><li class="chapter-item expanded "><a href="../runtime/sessions-and-visibility.html"><strong aria-hidden="true">3.3.</strong> Sessions, routing, and visibility</a></li><li class="chapter-item expanded "><a href="../runtime/chat-and-commands.html"><strong aria-hidden="true">3.4.</strong> Chat, commands, and completion</a></li></ol></li><li class="chapter-item expanded "><a href="../world/world-overview.html"><strong aria-hidden="true">4.</strong> World architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../world/blocks-and-items.html"><strong aria-hidden="true">4.1.</strong> Blocks, items, and metadata</a></li><li class="chapter-item expanded "><a href="../world/chunk-storage.html"><strong aria-hidden="true">4.2.</strong> Chunk coordinates and storage</a></li><li class="chapter-item expanded "><a href="../world/server-world.html"><strong aria-hidden="true">4.3.</strong> Server world providers and residency</a></li><li class="chapter-item expanded "><a href="../world/biomes.html"><strong aria-hidden="true">4.4.</strong> Biomes and world-generation features</a></li><li class="chapter-item expanded "><a href="../world/client-chunks.html"><strong aria-hidden="true">4.5.</strong> Client streaming, meshing, and rendering</a></li><li class="chapter-item expanded "><a href="../world/dimensions.html"><strong aria-hidden="true">4.6.</strong> Dimensions and world scopes</a></li><li class="chapter-item expanded "><a href="../world/portals.html"><strong aria-hidden="true">4.7.</strong> Portals</a></li></ol></li><li class="chapter-item expanded "><a href="../gameplay/gameplay-overview.html"><strong aria-hidden="true">5.</strong> Gameplay systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../gameplay/movement.html"><strong aria-hidden="true">5.1.</strong> Player movement and prediction</a></li><li class="chapter-item expanded "><a href="../gameplay/movement-features.html"><strong aria-hidden="true">5.2.</strong> Gravity, jump, sprint, and flight</a></li><li class="chapter-item expanded "><a href="../gameplay/block-interaction.html"><strong aria-hidden="true">5.3.</strong> Block interaction and world edits</a></li><li class="chapter-item expanded "><a href="../gameplay/inventory.html"><strong aria-hidden="true">5.4.</strong> Inventory, hotbar, and item use</a></li><li class="chapter-item expanded "><a href="../gameplay/cell-menus.html"><strong aria-hidden="true">5.5.</strong> Cell menus, audiences, and crafting tables</a></li></ol></li><li class="chapter-item expanded "><a href="../client/client-overview.html"><strong aria-hidden="true">6.</strong> Client systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../client/input-settings-menus.html"><strong aria-hidden="true">6.1.</strong> Input, settings, menus, and game state</a></li><li class="chapter-item expanded "><a href="../client/graphics.html"><strong aria-hidden="true">6.2.</strong> Graphics, lighting, sky, and outlines</a></li><li class="chapter-item expanded "><a href="../client/blocky-models.html"><strong aria-hidden="true">6.3.</strong> Blocky models and animation</a></li></ol></li><li class="chapter-item expanded "><a href="../development/developer-guide.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../development/extension-cookbook.html"><strong aria-hidden="true">7.1.</strong> Extension cookbook</a></li><li class="chapter-item expanded "><a href="../development/testing-and-performance.html" class="active"><strong aria-hidden="true">7.2.</strong> Testing, debugging, and performance</a></li><li class="chapter-item expanded "><a href="../reference/crate-map.html"><strong aria-hidden="true">7.3.</strong> Crate map</a></li><li class="chapter-item expanded "><a href="../reference/current-limits.html"><strong aria-hidden="true">7.4.</strong> Current limits and design direction</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Minecraft Simple Demo Architecture</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="testing-debugging-and-performance"><a class="header" href="#testing-debugging-and-performance">Testing, debugging, and performance</a></h1>
+<p>Modular architecture needs tests at more than one level.</p>
+<h2 id="unit-tests"><a class="header" href="#unit-tests">Unit tests</a></h2>
+<p>Use direct crate tests for pure or local behavior:</p>
+<ul>
+<li>packed bit array read/write and repack;</li>
+<li>chunk palette growth and serialization;</li>
+<li>negative coordinate conversion;</li>
+<li>exact-edge voxel raycasting;</li>
+<li>collision landing and ledge movement;</li>
+<li>portal frame recognition;</li>
+<li>dimension registration;</li>
+<li>AO brightness;</li>
+<li>provider uniform-layer behavior.</li>
+<li>biome registry validation, climate determinism, and feature vertical bounds;</li>
+</ul>
+<p>Pure API/support crates should have most of their behavior covered without
+starting Bevy.</p>
+<h2 id="ecs-integration-tests"><a class="header" href="#ecs-integration-tests">ECS integration tests</a></h2>
+<p>For pipelines, create a small <code>App</code>, add only required messages/resources and
+systems, then update it.</p>
+<p>Useful cases:</p>
+<ul>
+<li>a validator denies before apply;</li>
+<li>a specialized inventory handler prevents generic swap;</li>
+<li>dimension change triggers reset before player reposition;</li>
+<li>network typed dispatch happens before feature receive;</li>
+<li>flight apply happens before sync;</li>
+<li>optimistic UI is replaced by authoritative state.</li>
+</ul>
+<p>Public <code>SystemSet</code> order makes these tests easier.</p>
+<h2 id="composition-checks"><a class="header" href="#composition-checks">Composition checks</a></h2>
+<p>Always compose and check both active applications after changing shared domain
+types:</p>
+<pre><code class="language-sh">patchwork compose \
+  --modpack client \
+  --modpacks-folder ./modpacks \
+  --mods-folder ./mods \
+  --cache ./build-client
+
+cargo check --manifest-path build-client/client/Cargo.toml
+
+patchwork compose \
+  --modpack server \
+  --modpacks-folder ./modpacks \
+  --mods-folder ./mods \
+  --cache ./build-server
+
+cargo check --manifest-path build-server/server/Cargo.toml
+</code></pre>
+<p>Changes that require both:</p>
+<ul>
+<li>block/item/dimension contributors;</li>
+<li>metadata fields;</li>
+<li>network messages;</li>
+<li>shared serialized data;</li>
+<li>public API signatures;</li>
+<li>modpack imports.</li>
+</ul>
+<h2 id="test-alternate-compositions"><a class="header" href="#test-alternate-compositions">Test alternate compositions</a></h2>
+<p>The main client/server build cannot prove replaceability.</p>
+<p>Useful composition fixtures:</p>
+<ul>
+<li>server base without vanilla rules;</li>
+<li>checkerboard provider instead of Perlin;</li>
+<li>primary provider without the vanilla biome pack;</li>
+<li>single-world routing without dimensions;</li>
+<li>client without graphics pack;</li>
+<li>client with outline feature;</li>
+<li>alternate player renderer;</li>
+<li>transport provider replacement.</li>
+</ul>
+<p>Even a periodic compose/check test catches accidental concrete dependencies.</p>
+<h2 id="documentation-build"><a class="header" href="#documentation-build">Documentation build</a></h2>
+<p>From <code>documentation/</code>:</p>
+<pre><code class="language-sh">mdbook build
+</code></pre>
+<p>Keep <code>SUMMARY.md</code> links valid. The root <code>ARCHITECTURE.md</code> no longer exists; this
+book is the canonical source.</p>
+<h2 id="debug-generated-output"><a class="header" href="#debug-generated-output">Debug generated output</a></h2>
+<p>When composition is wrong, inspect:</p>
+<ul>
+<li>generated <code>main.rs</code> for initialization order;</li>
+<li>generated Cargo manifest for selected providers;</li>
+<li>generated registry enum for missing contributor;</li>
+<li>generated packet enum and typed event;</li>
+<li>output assets for namespaced path;</li>
+<li>modpack import/ignore chain.</li>
+</ul>
+<p>Do not patch generated output to continue. Fix the source metadata.</p>
+<h2 id="runtime-logging-boundaries"><a class="header" href="#runtime-logging-boundaries">Runtime logging boundaries</a></h2>
+<p>Log at the layer that understands the failure:</p>
+<ul>
+<li>framing errors in transport;</li>
+<li>unknown/unavailable route in world API caller;</li>
+<li>validation denial in gameplay validator;</li>
+<li>model parse error in Blocky renderer;</li>
+<li>missing asset in presentation;</li>
+<li>duplicate provider at registration.</li>
+</ul>
+<p>Avoid logging the same failure in every layer.</p>
+<h2 id="chunk-performance"><a class="header" href="#chunk-performance">Chunk performance</a></h2>
+<p>Current safeguards:</p>
+<ul>
+<li>palette/bit-packed storage;</li>
+<li>zero-bit uniform sections;</li>
+<li>uniform provider fast paths;</li>
+<li>finite moving 3D window;</li>
+<li>request budget of four per frame;</li>
+<li>remesh budget of four per frame;</li>
+<li>retries instead of one-shot events;</li>
+<li>one-lock missing-position query;</li>
+<li>partial selection instead of full queue sort;</li>
+<li>deduplicated remeshes;</li>
+<li>air and fully hidden uniform mesh fast paths;</li>
+<li>material reuse.</li>
+</ul>
+<p>When profiling vertical streaming, separate:</p>
+<ul>
+<li>server generation;</li>
+<li>network serialization;</li>
+<li>client cache insertion;</li>
+<li>mesh generation;</li>
+<li>Bevy asset/entity creation.</li>
+</ul>
+<p>One combined frame time does not identify the correct mod to optimize.</p>
+<h2 id="network-performance"><a class="header" href="#network-performance">Network performance</a></h2>
+<p>TCP outboxes avoid blocking normal update systems on complete writes.</p>
+<p>Current gaps:</p>
+<ul>
+<li>unbounded outboxes;</li>
+<li>no chunk response compression beyond compact CBOR data;</li>
+<li>no explicit request cancellation packet;</li>
+<li>no protocol metrics;</li>
+<li>synchronous packet encode/decode on update thread.</li>
+</ul>
+<p>Improve these in transport/scheduling mods.</p>
+<h2 id="rendering-performance"><a class="header" href="#rendering-performance">Rendering performance</a></h2>
+<p>The naive mesher emits one quad for every visible block face.</p>
+<p>Likely next improvements:</p>
+<ul>
+<li>greedy meshing;</li>
+<li>background mesh jobs;</li>
+<li>mesh pooling;</li>
+<li>texture arrays;</li>
+<li>frustum/distance culling;</li>
+<li>separate opaque and transparent passes.</li>
+</ul>
+<p>Preserve <code>ChunkMeshApi</code> and <code>ChunkRenderApi</code> boundaries while iterating.</p>
+<h2 id="bevy-query-conflicts"><a class="header" href="#bevy-query-conflicts">Bevy query conflicts</a></h2>
+<p>If one system mutably queries the same component in two parameters, Bevy raises
+<code>B0001</code>.</p>
+<p>Make queries provably disjoint:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>Query&lt;&amp;mut Transform, (
+    With&lt;BlockyModelNode&gt;,
+    Without&lt;BlockyModelVisual&gt;,
+)&gt;
+
+Query&lt;&amp;mut Transform, (
+    With&lt;BlockyModelVisual&gt;,
+    Without&lt;BlockyModelNode&gt;,
+)&gt;
+<span class="boring">}
+</span></code></pre></pre>
+<p>or use <code>ParamSet</code>.</p>
+<p>This matters in modular systems where one feature introduces a new component on
+entities already queried elsewhere.</p>
+<h2 id="ui-debugging"><a class="header" href="#ui-debugging">UI debugging</a></h2>
+<p>For drag/drop:</p>
+<ul>
+<li>inspect source and target entity markers;</li>
+<li>ensure one operation ID per logical drop;</li>
+<li>deduplicate Bevy pointer events in the same frame;</li>
+<li>update optimistic cache before rebuilding visuals;</li>
+<li>keep dragged visual above slots and decorations;</li>
+<li>verify authoritative packet returns both changed cells.</li>
+</ul>
+<p>For settings:</p>
+<ul>
+<li>verify only one editor owns keyboard focus;</li>
+<li>separate stored type from editor provider;</li>
+<li>rebuild menus after providers register.</li>
+</ul>
+<h2 id="performance-rule"><a class="header" href="#performance-rule">Performance rule</a></h2>
+<p>Optimize behind the narrowest contract that owns the cost.</p>
+<p>Do not merge modules only to gain access to private state. If an optimization
+needs new information, add a small public summary or service to the relevant
+API.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../development/extension-cookbook.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../reference/crate-map.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../development/extension-cookbook.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../reference/crate-map.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>

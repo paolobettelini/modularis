@@ -1,0 +1,519 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Biomes and world-generation features - Minecraft Simple Demo Architecture</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting-started/project-overview.html"><strong aria-hidden="true">1.1.</strong> Project overview</a></li><li class="chapter-item expanded "><a href="../getting-started/build-and-run.html"><strong aria-hidden="true">1.2.</strong> Build and run</a></li></ol></li><li class="chapter-item expanded "><a href="../architecture/foundations.html"><strong aria-hidden="true">2.</strong> Architecture foundations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../architecture/patchwork-composition.html"><strong aria-hidden="true">2.1.</strong> Patchwork composition</a></li><li class="chapter-item expanded "><a href="../architecture/mod-anatomy.html"><strong aria-hidden="true">2.2.</strong> Mod anatomy and lifecycle</a></li><li class="chapter-item expanded "><a href="../architecture/apis-and-events.html"><strong aria-hidden="true">2.3.</strong> APIs, providers, and ECS contracts</a></li><li class="chapter-item expanded "><a href="../architecture/code-generation.html"><strong aria-hidden="true">2.4.</strong> Code generation and registries</a></li><li class="chapter-item expanded "><a href="../architecture/modpacks.html"><strong aria-hidden="true">2.5.</strong> Modpacks and feature boundaries</a></li><li class="chapter-item expanded "><a href="../architecture/assets-and-output.html"><strong aria-hidden="true">2.6.</strong> Assets and generated output</a></li></ol></li><li class="chapter-item expanded "><a href="../runtime/runtime-overview.html"><strong aria-hidden="true">3.</strong> Runtime and networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../runtime/bevy-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Bevy application lifecycle</a></li><li class="chapter-item expanded "><a href="../runtime/networking.html"><strong aria-hidden="true">3.2.</strong> Protocol, transport, and framing</a></li><li class="chapter-item expanded "><a href="../runtime/sessions-and-visibility.html"><strong aria-hidden="true">3.3.</strong> Sessions, routing, and visibility</a></li><li class="chapter-item expanded "><a href="../runtime/chat-and-commands.html"><strong aria-hidden="true">3.4.</strong> Chat, commands, and completion</a></li></ol></li><li class="chapter-item expanded "><a href="../world/world-overview.html"><strong aria-hidden="true">4.</strong> World architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../world/blocks-and-items.html"><strong aria-hidden="true">4.1.</strong> Blocks, items, and metadata</a></li><li class="chapter-item expanded "><a href="../world/chunk-storage.html"><strong aria-hidden="true">4.2.</strong> Chunk coordinates and storage</a></li><li class="chapter-item expanded "><a href="../world/server-world.html"><strong aria-hidden="true">4.3.</strong> Server world providers and residency</a></li><li class="chapter-item expanded "><a href="../world/biomes.html" class="active"><strong aria-hidden="true">4.4.</strong> Biomes and world-generation features</a></li><li class="chapter-item expanded "><a href="../world/client-chunks.html"><strong aria-hidden="true">4.5.</strong> Client streaming, meshing, and rendering</a></li><li class="chapter-item expanded "><a href="../world/dimensions.html"><strong aria-hidden="true">4.6.</strong> Dimensions and world scopes</a></li><li class="chapter-item expanded "><a href="../world/portals.html"><strong aria-hidden="true">4.7.</strong> Portals</a></li></ol></li><li class="chapter-item expanded "><a href="../gameplay/gameplay-overview.html"><strong aria-hidden="true">5.</strong> Gameplay systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../gameplay/movement.html"><strong aria-hidden="true">5.1.</strong> Player movement and prediction</a></li><li class="chapter-item expanded "><a href="../gameplay/movement-features.html"><strong aria-hidden="true">5.2.</strong> Gravity, jump, sprint, and flight</a></li><li class="chapter-item expanded "><a href="../gameplay/block-interaction.html"><strong aria-hidden="true">5.3.</strong> Block interaction and world edits</a></li><li class="chapter-item expanded "><a href="../gameplay/inventory.html"><strong aria-hidden="true">5.4.</strong> Inventory, hotbar, and item use</a></li><li class="chapter-item expanded "><a href="../gameplay/cell-menus.html"><strong aria-hidden="true">5.5.</strong> Cell menus, audiences, and crafting tables</a></li></ol></li><li class="chapter-item expanded "><a href="../client/client-overview.html"><strong aria-hidden="true">6.</strong> Client systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../client/input-settings-menus.html"><strong aria-hidden="true">6.1.</strong> Input, settings, menus, and game state</a></li><li class="chapter-item expanded "><a href="../client/graphics.html"><strong aria-hidden="true">6.2.</strong> Graphics, lighting, sky, and outlines</a></li><li class="chapter-item expanded "><a href="../client/blocky-models.html"><strong aria-hidden="true">6.3.</strong> Blocky models and animation</a></li></ol></li><li class="chapter-item expanded "><a href="../development/developer-guide.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../development/extension-cookbook.html"><strong aria-hidden="true">7.1.</strong> Extension cookbook</a></li><li class="chapter-item expanded "><a href="../development/testing-and-performance.html"><strong aria-hidden="true">7.2.</strong> Testing, debugging, and performance</a></li><li class="chapter-item expanded "><a href="../reference/crate-map.html"><strong aria-hidden="true">7.3.</strong> Crate map</a></li><li class="chapter-item expanded "><a href="../reference/current-limits.html"><strong aria-hidden="true">7.4.</strong> Current limits and design direction</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Minecraft Simple Demo Architecture</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="biomes-and-world-generation-features"><a class="header" href="#biomes-and-world-generation-features">Biomes and world-generation features</a></h1>
+<p>Biomes are available in every current dimension. The system is assembled from
+independent layers:</p>
+<pre><code class="language-text">generated BiomeId contributors
+             │
+dimension-scoped runtime definitions + feature registry
+             │
+viewer/instance-aware biome selector
+             │
+shared request-local biome sampler
+             │
+Overworld, Nether, or Aether geometry provider
+</code></pre>
+<p>The split is intentional. A biome ID is domain identity, a definition is
+server content, selection is policy, and a tree or cave is an optional feature.
+The sampler only shares lookup, caching, terrain blending, and phased feature
+dispatch. It does not decide whether terrain is a heightmap, Nether ground, or
+floating islands.</p>
+<h2 id="generated-biome-identity"><a class="header" href="#generated-biome-identity">Generated biome identity</a></h2>
+<p>Every biome identity contributor is a small mod with one namespaced ID:</p>
+<pre><code class="language-toml">[package.metadata.biome]
+id = &quot;example:lavender-fields&quot;
+</code></pre>
+<p><code>biome-registry-codegen</code> scans the composed project and generates <code>BiomeId</code>,
+<code>ALL_BIOMES</code>, string conversion, and lookup. Only the ID belongs in Cargo
+metadata. Dimension, climate, terrain, visuals, and features stay in Rust code.</p>
+<p>The identity and server definition are separate mods:</p>
+<pre><code class="language-text">biome-forest
+    contributes demo:forest to codegen
+
+server-biome-forest-vanilla-mod
+    registers the demo server's runtime definition
+</code></pre>
+<p>This allows a protocol or client to know the ID without importing server world
+policy. Duplicate IDs and duplicate generated Rust variants fail during
+composition.</p>
+<p>Identity packs are split by dimension:</p>
+<ul>
+<li><code>biomes-overworld.toml</code>;</li>
+<li><code>biomes-nether.toml</code>;</li>
+<li><code>biomes-aether.toml</code>;</li>
+<li><code>biomes.toml</code>, which imports all three for the demo composition.</li>
+</ul>
+<p>A custom server may import only the dimensions it supports.</p>
+<h2 id="runtime-definitions"><a class="header" href="#runtime-definitions">Runtime definitions</a></h2>
+<p><code>server-biome-api</code> owns the runtime contract:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct BiomeDefinition {
+    pub id: BiomeId,
+    pub dimension: Dimension,
+    pub name: &amp;'static str,
+    pub climate: BiomeClimate,
+    pub terrain: BiomeTerrain,
+    pub visuals: BiomeVisuals,
+    pub features: Vec&lt;BiomeFeatureId&gt;,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>dimension</code> prevents the Nether selector from considering Overworld or Aether
+definitions. <code>ServerBiomeRegistry::definitions_for_dimension</code> returns a sorted
+copy containing only the requested dimension.</p>
+<h3 id="climate"><a class="header" href="#climate">Climate</a></h3>
+<p><code>BiomeClimate</code> stores target temperature, humidity, continentalness,
+precipitation support, and downfall. These values are hints for selectors, not
+fixed universal ranges.</p>
+<p>The vanilla selector combines two signals:</p>
+<ul>
+<li>an independent broad Perlin field per biome, giving every selected biome a
+similar chance to own regions;</li>
+<li>a smaller climate-distance penalty, preserving hot, cold, wet, and dry
+character without letting central climate points dominate the map.</li>
+</ul>
+<p>The region frequency is intentionally broad enough for readable areas while
+still showing several biomes during local flight. The current multiplier is
+<code>4.0</code>, half the previous test value, so regions are about twice as wide along
+each horizontal axis.</p>
+<p>A replacement selector may use ranges, latitude, Voronoi regions, player
+state, saved maps, or no climate data.</p>
+<h3 id="terrain"><a class="header" href="#terrain">Terrain</a></h3>
+<p><code>BiomeTerrain</code> stores base height, broad and detail variation, surface,
+subsurface and underground blocks, and subsurface depth.</p>
+<p>Providers interpret these fields. The Overworld uses them for a normal
+heightmap, the Nether for low terrain that continues through negative chunk
+layers, and the Aether for island height and material layers. A file-backed
+provider may ignore all height fields while still using biome IDs and
+features.</p>
+<h3 id="visuals"><a class="header" href="#visuals">Visuals</a></h3>
+<p><code>BiomeVisuals</code> records sky, fog, water, grass, and foliage colors. They are an
+extension point for client synchronization. The current chunk protocol does
+not transmit biome maps, so the renderer does not apply these values yet.</p>
+<h3 id="feature-list"><a class="header" href="#feature-list">Feature list</a></h3>
+<p>A definition stores ordered feature IDs rather than concrete implementations:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>features: vec![
+    caves_feature_id(),
+    ores_feature_id(),
+    dense_oak_trees_feature_id(),
+]
+<span class="boring">}
+</span></code></pre></pre>
+<p>Feature mods register those IDs separately. Missing implementations and
+duplicate registrations are rejected by registry validation.</p>
+<h2 id="world-generation-feature-contract"><a class="header" href="#world-generation-feature-contract">World-generation feature contract</a></h2>
+<p>A feature implements:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait ServerBiomeFeature: Send + Sync + 'static {
+    fn phase(&amp;self) -&gt; BiomeFeaturePhase;
+
+    fn vertical_range(&amp;self) -&gt; FeatureVerticalRange {
+        FeatureVerticalRange::Any
+    }
+
+    fn generate(&amp;self, context: &amp;mut BiomeFeatureContext&lt;'_&gt;);
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Public phases provide deterministic cooperation between unrelated mods:</p>
+<pre><code class="language-text">Carving -&gt; Underground -&gt; Surface -&gt; Decoration -&gt; Finalization
+</code></pre>
+<p>Examples include caves in <code>Carving</code>, ores in <code>Underground</code>, ice in <code>Surface</code>,
+and trees, boulders, glowstone clusters, and crystal spires in <code>Decoration</code>.</p>
+<p>Each feature also declares a conservative vertical range. Providers can then
+return uniform air or underground chunks without running irrelevant feature
+code. A bound must never be narrower than the feature's possible writes.</p>
+<p><code>BiomeFeatureContext</code> exposes the generation request, target biome, world seed,
+surface and biome sampling callbacks, current-chunk reads, clipped writes, and
+deterministic position hashing. Cross-chunk shapes inspect neighboring anchors
+but only write the current chunk. This makes output independent of generation
+order.</p>
+<h2 id="selection-and-request-scope"><a class="header" href="#selection-and-request-scope">Selection and request scope</a></h2>
+<p>Selection is an exclusive API:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait ServerBiomeSelector {
+    fn select(
+        &amp;self,
+        request: &amp;BiomeSelectionRequest&lt;'_&gt;,
+        definitions: &amp;[BiomeDefinition],
+    ) -&gt; Option&lt;BiomeId&gt;;
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>The request contains the original <code>ChunkGenerationRequest</code>, world X/Z,
+viewer, and world instance. A custom selector can therefore vary by instance
+or player. If it varies by player, chunk routing and edit identity must use a
+matching scope; otherwise two different logical worlds would share edits.</p>
+<p>The vanilla selector derives a stable noise seed from <code>ServerWorldSeed</code>, its
+own namespace, and <code>WorldInstanceId</code>, then uses stable ID tie-breaking. Only an
+Overworld definition set containing <code>BiomeId::Plains</code> receives the small safe
+Plains area around spawn. Nether and Aether selections cannot accidentally
+select Plains because definitions are filtered first.</p>
+<h2 id="shared-biome-sampler"><a class="header" href="#shared-biome-sampler">Shared biome sampler</a></h2>
+<p><code>server-biome-sampling-api</code> is a pure support crate used by all three current
+providers. A <code>ServerBiomeSampler</code>:</p>
+<ul>
+<li>filters definitions to one <code>Dimension</code>;</li>
+<li>caches <code>(x, z) -&gt; BiomeId</code> per chunk request;</li>
+<li>resolves definitions and terrain data;</li>
+<li>blends neighboring terrain parameters;</li>
+<li>finds active feature implementations;</li>
+<li>tests feature vertical intersections;</li>
+<li>dispatches features in public phase order.</li>
+</ul>
+<p>It does not register a provider and does not create blocks. This is important
+for Patchwork replacement: a custom island or saved-world provider can reuse
+the sampler, while a server with no biomes can omit it.</p>
+<h2 id="dimension-specific-providers"><a class="header" href="#dimension-specific-providers">Dimension-specific providers</a></h2>
+<h3 id="overworld"><a class="header" href="#overworld">Overworld</a></h3>
+<p><code>server-chunk-provider-biomes-mod</code> creates a continuous heightmap. It blends
+height parameters across biome boundaries, applies biome-specific strata,
+keeps a safe spawn blend, and runs features. Uniform sky and deep underground
+chunks use compact one-entry palettes where possible.</p>
+<h3 id="nether"><a class="header" href="#nether">Nether</a></h3>
+<p><code>server-chunk-provider-nether-mod</code> keeps its own Nether geometry and provider
+ID. It derives surface shape and material strata from Nether biome terrain and
+applies Nether features. It does not treat world Y zero as a floor: doing so in
+an unbounded vertical coordinate system would create a bedrock wall through the
+middle of the world. Chunks above every relevant surface and feature are
+returned as uniform air. A bedrock boundary, if desired, belongs in a separate
+feature or bounded provider.</p>
+<h3 id="aether"><a class="header" href="#aether">Aether</a></h3>
+<p><code>server-chunk-provider-aether-mod</code> generates sparse floating-island columns.
+Biome terrain controls island material and height character, while the provider
+owns island presence and thickness. Columns outside islands remain air and
+features run only where an island exists. A small spawn island remains
+guaranteed.</p>
+<p>The three providers are independent implementation mods. Sharing a sampler is
+not the same as merging their terrain policy.</p>
+<h2 id="default-biomes"><a class="header" href="#default-biomes">Default biomes</a></h2>
+<h3 id="overworld-1"><a class="header" href="#overworld-1">Overworld</a></h3>
+<table><thead><tr><th>Biome</th><th>Main layers</th><th>Main features</th></tr></thead><tbody>
+<tr><td>Plains</td><td>grass, dirt, stone</td><td>caves, ores, sparse oak trees</td></tr>
+<tr><td>Oak Forest</td><td>grass, dirt, stone</td><td>caves, ores, dense oak trees</td></tr>
+<tr><td>Birch Forest</td><td>grass, dirt, stone</td><td>caves, ores, birch trees</td></tr>
+<tr><td>Dry Desert</td><td>sand, stone</td><td>caves, ores, cacti</td></tr>
+<tr><td>Red Badlands</td><td>red sand, terracotta, stone</td><td>caves, ores, boulders</td></tr>
+<tr><td>Frozen Tundra</td><td>snow, dirt, stone</td><td>caves, ores, packed-ice patches</td></tr>
+<tr><td>Rocky Peaks</td><td>stone, gravel</td><td>caves, ores, boulders</td></tr>
+</tbody></table>
+<h3 id="nether-1"><a class="header" href="#nether-1">Nether</a></h3>
+<table><thead><tr><th>Biome</th><th>Main layers</th><th>Main features</th></tr></thead><tbody>
+<tr><td>Nether Wastes</td><td>netherrack</td><td>caves, glowstone clusters</td></tr>
+<tr><td>Soul Sand Valley</td><td>soul sand, soul soil, netherrack</td><td>caves</td></tr>
+<tr><td>Crimson Forest</td><td>crimson nylium, netherrack</td><td>caves, glowstone clusters</td></tr>
+<tr><td>Warped Forest</td><td>warped nylium, netherrack</td><td>caves, glowstone clusters</td></tr>
+<tr><td>Basalt Deltas</td><td>basalt, blackstone, netherrack</td><td>caves, glowstone clusters</td></tr>
+</tbody></table>
+<h3 id="aether-1"><a class="header" href="#aether-1">Aether</a></h3>
+<table><thead><tr><th>Biome</th><th>Main layers</th><th>Main features</th></tr></thead><tbody>
+<tr><td>Aether Highlands</td><td>grass, dirt, stone</td><td>sparse oak trees</td></tr>
+<tr><td>Golden Grove</td><td>moss, dirt, calcite</td><td>dense oak trees, glowstone clusters</td></tr>
+<tr><td>Crystal Peaks</td><td>calcite, stone</td><td>crystal spires</td></tr>
+</tbody></table>
+<p>Each definition is a separate mod. A server can omit or replace one without
+editing a central biome switch.</p>
+<h2 id="default-feature-mods"><a class="header" href="#default-feature-mods">Default feature mods</a></h2>
+<table><thead><tr><th>Mod</th><th>Purpose</th><th>Phase</th></tr></thead><tbody>
+<tr><td><code>server-biome-feature-caves-vanilla-mod</code></td><td>deterministic caves</td><td>Carving</td></tr>
+<tr><td><code>server-biome-feature-ores-vanilla-mod</code></td><td>diamond ore replacement</td><td>Underground</td></tr>
+<tr><td><code>server-biome-feature-oak-trees-vanilla-mod</code></td><td>sparse/dense oak trees</td><td>Decoration</td></tr>
+<tr><td><code>server-biome-feature-birch-trees-vanilla-mod</code></td><td>birch trees</td><td>Decoration</td></tr>
+<tr><td><code>server-biome-feature-cacti-vanilla-mod</code></td><td>cacti</td><td>Decoration</td></tr>
+<tr><td><code>server-biome-feature-ice-patches-vanilla-mod</code></td><td>packed ice</td><td>Surface</td></tr>
+<tr><td><code>server-biome-feature-boulders-vanilla-mod</code></td><td>rock boulders</td><td>Decoration</td></tr>
+<tr><td><code>server-biome-feature-glowstone-clusters-vanilla-mod</code></td><td>glowstone clusters</td><td>Decoration</td></tr>
+<tr><td><code>server-biome-feature-crystal-spires-vanilla-mod</code></td><td>calcite/glowstone spires</td><td>Decoration</td></tr>
+</tbody></table>
+<p>A feature mod may register multiple IDs when one algorithm supports several
+configurations.</p>
+<h2 id="adding-a-biome"><a class="header" href="#adding-a-biome">Adding a biome</a></h2>
+<h3 id="1-contribute-identity"><a class="header" href="#1-contribute-identity">1. Contribute identity</a></h3>
+<pre><code class="language-toml">[package.metadata.biome]
+id = &quot;example:lavender-fields&quot;
+</code></pre>
+<p>Add it to the appropriate dimension identity pack and recompose.</p>
+<h3 id="2-add-optional-generation-features"><a class="header" href="#2-add-optional-generation-features">2. Add optional generation features</a></h3>
+<p>Create a separate mod implementing <code>ServerBiomeFeature</code>, register a namespaced
+<code>BiomeFeatureId</code>, and declare its phase and conservative vertical range. The
+definition mod should depend on the feature mod so it is initialized first.</p>
+<h3 id="3-register-the-server-definition"><a class="header" href="#3-register-the-server-definition">3. Register the server definition</a></h3>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>registry.register_biome(BiomeDefinition {
+    id: BiomeId::LavenderFields,
+    dimension: Dimension::Overworld,
+    name: &quot;Lavender Fields&quot;,
+    climate: BiomeClimate {
+        temperature: 0.62,
+        humidity: 0.56,
+        continentalness: 0.40,
+        has_precipitation: true,
+        downfall: 0.48,
+    },
+    terrain: BiomeTerrain {
+        base_height: 6.0,
+        height_variation: 2.0,
+        detail_variation: 0.8,
+        surface: BlockId::Grass,
+        subsurface: BlockId::Dirt,
+        underground: BlockId::Stone,
+        subsurface_depth: 3,
+    },
+    visuals: BiomeVisuals {
+        sky_color: [0.55, 0.70, 0.96],
+        fog_color: [0.76, 0.78, 0.92],
+        water_color: [0.22, 0.42, 0.72],
+        grass_tint: [0.52, 0.70, 0.38],
+        foliage_tint: [0.44, 0.64, 0.34],
+    },
+    features: vec![BiomeFeatureId::new(&quot;example:lavender-patches&quot;)],
+})?;
+<span class="boring">}
+</span></code></pre></pre>
+<p>Definitions are normal Rust. There is no biome JSON loader in the current
+architecture.</p>
+<h3 id="4-select-it-in-a-server-pack"><a class="header" href="#4-select-it-in-a-server-pack">4. Select it in a server pack</a></h3>
+<p>Add the identity to a <code>biomes-&lt;dimension&gt;.toml</code> pack and the definition plus
+features to a <code>server-biomes-&lt;dimension&gt;-*.toml</code> pack. Do not put custom world
+policy in <code>server-base.toml</code>.</p>
+<h2 id="replacing-larger-pieces"><a class="header" href="#replacing-larger-pieces">Replacing larger pieces</a></h2>
+<p>Use the narrowest replacement:</p>
+<ul>
+<li>change one biome: replace only its definition mod;</li>
+<li>change a decoration: register a new feature and reference it;</li>
+<li>change placement policy: provide <code>server-biome-selection-api</code>;</li>
+<li>change geometry: provide a chunk provider while optionally reusing
+<code>server-biome-sampling-api</code>;</li>
+<li>use saved biomes: provide a selector backed by a non-blocking cache;</li>
+<li>use player-specific terrain: inspect <code>ChunkViewer</code> and use matching routing
+and edit scopes;</li>
+<li>use no biomes: omit biome packs and select another provider.</li>
+</ul>
+<p>The vanilla packs are split into Overworld, Nether, and Aether content packs.
+<code>server-biomes-vanilla.toml</code> imports them and selects the vanilla climate
+policy. Provider selection stays in the server's world composition.</p>
+<h2 id="texture-ownership"><a class="header" href="#texture-ownership">Texture ownership</a></h2>
+<p>Every block mod owns its texture files and Patchwork copies them to
+<code>assets/&lt;mod-name&gt;/</code>. The expanded biome set adds textures for birch logs and
+leaves, red sand, terracotta, soul sand, soul soil, basalt, blackstone, crimson
+and warped nylium, moss, and calcite. These files were copied from the local
+vanilla texture pack into their owning mods; no provider has a central texture
+directory.</p>
+<h2 id="current-limits"><a class="header" href="#current-limits">Current limits</a></h2>
+<ul>
+<li>biome maps and visual colors are not synchronized to clients;</li>
+<li>there is no water or precipitation simulation;</li>
+<li>there are no biome-specific audio or creature-spawn contracts;</li>
+<li>there is no generated structure registry;</li>
+<li>registries are startup-time resources;</li>
+<li>generation is synchronous;</li>
+<li>features write only the current chunk and must use deterministic clipped
+generation for cross-boundary shapes.</li>
+</ul>
+<p>These should become separate APIs and feature mods when implemented, not extra
+responsibilities in the selector or chunk providers.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../world/server-world.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../world/client-chunks.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../world/server-world.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../world/client-chunks.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Bevy application lifecycle - Minecraft Simple Demo Architecture</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting-started/project-overview.html"><strong aria-hidden="true">1.1.</strong> Project overview</a></li><li class="chapter-item expanded "><a href="../getting-started/build-and-run.html"><strong aria-hidden="true">1.2.</strong> Build and run</a></li></ol></li><li class="chapter-item expanded "><a href="../architecture/foundations.html"><strong aria-hidden="true">2.</strong> Architecture foundations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../architecture/patchwork-composition.html"><strong aria-hidden="true">2.1.</strong> Patchwork composition</a></li><li class="chapter-item expanded "><a href="../architecture/mod-anatomy.html"><strong aria-hidden="true">2.2.</strong> Mod anatomy and lifecycle</a></li><li class="chapter-item expanded "><a href="../architecture/apis-and-events.html"><strong aria-hidden="true">2.3.</strong> APIs, providers, and ECS contracts</a></li><li class="chapter-item expanded "><a href="../architecture/code-generation.html"><strong aria-hidden="true">2.4.</strong> Code generation and registries</a></li><li class="chapter-item expanded "><a href="../architecture/modpacks.html"><strong aria-hidden="true">2.5.</strong> Modpacks and feature boundaries</a></li><li class="chapter-item expanded "><a href="../architecture/assets-and-output.html"><strong aria-hidden="true">2.6.</strong> Assets and generated output</a></li></ol></li><li class="chapter-item expanded "><a href="../runtime/runtime-overview.html"><strong aria-hidden="true">3.</strong> Runtime and networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../runtime/bevy-lifecycle.html" class="active"><strong aria-hidden="true">3.1.</strong> Bevy application lifecycle</a></li><li class="chapter-item expanded "><a href="../runtime/networking.html"><strong aria-hidden="true">3.2.</strong> Protocol, transport, and framing</a></li><li class="chapter-item expanded "><a href="../runtime/sessions-and-visibility.html"><strong aria-hidden="true">3.3.</strong> Sessions, routing, and visibility</a></li><li class="chapter-item expanded "><a href="../runtime/chat-and-commands.html"><strong aria-hidden="true">3.4.</strong> Chat, commands, and completion</a></li></ol></li><li class="chapter-item expanded "><a href="../world/world-overview.html"><strong aria-hidden="true">4.</strong> World architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../world/blocks-and-items.html"><strong aria-hidden="true">4.1.</strong> Blocks, items, and metadata</a></li><li class="chapter-item expanded "><a href="../world/chunk-storage.html"><strong aria-hidden="true">4.2.</strong> Chunk coordinates and storage</a></li><li class="chapter-item expanded "><a href="../world/server-world.html"><strong aria-hidden="true">4.3.</strong> Server world providers and residency</a></li><li class="chapter-item expanded "><a href="../world/biomes.html"><strong aria-hidden="true">4.4.</strong> Biomes and world-generation features</a></li><li class="chapter-item expanded "><a href="../world/client-chunks.html"><strong aria-hidden="true">4.5.</strong> Client streaming, meshing, and rendering</a></li><li class="chapter-item expanded "><a href="../world/dimensions.html"><strong aria-hidden="true">4.6.</strong> Dimensions and world scopes</a></li><li class="chapter-item expanded "><a href="../world/portals.html"><strong aria-hidden="true">4.7.</strong> Portals</a></li></ol></li><li class="chapter-item expanded "><a href="../gameplay/gameplay-overview.html"><strong aria-hidden="true">5.</strong> Gameplay systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../gameplay/movement.html"><strong aria-hidden="true">5.1.</strong> Player movement and prediction</a></li><li class="chapter-item expanded "><a href="../gameplay/movement-features.html"><strong aria-hidden="true">5.2.</strong> Gravity, jump, sprint, and flight</a></li><li class="chapter-item expanded "><a href="../gameplay/block-interaction.html"><strong aria-hidden="true">5.3.</strong> Block interaction and world edits</a></li><li class="chapter-item expanded "><a href="../gameplay/inventory.html"><strong aria-hidden="true">5.4.</strong> Inventory, hotbar, and item use</a></li><li class="chapter-item expanded "><a href="../gameplay/cell-menus.html"><strong aria-hidden="true">5.5.</strong> Cell menus, audiences, and crafting tables</a></li></ol></li><li class="chapter-item expanded "><a href="../client/client-overview.html"><strong aria-hidden="true">6.</strong> Client systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../client/input-settings-menus.html"><strong aria-hidden="true">6.1.</strong> Input, settings, menus, and game state</a></li><li class="chapter-item expanded "><a href="../client/graphics.html"><strong aria-hidden="true">6.2.</strong> Graphics, lighting, sky, and outlines</a></li><li class="chapter-item expanded "><a href="../client/blocky-models.html"><strong aria-hidden="true">6.3.</strong> Blocky models and animation</a></li></ol></li><li class="chapter-item expanded "><a href="../development/developer-guide.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../development/extension-cookbook.html"><strong aria-hidden="true">7.1.</strong> Extension cookbook</a></li><li class="chapter-item expanded "><a href="../development/testing-and-performance.html"><strong aria-hidden="true">7.2.</strong> Testing, debugging, and performance</a></li><li class="chapter-item expanded "><a href="../reference/crate-map.html"><strong aria-hidden="true">7.3.</strong> Crate map</a></li><li class="chapter-item expanded "><a href="../reference/current-limits.html"><strong aria-hidden="true">7.4.</strong> Current limits and design direction</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Minecraft Simple Demo Architecture</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="bevy-application-lifecycle"><a class="header" href="#bevy-application-lifecycle">Bevy application lifecycle</a></h1>
+<p><code>bevy-mod</code> is intentionally neutral:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct BevyMod {
+    pub app: App,
+}
+
+pub fn init() -&gt; Self {
+    Self { app: App::new() }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>It does not install window plugins, rendering, or a runner.</p>
+<h2 id="client-app"><a class="header" href="#client-app">Client app</a></h2>
+<p><code>client-bevy-default-plugins-mod</code> installs Bevy <code>DefaultPlugins</code> with:</p>
+<ul>
+<li>nearest-neighbor image sampling;</li>
+<li>the selected log filter;</li>
+<li>a resizable <code>1280x720</code> primary window;</li>
+<li>the window title from <code>client-config-api</code>.</li>
+</ul>
+<p>The client bootstrap depends on the essential selected APIs and integration
+mods, then owns <code>bevy-mod</code> and runs the app.</p>
+<p>The bootstrap does not spawn gameplay entities or choose lighting. Those
+responsibilities belong to independent mods.</p>
+<h2 id="server-app"><a class="header" href="#server-app">Server app</a></h2>
+<p><code>server-bevy-runner-mod</code> installs:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>MinimalPlugins.set(
+    ScheduleRunnerPlugin::run_loop(Duration::from_millis(16))
+)
+<span class="boring">}
+</span></code></pre></pre>
+<p>This provides a headless update loop without a window.</p>
+<p><code>server-game-bootstrap-mod</code> only owns and runs the final app. Server gameplay
+systems register themselves before the bootstrap consumes the app.</p>
+<h2 id="client-state"><a class="header" href="#client-state">Client state</a></h2>
+<p>The main state is:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub enum GameState {
+    MainMenu,
+    SettingsMenu,
+    InGame,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>InGame</code> has a substate:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub enum InGameOverlayState {
+    Playing,
+    PauseMenu,
+    Settings,
+    Inventory,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>The overlay is a substate rather than a replacement for <code>InGame</code>. Therefore
+opening the pause menu or inventory does not destroy:</p>
+<ul>
+<li>the player entity;</li>
+<li>chunk cache and meshes;</li>
+<li>network connection;</li>
+<li>server synchronization;</li>
+<li>gravity and world updates.</li>
+</ul>
+<p>Input-specific systems may run only in <code>Playing</code>, while simulation and network
+systems continue in <code>InGame</code>.</p>
+<h2 id="state-commands"><a class="header" href="#state-commands">State commands</a></h2>
+<p>UI and input mods write commands:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>GameStateCommand::StartGame
+InGameOverlayCommand::Pause
+InGameOverlayCommand::OpenInventory
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>client-game-state-bevy-impl</code> is the only mod that converts these commands into
+<code>NextState</code>.</p>
+<p>This separates menu widgets and keybindings from concrete state mutation.</p>
+<h2 id="entity-lifetime"><a class="header" href="#entity-lifetime">Entity lifetime</a></h2>
+<p>Many client entities use:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>DespawnOnExit(GameState::InGame)
+<span class="boring">}
+</span></code></pre></pre>
+<p>Examples:</p>
+<ul>
+<li>local player;</li>
+<li>camera;</li>
+<li>crosshair;</li>
+<li>chunk entities;</li>
+<li>Blocky player models;</li>
+<li>sun light and sun disc.</li>
+</ul>
+<p>Subsystems with additional indices or caches also clear their resources in
+<code>OnExit</code>. Despawning an entity without clearing a resource map would leave stale
+entity IDs.</p>
+<h2 id="startup-ordering"><a class="header" href="#startup-ordering">Startup ordering</a></h2>
+<p>Some registries must be populated before menus are built. Settings input uses:</p>
+<pre><code class="language-text">SettingInputStartupSet::RegisterInputs
+    -&gt; SettingInputStartupSet::BuildMenus
+</code></pre>
+<p>General rule: if initialization order matters at runtime, expose a public
+<code>SystemSet</code> order. Do not depend on incidental plugin insertion order.</p>
+<h2 id="adding-a-client-startup-feature"><a class="header" href="#adding-a-client-startup-feature">Adding a client startup feature</a></h2>
+<p>Choose the narrowest lifecycle:</p>
+<ul>
+<li><code>Startup</code>: application-wide immutable registration;</li>
+<li><code>OnEnter(GameState::InGame)</code>: spawn world-specific entities;</li>
+<li><code>Update.run_if(in_state(...))</code>: active behavior;</li>
+<li><code>OnExit</code>: clean up entities and indexed state.</li>
+</ul>
+<p>If a feature owns no world entity, it may only need to initialize a resource.</p>
+<h2 id="adding-a-server-startup-feature"><a class="header" href="#adding-a-server-startup-feature">Adding a server startup feature</a></h2>
+<p>Server features usually:</p>
+<ul>
+<li>register resources in <code>init</code>;</li>
+<li>add systems to public server pipelines;</li>
+<li>listen to <code>ServerPlayerJoined</code> if they need per-player state;</li>
+<li>remove that state on <code>ServerPlayerLeft</code>;</li>
+<li>avoid placing behavior directly in the bootstrap.</li>
+</ul>
+<p>The bootstrap should remain stable as server feature packs change.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../runtime/runtime-overview.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../runtime/networking.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../runtime/runtime-overview.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../runtime/networking.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>

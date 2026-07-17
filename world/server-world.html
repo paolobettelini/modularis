@@ -1,0 +1,432 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Server world providers and residency - Minecraft Simple Demo Architecture</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting-started/project-overview.html"><strong aria-hidden="true">1.1.</strong> Project overview</a></li><li class="chapter-item expanded "><a href="../getting-started/build-and-run.html"><strong aria-hidden="true">1.2.</strong> Build and run</a></li></ol></li><li class="chapter-item expanded "><a href="../architecture/foundations.html"><strong aria-hidden="true">2.</strong> Architecture foundations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../architecture/patchwork-composition.html"><strong aria-hidden="true">2.1.</strong> Patchwork composition</a></li><li class="chapter-item expanded "><a href="../architecture/mod-anatomy.html"><strong aria-hidden="true">2.2.</strong> Mod anatomy and lifecycle</a></li><li class="chapter-item expanded "><a href="../architecture/apis-and-events.html"><strong aria-hidden="true">2.3.</strong> APIs, providers, and ECS contracts</a></li><li class="chapter-item expanded "><a href="../architecture/code-generation.html"><strong aria-hidden="true">2.4.</strong> Code generation and registries</a></li><li class="chapter-item expanded "><a href="../architecture/modpacks.html"><strong aria-hidden="true">2.5.</strong> Modpacks and feature boundaries</a></li><li class="chapter-item expanded "><a href="../architecture/assets-and-output.html"><strong aria-hidden="true">2.6.</strong> Assets and generated output</a></li></ol></li><li class="chapter-item expanded "><a href="../runtime/runtime-overview.html"><strong aria-hidden="true">3.</strong> Runtime and networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../runtime/bevy-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Bevy application lifecycle</a></li><li class="chapter-item expanded "><a href="../runtime/networking.html"><strong aria-hidden="true">3.2.</strong> Protocol, transport, and framing</a></li><li class="chapter-item expanded "><a href="../runtime/sessions-and-visibility.html"><strong aria-hidden="true">3.3.</strong> Sessions, routing, and visibility</a></li><li class="chapter-item expanded "><a href="../runtime/chat-and-commands.html"><strong aria-hidden="true">3.4.</strong> Chat, commands, and completion</a></li></ol></li><li class="chapter-item expanded "><a href="../world/world-overview.html"><strong aria-hidden="true">4.</strong> World architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../world/blocks-and-items.html"><strong aria-hidden="true">4.1.</strong> Blocks, items, and metadata</a></li><li class="chapter-item expanded "><a href="../world/chunk-storage.html"><strong aria-hidden="true">4.2.</strong> Chunk coordinates and storage</a></li><li class="chapter-item expanded "><a href="../world/server-world.html" class="active"><strong aria-hidden="true">4.3.</strong> Server world providers and residency</a></li><li class="chapter-item expanded "><a href="../world/biomes.html"><strong aria-hidden="true">4.4.</strong> Biomes and world-generation features</a></li><li class="chapter-item expanded "><a href="../world/client-chunks.html"><strong aria-hidden="true">4.5.</strong> Client streaming, meshing, and rendering</a></li><li class="chapter-item expanded "><a href="../world/dimensions.html"><strong aria-hidden="true">4.6.</strong> Dimensions and world scopes</a></li><li class="chapter-item expanded "><a href="../world/portals.html"><strong aria-hidden="true">4.7.</strong> Portals</a></li></ol></li><li class="chapter-item expanded "><a href="../gameplay/gameplay-overview.html"><strong aria-hidden="true">5.</strong> Gameplay systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../gameplay/movement.html"><strong aria-hidden="true">5.1.</strong> Player movement and prediction</a></li><li class="chapter-item expanded "><a href="../gameplay/movement-features.html"><strong aria-hidden="true">5.2.</strong> Gravity, jump, sprint, and flight</a></li><li class="chapter-item expanded "><a href="../gameplay/block-interaction.html"><strong aria-hidden="true">5.3.</strong> Block interaction and world edits</a></li><li class="chapter-item expanded "><a href="../gameplay/inventory.html"><strong aria-hidden="true">5.4.</strong> Inventory, hotbar, and item use</a></li><li class="chapter-item expanded "><a href="../gameplay/cell-menus.html"><strong aria-hidden="true">5.5.</strong> Cell menus, audiences, and crafting tables</a></li></ol></li><li class="chapter-item expanded "><a href="../client/client-overview.html"><strong aria-hidden="true">6.</strong> Client systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../client/input-settings-menus.html"><strong aria-hidden="true">6.1.</strong> Input, settings, menus, and game state</a></li><li class="chapter-item expanded "><a href="../client/graphics.html"><strong aria-hidden="true">6.2.</strong> Graphics, lighting, sky, and outlines</a></li><li class="chapter-item expanded "><a href="../client/blocky-models.html"><strong aria-hidden="true">6.3.</strong> Blocky models and animation</a></li></ol></li><li class="chapter-item expanded "><a href="../development/developer-guide.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../development/extension-cookbook.html"><strong aria-hidden="true">7.1.</strong> Extension cookbook</a></li><li class="chapter-item expanded "><a href="../development/testing-and-performance.html"><strong aria-hidden="true">7.2.</strong> Testing, debugging, and performance</a></li><li class="chapter-item expanded "><a href="../reference/crate-map.html"><strong aria-hidden="true">7.3.</strong> Crate map</a></li><li class="chapter-item expanded "><a href="../reference/current-limits.html"><strong aria-hidden="true">7.4.</strong> Current limits and design direction</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Minecraft Simple Demo Architecture</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="server-world-providers-and-residency"><a class="header" href="#server-world-providers-and-residency">Server world providers and residency</a></h1>
+<p>The server world is split into four main contracts:</p>
+<ol>
+<li>providers generate base chunks;</li>
+<li>routing selects provider and instance for a viewer;</li>
+<li>the world backend caches chunks and stores edits;</li>
+<li>residency decides which requests and cached chunks are allowed.</li>
+</ol>
+<h2 id="provider-registry"><a class="header" href="#provider-registry">Provider registry</a></h2>
+<p>A provider implements:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait ServerChunkProvider {
+    fn generate(
+        &amp;self,
+        request: &amp;ChunkGenerationRequest,
+    ) -&gt; Option&lt;Chunk&gt;;
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>The request includes:</p>
+<ul>
+<li><code>ChunkViewer</code>;</li>
+<li><code>WorldInstanceId</code>;</li>
+<li><code>ChunkPos</code>.</li>
+</ul>
+<p>The registry stores several providers by <code>ChunkProviderId</code>.</p>
+<p>Registration rejects duplicate IDs.</p>
+<h2 id="current-providers"><a class="header" href="#current-providers">Current providers</a></h2>
+<p>The demo selects:</p>
+<ul>
+<li><code>server-chunk-provider-biomes-mod</code>: biome-driven Overworld terrain;</li>
+<li><code>server-chunk-provider-nether-mod</code>: biome-driven Nether terrain without an
+implicit vertical floor;</li>
+<li><code>server-chunk-provider-aether-mod</code>: biome-driven floating islands;</li>
+<li><code>server-chunk-provider-perlin-mod</code>: alternate single-biome terrain, not active
+in the main server;</li>
+<li><code>server-chunk-provider-checkerboard-mod</code>: alternate test provider, not active
+in the main server.</li>
+</ul>
+<p>Providers answer all integer <code>ChunkPos</code> values.</p>
+<p>The biome-aware providers share <code>server-biome-sampling-api</code> for dimension
+filtering, cached selection, terrain-parameter blending, feature bounds, and
+phased feature dispatch. They do not share geometry policy.</p>
+<p>They use uniform fast paths for guaranteed regions:</p>
+<ul>
+<li>the biome Overworld provider combines local surface bounds with declared
+feature ranges, returning uniform air or underground chunks when no feature
+can affect them;</li>
+<li>Nether returns air above every local surface and relevant feature;</li>
+<li>Aether returns air outside all island columns and feature bounds;</li>
+<li>checkerboard returns simple uniform deep/sky chunks.</li>
+</ul>
+<p>Exact terrain policy belongs to each provider.</p>
+<h2 id="world-seeds"><a class="header" href="#world-seeds">World seeds</a></h2>
+<p>Procedural generation depends on the replaceable <code>server-world-seed-api</code>.
+<code>ServerWorldSeed</code> owns one root <code>u64</code> and derives stable child seeds from:</p>
+<pre><code class="language-text">root seed + feature/provider namespace + WorldInstanceId
+</code></pre>
+<p>The namespace keeps unrelated algorithms independent. Changing a biome
+selector must not silently change a terrain provider's random stream, and two
+world instances must not accidentally generate the same terrain unless a
+custom seed provider chooses that behavior.</p>
+<p>The selected <code>server-world-seed-random-impl</code> creates a random root at server
+startup. For reproducible development or a fixed world, set:</p>
+<pre><code class="language-sh">PATCHWORK_WORLD_SEED=123456
+</code></pre>
+<p>The Overworld, Nether, Aether, alternate Perlin/checkerboard providers, and the
+vanilla biome selector all derive their values from this service. Local numeric
+constants in a noise expression are algorithm salts, not independent world
+seeds.</p>
+<p>A persistent server should replace the random provider with a mod that loads
+and saves the root seed next to the world data. Features should depend only on
+<code>server-world-seed-api</code>, never on that concrete implementation.</p>
+<p>Because chunk Y coordinates are unbounded, world Y zero is not a valid generic
+&quot;bottom of the world&quot;. The Nether provider therefore uses biome strata at Y
+zero instead of inserting bedrock there. A bounded world can add a separate
+bedrock-floor feature or select a provider whose contract includes a floor.</p>
+<p>The dimension-scoped registry, selector, shared sampler, phased features, and
+provider responsibilities are described in
+<a href="biomes.html">Biomes and world-generation features</a>.</p>
+<h2 id="adding-a-provider"><a class="header" href="#adding-a-provider">Adding a provider</a></h2>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub const MOON_PROVIDER_ID: &amp;str = &quot;example:moon&quot;;
+
+struct MoonProvider;
+
+impl ServerChunkProvider for MoonProvider {
+    fn generate(
+        &amp;self,
+        request: &amp;ChunkGenerationRequest,
+    ) -&gt; Option&lt;Chunk&gt; {
+        if request.position.y &gt; 0 {
+            return Some(Chunk::filled(
+                request.position,
+                BlockId::Air,
+            ));
+        }
+        Some(generate_moon_chunk(request.position))
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>The provider mod registers it:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>registry.register(
+    ChunkProviderId::new(MOON_PROVIDER_ID),
+    MoonProvider,
+)?;
+<span class="boring">}
+</span></code></pre></pre>
+<p>Registration does not make it active. A routing or dimension mod must select
+its ID.</p>
+<h2 id="viewer-aware-routing"><a class="header" href="#viewer-aware-routing">Viewer-aware routing</a></h2>
+<p><code>ServerChunkRouter</code> resolves:</p>
+<pre><code class="language-text">(ChunkViewer, ChunkPos)
+    -&gt; ServerChunkRoute {
+         instance,
+         provider
+       }
+</code></pre>
+<p>The active dimension router asks <code>ServerDimensions</code> for a player's current
+dimension and returns the dimension's instance/provider.</p>
+<p>An alternate <code>server-chunk-routing-single-world-mod</code> exists for servers without
+dimensions.</p>
+<p>Custom routing may choose based on:</p>
+<ul>
+<li>player ID;</li>
+<li>team;</li>
+<li>region;</li>
+<li>permission;</li>
+<li>current game match;</li>
+<li>coordinate;</li>
+<li>server-only versus player query.</li>
+</ul>
+<p>If routing changes for an existing player, client synchronization must reset or
+version the affected cache.</p>
+<h2 id="world-scope-and-resident-keys"><a class="header" href="#world-scope-and-resident-keys">World scope and resident keys</a></h2>
+<p>The full cache key is:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>ResidentChunkKey {
+    instance: WorldInstanceId,
+    provider: ChunkProviderId,
+    position: ChunkPos,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>instance + provider</code> becomes a <code>WorldScopeId</code>.</p>
+<p>Two viewers can query the same <code>ChunkPos</code> but receive different resident keys.
+This prevents edits in one instance from affecting another.</p>
+<h2 id="dynamic-world-backend"><a class="header" href="#dynamic-world-backend">Dynamic world backend</a></h2>
+<p><code>server-chunk-world-dynamic-impl</code> stores:</p>
+<pre><code class="language-text">chunks: ResidentChunkKey -&gt; generated/resident Chunk
+edits:  ResidentChunkKey -&gt; LocalBlockPos -&gt; BlockInstance
+</code></pre>
+<p>On a query:</p>
+<ol>
+<li>route the viewer;</li>
+<li>return resident chunk if present;</li>
+<li>ask the selected provider to generate;</li>
+<li>apply sparse edits;</li>
+<li>cache and return the result.</li>
+</ol>
+<p>On mutation:</p>
+<ol>
+<li>resolve the same resident key;</li>
+<li>load the chunk if needed;</li>
+<li>mutate the resident chunk;</li>
+<li>store the new block in the sparse edit overlay;</li>
+<li>return <code>BlockMutation</code> with scope, previous, and current instance.</li>
+</ol>
+<p>Eviction removes base chunks but keeps sparse edits. Regeneration restores the
+same changed world.</p>
+<p>The overlay is in RAM and is not persistent storage. A file/database provider
+or persistence mod is required for durable worlds.</p>
+<h2 id="world-operations"><a class="header" href="#world-operations">World operations</a></h2>
+<p><code>ServerChunkWorld</code> exposes:</p>
+<ul>
+<li>viewer-aware chunk and block queries;</li>
+<li>player convenience methods;</li>
+<li><code>set_block</code>;</li>
+<li><code>place_block</code> only when current block is air;</li>
+<li><code>break_block</code> only when current block is not air;</li>
+<li>resident key lookup;</li>
+<li>cache retention;</li>
+<li>resident key enumeration.</li>
+</ul>
+<p>The API returns structured errors:</p>
+<ul>
+<li>route unavailable;</li>
+<li>chunk unavailable;</li>
+<li>block already air;</li>
+<li>position occupied.</li>
+</ul>
+<p>Gameplay should use these operations instead of mutating chunk maps directly.</p>
+<h2 id="residency-policy"><a class="header" href="#residency-policy">Residency policy</a></h2>
+<p><code>ServerChunkResidencyConfig</code> has:</p>
+<ul>
+<li>horizontal radius;</li>
+<li>vertical radius;</li>
+<li>maintenance interval.</li>
+</ul>
+<p>The vanilla player-interest mod builds desired resident keys around active
+players and evicts other resident chunks.</p>
+<p>Chunk request handling validates the requested position against this policy.
+This prevents a client from forcing arbitrary distant chunks into server memory.</p>
+<p>The server radius includes slack beyond the client's nominal window to account
+for movement and network latency.</p>
+<h2 id="replacing-residency"><a class="header" href="#replacing-residency">Replacing residency</a></h2>
+<p>Alternative policies may retain:</p>
+<ul>
+<li>all edited chunks;</li>
+<li>chunks around entities rather than players;</li>
+<li>a fixed spawn region;</li>
+<li>LRU chunks under a byte budget;</li>
+<li>chunks required by scheduled machines;</li>
+<li>no cache at all for a cheap provider.</li>
+</ul>
+<p>Keep request authorization separate from cache eviction if their rules differ.
+The current vanilla policy is intentionally simple.</p>
+<h2 id="synchronous-generation-limit"><a class="header" href="#synchronous-generation-limit">Synchronous generation limit</a></h2>
+<p>Provider generation currently runs synchronously during world queries. A slow
+file or procedural provider can block the Bevy schedule.</p>
+<p>An asynchronous design should add a pipeline such as:</p>
+<pre><code class="language-text">request -&gt; queued generation task -&gt; ready chunk -&gt; resident insertion -&gt; response
+</code></pre>
+<p>The public provider and world contracts may need an async-ready result type or a
+separate generation service. Do not hide a blocking file read inside the
+current synchronous <code>generate</code>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../world/chunk-storage.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../world/biomes.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../world/chunk-storage.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../world/biomes.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>

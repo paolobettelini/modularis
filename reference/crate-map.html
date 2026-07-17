@@ -1,0 +1,656 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Crate map - Minecraft Simple Demo Architecture</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting-started/project-overview.html"><strong aria-hidden="true">1.1.</strong> Project overview</a></li><li class="chapter-item expanded "><a href="../getting-started/build-and-run.html"><strong aria-hidden="true">1.2.</strong> Build and run</a></li></ol></li><li class="chapter-item expanded "><a href="../architecture/foundations.html"><strong aria-hidden="true">2.</strong> Architecture foundations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../architecture/patchwork-composition.html"><strong aria-hidden="true">2.1.</strong> Patchwork composition</a></li><li class="chapter-item expanded "><a href="../architecture/mod-anatomy.html"><strong aria-hidden="true">2.2.</strong> Mod anatomy and lifecycle</a></li><li class="chapter-item expanded "><a href="../architecture/apis-and-events.html"><strong aria-hidden="true">2.3.</strong> APIs, providers, and ECS contracts</a></li><li class="chapter-item expanded "><a href="../architecture/code-generation.html"><strong aria-hidden="true">2.4.</strong> Code generation and registries</a></li><li class="chapter-item expanded "><a href="../architecture/modpacks.html"><strong aria-hidden="true">2.5.</strong> Modpacks and feature boundaries</a></li><li class="chapter-item expanded "><a href="../architecture/assets-and-output.html"><strong aria-hidden="true">2.6.</strong> Assets and generated output</a></li></ol></li><li class="chapter-item expanded "><a href="../runtime/runtime-overview.html"><strong aria-hidden="true">3.</strong> Runtime and networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../runtime/bevy-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Bevy application lifecycle</a></li><li class="chapter-item expanded "><a href="../runtime/networking.html"><strong aria-hidden="true">3.2.</strong> Protocol, transport, and framing</a></li><li class="chapter-item expanded "><a href="../runtime/sessions-and-visibility.html"><strong aria-hidden="true">3.3.</strong> Sessions, routing, and visibility</a></li><li class="chapter-item expanded "><a href="../runtime/chat-and-commands.html"><strong aria-hidden="true">3.4.</strong> Chat, commands, and completion</a></li></ol></li><li class="chapter-item expanded "><a href="../world/world-overview.html"><strong aria-hidden="true">4.</strong> World architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../world/blocks-and-items.html"><strong aria-hidden="true">4.1.</strong> Blocks, items, and metadata</a></li><li class="chapter-item expanded "><a href="../world/chunk-storage.html"><strong aria-hidden="true">4.2.</strong> Chunk coordinates and storage</a></li><li class="chapter-item expanded "><a href="../world/server-world.html"><strong aria-hidden="true">4.3.</strong> Server world providers and residency</a></li><li class="chapter-item expanded "><a href="../world/biomes.html"><strong aria-hidden="true">4.4.</strong> Biomes and world-generation features</a></li><li class="chapter-item expanded "><a href="../world/client-chunks.html"><strong aria-hidden="true">4.5.</strong> Client streaming, meshing, and rendering</a></li><li class="chapter-item expanded "><a href="../world/dimensions.html"><strong aria-hidden="true">4.6.</strong> Dimensions and world scopes</a></li><li class="chapter-item expanded "><a href="../world/portals.html"><strong aria-hidden="true">4.7.</strong> Portals</a></li></ol></li><li class="chapter-item expanded "><a href="../gameplay/gameplay-overview.html"><strong aria-hidden="true">5.</strong> Gameplay systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../gameplay/movement.html"><strong aria-hidden="true">5.1.</strong> Player movement and prediction</a></li><li class="chapter-item expanded "><a href="../gameplay/movement-features.html"><strong aria-hidden="true">5.2.</strong> Gravity, jump, sprint, and flight</a></li><li class="chapter-item expanded "><a href="../gameplay/block-interaction.html"><strong aria-hidden="true">5.3.</strong> Block interaction and world edits</a></li><li class="chapter-item expanded "><a href="../gameplay/inventory.html"><strong aria-hidden="true">5.4.</strong> Inventory, hotbar, and item use</a></li><li class="chapter-item expanded "><a href="../gameplay/cell-menus.html"><strong aria-hidden="true">5.5.</strong> Cell menus, audiences, and crafting tables</a></li></ol></li><li class="chapter-item expanded "><a href="../client/client-overview.html"><strong aria-hidden="true">6.</strong> Client systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../client/input-settings-menus.html"><strong aria-hidden="true">6.1.</strong> Input, settings, menus, and game state</a></li><li class="chapter-item expanded "><a href="../client/graphics.html"><strong aria-hidden="true">6.2.</strong> Graphics, lighting, sky, and outlines</a></li><li class="chapter-item expanded "><a href="../client/blocky-models.html"><strong aria-hidden="true">6.3.</strong> Blocky models and animation</a></li></ol></li><li class="chapter-item expanded "><a href="../development/developer-guide.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../development/extension-cookbook.html"><strong aria-hidden="true">7.1.</strong> Extension cookbook</a></li><li class="chapter-item expanded "><a href="../development/testing-and-performance.html"><strong aria-hidden="true">7.2.</strong> Testing, debugging, and performance</a></li><li class="chapter-item expanded "><a href="../reference/crate-map.html" class="active"><strong aria-hidden="true">7.3.</strong> Crate map</a></li><li class="chapter-item expanded "><a href="../reference/current-limits.html"><strong aria-hidden="true">7.4.</strong> Current limits and design direction</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Minecraft Simple Demo Architecture</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="crate-map"><a class="header" href="#crate-map">Crate map</a></h1>
+<p>The project contains many small crates. This reference groups them by role.
+Generated and message-type crates follow predictable naming and are summarized
+as families.</p>
+<h2 id="composition-and-bevy-foundation"><a class="header" href="#composition-and-bevy-foundation">Composition and Bevy foundation</a></h2>
+<table><thead><tr><th>Crate</th><th>Role</th></tr></thead><tbody>
+<tr><td><code>bevy-mod</code></td><td>Owns the initially empty <code>App</code></td></tr>
+<tr><td><code>client-bevy-default-plugins-mod</code></td><td>Window, renderer, logging, nearest textures</td></tr>
+<tr><td><code>client-player-physics-tick-api</code></td><td>Replaceable client physics frequency contract</td></tr>
+<tr><td><code>client-player-physics-tick-20hz-vanilla-mod</code></td><td>Vanilla 20 Hz client physics provider</td></tr>
+<tr><td><code>server-tick-api</code></td><td>Server target tick rate and measured TPS resources</td></tr>
+<tr><td><code>server-tick-rate-20hz-default-impl</code></td><td>Default 20 TPS server provider</td></tr>
+<tr><td><code>server-tick-metrics-mod</code></td><td>Measures observed server TPS</td></tr>
+<tr><td><code>server-bevy-runner-mod</code></td><td>Headless minimal plugin set driven by <code>ServerTickApi</code></td></tr>
+<tr><td><code>client-game-bootstrap-mod</code></td><td>Owns/runs final client app</td></tr>
+<tr><td><code>server-game-bootstrap-mod</code></td><td>Owns/runs final server app</td></tr>
+</tbody></table>
+<h2 id="generated-registries"><a class="header" href="#generated-registries">Generated registries</a></h2>
+<table><thead><tr><th>Owner</th><th>Generated crate</th><th>Contributors</th></tr></thead><tbody>
+<tr><td><code>block-registry-codegen</code></td><td><code>generated-block-registry</code></td><td><code>block-*</code></td></tr>
+<tr><td><code>block-metadata-registry-codegen</code></td><td><code>generated-block-metadata</code></td><td>block metadata crates</td></tr>
+<tr><td><code>item-registry-codegen</code></td><td><code>generated-item-registry</code></td><td><code>item-*</code> contributors</td></tr>
+<tr><td><code>item-metadata-registry-codegen</code></td><td><code>generated-item-metadata</code></td><td><code>item-*-meta</code></td></tr>
+<tr><td><code>dimension-registry-codegen</code></td><td><code>generated-dimension-registry</code></td><td><code>dimension-*</code></td></tr>
+<tr><td><code>biome-registry-codegen</code></td><td><code>generated-biome-registry</code></td><td><code>biome-*</code> identity contributors</td></tr>
+<tr><td><code>client-settings-registry-codegen</code></td><td><code>generated-client-settings-registry</code></td><td><code>client-setting-*</code></td></tr>
+<tr><td><code>network-protocol-mod</code> / <code>network-codegen-utils</code></td><td><code>generated-network-messages</code></td><td><code>*-network-messages-mod</code></td></tr>
+</tbody></table>
+<p>Support generators use <code>codegen-utils</code> and <code>network-codegen-utils</code>.</p>
+<h2 id="block-domain"><a class="header" href="#block-domain">Block domain</a></h2>
+<p>Contracts:</p>
+<ul>
+<li><code>block-api</code>;</li>
+<li><code>block-render-api</code>;</li>
+<li><code>block-instance-api</code>;</li>
+<li><code>block-manager-api</code>;</li>
+<li><code>block-edit-events-api</code>;</li>
+<li><code>block-edit-events-mod</code>.</li>
+</ul>
+<p>Generated manager:</p>
+<ul>
+<li><code>block-manager-generated-impl</code>.</li>
+</ul>
+<p>Current block contributors:</p>
+<ul>
+<li><code>block-air</code>;</li>
+<li><code>block-basalt</code>;</li>
+<li><code>block-bedrock</code>;</li>
+<li><code>block-birch-leaves</code> and <code>block-birch-log</code>;</li>
+<li><code>block-blackstone</code>;</li>
+<li><code>block-cactus</code> and <code>block-calcite</code>;</li>
+<li><code>block-crafting-table</code>;</li>
+<li><code>block-crimson-nylium</code> and <code>block-warped-nylium</code>;</li>
+<li><code>block-diamond-block</code>;</li>
+<li><code>block-diamond-ore</code>;</li>
+<li><code>block-dirt</code>;</li>
+<li><code>block-end-stone</code>;</li>
+<li><code>block-gravel</code>;</li>
+<li><code>block-glowstone</code>;</li>
+<li><code>block-grass</code>;</li>
+<li><code>block-moss</code>;</li>
+<li><code>block-netherrack</code>;</li>
+<li><code>block-oak-leaves</code>;</li>
+<li><code>block-oak-log</code>;</li>
+<li><code>block-obsidian</code>;</li>
+<li><code>block-packed-ice</code>;</li>
+<li><code>block-red-sand</code> and <code>block-sand</code>;</li>
+<li><code>block-snow</code>;</li>
+<li><code>block-soul-sand</code> and <code>block-soul-soil</code>;</li>
+<li><code>block-stone</code>;</li>
+<li><code>block-terracotta</code>.</li>
+</ul>
+<p>Block edit networking:</p>
+<ul>
+<li><code>block-edit-network-message-types</code>;</li>
+<li>client/server send/receive mods.</li>
+</ul>
+<h2 id="item-domain"><a class="header" href="#item-domain">Item domain</a></h2>
+<p>Contracts:</p>
+<ul>
+<li><code>item-api</code>;</li>
+<li><code>item-instance-api</code>;</li>
+<li><code>item-manager-api</code>;</li>
+<li><code>item-use-api</code>.</li>
+</ul>
+<p>Generated manager:</p>
+<ul>
+<li><code>item-manager-generated-impl</code>.</li>
+</ul>
+<p>Metadata:</p>
+<ul>
+<li><code>item-quantity-meta</code>;</li>
+<li><code>item-place-block-meta</code>;</li>
+<li><code>item-favicon-meta</code>;</li>
+<li><code>item-portal-igniter-meta</code>.</li>
+</ul>
+<p>Block item contributors follow the <code>item-&lt;block&gt;-block</code> naming family. The
+current composition contains one for every non-air block contributor listed
+above: 30 placeable block items. This one-to-one relation is a selected demo
+policy, not a registry requirement; a custom composition may expose blocks
+without inventory items or multiple items for one block.</p>
+<p>Tool item:</p>
+<ul>
+<li><code>item-flint-and-steel</code>.</li>
+</ul>
+<h2 id="chunk-data-and-math"><a class="header" href="#chunk-data-and-math">Chunk data and math</a></h2>
+<table><thead><tr><th>Crate</th><th>Role</th></tr></thead><tbody>
+<tr><td><code>voxel-math-api</code></td><td>Block/chunk/local positions</td></tr>
+<tr><td><code>voxel-raycast-api</code></td><td>Exact 3D DDA voxel traversal</td></tr>
+<tr><td><code>packed-bit-array-api</code></td><td>Compact palette indices</td></tr>
+<tr><td><code>chunk-section-api</code></td><td>Palette and reverse map</td></tr>
+<tr><td><code>chunk-api</code></td><td>Positioned chunk</td></tr>
+<tr><td><code>chunk-network-message-types</code></td><td>Chunk request/response payloads</td></tr>
+<tr><td><code>chunk-network-messages-mod</code></td><td>Protocol contribution</td></tr>
+<tr><td><code>coherent-noise-api</code></td><td>Noise helper contract</td></tr>
+</tbody></table>
+<h2 id="server-chunk-world"><a class="header" href="#server-chunk-world">Server chunk world</a></h2>
+<p>Contracts:</p>
+<ul>
+<li><code>server-chunk-provider-api</code>;</li>
+<li><code>server-primary-chunk-provider-api</code>;</li>
+<li><code>server-chunk-routing-api</code>;</li>
+<li><code>server-chunk-residency-api</code>;</li>
+<li><code>server-chunk-world-api</code>;</li>
+<li><code>server-world-seed-api</code>;</li>
+<li><code>world-instance-api</code>.</li>
+</ul>
+<p>Infrastructure:</p>
+<ul>
+<li><code>server-chunk-provider-registry-mod</code>;</li>
+<li><code>server-chunk-world-dynamic-impl</code>;</li>
+<li><code>server-chunk-request-mod</code>.</li>
+<li><code>server-world-seed-random-impl</code>.</li>
+</ul>
+<p>Providers:</p>
+<ul>
+<li><code>server-chunk-provider-biomes-mod</code> (active Overworld provider);</li>
+<li><code>server-chunk-provider-perlin-mod</code>;</li>
+<li><code>server-chunk-provider-nether-mod</code> (active biome-driven Nether provider);</li>
+<li><code>server-chunk-provider-aether-mod</code> (active biome-driven Aether provider);</li>
+<li><code>server-chunk-provider-checkerboard-mod</code>.</li>
+</ul>
+<p>Routing:</p>
+<ul>
+<li><code>server-chunk-routing-dimensions-mod</code>;</li>
+<li><code>server-chunk-routing-single-world-mod</code>.</li>
+</ul>
+<p>Residency:</p>
+<ul>
+<li><code>server-chunk-residency-player-interest-vanilla-mod</code>.</li>
+</ul>
+<h2 id="biomes-and-generation-features"><a class="header" href="#biomes-and-generation-features">Biomes and generation features</a></h2>
+<p>Identity and codegen:</p>
+<ul>
+<li><code>biome-registry-codegen</code>;</li>
+<li><code>generated-biome-registry</code>;</li>
+<li>seven Overworld, five Nether, and three Aether identity contributors.</li>
+</ul>
+<p>Contracts and providers:</p>
+<ul>
+<li><code>server-biome-api</code>;</li>
+<li><code>server-biome-selection-api</code>;</li>
+<li><code>server-biome-registry-mod</code>;</li>
+<li><code>server-biome-climate-selector-vanilla-mod</code>;</li>
+<li><code>server-biome-sampling-api</code> shared provider support;</li>
+<li>one vanilla definition mod per biome.</li>
+</ul>
+<p>Phased features:</p>
+<ul>
+<li>caves;</li>
+<li>diamond ores;</li>
+<li>sparse/dense oak trees;</li>
+<li>cacti;</li>
+<li>packed-ice patches;</li>
+<li>rock boulders;</li>
+<li>birch trees;</li>
+<li>glowstone clusters;</li>
+<li>crystal spires.</li>
+</ul>
+<h2 id="client-chunks"><a class="header" href="#client-chunks">Client chunks</a></h2>
+<p>Contracts:</p>
+<ul>
+<li><code>client-chunk-streaming-api</code>;</li>
+<li><code>client-chunk-cache-api</code>;</li>
+<li><code>client-chunk-work-priority-api</code>;</li>
+<li><code>client-chunk-mesh-api</code>;</li>
+<li><code>client-chunk-render-api</code>;</li>
+<li><code>client-chunk-vertex-lighting-api</code>.</li>
+</ul>
+<p>Infrastructure and providers:</p>
+<ul>
+<li><code>client-chunk-streaming-around-player-impl</code>;</li>
+<li><code>client-chunk-cache-network-impl</code>;</li>
+<li><code>client-chunk-work-priority-mod</code>;</li>
+<li><code>client-chunk-layered-priority-vanilla-mod</code>;</li>
+<li><code>client-chunk-request-network-mod</code>;</li>
+<li><code>client-chunk-mesh-naive-cubes-impl</code>;</li>
+<li><code>client-chunk-render-bevy-impl</code>;</li>
+<li><code>client-chunk-vertex-lighting-pipeline-mod</code>;</li>
+<li>face-shading and ambient-occlusion vanilla mods.</li>
+</ul>
+<p>Dimension reset:</p>
+<ul>
+<li><code>client-chunk-reset-on-dimension-change-mod</code>.</li>
+</ul>
+<h2 id="network-and-sessions"><a class="header" href="#network-and-sessions">Network and sessions</a></h2>
+<p>Contracts:</p>
+<ul>
+<li><code>network-framing-api</code>;</li>
+<li><code>client-network-api</code>;</li>
+<li><code>server-network-api</code>;</li>
+<li><code>server-network-events-api</code>;</li>
+<li><code>server-player-registry-api</code>;</li>
+<li><code>server-player-visibility-api</code>;</li>
+<li>lifecycle event API/mod.</li>
+<li><code>server-player-admission-api</code>;</li>
+<li><code>server-audience-api</code>.</li>
+</ul>
+<p>Active transport:</p>
+<ul>
+<li><code>client-network-tcp-impl</code>;</li>
+<li><code>server-network-tcp-impl</code>.</li>
+</ul>
+<p>Alternate transport crates:</p>
+<ul>
+<li>client/server UDP implementations.</li>
+</ul>
+<p>Routing/session:</p>
+<ul>
+<li><code>server-network-router-mod</code>;</li>
+<li><code>client-session-api</code>;</li>
+<li><code>client-session-network-mod</code>;</li>
+<li><code>server-player-session-mod</code>;</li>
+<li><code>server-player-timeout-mod</code>;</li>
+<li><code>server-player-visibility-world-instance-mod</code>.</li>
+<li><code>server-player-name-unique-vanilla-mod</code>;</li>
+<li><code>server-audience-basic-impl</code>.</li>
+<li><code>server-kick-api</code>, <code>server-kick-events-mod</code>, and <code>server-player-kick-mod</code>.</li>
+</ul>
+<p>Message type/contributor families:</p>
+<ul>
+<li>session;</li>
+<li>player;</li>
+<li>gravity/jump;</li>
+<li>flight capability and flight speed;</li>
+<li>player movement speed;</li>
+<li>generic kick;</li>
+<li>chunks;</li>
+<li>block edits;</li>
+<li>inventory/hotbar;</li>
+<li>cell menus;</li>
+<li>dimension;</li>
+<li>sky/sun;</li>
+<li>portal;</li>
+<li>chat and command completion.</li>
+</ul>
+<h2 id="chat-and-commands"><a class="header" href="#chat-and-commands">Chat and commands</a></h2>
+<p>Contracts and state:</p>
+<ul>
+<li><code>client-chat-api</code> and <code>client-chat-state-mod</code>;</li>
+<li><code>server-chat-api</code> and <code>server-chat-events-mod</code>;</li>
+<li><code>server-command-api</code>.</li>
+</ul>
+<p>Network and presentation:</p>
+<ul>
+<li><code>chat-network-message-types</code> and <code>chat-network-messages-mod</code>;</li>
+<li>clear-chat message type/contributor plus dedicated client receive and server
+sync bridges;</li>
+<li>client chat send/receive, toggle-input, and Bevy UI mods;</li>
+<li>optional client chat history/completion navigation mod;</li>
+<li>server chat receive/sync mods;</li>
+<li><code>client-setting-chat-key</code>.</li>
+</ul>
+<p>Policies and implementations:</p>
+<ul>
+<li><code>server-chat-global-vanilla-mod</code>;</li>
+<li><code>server-chat-command-router-mod</code>;</li>
+<li><code>server-command-brigadier-mod</code>;</li>
+<li>clear-chat, flight, flight-speed, kick, teleport, speed, gravity, and TPS
+vanilla command mods.</li>
+</ul>
+<h2 id="player-movement"><a class="header" href="#player-movement">Player movement</a></h2>
+<p>Contracts:</p>
+<ul>
+<li><code>client-input-api</code>;</li>
+<li><code>client-camera-api</code>;</li>
+<li><code>client-player-controller-api</code>;</li>
+<li><code>collision-api</code>;</li>
+<li><code>player-block-collision-api</code>;</li>
+<li><code>player-hitbox-api</code>;</li>
+<li><code>player-gravity-api</code>;</li>
+<li><code>player-speed-api</code>;</li>
+<li><code>player-jump-api</code>;</li>
+<li><code>player-flight-api</code>;</li>
+<li><code>player-flight-speed-api</code>;</li>
+<li><code>server-player-flight-api</code>;</li>
+<li><code>server-player-flight-speed-api</code>;</li>
+<li><code>server-player-gravity-api</code>;</li>
+<li><code>server-player-speed-api</code>.</li>
+</ul>
+<p>Implementations/features:</p>
+<ul>
+<li><code>client-input-bevy-impl</code>;</li>
+<li><code>client-camera-first-person-bevy-impl</code>;</li>
+<li><code>client-player-controller-fps-bevy-impl</code>;</li>
+<li><code>client-collision-block-aabb-impl</code>;</li>
+<li><code>client-player-spawn-mod</code>;</li>
+<li>gravity prediction/network mods;</li>
+<li>per-player server gravity state/sync mods;</li>
+<li>local and server player speed state/sync mods;</li>
+<li>client/server jump vanilla mods;</li>
+<li>client sprint vanilla mod;</li>
+<li>client inertial acceleration/drag and sprint-jump vanilla mods;</li>
+<li>flight state, capability, sync, controls, and grant policy mods;</li>
+<li>separate client/server flight-speed state and sync mods;</li>
+<li><code>server-player-movement-collision-vanilla-mod</code>;</li>
+<li><code>client-player-network-sync-mod</code>.</li>
+</ul>
+<h2 id="player-rendering-and-blocky-formats"><a class="header" href="#player-rendering-and-blocky-formats">Player rendering and Blocky formats</a></h2>
+<p>Contracts/parser:</p>
+<ul>
+<li><code>client-player-render-api</code>;</li>
+<li><code>blocky_formats</code>;</li>
+<li><code>blocky-model-api</code>;</li>
+<li><code>blocky-animation-api</code>;</li>
+<li><code>client-player-blocky-model-paths-api</code>.</li>
+</ul>
+<p>Implementations:</p>
+<ul>
+<li><code>client-blocky-model-bevy-render-mod</code>;</li>
+<li><code>client-blocky-animation-bevy-mod</code>;</li>
+<li><code>client-player-blocky-model-paths-mod</code>;</li>
+<li><code>client-player-render-blocky-impl</code>.</li>
+</ul>
+<p>Alternate renderer:</p>
+<ul>
+<li><code>client-player-render-bevy-impl</code> sphere-based implementation.</li>
+</ul>
+<h2 id="inventory-and-cell-menus"><a class="header" href="#inventory-and-cell-menus">Inventory and cell menus</a></h2>
+<p>Inventory contracts:</p>
+<ul>
+<li><code>inventory-core-api</code>;</li>
+<li><code>inventory-events-api</code>;</li>
+<li><code>inventory-events-mod</code>;</li>
+<li><code>server-inventory-api</code>;</li>
+<li><code>server-inventory-layout-api</code>;</li>
+<li><code>client-inventory-cache-api</code>;</li>
+<li><code>client-inventory-ui-api</code>.</li>
+</ul>
+<p>Server inventory:</p>
+<ul>
+<li>authoritative state;</li>
+<li>default layout;</li>
+<li>default loadout;</li>
+<li>network receive/sync;</li>
+<li>quantity stacking;</li>
+<li>quantity consumption;</li>
+<li>place-block item use.</li>
+</ul>
+<p>Client inventory:</p>
+<ul>
+<li>cache;</li>
+<li>optimistic move;</li>
+<li>network receive/send;</li>
+<li>UI;</li>
+<li>drag/drop;</li>
+<li>hotbar UI and selection input;</li>
+<li>quantity and favicon UI.</li>
+</ul>
+<p>Cell menu contracts:</p>
+<ul>
+<li><code>audience-api</code>;</li>
+<li><code>cell-menu-api</code>;</li>
+<li><code>cell-menu-events-mod</code>;</li>
+<li><code>server-cell-menu-api</code>;</li>
+<li>client cache/UI APIs.</li>
+</ul>
+<p>Cell menu implementation:</p>
+<ul>
+<li>server authoritative, receive, sync, and inventory bridge mods;</li>
+<li>client cache, UI, drag/drop, optimistic, network, and bridge mods;</li>
+<li>client/server crafting-table vanilla mods.</li>
+</ul>
+<h2 id="dimensions-and-portals"><a class="header" href="#dimensions-and-portals">Dimensions and portals</a></h2>
+<p>Dimensions:</p>
+<ul>
+<li>three contributor crates;</li>
+<li>server dimension API/registry;</li>
+<li>Overworld, Nether, Aether registration mods;</li>
+<li>player lifecycle and network sync;</li>
+<li>client dimension state/receive/position/reset mods.</li>
+</ul>
+<p>Portals:</p>
+<ul>
+<li><code>portal-api</code>;</li>
+<li><code>server-portal-api</code>;</li>
+<li>server state, rule, ignition, sync, travel mods;</li>
+<li>Nether and Aether rule mods;</li>
+<li>portal message types/contributor;</li>
+<li>client portal renderer.</li>
+</ul>
+<h2 id="client-ui-settings-and-menus"><a class="header" href="#client-ui-settings-and-menus">Client UI, settings, and menus</a></h2>
+<p>Game/menu contracts:</p>
+<ul>
+<li><code>client-game-state-api</code>;</li>
+<li><code>client-menu-api</code>;</li>
+<li><code>client-settings-api</code>;</li>
+<li><code>settings-schema-api</code>;</li>
+<li><code>client-settings-input-api</code>;</li>
+<li><code>client-keybinding-api</code>.</li>
+</ul>
+<p>Providers/features:</p>
+<ul>
+<li>game state Bevy implementation;</li>
+<li>menu Bevy implementation;</li>
+<li>main and pause menus;</li>
+<li>pause/inventory input mods;</li>
+<li>settings menu;</li>
+<li>settings input registry;</li>
+<li>string, integer, float, bool, keybinding editors;</li>
+<li>generated setting contributor crates;</li>
+<li>DejaVu font provider;</li>
+<li>crosshair;</li>
+<li>optional block outline API/renderer/looked-block policy.</li>
+</ul>
+<h2 id="sky-sun-and-graphics"><a class="header" href="#sky-sun-and-graphics">Sky, sun, and graphics</a></h2>
+<p>Contracts:</p>
+<ul>
+<li><code>client-sky-api</code>;</li>
+<li><code>sun-api</code>;</li>
+<li><code>client-sun-api</code>;</li>
+<li><code>server-sun-api</code>.</li>
+</ul>
+<p>State/network:</p>
+<ul>
+<li>sky/sun message types and contributors;</li>
+<li>server state, sync, and vanilla sun;</li>
+<li>client state and receive mods.</li>
+</ul>
+<p>Rendering/policy:</p>
+<ul>
+<li>client sky;</li>
+<li>sun directional light;</li>
+<li>sun shadows;</li>
+<li>ambient light;</li>
+<li>sun disc;</li>
+<li>chunk face shading;</li>
+<li>chunk ambient occlusion.</li>
+</ul>
+<h2 id="reading-this-map"><a class="header" href="#reading-this-map">Reading this map</a></h2>
+<p>When a crate name is unfamiliar:</p>
+<ol>
+<li>identify its family here;</li>
+<li>inspect its API crate first;</li>
+<li>check which modpack selects it;</li>
+<li>inspect <code>package.metadata.mod.dependencies</code>;</li>
+<li>inspect the entry's <code>init</code> registration;</li>
+<li>follow public messages and system sets.</li>
+</ol>
+<p>This is usually faster than starting from generated <code>main.rs</code>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../development/testing-and-performance.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../reference/current-limits.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../development/testing-and-performance.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../reference/current-limits.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>

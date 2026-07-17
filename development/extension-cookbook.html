@@ -1,0 +1,602 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Extension cookbook - Minecraft Simple Demo Architecture</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting-started/project-overview.html"><strong aria-hidden="true">1.1.</strong> Project overview</a></li><li class="chapter-item expanded "><a href="../getting-started/build-and-run.html"><strong aria-hidden="true">1.2.</strong> Build and run</a></li></ol></li><li class="chapter-item expanded "><a href="../architecture/foundations.html"><strong aria-hidden="true">2.</strong> Architecture foundations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../architecture/patchwork-composition.html"><strong aria-hidden="true">2.1.</strong> Patchwork composition</a></li><li class="chapter-item expanded "><a href="../architecture/mod-anatomy.html"><strong aria-hidden="true">2.2.</strong> Mod anatomy and lifecycle</a></li><li class="chapter-item expanded "><a href="../architecture/apis-and-events.html"><strong aria-hidden="true">2.3.</strong> APIs, providers, and ECS contracts</a></li><li class="chapter-item expanded "><a href="../architecture/code-generation.html"><strong aria-hidden="true">2.4.</strong> Code generation and registries</a></li><li class="chapter-item expanded "><a href="../architecture/modpacks.html"><strong aria-hidden="true">2.5.</strong> Modpacks and feature boundaries</a></li><li class="chapter-item expanded "><a href="../architecture/assets-and-output.html"><strong aria-hidden="true">2.6.</strong> Assets and generated output</a></li></ol></li><li class="chapter-item expanded "><a href="../runtime/runtime-overview.html"><strong aria-hidden="true">3.</strong> Runtime and networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../runtime/bevy-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Bevy application lifecycle</a></li><li class="chapter-item expanded "><a href="../runtime/networking.html"><strong aria-hidden="true">3.2.</strong> Protocol, transport, and framing</a></li><li class="chapter-item expanded "><a href="../runtime/sessions-and-visibility.html"><strong aria-hidden="true">3.3.</strong> Sessions, routing, and visibility</a></li><li class="chapter-item expanded "><a href="../runtime/chat-and-commands.html"><strong aria-hidden="true">3.4.</strong> Chat, commands, and completion</a></li></ol></li><li class="chapter-item expanded "><a href="../world/world-overview.html"><strong aria-hidden="true">4.</strong> World architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../world/blocks-and-items.html"><strong aria-hidden="true">4.1.</strong> Blocks, items, and metadata</a></li><li class="chapter-item expanded "><a href="../world/chunk-storage.html"><strong aria-hidden="true">4.2.</strong> Chunk coordinates and storage</a></li><li class="chapter-item expanded "><a href="../world/server-world.html"><strong aria-hidden="true">4.3.</strong> Server world providers and residency</a></li><li class="chapter-item expanded "><a href="../world/biomes.html"><strong aria-hidden="true">4.4.</strong> Biomes and world-generation features</a></li><li class="chapter-item expanded "><a href="../world/client-chunks.html"><strong aria-hidden="true">4.5.</strong> Client streaming, meshing, and rendering</a></li><li class="chapter-item expanded "><a href="../world/dimensions.html"><strong aria-hidden="true">4.6.</strong> Dimensions and world scopes</a></li><li class="chapter-item expanded "><a href="../world/portals.html"><strong aria-hidden="true">4.7.</strong> Portals</a></li></ol></li><li class="chapter-item expanded "><a href="../gameplay/gameplay-overview.html"><strong aria-hidden="true">5.</strong> Gameplay systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../gameplay/movement.html"><strong aria-hidden="true">5.1.</strong> Player movement and prediction</a></li><li class="chapter-item expanded "><a href="../gameplay/movement-features.html"><strong aria-hidden="true">5.2.</strong> Gravity, jump, sprint, and flight</a></li><li class="chapter-item expanded "><a href="../gameplay/block-interaction.html"><strong aria-hidden="true">5.3.</strong> Block interaction and world edits</a></li><li class="chapter-item expanded "><a href="../gameplay/inventory.html"><strong aria-hidden="true">5.4.</strong> Inventory, hotbar, and item use</a></li><li class="chapter-item expanded "><a href="../gameplay/cell-menus.html"><strong aria-hidden="true">5.5.</strong> Cell menus, audiences, and crafting tables</a></li></ol></li><li class="chapter-item expanded "><a href="../client/client-overview.html"><strong aria-hidden="true">6.</strong> Client systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../client/input-settings-menus.html"><strong aria-hidden="true">6.1.</strong> Input, settings, menus, and game state</a></li><li class="chapter-item expanded "><a href="../client/graphics.html"><strong aria-hidden="true">6.2.</strong> Graphics, lighting, sky, and outlines</a></li><li class="chapter-item expanded "><a href="../client/blocky-models.html"><strong aria-hidden="true">6.3.</strong> Blocky models and animation</a></li></ol></li><li class="chapter-item expanded "><a href="../development/developer-guide.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../development/extension-cookbook.html" class="active"><strong aria-hidden="true">7.1.</strong> Extension cookbook</a></li><li class="chapter-item expanded "><a href="../development/testing-and-performance.html"><strong aria-hidden="true">7.2.</strong> Testing, debugging, and performance</a></li><li class="chapter-item expanded "><a href="../reference/crate-map.html"><strong aria-hidden="true">7.3.</strong> Crate map</a></li><li class="chapter-item expanded "><a href="../reference/current-limits.html"><strong aria-hidden="true">7.4.</strong> Current limits and design direction</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Minecraft Simple Demo Architecture</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="extension-cookbook"><a class="header" href="#extension-cookbook">Extension cookbook</a></h1>
+<p>This chapter gives concrete patterns for common extensions.</p>
+<p>Paths and names are examples. Use a unique namespace instead of <code>example</code>.</p>
+<h2 id="create-a-small-bevy-feature-mod"><a class="header" href="#create-a-small-bevy-feature-mod">Create a small Bevy feature mod</a></h2>
+<p>Manifest:</p>
+<pre><code class="language-toml">[package]
+name = &quot;server-welcome-effect-mod&quot;
+version = &quot;0.1.0&quot;
+edition = &quot;2024&quot;
+
+[package.metadata.mod]
+entry = &quot;ServerWelcomeEffectMod&quot;
+
+[package.metadata.mod.dependencies]
+init = [&quot;bevy-mod&quot;, &quot;server-player-lifecycle-events-mod&quot;]
+run = []
+ownership = []
+
+[dependencies]
+bevy = &quot;0.17.3&quot;
+bevy-mod = { path = &quot;../bevy-mod&quot; }
+server-player-lifecycle-events-api = {
+    path = &quot;../server-player-lifecycle-events-api&quot;
+}
+server-player-lifecycle-events-mod = {
+    path = &quot;../server-player-lifecycle-events-mod&quot;
+}
+tokio = { version = &quot;1.48.0&quot;, features = [&quot;full&quot;] }
+</code></pre>
+<p>Entry:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use bevy::prelude::*;
+use bevy_mod::BevyMod;
+use server_player_lifecycle_events_api::ServerPlayerJoined;
+use server_player_lifecycle_events_mod::ServerPlayerLifecycleEventsMod;
+use tokio::task::JoinHandle;
+
+pub struct ServerWelcomeEffectMod;
+
+impl ServerWelcomeEffectMod {
+    pub fn init(
+        bevy: &amp;mut BevyMod,
+        _lifecycle: &amp;mut ServerPlayerLifecycleEventsMod,
+    ) -&gt; Self {
+        bevy.app.add_systems(Update, welcome);
+        Self
+    }
+
+    pub fn run(&amp;self) -&gt; Option&lt;Vec&lt;JoinHandle&lt;()&gt;&gt;&gt; {
+        None
+    }
+}
+
+fn welcome(mut joined: MessageReader&lt;ServerPlayerJoined&gt;) {
+    for player in joined.read() {
+        info!(&quot;player {} joined&quot;, player.player_id);
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Add it to the intended feature modpack, not necessarily <code>server-base.toml</code>.</p>
+<h2 id="create-an-exclusive-api-provider"><a class="header" href="#create-an-exclusive-api-provider">Create an exclusive API provider</a></h2>
+<p>API crate:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait WeatherApi: Send + Sync + 'static {}
+
+#[derive(Resource, Clone)]
+pub struct WeatherService {
+    pub sample: Arc&lt;dyn Fn(Vec3) -&gt; Weather + Send + Sync&gt;,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Provider manifest:</p>
+<pre><code class="language-toml">[package.metadata.mod]
+entry = &quot;ClearWeatherProvider&quot;
+provides = &quot;weather-api&quot;
+</code></pre>
+<p>Provider:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl ClearWeatherProvider {
+    pub fn init(bevy: &amp;mut BevyMod) -&gt; Self {
+        bevy.app.insert_resource(WeatherService {
+            sample: Arc::new(|_| Weather::Clear),
+        });
+        Self
+    }
+}
+
+impl WeatherApi for ClearWeatherProvider {}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Consumers take <code>W: WeatherApi</code> in <code>init</code> and read <code>WeatherService</code> in systems.</p>
+<h2 id="add-a-block"><a class="header" href="#add-a-block">Add a block</a></h2>
+<p>Create:</p>
+<pre><code class="language-text">mods/block-marble/
+├── Cargo.toml
+├── src/lib.rs
+└── assets/marble.png
+</code></pre>
+<p>Cargo metadata:</p>
+<pre><code class="language-toml">[package.metadata.block]
+id = &quot;example:marble&quot;
+</code></pre>
+<p>Export <code>BLOCK_INFO</code> and <code>RENDER_INFO</code> as shown in
+<a href="../world/blocks-and-items.html">Blocks, items, and metadata</a>.</p>
+<p>Add <code>&quot;block-marble&quot;</code> to <code>blocks.toml</code>, recompose both applications, and use the
+generated <code>BlockId::Marble</code>.</p>
+<p>For six textures:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>textures: Some(BlockTextures::PerFace {
+    east: &quot;block-marble/east.png&quot;,
+    west: &quot;block-marble/west.png&quot;,
+    top: &quot;block-marble/top.png&quot;,
+    bottom: &quot;block-marble/bottom.png&quot;,
+    south: &quot;block-marble/south.png&quot;,
+    north: &quot;block-marble/north.png&quot;,
+})
+<span class="boring">}
+</span></code></pre></pre>
+<h2 id="add-an-item"><a class="header" href="#add-an-item">Add an item</a></h2>
+<p>Contributor metadata:</p>
+<pre><code class="language-toml">[package.metadata.item]
+id = &quot;example:wand&quot;
+</code></pre>
+<p>Export:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub const ITEM_INFO: ItemInfo = ItemInfo {
+    id: &quot;example:wand&quot;,
+    label: &quot;Wand&quot;,
+};
+<span class="boring">}
+</span></code></pre></pre>
+<p>Add it to <code>items.toml</code> and recompose.</p>
+<p>The contributor defines identity/label. Item-use behavior belongs in another
+mod listening to <code>HeldItemUseDispatched</code>.</p>
+<h2 id="add-item-metadata"><a class="header" href="#add-item-metadata">Add item metadata</a></h2>
+<p>Manifest:</p>
+<pre><code class="language-toml">[package.metadata.item_metadata]
+id = &quot;example:spell&quot;
+field = &quot;spell&quot;
+type = &quot;item-spell-meta::Spell&quot;
+</code></pre>
+<p>Type:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(
+    Debug, Clone, PartialEq, Eq, Serialize, Deserialize
+)]
+pub struct Spell {
+    pub id: String,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Add the metadata contributor to <code>items.toml</code>.</p>
+<p>Instantiate:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>ItemMetaSet {
+    spell: Some(Spell {
+        id: &quot;example:blink&quot;.into(),
+    }),
+    ..Default::default()
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Implement spell semantics in one or more separate feature mods.</p>
+<h2 id="add-block-metadata"><a class="header" href="#add-block-metadata">Add block metadata</a></h2>
+<p>Use <code>package.metadata.block_metadata</code> with stable <code>id</code>, generated field name,
+and type path.</p>
+<p>Ensure the metadata type derives:</p>
+<ul>
+<li>clone;</li>
+<li>equality;</li>
+<li>hash;</li>
+<li>serialization/deserialization.</li>
+</ul>
+<p>Block metadata is used as a chunk palette key, so equality and hash semantics
+must be stable.</p>
+<h2 id="add-a-network-packet"><a class="header" href="#add-a-network-packet">Add a network packet</a></h2>
+<p>Create a message type crate:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PlayerManaChanged {
+    pub current: u32,
+    pub maximum: u32,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Create a contributor mod:</p>
+<pre><code class="language-toml">[package.metadata.network.messages]
+clientbound = [
+    &quot;player-mana-network-message-types::PlayerManaChanged&quot;
+]
+serverbound = []
+</code></pre>
+<p>Add the contributor to <code>network.toml</code>.</p>
+<p>After recomposition, codegen provides:</p>
+<ul>
+<li><code>ClientBoundMessage::PlayerManaChanged</code>;</li>
+<li><code>PlayerManaChangedReceived</code>;</li>
+<li>event registration and dispatch.</li>
+</ul>
+<p>Server sync:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>packets.write(ServerPacketOut {
+    audience: ServerAudience::Player(player_id),
+    message: ClientBoundMessage::PlayerManaChanged(
+        PlayerManaChanged { current, maximum },
+    ),
+});
+<span class="boring">}
+</span></code></pre></pre>
+<p>Client receive:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn receive(
+    mut packets: MessageReader&lt;PlayerManaChangedReceived&gt;,
+) {
+    // Update client cache/resource.
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Do not add the type directly to <code>network-protocol-mod</code>.</p>
+<h2 id="add-a-server-block-validator"><a class="header" href="#add-a-server-block-validator">Add a server block validator</a></h2>
+<p>Depend on block edit events and add a system to:</p>
+<pre><code class="language-text">ServerBlockEditSet::Validate
+</code></pre>
+<p>Modify pending requests, or add a richer shared validation result if required.</p>
+<p>Do not decode packets again and do not mutate the world in validation.</p>
+<h2 id="add-an-item-use-effect"><a class="header" href="#add-an-item-use-effect">Add an item-use effect</a></h2>
+<p>Listen in:</p>
+<pre><code class="language-text">InventoryServerSet::ApplyWorldEffects
+</code></pre>
+<p>Check your metadata and target:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn use_wand(
+    mut uses: MessageReader&lt;HeldItemUseDispatched&gt;,
+    mut success: MessageWriter&lt;ItemUseSucceeded&gt;,
+) {
+    for item_use in uses.read() {
+        let Some(spell) = &amp;item_use.item.metadata.spell else {
+            continue;
+        };
+
+        if apply_spell(spell, &amp;item_use.target) {
+            success.write(ItemUseSucceeded {
+                player_id: item_use.player_id,
+                cell: item_use.cell.clone(),
+                item_before_use: item_use.item.clone(),
+            });
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Quantity consumption remains reusable.</p>
+<p>If more than one world effect may consume the same use, add an explicit claim
+or result contract to avoid duplicate success.</p>
+<h2 id="add-a-setting"><a class="header" href="#add-a-setting">Add a setting</a></h2>
+<p>Contributor:</p>
+<pre><code class="language-toml">[package.metadata.setting]
+id = &quot;graphics.fog_distance&quot;
+label = &quot;Fog distance&quot;
+type = &quot;f32&quot;
+input = &quot;f32&quot;
+default = 64.0
+</code></pre>
+<p>Add it to <code>client.toml</code>, recompose, and read the generated key.</p>
+<p>For a new editor, create and select a setting input provider mod.</p>
+<h2 id="add-a-chunk-provider"><a class="header" href="#add-a-chunk-provider">Add a chunk provider</a></h2>
+<p>Implement <code>ServerChunkProvider</code>, register a unique <code>ChunkProviderId</code>, then
+select it through routing or a dimension definition.</p>
+<p>Provider generation must:</p>
+<ul>
+<li>return a chunk at <code>request.position</code>;</li>
+<li>use complete <code>BlockInstance</code> values;</li>
+<li>avoid blocking operations;</li>
+<li>return uniform chunks early when possible;</li>
+<li>remain deterministic unless mutable source state is intentional.</li>
+</ul>
+<p>If it depends on viewer identity, document whether edits are shared or
+viewer-specific. Routing and instance keys must match that policy.</p>
+<h2 id="add-a-biome"><a class="header" href="#add-a-biome">Add a biome</a></h2>
+<p>Create a small identity contributor:</p>
+<pre><code class="language-toml">[package.metadata.biome]
+id = &quot;example:crystal-fields&quot;
+</code></pre>
+<p>Add it to the appropriate <code>biomes-&lt;dimension&gt;.toml</code> pack and recompose to
+generate <code>BiomeId::CrystalFields</code>.</p>
+<p>Create a separate server definition mod that registers <code>BiomeDefinition</code> in
+<code>ServerBiomeRegistry</code>. Set its generated <code>Dimension</code>, climate targets, terrain
+blocks, visual data, and ordered feature IDs in that Rust definition.</p>
+<p>If the biome needs new generation behavior, create a feature mod implementing
+<code>ServerBiomeFeature</code>, register a namespaced <code>BiomeFeatureId</code>, and give it a
+public phase plus a conservative vertical range. Make the definition mod depend
+on the feature mod so registration happens first.</p>
+<p>The vanilla selector automatically considers definitions for the provider's
+dimension. Replace <code>server-biome-selection-api</code> for another placement policy.
+Replace one dimension's chunk provider when its desired geometry does not fit
+the current heightmap, Nether ground, or floating-island model. A replacement
+provider may reuse <code>server-biome-sampling-api</code> without inheriting any of those
+geometry rules.</p>
+<p>The complete contract and examples are in
+<a href="../world/biomes.html">Biomes and world-generation features</a>.</p>
+<h2 id="add-a-dimension"><a class="header" href="#add-a-dimension">Add a dimension</a></h2>
+<p>Create:</p>
+<ol>
+<li>dimension contributor;</li>
+<li>terrain provider or provider selection;</li>
+<li>server registration mod;</li>
+<li>travel behavior;</li>
+<li>packet-compatible client/server builds.</li>
+</ol>
+<p>Do not add special cases to <code>ServerChunkWorld</code>.</p>
+<h2 id="add-a-cell-menu-feature"><a class="header" href="#add-a-cell-menu-feature">Add a cell-menu feature</a></h2>
+<p>Client specific handler:</p>
+<ul>
+<li>recognize the block/action;</li>
+<li>send generic open request;</li>
+<li>mark local block use handled.</li>
+</ul>
+<p>Server validator:</p>
+<ul>
+<li>recognize <code>CellMenuOpenIntent.kind</code>;</li>
+<li>validate actor, anchor, scope, and permissions;</li>
+<li>build stable menu ID and audience;</li>
+<li>emit <code>CellMenuOpenRequested</code>.</li>
+</ul>
+<p>Optional semantics:</p>
+<ul>
+<li>persistence;</li>
+<li>recipe processing;</li>
+<li>periodic machine updates;</li>
+<li>damage/effects on move.</li>
+</ul>
+<p>Keep each semantic in a separate mod.</p>
+<h2 id="add-a-graphics-stage"><a class="header" href="#add-a-graphics-stage">Add a graphics stage</a></h2>
+<p>For composable brightness:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pipeline.register_face_stage(my_face_stage);
+pipeline.register_ambient_occlusion_stage(my_ao_stage);
+<span class="boring">}
+</span></code></pre></pre>
+<p>For a replacement mesher or renderer, implement the exclusive API instead.</p>
+<h2 id="replace-player-assets"><a class="header" href="#replace-player-assets">Replace player assets</a></h2>
+<p>Provide <code>client-player-blocky-model-paths-api</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>ClientPlayerBlockyModelPaths {
+    model_path: &quot;my-player-assets/player.blockymodel&quot;,
+    texture_path: Some(&quot;my-player-assets/player.png&quot;),
+    texture_size: Some(UVec2::new(256, 128)),
+    idle_animation_path: &quot;my-player-assets/idle.blockyanim&quot;,
+    walk_animation_path: Some(
+        &quot;my-player-assets/walk.blockyanim&quot;
+    ),
+    model_scale: 1.0,
+    primitive_scale: 1.0 / 64.0,
+    yaw_offset_radians: 0.0,
+    vertical_animation_locked_nodes: &amp;[&quot;Pelvis&quot;],
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Own all files in that mod's <code>assets/</code> directory and select only one provider.</p>
+<h2 id="build-a-custom-server-profile"><a class="header" href="#build-a-custom-server-profile">Build a custom server profile</a></h2>
+<p>Start from the smallest useful composition:</p>
+<pre><code class="language-toml">name = &quot;Custom server&quot;
+description = &quot;A server with selected rules.&quot;
+modpacks = [&quot;server-base&quot;]
+ignore = []
+
+mods = [
+    &quot;server-chunk-provider-registry-mod&quot;,
+    &quot;my-chunk-provider-mod&quot;,
+    &quot;my-chunk-routing-mod&quot;,
+    &quot;server-chunk-world-dynamic-impl&quot;,
+    &quot;my-player-visibility-mod&quot;,
+    &quot;my-inventory-layout-mod&quot;,
+]
+</code></pre>
+<p>Add only desired vanilla feature mods. Do not import <code>server.toml</code>, because it
+already chooses the demo world and vanilla pack.</p>
+<p>Compose early. Missing API errors reveal which neutral contracts still need a
+provider.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../development/developer-guide.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../development/testing-and-performance.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../development/developer-guide.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../development/testing-and-performance.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>

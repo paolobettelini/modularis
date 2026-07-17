@@ -1,0 +1,373 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Modpacks and feature boundaries - Minecraft Simple Demo Architecture</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting-started/project-overview.html"><strong aria-hidden="true">1.1.</strong> Project overview</a></li><li class="chapter-item expanded "><a href="../getting-started/build-and-run.html"><strong aria-hidden="true">1.2.</strong> Build and run</a></li></ol></li><li class="chapter-item expanded "><a href="../architecture/foundations.html"><strong aria-hidden="true">2.</strong> Architecture foundations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../architecture/patchwork-composition.html"><strong aria-hidden="true">2.1.</strong> Patchwork composition</a></li><li class="chapter-item expanded "><a href="../architecture/mod-anatomy.html"><strong aria-hidden="true">2.2.</strong> Mod anatomy and lifecycle</a></li><li class="chapter-item expanded "><a href="../architecture/apis-and-events.html"><strong aria-hidden="true">2.3.</strong> APIs, providers, and ECS contracts</a></li><li class="chapter-item expanded "><a href="../architecture/code-generation.html"><strong aria-hidden="true">2.4.</strong> Code generation and registries</a></li><li class="chapter-item expanded "><a href="../architecture/modpacks.html" class="active"><strong aria-hidden="true">2.5.</strong> Modpacks and feature boundaries</a></li><li class="chapter-item expanded "><a href="../architecture/assets-and-output.html"><strong aria-hidden="true">2.6.</strong> Assets and generated output</a></li></ol></li><li class="chapter-item expanded "><a href="../runtime/runtime-overview.html"><strong aria-hidden="true">3.</strong> Runtime and networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../runtime/bevy-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Bevy application lifecycle</a></li><li class="chapter-item expanded "><a href="../runtime/networking.html"><strong aria-hidden="true">3.2.</strong> Protocol, transport, and framing</a></li><li class="chapter-item expanded "><a href="../runtime/sessions-and-visibility.html"><strong aria-hidden="true">3.3.</strong> Sessions, routing, and visibility</a></li><li class="chapter-item expanded "><a href="../runtime/chat-and-commands.html"><strong aria-hidden="true">3.4.</strong> Chat, commands, and completion</a></li></ol></li><li class="chapter-item expanded "><a href="../world/world-overview.html"><strong aria-hidden="true">4.</strong> World architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../world/blocks-and-items.html"><strong aria-hidden="true">4.1.</strong> Blocks, items, and metadata</a></li><li class="chapter-item expanded "><a href="../world/chunk-storage.html"><strong aria-hidden="true">4.2.</strong> Chunk coordinates and storage</a></li><li class="chapter-item expanded "><a href="../world/server-world.html"><strong aria-hidden="true">4.3.</strong> Server world providers and residency</a></li><li class="chapter-item expanded "><a href="../world/biomes.html"><strong aria-hidden="true">4.4.</strong> Biomes and world-generation features</a></li><li class="chapter-item expanded "><a href="../world/client-chunks.html"><strong aria-hidden="true">4.5.</strong> Client streaming, meshing, and rendering</a></li><li class="chapter-item expanded "><a href="../world/dimensions.html"><strong aria-hidden="true">4.6.</strong> Dimensions and world scopes</a></li><li class="chapter-item expanded "><a href="../world/portals.html"><strong aria-hidden="true">4.7.</strong> Portals</a></li></ol></li><li class="chapter-item expanded "><a href="../gameplay/gameplay-overview.html"><strong aria-hidden="true">5.</strong> Gameplay systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../gameplay/movement.html"><strong aria-hidden="true">5.1.</strong> Player movement and prediction</a></li><li class="chapter-item expanded "><a href="../gameplay/movement-features.html"><strong aria-hidden="true">5.2.</strong> Gravity, jump, sprint, and flight</a></li><li class="chapter-item expanded "><a href="../gameplay/block-interaction.html"><strong aria-hidden="true">5.3.</strong> Block interaction and world edits</a></li><li class="chapter-item expanded "><a href="../gameplay/inventory.html"><strong aria-hidden="true">5.4.</strong> Inventory, hotbar, and item use</a></li><li class="chapter-item expanded "><a href="../gameplay/cell-menus.html"><strong aria-hidden="true">5.5.</strong> Cell menus, audiences, and crafting tables</a></li></ol></li><li class="chapter-item expanded "><a href="../client/client-overview.html"><strong aria-hidden="true">6.</strong> Client systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../client/input-settings-menus.html"><strong aria-hidden="true">6.1.</strong> Input, settings, menus, and game state</a></li><li class="chapter-item expanded "><a href="../client/graphics.html"><strong aria-hidden="true">6.2.</strong> Graphics, lighting, sky, and outlines</a></li><li class="chapter-item expanded "><a href="../client/blocky-models.html"><strong aria-hidden="true">6.3.</strong> Blocky models and animation</a></li></ol></li><li class="chapter-item expanded "><a href="../development/developer-guide.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../development/extension-cookbook.html"><strong aria-hidden="true">7.1.</strong> Extension cookbook</a></li><li class="chapter-item expanded "><a href="../development/testing-and-performance.html"><strong aria-hidden="true">7.2.</strong> Testing, debugging, and performance</a></li><li class="chapter-item expanded "><a href="../reference/crate-map.html"><strong aria-hidden="true">7.3.</strong> Crate map</a></li><li class="chapter-item expanded "><a href="../reference/current-limits.html"><strong aria-hidden="true">7.4.</strong> Current limits and design direction</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Minecraft Simple Demo Architecture</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="modpacks-and-feature-boundaries"><a class="header" href="#modpacks-and-feature-boundaries">Modpacks and feature boundaries</a></h1>
+<p>Modpacks are the architecture's final decision layer. APIs and feature mods make
+choices possible; modpacks decide which choices become an application.</p>
+<h2 id="shared-composition"><a class="header" href="#shared-composition">Shared composition</a></h2>
+<p><code>common.toml</code> imports:</p>
+<pre><code class="language-text">blocks
+items
+network
+</code></pre>
+<p>and selects <code>bevy-mod</code>.</p>
+<p>This gives client and server the same generated block, item, metadata, dimension,
+and protocol types.</p>
+<p><code>items.toml</code> imports <code>blocks.toml</code> because <code>PlaceBlock</code> metadata contains a
+generated <code>BlockId</code>.</p>
+<p><code>network.toml</code> imports blocks and dimensions because packets serialize block
+instances, chunks, and dimension IDs.</p>
+<p><code>biomes-overworld.toml</code>, <code>biomes-nether.toml</code>, and <code>biomes-aether.toml</code> select
+dimension-specific biome identity contributors. <code>biomes.toml</code> imports those
+packs, blocks, and dimensions, then selects <code>biome-registry-codegen</code>. It is not
+part of <code>common.toml</code> yet because the current network protocol does not transmit
+biome IDs.</p>
+<h2 id="client-composition"><a class="header" href="#client-composition">Client composition</a></h2>
+<p><code>client.toml</code> imports:</p>
+<pre><code class="language-toml">modpacks = [&quot;common&quot;, &quot;client-vanilla&quot;, &quot;client-graphics&quot;]
+</code></pre>
+<p>The top-level client selects neutral state and concrete presentation:</p>
+<ul>
+<li>Bevy default plugins and window;</li>
+<li>settings and input editor providers;</li>
+<li>TCP transport;</li>
+<li>session state;</li>
+<li>chat state, network bridges, and UI;</li>
+<li>chunk cache, streaming, meshing, and rendering;</li>
+<li>first-person controller and camera;</li>
+<li>inventory and cell-menu UI;</li>
+<li>Blocky remote player rendering;</li>
+<li>dimension, sky, sun, and portal client state;</li>
+<li>bootstrap.</li>
+</ul>
+<p><code>client-vanilla.toml</code> adds optional behavior:</p>
+<ul>
+<li>jump and sprint settings;</li>
+<li>crosshair;</li>
+<li>number-key and wheel hotbar selection;</li>
+<li>pause and inventory input;</li>
+<li>configurable chat-key input;</li>
+<li>client gravity prediction;</li>
+<li>fixed-rate movement, inertia, jump, sprint-jump, sprint, and flight controls;</li>
+<li>held-item fallback;</li>
+<li>crafting-table interaction;</li>
+<li>layered chunk priority.</li>
+</ul>
+<p><code>client-graphics.toml</code> adds:</p>
+<ul>
+<li>directional sun;</li>
+<li>sun shadows;</li>
+<li>ambient fill;</li>
+<li>face-direction shading;</li>
+<li>voxel ambient occlusion.</li>
+</ul>
+<p>This split lets a custom client keep the base protocol and chunk renderer while
+changing controls or graphics.</p>
+<h2 id="server-composition"><a class="header" href="#server-composition">Server composition</a></h2>
+<p><code>server-base.toml</code> contains infrastructure:</p>
+<ul>
+<li>server configuration;</li>
+<li>replaceable server tick provider, metrics, and headless Bevy runner;</li>
+<li>TCP transport;</li>
+<li>server packet events and routing;</li>
+<li>lifecycle messages;</li>
+<li>authoritative inventory and cell-menu state;</li>
+<li>network receive/sync bridges;</li>
+<li>block edit network bridges;</li>
+<li>sessions and timeout;</li>
+<li>player admission contracts;</li>
+<li>generic kick contracts and authoritative cleanup;</li>
+<li>chat ECS contracts, network bridges, and the Brigadier command provider;</li>
+<li>flight capability state and synchronization;</li>
+<li>sun state and synchronization;</li>
+<li>chunk request handling;</li>
+<li>bootstrap.</li>
+</ul>
+<p><code>server-vanilla.toml</code> imports <code>server-biomes-vanilla.toml</code> and the independent
+<code>server-commands-vanilla.toml</code> command pack, then contains selected policy:</p>
+<ul>
+<li>the imported <code>server-biomes-vanilla.toml</code> umbrella, whose separate
+Overworld, Nether, and Aether packs contain definitions and phased features;</li>
+<li>the biome runtime registry, vanilla selector, and shared biome sampler;</li>
+<li>global-chat audience policy and case-insensitive unique player names;</li>
+<li>chat command routing and optional clear-chat, flight, flight-speed, kick,
+teleport, speed, gravity, and TPS commands;</li>
+<li>player-interest chunk residency;</li>
+<li>world-scope player visibility;</li>
+<li>default dimension lifecycle;</li>
+<li>grant-all flight;</li>
+<li>default sun;</li>
+<li>Nether and Aether portal rules;</li>
+<li>portal ignition and travel;</li>
+<li>movement collision and jump validation;</li>
+<li>per-player gravity, movement-speed, and flight-speed state/synchronization;</li>
+<li>default inventory layout and loadout;</li>
+<li>quantity stacking and consumption;</li>
+<li>reach validation;</li>
+<li>block breaking and <code>PlaceBlock</code> item behavior;</li>
+<li>crafting-table menus.</li>
+</ul>
+<p><code>server.toml</code> selects the concrete world:</p>
+<ul>
+<li>random-at-startup world seed provider;</li>
+<li>chunk provider registry;</li>
+<li>dimension registry;</li>
+<li>Overworld, Nether, and Aether definitions;</li>
+<li>dimension-aware chunk routing;</li>
+<li>independent biome-driven Overworld, Nether, and Aether providers;</li>
+<li>dynamic world cache and edit overlay.</li>
+</ul>
+<p>The biome packs are separate from <code>server-base.toml</code>. A server can import only
+chosen dimension packs, omit them, or select the simple Perlin provider,
+checkerboard provider, a file-backed world, or a custom biome composition.</p>
+<h2 id="why-vanilla-is-not-base"><a class="header" href="#why-vanilla-is-not-base">Why vanilla is not base</a></h2>
+<p>Suppose a custom server wants inventories but no block placement. It can use
+<code>server-base.toml</code> and select the inventory layout/loadout mods it wants, while
+omitting <code>server-place-block-item-use-mod</code>.</p>
+<p>Suppose another server wants players to move through blocks. It can omit
+<code>server-player-movement-collision-vanilla-mod</code> or provide a different validator.</p>
+<p>Suppose a server wants team worlds. It can replace:</p>
+<ul>
+<li>chunk routing;</li>
+<li>player visibility;</li>
+<li>chunk residency;</li>
+<li>dimension lifecycle;</li>
+</ul>
+<p>without replacing TCP, packet generation, or the chunk storage backend.</p>
+<p>These are only possible when default behavior remains outside the base.</p>
+<h2 id="designing-a-new-feature-pack"><a class="header" href="#designing-a-new-feature-pack">Designing a new feature pack</a></h2>
+<p>A feature pack should:</p>
+<ol>
+<li>import only foundations it genuinely needs;</li>
+<li>select small behavior mods;</li>
+<li>avoid selecting both sides of an exclusive provider API;</li>
+<li>keep generated contributors near the domain pack that owns them;</li>
+<li>avoid importing a top-level application modpack;</li>
+<li>document which policies it chooses.</li>
+</ol>
+<p>Example:</p>
+<pre><code class="language-toml">name = &quot;Low gravity server rules&quot;
+description = &quot;Movement rules for a low-gravity server.&quot;
+modpacks = []
+ignore = []
+
+mods = [
+    &quot;player-gravity-low-mod&quot;,
+    &quot;server-player-gravity-network-sync-mod&quot;,
+    &quot;server-player-jump-low-gravity-mod&quot;,
+]
+</code></pre>
+<p>The top-level server profile can import this pack instead of the vanilla gravity
+selection.</p>
+<h2 id="using-ignore"><a class="header" href="#using-ignore">Using <code>ignore</code></a></h2>
+<p><code>ignore</code> is appropriate when importing a convenient broad pack but replacing
+one selected mod:</p>
+<pre><code class="language-toml">modpacks = [&quot;client&quot;, &quot;my-graphics&quot;]
+ignore = [&quot;client-sun-shadows-vanilla-mod&quot;]
+</code></pre>
+<p>Use it carefully. If the ignored mod provides an API required by another
+selected feature, the profile must select a replacement.</p>
+<h2 id="dependency-review-at-the-modpack-level"><a class="header" href="#dependency-review-at-the-modpack-level">Dependency review at the modpack level</a></h2>
+<p>Before accepting a modpack change, check:</p>
+<ul>
+<li>does it accidentally add a client-only mod to the server?</li>
+<li>does it select two exclusive providers?</li>
+<li>does it make a vanilla behavior mandatory through an imported base?</li>
+<li>are packet contributors shared by both client and server?</li>
+<li>are contributor and codegen owner selected together?</li>
+<li>does a new asset-owning mod appear in the correct application?</li>
+</ul>
+<p>The modpack is where architectural promises become testable compositions.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../architecture/code-generation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../architecture/assets-and-output.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../architecture/code-generation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../architecture/assets-and-output.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>
