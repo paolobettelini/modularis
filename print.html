@@ -1302,13 +1302,14 @@ biome IDs.</p>
 </ul>
 <p><code>client-vanilla.toml</code> adds optional behavior:</p>
 <ul>
-<li>jump and sprint settings;</li>
+<li>jump, sprint, and sneak settings;</li>
 <li>crosshair;</li>
 <li>number-key and wheel hotbar selection;</li>
 <li>pause and inventory input;</li>
 <li>configurable chat-key input;</li>
 <li>client gravity prediction;</li>
-<li>fixed-rate movement, inertia, jump, sprint-jump, sprint, and flight controls;</li>
+<li>fixed-rate movement, inertia, jump, sprint-jump, sprint, sneak, and flight controls;</li>
+<li>independent sneak state, speed, edge-protection, camera, and block-use routing policies;</li>
 <li>held-item fallback;</li>
 <li>crafting-table interaction;</li>
 <li>layered chunk priority.</li>
@@ -3856,10 +3857,11 @@ Grounded(bool)
   -&gt; JumpForces
   -&gt; Forces
   -&gt; ForceOverrides
+  -&gt; MovementConstraints
   -&gt; Movement
   -&gt; PostMovement
 
-Update: CameraSync
+Update: CameraSync -&gt; CameraModifiers
 </code></pre>
 <p>Physics runs in <code>FixedUpdate</code>. The selected
 <code>client-player-physics-tick-20hz-vanilla-mod</code> provides a <code>20 Hz</code> step, but the
@@ -3922,6 +3924,10 @@ along gravity-up after ordinary forces without hardcoding flight into gravity.
 The vanilla flight policy also replaces planar velocity directly from the
 current flight intent, so flight starts, stops, and turns almost immediately
 instead of inheriting walking or airborne drag.</p>
+<p><code>MovementConstraints</code> is deliberately separate from force calculation and
+collision resolution. Optional policies can reduce the final requested
+displacement without owning the controller. The vanilla sneak edge-protection
+mod uses this phase.</p>
 <h3 id="movement"><a class="header" href="#movement">Movement</a></h3>
 <p>The collision service resolves the fixed tick's movement and returns:</p>
 <ul>
@@ -3938,6 +3944,9 @@ instead of inheriting walking or airborne drag.</p>
 position is interpolated between the two most recent fixed physics positions,
 which prevents a 20 Hz simulation from making vertical camera movement appear
 stepped.</p>
+<p><code>CameraModifiers</code> runs after this absolute synchronization. Camera effects can
+therefore add a frame-local offset without accumulating it or changing the
+controller. The vanilla sneak camera mod uses this phase to lower eye height.</p>
 <h2 id="collision-service"><a class="header" href="#collision-service">Collision service</a></h2>
 <p><code>collision-api</code> exposes a closure-backed <code>CollisionService</code>.</p>
 <p>The active implementation reads blocks from <code>ClientChunkCache</code> and uses shared
@@ -4034,7 +4043,7 @@ maintain a complete per-player velocity model or validate acceleration, exact
 input timing, sprint state, or knockback.</p>
 <p>A stronger server can add validators to <code>ServerPlayerMovementSet::Validate</code>
 without changing the session transport.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="gravity-jump-sprint-and-flight"><a class="header" href="#gravity-jump-sprint-and-flight">Gravity, jump, sprint, and flight</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="gravity-jump-sprint-sneak-and-flight"><a class="header" href="#gravity-jump-sprint-sneak-and-flight">Gravity, jump, sprint, sneak, and flight</a></h1>
 <p>Movement features are independent mods layered onto the controller and server
 pipelines.</p>
 <h2 id="gravity"><a class="header" href="#gravity">Gravity</a></h2>
@@ -4133,6 +4142,28 @@ current planar intent.</p>
 <p>Removing the mod removes sprint while preserving movement.</p>
 <p>If sprint affects server rules, add a server-visible sprint intent and
 validator. The current demo validates only movement displacement/collision.</p>
+<h2 id="sneak"><a class="header" href="#sneak">Sneak</a></h2>
+<p>Sneak is not a boolean hardcoded into the input backend or controller. The
+vanilla composition assembles it from independent mods:</p>
+<table><thead><tr><th>Mod</th><th>Responsibility</th></tr></thead><tbody>
+<tr><td><code>client-setting-sneak-key</code></td><td>contributes <code>controls.sneak_key</code>, defaulting to left Shift</td></tr>
+<tr><td><code>client-player-sneak-state-mod</code></td><td>provides the neutral <code>LocalPlayerSneak</code> resource and change event</td></tr>
+<tr><td><code>client-player-sneak-input-vanilla-mod</code></td><td>maps the configured held key to local sneak state</td></tr>
+<tr><td><code>client-player-sneak-speed-vanilla-mod</code></td><td>multiplies planar speed while sneaking</td></tr>
+<tr><td><code>client-player-sneak-edge-protection-vanilla-mod</code></td><td>constrains supported movement before collision resolution</td></tr>
+<tr><td><code>client-player-sneak-camera-vanilla-mod</code></td><td>lowers the local camera after normal camera synchronization</td></tr>
+<tr><td><code>client-player-sneak-block-interaction-bypass-vanilla-mod</code></td><td>routes right-click directly to the held item before block handlers</td></tr>
+</tbody></table>
+<p>The speed multiplier, camera offset, and edge-probe constants live in the mods
+that own those policies. A client may keep configurable sneak input but replace
+only its movement speed or camera presentation.</p>
+<p>Edge protection applies only while grounded. It samples the requested planar
+path along two gravity-relative axes and clamps each component at the last
+supported point. Jumping and flight are not converted into grounded movement.</p>
+<p>The interaction behavior matches the usual voxel-game convention: sneaking
+does not disable block breaking. It bypasses right-click block activation, so a
+held placeable item can be used against a crafting table instead of opening its
+menu.</p>
 <h2 id="flight-architecture"><a class="header" href="#flight-architecture">Flight architecture</a></h2>
 <p>Flight is split into:</p>
 <ol>
@@ -4188,7 +4219,7 @@ player.</p>
 <li>detects a double-tap of the jump key within <code>0.3</code> seconds;</li>
 <li>toggles flight only when capability is enabled;</li>
 <li>uses jump to ascend;</li>
-<li>uses Shift to descend;</li>
+<li>uses the configured sneak key to descend;</li>
 <li>uses the separate synchronized flight-speed multiplier for both planar and
 vertical speed;</li>
 <li>runs in <code>ForceOverrides</code>;</li>
@@ -4268,11 +4299,17 @@ remote player hitboxes.</li>
 authoritative check.</p>
 <h2 id="right-click-handler-chain"><a class="header" href="#right-click-handler-chain">Right-click handler chain</a></h2>
 <pre><code class="language-text">ClientBlockInteractionSet::Raycast
+  -&gt; RoutingRules
   -&gt; SpecificHandlers
   -&gt; Fallback
 </code></pre>
+<p><code>RoutingRules</code> lets optional behavior redirect an operation before a block
+handler claims it. The vanilla sneak routing mod marks the operation handled
+and emits held-item use directly. Consequently, right-clicking a crafting table
+while sneaking places or uses the held item instead of opening the table.</p>
 <p>The crafting-table handler recognizes a crafting table and sends a menu open
-request. It emits <code>LocalBlockUseHandled</code>.</p>
+request. It ignores operations already handled by routing rules, then emits
+<code>LocalBlockUseHandled</code> for operations it claims.</p>
 <p>The held-item fallback forwards only operation IDs not claimed by a specific
 handler.</p>
 <p>This allows more mods to add:</p>
@@ -4881,6 +4918,7 @@ menus are separate systems.</p>
 <ul>
 <li>jump key;</li>
 <li>sprint key;</li>
+<li>sneak key;</li>
 <li>inventory key;</li>
 <li>hotbar number keys;</li>
 <li>pause behavior.</li>
@@ -4903,6 +4941,7 @@ systems can read Bevy keyboard state and generated settings directly.</p>
 <tr><td><code>graphics.fov</code></td><td><code>f32</code></td><td><code>f32</code></td><td><code>75</code></td></tr>
 <tr><td><code>controls.jump_key</code></td><td>string</td><td>keybinding</td><td><code>Space</code></td></tr>
 <tr><td><code>controls.sprint_key</code></td><td>string</td><td>keybinding</td><td><code>ControlLeft</code></td></tr>
+<tr><td><code>controls.sneak_key</code></td><td>string</td><td>keybinding</td><td><code>ShiftLeft</code></td></tr>
 <tr><td><code>controls.inventory_key</code></td><td>string</td><td>keybinding</td><td><code>E</code></td></tr>
 <tr><td><code>controls.chat_key</code></td><td>string</td><td>keybinding</td><td><code>T</code></td></tr>
 <tr><td><code>network.player_name</code></td><td>string</td><td>string</td><td><code>Player</code></td></tr>
@@ -6513,6 +6552,7 @@ vanilla command mods.</li>
 <li><code>player-jump-api</code>;</li>
 <li><code>player-flight-api</code>;</li>
 <li><code>player-flight-speed-api</code>;</li>
+<li><code>player-sneak-api</code>;</li>
 <li><code>server-player-flight-api</code>;</li>
 <li><code>server-player-flight-speed-api</code>;</li>
 <li><code>server-player-gravity-api</code>;</li>
@@ -6530,6 +6570,8 @@ vanilla command mods.</li>
 <li>local and server player speed state/sync mods;</li>
 <li>client/server jump vanilla mods;</li>
 <li>client sprint vanilla mod;</li>
+<li>client sneak state, input, speed, edge-protection, camera, and block-use
+routing mods;</li>
 <li>client inertial acceleration/drag and sprint-jump vanilla mods;</li>
 <li>flight state, capability, sync, controls, and grant policy mods;</li>
 <li>separate client/server flight-speed state and sync mods;</li>

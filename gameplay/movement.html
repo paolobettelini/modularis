@@ -174,10 +174,11 @@ Grounded(bool)
   -&gt; JumpForces
   -&gt; Forces
   -&gt; ForceOverrides
+  -&gt; MovementConstraints
   -&gt; Movement
   -&gt; PostMovement
 
-Update: CameraSync
+Update: CameraSync -&gt; CameraModifiers
 </code></pre>
 <p>Physics runs in <code>FixedUpdate</code>. The selected
 <code>client-player-physics-tick-20hz-vanilla-mod</code> provides a <code>20 Hz</code> step, but the
@@ -240,6 +241,10 @@ along gravity-up after ordinary forces without hardcoding flight into gravity.
 The vanilla flight policy also replaces planar velocity directly from the
 current flight intent, so flight starts, stops, and turns almost immediately
 instead of inheriting walking or airborne drag.</p>
+<p><code>MovementConstraints</code> is deliberately separate from force calculation and
+collision resolution. Optional policies can reduce the final requested
+displacement without owning the controller. The vanilla sneak edge-protection
+mod uses this phase.</p>
 <h3 id="movement"><a class="header" href="#movement">Movement</a></h3>
 <p>The collision service resolves the fixed tick's movement and returns:</p>
 <ul>
@@ -256,6 +261,9 @@ instead of inheriting walking or airborne drag.</p>
 position is interpolated between the two most recent fixed physics positions,
 which prevents a 20 Hz simulation from making vertical camera movement appear
 stepped.</p>
+<p><code>CameraModifiers</code> runs after this absolute synchronization. Camera effects can
+therefore add a frame-local offset without accumulating it or changing the
+controller. The vanilla sneak camera mod uses this phase to lower eye height.</p>
 <h2 id="collision-service"><a class="header" href="#collision-service">Collision service</a></h2>
 <p><code>collision-api</code> exposes a closure-backed <code>CollisionService</code>.</p>
 <p>The active implementation reads blocks from <code>ClientChunkCache</code> and uses shared

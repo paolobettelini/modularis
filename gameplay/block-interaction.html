@@ -184,11 +184,17 @@ remote player hitboxes.</li>
 authoritative check.</p>
 <h2 id="right-click-handler-chain"><a class="header" href="#right-click-handler-chain">Right-click handler chain</a></h2>
 <pre><code class="language-text">ClientBlockInteractionSet::Raycast
+  -&gt; RoutingRules
   -&gt; SpecificHandlers
   -&gt; Fallback
 </code></pre>
+<p><code>RoutingRules</code> lets optional behavior redirect an operation before a block
+handler claims it. The vanilla sneak routing mod marks the operation handled
+and emits held-item use directly. Consequently, right-clicking a crafting table
+while sneaking places or uses the held item instead of opening the table.</p>
 <p>The crafting-table handler recognizes a crafting table and sends a menu open
-request. It emits <code>LocalBlockUseHandled</code>.</p>
+request. It ignores operations already handled by routing rules, then emits
+<code>LocalBlockUseHandled</code> for operations it claims.</p>
 <p>The held-item fallback forwards only operation IDs not claimed by a specific
 handler.</p>
 <p>This allows more mods to add:</p>
