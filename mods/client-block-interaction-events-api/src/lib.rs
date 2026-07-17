@@ -4,6 +4,9 @@ use item_use_api::ItemUseTarget;
 #[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ClientBlockInteractionSet {
     Raycast,
+    /// Optional rules may route an intent before block-specific handlers see
+    /// it. Sneak uses this phase to prefer the held item action.
+    RoutingRules,
     SpecificHandlers,
     Fallback,
 }

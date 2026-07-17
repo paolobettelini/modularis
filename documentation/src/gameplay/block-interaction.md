@@ -52,12 +52,19 @@ authoritative check.
 
 ```text
 ClientBlockInteractionSet::Raycast
+  -> RoutingRules
   -> SpecificHandlers
   -> Fallback
 ```
 
+`RoutingRules` lets optional behavior redirect an operation before a block
+handler claims it. The vanilla sneak routing mod marks the operation handled
+and emits held-item use directly. Consequently, right-clicking a crafting table
+while sneaking places or uses the held item instead of opening the table.
+
 The crafting-table handler recognizes a crafting table and sends a menu open
-request. It emits `LocalBlockUseHandled`.
+request. It ignores operations already handled by routing rules, then emits
+`LocalBlockUseHandled` for operations it claims.
 
 The held-item fallback forwards only operation IDs not claimed by a specific
 handler.

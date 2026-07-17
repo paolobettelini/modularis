@@ -35,10 +35,11 @@ PlayerControllerSet::Input
   -> JumpForces
   -> Forces
   -> ForceOverrides
+  -> MovementConstraints
   -> Movement
   -> PostMovement
 
-Update: CameraSync
+Update: CameraSync -> CameraModifiers
 ```
 
 Physics runs in `FixedUpdate`. The selected
@@ -113,6 +114,11 @@ The vanilla flight policy also replaces planar velocity directly from the
 current flight intent, so flight starts, stops, and turns almost immediately
 instead of inheriting walking or airborne drag.
 
+`MovementConstraints` is deliberately separate from force calculation and
+collision resolution. Optional policies can reduce the final requested
+displacement without owning the controller. The vanilla sneak edge-protection
+mod uses this phase.
+
 ### Movement
 
 The collision service resolves the fixed tick's movement and returns:
@@ -135,6 +141,10 @@ It follows the locally predicted player, not the last server packet. The render
 position is interpolated between the two most recent fixed physics positions,
 which prevents a 20 Hz simulation from making vertical camera movement appear
 stepped.
+
+`CameraModifiers` runs after this absolute synchronization. Camera effects can
+therefore add a frame-local offset without accumulating it or changing the
+controller. The vanilla sneak camera mod uses this phase to lower eye height.
 
 ## Collision service
 

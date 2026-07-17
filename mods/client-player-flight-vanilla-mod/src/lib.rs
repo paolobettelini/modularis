@@ -135,8 +135,11 @@ fn apply_flight_velocity(
         .unwrap_or(KeyCode::Space);
     let vertical_input = if *overlay.get() == InGameOverlayState::Playing {
         let up = if keyboard.pressed(jump_key) { 1.0 } else { 0.0 };
-        let down = if keyboard.pressed(KeyCode::ShiftLeft) || keyboard.pressed(KeyCode::ShiftRight)
-        {
+        let sneak_key = settings
+            .get_string(SettingKey::ControlsSneakKey)
+            .and_then(parse_key_code)
+            .unwrap_or(KeyCode::ShiftLeft);
+        let down = if keyboard.pressed(sneak_key) {
             1.0
         } else {
             0.0

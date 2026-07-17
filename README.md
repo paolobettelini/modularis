@@ -8,7 +8,9 @@ replaceable mods.
 Check out the AI-generated
 <b>[documentation](https://paolobettelini.github.io/modularis)</b>.
 
-
+<div align="center">
+  <img src="./media/preview.png" alt="Preview" width="600">
+</div>
 
 ## Build and run
 

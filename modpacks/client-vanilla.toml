@@ -6,6 +6,7 @@ ignore = []
 mods = [
     "client-setting-jump-key",
     "client-setting-sprint-key",
+    "client-setting-sneak-key",
     "client-setting-chat-key",
     "client-block-interaction-rules-vanilla-mod",
     "client-chunk-layered-priority-vanilla-mod",
@@ -28,6 +29,12 @@ mods = [
     "client-player-sprint-jump-vanilla-mod",
     "client-player-flight-vanilla-mod",
     "client-player-sprint-vanilla-mod",
+    "client-player-sneak-state-mod",
+    "client-player-sneak-input-vanilla-mod",
+    "client-player-sneak-speed-vanilla-mod",
+    "client-player-sneak-edge-protection-vanilla-mod",
+    "client-player-sneak-camera-vanilla-mod",
+    "client-player-sneak-block-interaction-bypass-vanilla-mod",
     "client-use-held-item-on-block-mod",
     "client-crafting-table-open-network-mod",
 ]

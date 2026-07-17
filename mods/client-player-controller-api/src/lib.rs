@@ -23,9 +23,15 @@ pub enum PlayerControllerSet {
     JumpForces,
     Forces,
     ForceOverrides,
+    /// Optional policies that constrain the final displacement without owning
+    /// collision resolution, such as sneak edge protection.
+    MovementConstraints,
     Movement,
     PostMovement,
     CameraSync,
+    /// Optional camera effects applied after the controller has synchronized
+    /// the camera to the interpolated player position.
+    CameraModifiers,
 }
 
 #[derive(Resource, Debug, Clone, Copy)]

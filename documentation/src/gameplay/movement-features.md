@@ -1,4 +1,4 @@
-# Gravity, jump, sprint, and flight
+# Gravity, jump, sprint, sneak, and flight
 
 Movement features are independent mods layered onto the controller and server
 pipelines.
@@ -124,6 +124,34 @@ Removing the mod removes sprint while preserving movement.
 If sprint affects server rules, add a server-visible sprint intent and
 validator. The current demo validates only movement displacement/collision.
 
+## Sneak
+
+Sneak is not a boolean hardcoded into the input backend or controller. The
+vanilla composition assembles it from independent mods:
+
+| Mod | Responsibility |
+| --- | --- |
+| `client-setting-sneak-key` | contributes `controls.sneak_key`, defaulting to left Shift |
+| `client-player-sneak-state-mod` | provides the neutral `LocalPlayerSneak` resource and change event |
+| `client-player-sneak-input-vanilla-mod` | maps the configured held key to local sneak state |
+| `client-player-sneak-speed-vanilla-mod` | multiplies planar speed while sneaking |
+| `client-player-sneak-edge-protection-vanilla-mod` | constrains supported movement before collision resolution |
+| `client-player-sneak-camera-vanilla-mod` | lowers the local camera after normal camera synchronization |
+| `client-player-sneak-block-interaction-bypass-vanilla-mod` | routes right-click directly to the held item before block handlers |
+
+The speed multiplier, camera offset, and edge-probe constants live in the mods
+that own those policies. A client may keep configurable sneak input but replace
+only its movement speed or camera presentation.
+
+Edge protection applies only while grounded. It samples the requested planar
+path along two gravity-relative axes and clamps each component at the last
+supported point. Jumping and flight are not converted into grounded movement.
+
+The interaction behavior matches the usual voxel-game convention: sneaking
+does not disable block breaking. It bypasses right-click block activation, so a
+held placeable item can be used against a crafting table instead of opening its
+menu.
+
 ## Flight architecture
 
 Flight is split into:
@@ -185,7 +213,7 @@ The vanilla control mod:
 - detects a double-tap of the jump key within `0.3` seconds;
 - toggles flight only when capability is enabled;
 - uses jump to ascend;
-- uses Shift to descend;
+- uses the configured sneak key to descend;
 - uses the separate synchronized flight-speed multiplier for both planar and
   vertical speed;
 - runs in `ForceOverrides`;

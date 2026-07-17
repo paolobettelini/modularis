@@ -16,6 +16,7 @@ impl ClientBlockInteractionEventsMod {
                 Update,
                 (
                     ClientBlockInteractionSet::Raycast,
+                    ClientBlockInteractionSet::RoutingRules,
                     ClientBlockInteractionSet::SpecificHandlers,
                     ClientBlockInteractionSet::Fallback,
                 )

@@ -18,6 +18,7 @@ It does not know:
 
 - jump key;
 - sprint key;
+- sneak key;
 - inventory key;
 - hotbar number keys;
 - pause behavior.
@@ -49,6 +50,7 @@ Current setting contributors:
 | `graphics.fov` | `f32` | `f32` | `75` |
 | `controls.jump_key` | string | keybinding | `Space` |
 | `controls.sprint_key` | string | keybinding | `ControlLeft` |
+| `controls.sneak_key` | string | keybinding | `ShiftLeft` |
 | `controls.inventory_key` | string | keybinding | `E` |
 | `controls.chat_key` | string | keybinding | `T` |
 | `network.player_name` | string | string | `Player` |

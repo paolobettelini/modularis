@@ -53,12 +53,20 @@ impl FpsPlayerControllerBevyImpl {
                     PlayerControllerSet::JumpForces,
                     PlayerControllerSet::Forces,
                     PlayerControllerSet::ForceOverrides,
+                    PlayerControllerSet::MovementConstraints,
                     PlayerControllerSet::Movement,
                     PlayerControllerSet::PostMovement,
                 )
                     .chain(),
             )
-            .configure_sets(Update, PlayerControllerSet::CameraSync)
+            .configure_sets(
+                Update,
+                (
+                    PlayerControllerSet::CameraSync,
+                    PlayerControllerSet::CameraModifiers,
+                )
+                    .chain(),
+            )
             .add_systems(
                 FixedUpdate,
                 collect_planar_movement_intent

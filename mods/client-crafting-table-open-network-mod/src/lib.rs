@@ -11,6 +11,7 @@ use generated_block_registry::BlockId;
 use generated_network_messages::ServerBoundMessage;
 use item_use_api::ItemUseTarget;
 use network_protocol_mod::NetworkProtocolMod;
+use std::collections::HashSet;
 use tokio::task::JoinHandle;
 
 const CRAFTING_TABLE_KIND: &str = "demo:crafting-table";
@@ -41,12 +42,23 @@ fn request_crafting_table_menu(
     cache: Res<ClientChunkCache>,
     sender: Option<Res<ClientNetworkSender>>,
     mut intents: MessageReader<LocalBlockUseIntent>,
-    mut handled: MessageWriter<LocalBlockUseHandled>,
+    mut handled: ParamSet<(
+        MessageReader<LocalBlockUseHandled>,
+        MessageWriter<LocalBlockUseHandled>,
+    )>,
 ) {
     let Some(sender) = sender else {
         return;
     };
+    let already_handled = handled
+        .p0()
+        .read()
+        .map(|event| event.operation_id)
+        .collect::<HashSet<_>>();
     for intent in intents.read() {
+        if already_handled.contains(&intent.operation_id) {
+            continue;
+        }
         let ItemUseTarget::Block { hit, .. } = intent.target else {
             continue;
         };
@@ -62,7 +74,7 @@ fn request_crafting_table_menu(
                 anchor: Some(hit),
             },
         )));
-        handled.write(LocalBlockUseHandled {
+        handled.p1().write(LocalBlockUseHandled {
             operation_id: intent.operation_id,
         });
     }

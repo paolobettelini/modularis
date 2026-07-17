@@ -54,13 +54,14 @@ The top-level client selects neutral state and concrete presentation:
 
 `client-vanilla.toml` adds optional behavior:
 
-- jump and sprint settings;
+- jump, sprint, and sneak settings;
 - crosshair;
 - number-key and wheel hotbar selection;
 - pause and inventory input;
 - configurable chat-key input;
 - client gravity prediction;
-- fixed-rate movement, inertia, jump, sprint-jump, sprint, and flight controls;
+- fixed-rate movement, inertia, jump, sprint-jump, sprint, sneak, and flight controls;
+- independent sneak state, speed, edge-protection, camera, and block-use routing policies;
 - held-item fallback;
 - crafting-table interaction;
 - layered chunk priority.

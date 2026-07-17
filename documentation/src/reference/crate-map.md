@@ -311,6 +311,7 @@ Contracts:
 - `player-jump-api`;
 - `player-flight-api`;
 - `player-flight-speed-api`;
+- `player-sneak-api`;
 - `server-player-flight-api`;
 - `server-player-flight-speed-api`;
 - `server-player-gravity-api`;
@@ -328,6 +329,8 @@ Implementations/features:
 - local and server player speed state/sync mods;
 - client/server jump vanilla mods;
 - client sprint vanilla mod;
+- client sneak state, input, speed, edge-protection, camera, and block-use
+  routing mods;
 - client inertial acceleration/drag and sprint-jump vanilla mods;
 - flight state, capability, sync, controls, and grant policy mods;
 - separate client/server flight-speed state and sync mods;
