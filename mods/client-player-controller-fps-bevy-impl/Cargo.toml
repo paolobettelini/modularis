@@ -10,6 +10,7 @@ provides = "client-player-controller-api"
 [package.metadata.mod.dependencies]
 init = [
     "bevy-mod",
+    "client-player-physics-tick-api",
     "client-input-api",
     "client-camera-api",
     "collision-api",
@@ -27,6 +28,7 @@ client-camera-api = { path = "../client-camera-api" }
 collision-api = { path = "../collision-api" }
 client-game-state-api = { path = "../client-game-state-api" }
 client-input-api = { path = "../client-input-api" }
+client-player-physics-tick-api = { path = "../client-player-physics-tick-api" }
 client-player-controller-api = { path = "../client-player-controller-api" }
 player-gravity-api = { path = "../player-gravity-api" }
 player-speed-api = { path = "../player-speed-api" }

@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use client_chat_api::{
-    ClientChatApi, ClientChatComposer, ClientChatLog, ClientChatMessageReceived, ClientChatSet,
-    ClientChatSubmitRequested, ClientChatSuggestionsReceived, ClientChatSuggestionsRequested,
+    ClientChatApi, ClientChatCleared, ClientChatComposer, ClientChatLog, ClientChatMessageReceived,
+    ClientChatSet, ClientChatSubmitRequested, ClientChatSuggestionsReceived,
+    ClientChatSuggestionsRequested,
 };
 use tokio::task::JoinHandle;
 
@@ -16,6 +17,7 @@ impl ClientChatStateMod {
             .add_message::<ClientChatSubmitRequested>()
             .add_message::<ClientChatSuggestionsRequested>()
             .add_message::<ClientChatMessageReceived>()
+            .add_message::<ClientChatCleared>()
             .add_message::<ClientChatSuggestionsReceived>()
             .configure_sets(
                 Update,
@@ -30,13 +32,19 @@ impl ClientChatStateMod {
             )
             .add_systems(
                 Update,
-                (apply_messages, apply_suggestions).in_set(ClientChatSet::Apply),
+                (apply_messages, apply_clear, apply_suggestions).in_set(ClientChatSet::Apply),
             );
         Self
     }
 
     pub fn run(&self) -> Option<Vec<JoinHandle<()>>> {
         None
+    }
+}
+
+fn apply_clear(mut cleared: MessageReader<ClientChatCleared>, mut log: ResMut<ClientChatLog>) {
+    if cleared.read().next().is_some() {
+        log.clear();
     }
 }
 
@@ -60,5 +68,6 @@ fn apply_suggestions(
             continue;
         }
         composer.suggestions.clone_from(&suggestions.suggestions);
+        composer.selected_suggestion = None;
     }
 }

@@ -9,6 +9,9 @@ pub struct Player;
 pub struct PlayerVelocity(pub Vec3);
 
 #[derive(Component, Debug, Clone, Copy, Default)]
+pub struct PreviousPlayerPosition(pub Vec3);
+
+#[derive(Component, Debug, Clone, Copy, Default)]
 pub struct Grounded(pub bool);
 
 #[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -16,9 +19,12 @@ pub enum PlayerControllerSet {
     Input,
     MovementModifiers,
     ApplyMovementIntent,
+    GravityForces,
+    JumpForces,
     Forces,
     ForceOverrides,
     Movement,
+    PostMovement,
     CameraSync,
 }
 
@@ -41,6 +47,8 @@ impl Default for PlayerMovementConfig {
 #[derive(Resource, Debug, Clone, Copy)]
 pub struct PlayerPlanarMovementIntent {
     pub direction: Vec3,
+    /// Base movement speed selected by the active movement mode.
+    pub target_speed: f32,
     pub speed_multiplier: f32,
 }
 
@@ -48,6 +56,7 @@ impl Default for PlayerPlanarMovementIntent {
     fn default() -> Self {
         Self {
             direction: Vec3::ZERO,
+            target_speed: 0.0,
             speed_multiplier: 1.0,
         }
     }

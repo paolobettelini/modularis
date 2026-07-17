@@ -4,6 +4,8 @@ use block_manager_api::{BlockId, BlockManagerApi};
 use player_block_collision_api::resolve_player_collision;
 use player_hitbox_api::{PLAYER_HEIGHT, PLAYER_RADIUS};
 use server_chunk_world_api::{ServerChunkWorld, ServerChunkWorldApi};
+use server_player_flight_api::{ServerPlayerFlightApi, ServerPlayerFlightCapabilities};
+use server_player_flight_speed_api::{ServerPlayerFlightSpeedApi, ServerPlayerFlightSpeeds};
 use server_player_registry_api::{
     PendingServerPlayerMoves, ServerPlayerMovementSet, ServerPlayerRegistryApi,
 };
@@ -17,12 +19,20 @@ const MAX_PLAYER_MOVE_DELTA: f32 = 2.0;
 pub struct ServerPlayerMovementCollisionVanillaMod<B>(PhantomData<B>);
 
 impl<B: BlockManagerApi> ServerPlayerMovementCollisionVanillaMod<B> {
-    pub fn init<W: ServerChunkWorldApi, P: ServerPlayerRegistryApi, S: ServerPlayerSpeedApi>(
+    pub fn init<
+        W: ServerChunkWorldApi,
+        P: ServerPlayerRegistryApi,
+        S: ServerPlayerSpeedApi,
+        F: ServerPlayerFlightApi,
+        FS: ServerPlayerFlightSpeedApi,
+    >(
         bevy: &mut BevyMod,
         _blocks: &mut B,
         _world_api: &mut W,
         _players: &mut P,
         _speed: &mut S,
+        _flight: &mut F,
+        _flight_speed: &mut FS,
     ) -> Self {
         bevy.app.add_systems(
             Update,
@@ -39,16 +49,22 @@ impl<B: BlockManagerApi> ServerPlayerMovementCollisionVanillaMod<B> {
 fn validate_player_movement_collision<B: BlockManagerApi>(
     world: Res<ServerChunkWorld>,
     speeds: Res<ServerPlayerSpeeds>,
+    flight_capabilities: Res<ServerPlayerFlightCapabilities>,
+    flight_speeds: Res<ServerPlayerFlightSpeeds>,
     mut moves: ResMut<PendingServerPlayerMoves>,
 ) {
     for movement in &mut moves.moves {
         if movement.rejected {
             continue;
         }
+        let mut allowed_speed = speeds.multiplier(movement.player_id);
+        if flight_capabilities.enabled(movement.player_id) {
+            allowed_speed = allowed_speed.max(flight_speeds.multiplier(movement.player_id));
+        }
         let requested = clamp_requested_movement(
             movement.current_position,
             movement.accepted_position,
-            speeds.multiplier(movement.player_id),
+            allowed_speed,
         );
         let delta = requested - movement.current_position;
         movement.accepted_position = resolve_player_collision(

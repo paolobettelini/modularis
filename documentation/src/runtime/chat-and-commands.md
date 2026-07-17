@@ -12,9 +12,9 @@ server network receive
       │ ServerChatInputReceived
       ▼
 normal-chat policy OR command router
-      │                     │
+      │                                  │
 PublishServerChatMessage    ServerCommandRequested
-      │                     │
+      │                                  │
 audience resolver           Brigadier dispatcher -> gameplay events
       │                     │
       └────────── publish/sync ──────────┘
@@ -35,6 +35,10 @@ party, moderated, or no chat while keeping the same client UI and packets.
 - `CommandSuggestionsRequest { request_id, input, cursor }`;
 - `CommandSuggestionsResponse { request_id, suggestions }`.
 
+The optional clear-chat packet family separately contributes the client-bound
+unit packet `ClearChat`. Keeping it in its own contributor lets another
+composition omit this capability without changing normal chat packets.
+
 `chat-network-messages-mod` contributes those four types to network codegen.
 They are not listed in a central protocol Cargo table. Removing the contributor
 from a composition removes its generated packet variants.
@@ -54,12 +58,25 @@ settings editor can change it without special chat-menu code.
 `client-chat-toggle-input-mod` only opens the chat overlay while the in-game
 overlay is `Playing`. Chat is a distinct `InGameOverlayState`, so movement and
 other gameplay input can remain disabled while typing. Escape closes it, Enter
-submits non-empty text, Backspace edits, and Tab accepts the first completion.
+submits non-empty text, Backspace edits, and Tab accepts the selected completion
+or the first one when no row is selected.
+
+Input history and completion navigation are optional vanilla policy in
+`client-chat-navigation-vanilla-mod`, not hardcoded into the composer or UI.
+When no suggestions are visible, Up and Down browse submitted inputs and place
+the selected entry back into the text box. Moving past the newest entry restores
+the draft that was present before history browsing. When suggestions are
+visible, the same keys cycle through them and copy the selected full command
+into the text box. Once history traversal has started, it keeps priority over
+suggestions until the draft is restored; this is important for old slash
+commands whose autocomplete response may arrive while browsing. The history is
+bounded and consecutive duplicate entries are stored only once.
 
 `client-chat-ui-bevy-mod` is presentation policy. It uses the shared UI font,
 renders a bounded history at the bottom left, and renders the composer only
-while chat is open. Replacing it with another renderer does not require changes
-to chat state or networking.
+while chat is open. Suggestions are drawn in one opaque panel so command rows do
+not mix visually with chat history. Replacing this UI or the navigation policy
+does not require changes to chat state, command parsing, or networking.
 
 The client sends intentions only. It never adds its submitted message directly
 to the authoritative log; the message appears when the server sends a
@@ -146,16 +163,22 @@ the generic dispatcher.
 ## Vanilla command feature pack
 
 `server-commands-vanilla.toml` is an optional policy pack. It currently selects
-four independent command mods:
+eight independent command mods:
 
 | Mod | Syntax | Domain intention |
 | --- | --- | --- |
+| `server-command-clear-vanilla-mod` | `/clear` | requests clearing the caller's client chat log |
 | `server-command-flight-vanilla-mod` | `/flight [player]` | changes flight capability |
+| `server-command-flight-speed-vanilla-mod` | `/flightspeed <amount>`, `/flightspeed <player> <amount>` | changes the separate authoritative flight-speed multiplier |
+| `server-command-kick-vanilla-mod` | `/kick <player> [reason]` | emits a generic server kick request |
 | `server-command-teleport-vanilla-mod` | `/teleport <x> <y> <z>`, `/teleport <destination>`, `/teleport <subject> <x> <y> <z>`, `/teleport <subject> <destination>` | requests a dimension-aware reposition |
 | `server-command-speed-vanilla-mod` | `/speed <amount>`, `/speed <player> <amount>` | changes the authoritative movement multiplier |
 | `server-command-gravity-vanilla-mod` | `/setgravity <g>`, `/setgravity <x> <y> <z>`, and both forms prefixed by a player | changes that player's gravity vector |
+| `server-command-tps-vanilla-mod` | `/tps` | reports measured and target server tick rate to the caller |
 
-Speed `1` is the normal base speed. A scalar gravity `g` means `(0, -g, 0)`;
+Speed `1` is the normal base speed. Flight speed is an independent multiplier
+and defaults to `2`, so changing normal movement speed does not silently change
+the configured flight multiplier. A scalar gravity `g` means `(0, -g, 0)`;
 three values set an arbitrary vector.
 
 Player arguments use the online-player snapshot and are matched
@@ -163,9 +186,15 @@ case-insensitively. The longest matching name prefix wins, so names containing
 spaces can be used in forms such as `/teleport Player1 Player 2`.
 
 Each command queues a narrow ECS intention. Flight emits the existing
-capability change, speed and gravity emit their per-player state changes, and
-teleport emits `RequestPlayerDimensionChange`. None of these command mods sends
-its domain packet directly.
+capability change, ground and flight speed use different per-player state
+contracts, gravity emits its per-player state change, teleport emits
+`RequestPlayerDimensionChange`, and kick emits `ServerKickRequested`. The TPS
+command only reads neutral tick metrics and publishes personal feedback. None
+of these command mods sends its domain packet directly.
+
+`/clear` emits `ClearServerPlayerChatRequested`. The dedicated server network
+bridge sends `ClearChat` only to that player; the client receiver emits
+`ClientChatCleared`, and the neutral client state owns the actual log mutation.
 
 Teleport-to-player reads the destination player's dimension as well as their
 position. Teleport-to-coordinates keeps the subject in their current dimension.
@@ -179,8 +208,9 @@ replace any command while keeping the underlying gameplay APIs.
 
 Player names used by commands are unique because admission happens before
 session creation. `server-player-name-unique-vanilla-mod` is one policy rule,
-not part of the player registry. It rejects case-insensitive duplicates and
-the client displays the server-provided reason.
+not part of the player registry. It rejects case-insensitive duplicates by
+emitting the same generic kick request used by `/kick`; the client displays the
+server-provided reason.
 
 The random `Player0` through `Player100` client default reduces accidental
 collisions during local testing, but it is not a security or uniqueness
@@ -205,10 +235,9 @@ the appropriate registry snapshots.
 
 - there is no permission or authentication model;
 - chat text is plain text with no structured style spans;
-- there is no history navigation, selection, or cursor movement in the client
-  composer;
-- suggestions are full replacement strings and the UI displays only the first
-  few;
+- suggestions are full replacement strings rather than editable completion
+  ranges, and the UI displays only a small moving window;
+- the text composer has no free cursor movement or selection;
 - normal chat has no rate limiting or moderation;
 - the selected global policy ignores dimension and distance;
 - command registration happens at startup, matching compile-time composition.

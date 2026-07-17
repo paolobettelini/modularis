@@ -10,7 +10,12 @@ as families.
 | --- | --- |
 | `bevy-mod` | Owns the initially empty `App` |
 | `client-bevy-default-plugins-mod` | Window, renderer, logging, nearest textures |
-| `server-bevy-runner-mod` | Headless minimal plugin set and fixed update loop |
+| `client-player-physics-tick-api` | Replaceable client physics frequency contract |
+| `client-player-physics-tick-20hz-vanilla-mod` | Vanilla 20 Hz client physics provider |
+| `server-tick-api` | Server target tick rate and measured TPS resources |
+| `server-tick-rate-20hz-default-impl` | Default 20 TPS server provider |
+| `server-tick-metrics-mod` | Measures observed server TPS |
+| `server-bevy-runner-mod` | Headless minimal plugin set driven by `ServerTickApi` |
 | `client-game-bootstrap-mod` | Owns/runs final client app |
 | `server-game-bootstrap-mod` | Owns/runs final server app |
 
@@ -47,24 +52,31 @@ Generated manager:
 Current block contributors:
 
 - `block-air`;
+- `block-basalt`;
 - `block-bedrock`;
+- `block-birch-leaves` and `block-birch-log`;
+- `block-blackstone`;
+- `block-cactus` and `block-calcite`;
 - `block-crafting-table`;
+- `block-crimson-nylium` and `block-warped-nylium`;
 - `block-diamond-block`;
 - `block-diamond-ore`;
 - `block-dirt`;
 - `block-end-stone`;
-- `block-cactus`;
 - `block-gravel`;
 - `block-glowstone`;
 - `block-grass`;
+- `block-moss`;
 - `block-netherrack`;
 - `block-oak-leaves`;
 - `block-oak-log`;
 - `block-obsidian`;
 - `block-packed-ice`;
-- `block-sand`;
+- `block-red-sand` and `block-sand`;
 - `block-snow`;
-- `block-stone`.
+- `block-soul-sand` and `block-soul-soil`;
+- `block-stone`;
+- `block-terracotta`.
 
 Block edit networking:
 
@@ -91,15 +103,11 @@ Metadata:
 - `item-favicon-meta`;
 - `item-portal-igniter-meta`.
 
-Block item contributors:
-
-- dirt, grass, stone, bedrock;
-- crafting table;
-- diamond block and ore;
-- end stone;
-- glowstone;
-- netherrack;
-- obsidian.
+Block item contributors follow the `item-<block>-block` naming family. The
+current composition contains one for every non-air block contributor listed
+above: 30 placeable block items. This one-to-one relation is a selected demo
+policy, not a registry requirement; a custom composition may expose blocks
+without inventory items or multiple items for one block.
 
 Tool item:
 
@@ -243,21 +251,23 @@ Routing/session:
 - `server-player-visibility-world-instance-mod`.
 - `server-player-name-unique-vanilla-mod`;
 - `server-audience-basic-impl`.
+- `server-kick-api`, `server-kick-events-mod`, and `server-player-kick-mod`.
 
 Message type/contributor families:
 
 - session;
 - player;
 - gravity/jump;
-- flight;
-- player speed;
+- flight capability and flight speed;
+- player movement speed;
+- generic kick;
 - chunks;
 - block edits;
 - inventory/hotbar;
 - cell menus;
 - dimension;
 - sky/sun;
-- portal.
+- portal;
 - chat and command completion.
 
 ## Chat and commands
@@ -271,7 +281,10 @@ Contracts and state:
 Network and presentation:
 
 - `chat-network-message-types` and `chat-network-messages-mod`;
+- clear-chat message type/contributor plus dedicated client receive and server
+  sync bridges;
 - client chat send/receive, toggle-input, and Bevy UI mods;
+- optional client chat history/completion navigation mod;
 - server chat receive/sync mods;
 - `client-setting-chat-key`.
 
@@ -280,7 +293,8 @@ Policies and implementations:
 - `server-chat-global-vanilla-mod`;
 - `server-chat-command-router-mod`;
 - `server-command-brigadier-mod`;
-- flight, teleport, speed, and gravity vanilla command mods.
+- clear-chat, flight, flight-speed, kick, teleport, speed, gravity, and TPS
+  vanilla command mods.
 
 ## Player movement
 
@@ -296,7 +310,9 @@ Contracts:
 - `player-speed-api`;
 - `player-jump-api`;
 - `player-flight-api`;
+- `player-flight-speed-api`;
 - `server-player-flight-api`;
+- `server-player-flight-speed-api`;
 - `server-player-gravity-api`;
 - `server-player-speed-api`.
 
@@ -312,7 +328,9 @@ Implementations/features:
 - local and server player speed state/sync mods;
 - client/server jump vanilla mods;
 - client sprint vanilla mod;
+- client inertial acceleration/drag and sprint-jump vanilla mods;
 - flight state, capability, sync, controls, and grant policy mods;
+- separate client/server flight-speed state and sync mods;
 - `server-player-movement-collision-vanilla-mod`;
 - `client-player-network-sync-mod`.
 

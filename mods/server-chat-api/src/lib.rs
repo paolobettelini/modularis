@@ -26,6 +26,11 @@ pub struct PublishServerChatMessage {
     pub text: String,
 }
 
+#[derive(Message, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ClearServerPlayerChatRequested {
+    pub player_id: PlayerId,
+}
+
 #[derive(Message, Debug, Clone, PartialEq, Eq)]
 pub struct ServerCommandRequested {
     pub player_id: PlayerId,

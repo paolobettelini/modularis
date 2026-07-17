@@ -34,7 +34,7 @@ impl ClientPlayerSprintVanillaMod {
         _codegen: &mut SettingsRegistryCodegenMod,
     ) -> Self {
         bevy.app.init_resource::<SprintConfig>().add_systems(
-            Update,
+            FixedUpdate,
             apply_sprint_modifier
                 .in_set(PlayerControllerSet::MovementModifiers)
                 .run_if(in_state(InGameOverlayState::Playing)),

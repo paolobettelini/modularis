@@ -28,14 +28,20 @@ Feature families own their packets:
 - sessions;
 - players;
 - gravity and jump;
-- flight;
+- flight capability and separate flight speed;
+- generic kick/disconnect reasons;
 - chunks;
 - block edits;
 - inventory and hotbar;
 - cell menus;
 - dimensions;
 - sky and sun;
-- portals.
+- portals;
+- chat and command completion.
+
+`Kick { reason }` is intentionally not session-admission-specific. The server
+can address it to a socket before a `PlayerId` exists or to an admitted player,
+and the same client receiver returns to the main menu and displays the reason.
 
 For example:
 

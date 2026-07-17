@@ -14,7 +14,6 @@ ownership = []
 [package.metadata.network.messages]
 clientbound = [
     "session_network_message_types::JoinAccepted",
-    "session_network_message_types::JoinRejected",
 ]
 serverbound = [
     "session_network_message_types::JoinRequest",

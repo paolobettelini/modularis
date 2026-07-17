@@ -2,7 +2,9 @@ use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use client_camera_api::CameraApi;
 use client_game_state_api::{GameState, GameStateApi};
-use client_player_controller_api::{Grounded, Player, PlayerControllerApi, PlayerVelocity};
+use client_player_controller_api::{
+    Grounded, Player, PlayerControllerApi, PlayerVelocity, PreviousPlayerPosition,
+};
 use tokio::task::JoinHandle;
 
 pub struct PlayerSpawnMod;
@@ -32,6 +34,7 @@ fn spawn_player(mut commands: Commands, players: Query<(), With<Player>>) {
         Player,
         PlayerVelocity::default(),
         Grounded::default(),
+        PreviousPlayerPosition(Vec3::new(0.0, 2.0, 0.0)),
         Transform::from_xyz(0.0, 2.0, 0.0),
         DespawnOnExit(GameState::InGame),
     ));

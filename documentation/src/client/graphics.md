@@ -168,7 +168,9 @@ The pipeline is:
 Collect -> Apply -> Draw
 ```
 
-The Bevy provider uses a dedicated Gizmo group with line width and depth bias.
+The Bevy provider creates only twelve thin, unlit edge meshes around the block.
+It does not create a screen-space cursor; the crosshair remains owned entirely
+by `client-crosshair-bevy-mod`.
 
 The looked-block vanilla mod performs a reach-limited voxel raycast and owns the
 key `vanilla:looked-block`.

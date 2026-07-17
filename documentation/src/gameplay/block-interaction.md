@@ -201,7 +201,7 @@ than relying on system order to overwrite a boolean.
 Outlines are an independent client feature family:
 
 - API defines owner-keyed outline commands;
-- Bevy/Gizmos provider draws them;
+- Bevy provider renders only twelve thin edge meshes around each selected block;
 - looked-block vanilla policy performs its own raycast.
 
 An owner key lets several mods maintain independent outlines.
@@ -211,4 +211,4 @@ looked-block policy in `client-vanilla.toml`. Omitting the policy leaves the
 generic outline provider available for other features; omitting the provider
 leaves outline commands without a renderer.
 
-Crosshair and outline do not own or reposition each other.
+Crosshair and outline do not own, spawn, or reposition each other.

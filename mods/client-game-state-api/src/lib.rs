@@ -5,6 +5,7 @@ pub enum GameState {
     #[default]
     MainMenu,
     SettingsMenu,
+    Disconnected,
     InGame,
 }
 
@@ -22,6 +23,7 @@ pub enum InGameOverlayState {
 #[derive(Message, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GameStateCommand {
     BackToMainMenu,
+    ShowDisconnect,
     OpenSettings,
     StartGame,
 }
@@ -30,6 +32,7 @@ impl GameStateCommand {
     pub const fn target(self) -> GameState {
         match self {
             Self::BackToMainMenu => GameState::MainMenu,
+            Self::ShowDisconnect => GameState::Disconnected,
             Self::OpenSettings => GameState::SettingsMenu,
             Self::StartGame => GameState::InGame,
         }

@@ -60,7 +60,7 @@ The top-level client selects neutral state and concrete presentation:
 - pause and inventory input;
 - configurable chat-key input;
 - client gravity prediction;
-- jump, sprint, and flight controls;
+- fixed-rate movement, inertia, jump, sprint-jump, sprint, and flight controls;
 - held-item fallback;
 - crafting-table interaction;
 - layered chunk priority.
@@ -81,7 +81,7 @@ changing controls or graphics.
 `server-base.toml` contains infrastructure:
 
 - server configuration;
-- headless Bevy runner;
+- replaceable server tick provider, metrics, and headless Bevy runner;
 - TCP transport;
 - server packet events and routing;
 - lifecycle messages;
@@ -90,6 +90,7 @@ changing controls or graphics.
 - block edit network bridges;
 - sessions and timeout;
 - player admission contracts;
+- generic kick contracts and authoritative cleanup;
 - chat ECS contracts, network bridges, and the Brigadier command provider;
 - flight capability state and synchronization;
 - sun state and synchronization;
@@ -103,7 +104,8 @@ changing controls or graphics.
   Overworld, Nether, and Aether packs contain definitions and phased features;
 - the biome runtime registry, vanilla selector, and shared biome sampler;
 - global-chat audience policy and case-insensitive unique player names;
-- chat command routing and optional flight, teleport, speed, and gravity commands;
+- chat command routing and optional clear-chat, flight, flight-speed, kick,
+  teleport, speed, gravity, and TPS commands;
 - player-interest chunk residency;
 - world-scope player visibility;
 - default dimension lifecycle;
@@ -112,7 +114,7 @@ changing controls or graphics.
 - Nether and Aether portal rules;
 - portal ignition and travel;
 - movement collision and jump validation;
-- per-player gravity and speed state/synchronization;
+- per-player gravity, movement-speed, and flight-speed state/synchronization;
 - default inventory layout and loadout;
 - quantity stacking and consumption;
 - reach validation;

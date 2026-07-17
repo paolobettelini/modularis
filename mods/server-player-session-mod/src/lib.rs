@@ -6,6 +6,7 @@ use generated_network_messages::{
 };
 use network_protocol_mod::NetworkProtocolMod;
 use player_network_message_types::{PlayerJoined, PlayerLeft, PlayerMoved, PlayerRotationChanged};
+use server_kick_api::{ServerKickApi, ServerKickRequested, ServerKickSet, ServerKickTarget};
 use server_network_api::{ServerNetworkApi, ServerNetworkSender};
 use server_network_events_api::{ServerAudience, ServerNetworkEventsApi, ServerPacketOut};
 use server_player_admission_api::{ServerJoinCandidate, ServerPlayerAdmissionRules};
@@ -16,7 +17,7 @@ use server_player_registry_api::{
     ServerPlayerRegistry, ServerPlayerRegistryApi,
 };
 use server_player_visibility_api::{ServerPlayerVisibility, ServerPlayerVisibilityApi};
-use session_network_message_types::{JoinAccepted, JoinRejected};
+use session_network_message_types::JoinAccepted;
 use tokio::task::JoinHandle;
 
 const LOCAL_PLAYER_CORRECTION_THRESHOLD: f32 = 0.15;
@@ -24,13 +25,19 @@ const LOCAL_PLAYER_CORRECTION_THRESHOLD: f32 = 0.15;
 pub struct ServerPlayerSessionMod;
 
 impl ServerPlayerSessionMod {
-    pub fn init<N: ServerNetworkApi, E: ServerNetworkEventsApi, V: ServerPlayerVisibilityApi>(
+    pub fn init<
+        N: ServerNetworkApi,
+        E: ServerNetworkEventsApi,
+        V: ServerPlayerVisibilityApi,
+        K: ServerKickApi,
+    >(
         bevy: &mut BevyMod,
         _network: &mut N,
         _network_events: &mut E,
         _protocol: &mut NetworkProtocolMod,
         _lifecycle: &mut ServerPlayerLifecycleEventsMod,
         _visibility: &mut V,
+        _kick: &mut K,
     ) -> Self {
         bevy.app
             .init_resource::<ServerPlayerRegistry>()
@@ -48,7 +55,12 @@ impl ServerPlayerSessionMod {
             )
             .add_systems(
                 Update,
-                (handle_join, handle_leave).after(NetworkMessageSet::DispatchPackets),
+                (
+                    handle_join
+                        .after(NetworkMessageSet::DispatchPackets)
+                        .before(ServerKickSet::Apply),
+                    handle_leave.after(NetworkMessageSet::DispatchPackets),
+                ),
             )
             .add_systems(
                 Update,
@@ -79,6 +91,7 @@ fn handle_join(
     mut packets: MessageWriter<ServerPacketOut>,
     visibility: Res<ServerPlayerVisibility>,
     admission: Res<ServerPlayerAdmissionRules>,
+    mut kicks: MessageWriter<ServerKickRequested>,
 ) {
     for join in joins.read() {
         let name = {
@@ -96,9 +109,9 @@ fn handle_join(
                 name: name.clone(),
             };
             if let Err(reason) = admission.validate(&candidate, &registry.players()) {
-                packets.write(ServerPacketOut {
-                    audience: ServerAudience::Address(join.source),
-                    message: ClientBoundMessage::JoinRejected(JoinRejected { reason }),
+                kicks.write(ServerKickRequested {
+                    target: ServerKickTarget::Address(join.source),
+                    reason,
                 });
                 continue;
             }

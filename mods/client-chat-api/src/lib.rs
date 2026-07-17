@@ -19,12 +19,17 @@ impl ClientChatLog {
     pub fn entries(&self) -> impl DoubleEndedIterator<Item = &str> {
         self.entries.iter().map(String::as_str)
     }
+
+    pub fn clear(&mut self) {
+        self.entries.clear();
+    }
 }
 
 #[derive(Resource, Debug, Default)]
 pub struct ClientChatComposer {
     pub input: String,
     pub suggestions: Vec<String>,
+    pub selected_suggestion: Option<usize>,
     pub latest_request_id: u64,
 }
 
@@ -40,6 +45,9 @@ pub struct ClientChatSuggestionsRequested {
 
 #[derive(Message, Debug, Clone, PartialEq, Eq)]
 pub struct ClientChatMessageReceived(pub String);
+
+#[derive(Message, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ClientChatCleared;
 
 #[derive(Message, Debug, Clone, PartialEq, Eq)]
 pub struct ClientChatSuggestionsReceived {

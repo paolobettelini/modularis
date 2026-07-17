@@ -49,18 +49,19 @@ Design direction:
 
 Current limits:
 
-- global gravity resource;
-- server validates displacement/collision but does not simulate full velocity;
+- local prediction exposes one controlled-player gravity resource, while server
+  authority is per player;
+- server validates displacement, collision, speed, and flight limits but does
+  not simulate full velocity;
 - sprint state is not explicitly validated server-side;
-- flight movement capability is not yet part of movement validation;
+- acceleration and drag are not reconstructed server-side;
 - correction protocol has no sequence number.
 
 Design direction:
 
-- per-player/per-world force state;
+- optional per-world defaults layered under existing per-player force state;
 - input sequence/timestamp;
 - authoritative velocity and acceleration validation;
-- capability-aware movement policy;
 - reconciliation based on acknowledged input.
 
 ## Networking

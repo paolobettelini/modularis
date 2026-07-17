@@ -1,0 +1,17 @@
+[package]
+name = "client-player-physics-tick-20hz-vanilla-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientPlayerPhysicsTick20HzVanillaMod"
+provides = "client-player-physics-tick-api"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[dependencies]
+client-player-physics-tick-api = { path = "../client-player-physics-tick-api" }
+tokio = { version = "1.48.0", features = ["full"] }

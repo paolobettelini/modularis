@@ -40,7 +40,7 @@ Examples of optional vanilla behavior:
 - jump acceptance;
 - sprint multiplier;
 - grant-all flight;
-- global chat and the `/flight` command;
+- global chat and each individual vanilla command;
 - block reach;
 - block placement from item metadata;
 - quantity stacking and consumption;

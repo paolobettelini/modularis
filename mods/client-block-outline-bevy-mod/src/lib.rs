@@ -1,4 +1,7 @@
-use bevy::{gizmos::config::GizmoConfigStore, prelude::*};
+use bevy::{
+    light::{NotShadowCaster, NotShadowReceiver},
+    prelude::*,
+};
 use bevy_mod::BevyMod;
 use client_bevy_default_plugins_mod::ClientBevyDefaultPluginsMod;
 use client_block_outline_api::{
@@ -9,13 +12,24 @@ use std::collections::HashMap;
 use tokio::task::JoinHandle;
 use voxel_math_api::BlockPos;
 
-#[derive(Default, Reflect, GizmoConfigGroup)]
-struct ClientBlockOutlineGizmos;
+const OUTLINE_EDGE_THICKNESS: f32 = 0.002;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Resource)]
+struct BlockOutlineMesh(Handle<Mesh>);
+
+impl FromWorld for BlockOutlineMesh {
+    fn from_world(world: &mut World) -> Self {
+        let mesh = world
+            .resource_mut::<Assets<Mesh>>()
+            .add(Cuboid::new(1.0, 1.0, 1.0));
+        Self(mesh)
+    }
+}
+
+#[derive(Debug, Clone)]
 struct ActiveBlockOutline {
-    block: BlockPos,
-    style: BlockOutlineStyle,
+    entity: Entity,
+    material: Handle<StandardMaterial>,
 }
 
 #[derive(Resource, Default)]
@@ -30,7 +44,7 @@ impl ClientBlockOutlineBevyMod {
         _game_state: &mut G,
     ) -> Self {
         bevy.app
-            .init_gizmo_group::<ClientBlockOutlineGizmos>()
+            .init_resource::<BlockOutlineMesh>()
             .init_resource::<ActiveBlockOutlines>()
             .add_message::<SetClientBlockOutline>()
             .configure_sets(
@@ -42,17 +56,11 @@ impl ClientBlockOutlineBevyMod {
                 )
                     .chain(),
             )
-            .add_systems(Startup, configure_block_outline_gizmos)
             .add_systems(
                 Update,
                 apply_block_outline_commands.in_set(ClientBlockOutlineSet::Apply),
             )
-            .add_systems(
-                Update,
-                draw_block_outlines
-                    .in_set(ClientBlockOutlineSet::Draw)
-                    .run_if(in_state(GameState::InGame)),
-            );
+            .add_systems(OnExit(GameState::InGame), clear_block_outlines);
         Self
     }
 
@@ -63,50 +71,128 @@ impl ClientBlockOutlineBevyMod {
 
 impl ClientBlockOutlineApi for ClientBlockOutlineBevyMod {}
 
-fn configure_block_outline_gizmos(mut configs: ResMut<GizmoConfigStore>) {
-    let (config, _) = configs.config_mut::<ClientBlockOutlineGizmos>();
-    config.line.width = 2.5;
-    config.depth_bias = -0.001;
-}
-
 fn apply_block_outline_commands(
+    mut entity_commands: Commands,
     mut commands: MessageReader<SetClientBlockOutline>,
+    mesh: Res<BlockOutlineMesh>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
     mut active: ResMut<ActiveBlockOutlines>,
 ) {
     for command in commands.read() {
-        if let Some(block) = command.block {
-            active.0.insert(
-                command.owner.clone(),
-                ActiveBlockOutline {
-                    block,
-                    style: command.style,
-                },
-            );
-        } else {
-            active.0.remove(&command.owner);
-        }
+        remove_outline(
+            &command.owner,
+            &mut entity_commands,
+            &mut materials,
+            &mut active,
+        );
+        let Some(block) = command.block else {
+            continue;
+        };
+        let outline = spawn_outline(
+            &mut entity_commands,
+            &mesh.0,
+            &mut materials,
+            block,
+            command.style,
+        );
+        active.0.insert(command.owner.clone(), outline);
     }
 }
 
-fn draw_block_outlines(
-    active: Res<ActiveBlockOutlines>,
-    mut gizmos: Gizmos<ClientBlockOutlineGizmos>,
+fn spawn_outline(
+    commands: &mut Commands,
+    mesh: &Handle<Mesh>,
+    materials: &mut Assets<StandardMaterial>,
+    block: BlockPos,
+    style: BlockOutlineStyle,
+) -> ActiveBlockOutline {
+    let color = Color::srgba(
+        style.color[0],
+        style.color[1],
+        style.color[2],
+        style.color[3],
+    );
+    let material = materials.add(StandardMaterial {
+        base_color: color,
+        alpha_mode: if style.color[3] < 1.0 {
+            AlphaMode::Blend
+        } else {
+            AlphaMode::Opaque
+        },
+        unlit: true,
+        ..default()
+    });
+    let size = 1.0 + style.expansion.max(0.0) * 2.0;
+    let half = size * 0.5;
+    let thickness = OUTLINE_EDGE_THICKNESS;
+    let length = size + thickness;
+    let mut edges = Vec::with_capacity(12);
+    for y in [-half, half] {
+        for z in [-half, half] {
+            edges.push((
+                Vec3::new(0.0, y, z),
+                Vec3::new(length, thickness, thickness),
+            ));
+        }
+    }
+    for x in [-half, half] {
+        for z in [-half, half] {
+            edges.push((
+                Vec3::new(x, 0.0, z),
+                Vec3::new(thickness, length, thickness),
+            ));
+        }
+    }
+    for x in [-half, half] {
+        for y in [-half, half] {
+            edges.push((
+                Vec3::new(x, y, 0.0),
+                Vec3::new(thickness, thickness, length),
+            ));
+        }
+    }
+    let center = Vec3::new(
+        block.x as f32 + 0.5,
+        block.y as f32 + 0.5,
+        block.z as f32 + 0.5,
+    );
+    let entity = commands
+        .spawn((Transform::from_translation(center), Visibility::default()))
+        .with_children(|parent| {
+            for (translation, scale) in edges {
+                parent.spawn((
+                    Mesh3d(mesh.clone()),
+                    MeshMaterial3d(material.clone()),
+                    Transform::from_translation(translation).with_scale(scale),
+                    NotShadowCaster,
+                    NotShadowReceiver,
+                    Pickable::IGNORE,
+                ));
+            }
+        })
+        .id();
+    ActiveBlockOutline { entity, material }
+}
+
+fn remove_outline(
+    owner: &str,
+    commands: &mut Commands,
+    materials: &mut Assets<StandardMaterial>,
+    active: &mut ActiveBlockOutlines,
 ) {
-    for outline in active.0.values() {
-        let center = Vec3::new(
-            outline.block.x as f32 + 0.5,
-            outline.block.y as f32 + 0.5,
-            outline.block.z as f32 + 0.5,
-        );
-        let size = 1.0 + outline.style.expansion.max(0.0) * 2.0;
-        gizmos.cuboid(
-            Transform::from_translation(center).with_scale(Vec3::splat(size)),
-            Color::srgba(
-                outline.style.color[0],
-                outline.style.color[1],
-                outline.style.color[2],
-                outline.style.color[3],
-            ),
-        );
+    if let Some(outline) = active.0.remove(owner) {
+        commands.entity(outline.entity).despawn();
+        materials.remove(outline.material.id());
+    }
+}
+
+fn clear_block_outlines(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut active: ResMut<ActiveBlockOutlines>,
+) {
+    for (_, outline) in active.0.drain() {
+        commands.entity(outline.entity).despawn();
+        materials.remove(outline.material.id());
     }
 }

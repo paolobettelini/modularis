@@ -9,8 +9,10 @@ mods = [
     "hotbar-network-messages-mod",
     "block-edit-events-mod",
     "session-network-messages-mod",
+    "kick-network-messages-mod",
     "player-network-messages-mod",
     "player-flight-network-messages-mod",
+    "player-flight-speed-network-messages-mod",
     "player-speed-network-messages-mod",
     "chunk-network-messages-mod",
     "dimension-network-messages-mod",
@@ -19,5 +21,6 @@ mods = [
     "portal-network-messages-mod",
     "cell-menu-network-messages-mod",
     "chat-network-messages-mod",
+    "chat-clear-network-messages-mod",
     "network-protocol-mod",
 ]

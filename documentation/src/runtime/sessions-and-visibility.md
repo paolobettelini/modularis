@@ -33,9 +33,13 @@ rules in `ServerPlayerAdmissionRules` to validate it. A rule can reject a join
 without modifying the session implementation.
 
 The selected `server-player-name-unique-vanilla-mod` rejects duplicate names
-case-insensitively. The server sends `JoinRejected { reason }`; the client
-returns to the main menu, displays the reason, and drops its TCP connection as
-it exits the in-game state.
+case-insensitively. A rejected admission emits
+`ServerKickRequested::Address` because no `PlayerId` exists yet. The generic
+kick pipeline sends `Kick { reason }`; the client enters a dedicated
+disconnected screen, displays the reason in the center, and
+drops its TCP connection as it exits the in-game state. The user explicitly
+returns home with the `Back to home` button. The same packet and client behavior
+are used for an admitted player kicked later by another server rule.
 
 The client setting still owns the chosen name. The optional
 `client-player-name-random-default-mod` changes only the untouched default
@@ -65,7 +69,7 @@ Session code should not call all these features directly.
 JoinRequestReceived
   -> sanitize candidate
   -> composable admission rules
-  -> reject with reason, or register address/player
+  -> reject through generic kick, or register address/player
   -> player created or reused
   -> visible player snapshot selected
   -> JoinAccepted sent to source address
@@ -80,6 +84,14 @@ identifies the local `player_id`.
 
 Explicit leave removes the registry entry, network client, and emits
 `ServerPlayerLeft`.
+
+`server-player-kick-mod` performs the same authoritative cleanup for a kick. It
+accepts either a pre-admission socket address or an admitted `PlayerId`, sends a
+bounded reason, removes session/network membership when present, emits the
+lifecycle event, and sends `PlayerLeft` only to viewers that could see the
+player. Policies such as moderation, duplicate-name admission, bans, timeouts,
+or commands should emit `ServerKickRequested` instead of duplicating this
+sequence.
 
 `server-player-timeout-mod` expires inactive registry entries. Cleanup features
 must listen to the lifecycle event rather than relying only on a leave packet,

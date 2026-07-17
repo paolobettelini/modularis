@@ -17,9 +17,9 @@ impl ClientPlayerGravityVanillaMod {
         _game_state: &mut S,
     ) -> Self {
         bevy.app.add_systems(
-            Update,
+            FixedUpdate,
             apply_gravity
-                .in_set(PlayerControllerSet::Forces)
+                .in_set(PlayerControllerSet::GravityForces)
                 .run_if(in_state(InGameOverlayState::Playing)),
         );
         Self
@@ -31,7 +31,7 @@ impl ClientPlayerGravityVanillaMod {
 }
 
 fn apply_gravity(
-    time: Res<Time>,
+    time: Res<Time<Fixed>>,
     gravity: Res<Gravity>,
     mut players: Query<&mut PlayerVelocity, With<Player>>,
 ) {

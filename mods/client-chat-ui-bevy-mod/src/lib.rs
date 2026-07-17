@@ -103,9 +103,13 @@ fn spawn_chat_input(mut commands: Commands, font: Res<ClientUiFont>) {
                 },
                 TextColor(Color::srgb(0.72, 0.84, 1.0)),
                 Node {
-                    padding: UiRect::horizontal(px(8)),
+                    display: Display::None,
+                    width: percent(100),
+                    padding: UiRect::axes(px(10), px(7)),
                     ..default()
                 },
+                BackgroundColor(Color::srgba(0.015, 0.02, 0.03, 0.96)),
+                BorderRadius::all(px(4)),
             ));
             root.spawn((
                 Node {
@@ -155,18 +159,21 @@ fn handle_chat_keyboard(
                 }
                 composer.input.clear();
                 composer.suggestions.clear();
+                composer.selected_suggestion = None;
                 overlay_commands.write(InGameOverlayCommand::Resume);
             }
             (Key::Escape, _) => {
                 composer.input.clear();
                 composer.suggestions.clear();
+                composer.selected_suggestion = None;
                 overlay_commands.write(InGameOverlayCommand::Resume);
             }
             (Key::Backspace, _) => {
                 changed = composer.input.pop().is_some();
             }
             (Key::Tab, _) => {
-                if let Some(suggestion) = composer.suggestions.first().cloned() {
+                let selected = composer.selected_suggestion.unwrap_or(0);
+                if let Some(suggestion) = composer.suggestions.get(selected).cloned() {
                     composer.input = suggestion;
                     changed = true;
                 }
@@ -192,6 +199,7 @@ fn request_suggestions(
 ) {
     composer.latest_request_id = composer.latest_request_id.wrapping_add(1);
     composer.suggestions.clear();
+    composer.selected_suggestion = None;
     if !composer.input.starts_with('/') {
         return;
     }
@@ -221,7 +229,10 @@ fn render_chat_log(log: Res<ClientChatLog>, mut text: Query<&mut Text, With<Chat
 fn render_chat_composer(
     composer: Res<ClientChatComposer>,
     mut input: Query<&mut Text, (With<ChatInputText>, Without<ChatSuggestionsText>)>,
-    mut suggestions: Query<&mut Text, (With<ChatSuggestionsText>, Without<ChatInputText>)>,
+    mut suggestions: Query<
+        (&mut Text, &mut Node),
+        (With<ChatSuggestionsText>, Without<ChatInputText>),
+    >,
 ) {
     if !composer.is_changed() {
         return;
@@ -229,15 +240,38 @@ fn render_chat_composer(
     for mut text in &mut input {
         **text = format!("> {}_", composer.input);
     }
+    const MAX_VISIBLE_SUGGESTIONS: usize = 5;
+    let first_visible = composer
+        .selected_suggestion
+        .map(|selected| {
+            selected
+                .saturating_add(1)
+                .saturating_sub(MAX_VISIBLE_SUGGESTIONS)
+        })
+        .unwrap_or(0);
     let rendered = composer
         .suggestions
         .iter()
-        .take(5)
-        .map(|suggestion| format!("Tab: {suggestion}"))
+        .enumerate()
+        .skip(first_visible)
+        .take(MAX_VISIBLE_SUGGESTIONS)
+        .map(|(index, suggestion)| {
+            let marker = if composer.selected_suggestion == Some(index) {
+                "▶"
+            } else {
+                " "
+            };
+            format!("{marker} {suggestion}")
+        })
         .collect::<Vec<_>>()
         .join("\n");
-    for mut text in &mut suggestions {
+    for (mut text, mut node) in &mut suggestions {
         **text = rendered.clone();
+        node.display = if rendered.is_empty() {
+            Display::None
+        } else {
+            Display::Flex
+        };
     }
 }
 

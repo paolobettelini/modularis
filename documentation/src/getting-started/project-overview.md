@@ -115,11 +115,12 @@ The demo currently includes:
 
 - TCP multiplayer with CBOR packets and length-prefixed framing;
 - join, leave, timeout, movement, player visibility, and remote avatars;
-- unique-name admission with client-visible rejection;
+- unique-name admission using the generic client-visible kick pipeline;
 - configurable chat, audience-based delivery, Brigadier commands, and
   server-backed completion;
 - client-predicted first-person movement with server collision validation;
-- configurable jump, sprint, flight, FOV, mouse sensitivity, and inventory key;
+- fixed-rate inertial movement with configurable jump, sprint, flight, separate
+  flight speed, FOV, mouse sensitivity, and inventory key;
 - vertically unbounded chunk coordinates with a moving client window;
 - pluggable biome-driven Overworld, Nether, and Aether terrain providers;
 - an explicit scoped world-seed service used by procedural providers;

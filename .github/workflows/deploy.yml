@@ -1,0 +1,34 @@
+name: Deploy mdBook
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'documentation/**'
+      - '.github/workflows/**'
+
+jobs:
+  deploy:
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup mdBook
+        uses: peaceiris/actions-mdbook@v2
+        with:
+           mdbook-version: '0.4.10'
+
+      - run: mdbook build ./documentation
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v4
+        if: ${{ github.ref == 'refs/heads/main' }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./documentation/book

@@ -1,0 +1,25 @@
+[package]
+name = "client-player-inertia-vanilla-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientPlayerInertiaVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-player-controller-api",
+    "player-gravity-api",
+    "client-game-state-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-player-controller-api = { path = "../client-player-controller-api" }
+player-gravity-api = { path = "../player-gravity-api" }
+tokio = { version = "1.48.0", features = ["full"] }

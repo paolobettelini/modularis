@@ -10,6 +10,7 @@ entry = "ClientPlayerFlightVanillaMod"
 init = [
     "bevy-mod",
     "player-flight-api",
+    "player-flight-speed-api",
     "client-player-controller-api",
     "player-gravity-api",
     "client-settings-api",
@@ -29,6 +30,7 @@ client-settings-api = { path = "../client-settings-api" }
 client-settings-registry-codegen = { path = "../client-settings-registry-codegen" }
 generated-client-settings-registry = "0.1.0"
 player-flight-api = { path = "../player-flight-api" }
+player-flight-speed-api = { path = "../player-flight-speed-api" }
 player-gravity-api = { path = "../player-gravity-api" }
 tokio = { version = "1.48.0", features = ["full"] }
 

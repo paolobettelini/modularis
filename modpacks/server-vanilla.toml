@@ -30,6 +30,8 @@ mods = [
     "server-player-gravity-network-sync-mod",
     "server-player-speed-state-mod",
     "server-player-speed-network-sync-mod",
+    "server-player-flight-speed-state-mod",
+    "server-player-flight-speed-network-sync-mod",
     "server-player-jump-vanilla-mod",
     "server-inventory-layout-default-impl",
     "server-block-interaction-rules-vanilla-mod",

@@ -13,19 +13,21 @@ use generated_client_settings_registry::SettingKey;
 use generated_network_messages::ServerBoundMessage;
 use network_protocol_mod::NetworkProtocolMod;
 use player_gravity_api::{Gravity, PlayerGravityApi};
-use player_jump_api::{JumpConfig, PlayerJumpApi};
+use player_jump_api::{JumpConfig, LocalPlayerJumped, PlayerJumpApi};
 use player_jump_network_message_types::PlayerJumpRequest;
 use tokio::task::JoinHandle;
 
 #[derive(Resource, Debug)]
 struct PredictedJumpGate {
-    remaining_seconds: f32,
+    rearm_remaining_seconds: f32,
+    buffered_input_seconds: f32,
 }
 
 impl Default for PredictedJumpGate {
     fn default() -> Self {
         Self {
-            remaining_seconds: 0.0,
+            rearm_remaining_seconds: 0.0,
+            buffered_input_seconds: 0.0,
         }
     }
 }
@@ -54,9 +56,14 @@ impl ClientPlayerJumpVanillaMod {
         bevy.app
             .init_resource::<JumpConfig>()
             .init_resource::<PredictedJumpGate>()
+            .add_message::<LocalPlayerJumped>()
             .add_systems(
                 Update,
-                jump.in_set(PlayerControllerSet::Forces)
+                buffer_jump_input.run_if(in_state(InGameOverlayState::Playing)),
+            )
+            .add_systems(
+                FixedUpdate,
+                jump.in_set(PlayerControllerSet::JumpForces)
                     .run_if(in_state(InGameOverlayState::Playing)),
             );
         Self
@@ -69,26 +76,37 @@ impl ClientPlayerJumpVanillaMod {
 
 impl PlayerJumpApi for ClientPlayerJumpVanillaMod {}
 
-fn jump(
-    time: Res<Time>,
+fn buffer_jump_input(
     keyboard: Res<ButtonInput<KeyCode>>,
     settings: Res<SettingsStore>,
+    config: Res<JumpConfig>,
+    mut gate: ResMut<PredictedJumpGate>,
+) {
+    let jump_key = settings
+        .get_string(SettingKey::ControlsJumpKey)
+        .and_then(parse_key_code)
+        .unwrap_or(KeyCode::Space);
+    if keyboard.just_pressed(jump_key) {
+        gate.buffered_input_seconds = config.input_buffer_seconds.max(0.0);
+    }
+}
+
+fn jump(
+    time: Res<Time<Fixed>>,
     gravity: Res<Gravity>,
     config: Res<JumpConfig>,
     sender: Option<Res<ClientNetworkSender>>,
     session: Res<ClientSession>,
     mut gate: ResMut<PredictedJumpGate>,
     mut players: Query<(&mut PlayerVelocity, &mut Grounded), With<Player>>,
+    mut jumped_events: MessageWriter<LocalPlayerJumped>,
 ) {
-    gate.remaining_seconds = (gate.remaining_seconds - time.delta_secs()).max(0.0);
-    let jump_key = settings
-        .get_string(SettingKey::ControlsJumpKey)
-        .and_then(parse_key_code)
-        .unwrap_or(KeyCode::Space);
-    if !keyboard.just_pressed(jump_key) {
+    gate.rearm_remaining_seconds = (gate.rearm_remaining_seconds - time.delta_secs()).max(0.0);
+    gate.buffered_input_seconds = (gate.buffered_input_seconds - time.delta_secs()).max(0.0);
+    if gate.buffered_input_seconds <= 0.0 {
         return;
     }
-    if gate.remaining_seconds > 0.0 {
+    if gate.rearm_remaining_seconds > 0.0 {
         return;
     }
 
@@ -107,7 +125,9 @@ fn jump(
         return;
     }
 
-    gate.remaining_seconds = config.rearm_seconds;
+    gate.buffered_input_seconds = 0.0;
+    gate.rearm_remaining_seconds = config.rearm_seconds;
+    jumped_events.write(LocalPlayerJumped);
     if session.player_id.is_some()
         && let Some(sender) = sender.as_ref()
     {

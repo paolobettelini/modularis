@@ -30,6 +30,18 @@ The server owns:
 The shared protocol carries intentions from client to server and authoritative
 results from server to client.
 
+## Server tick rate
+
+The headless runner depends on the small `ServerTickApi` provider instead of
+hardcoding a sleep duration. The selected
+`server-tick-rate-20hz-default-impl` supplies `20` ticks per second, configures
+the schedule runner, and keeps Bevy's fixed schedule at the same frequency.
+
+`server-tick-metrics-mod` measures the observed update rate independently. The
+optional `/tps` command reads `ServerTickRate` and `ServerTickMetrics`, then
+publishes the result only to its caller. A different server can replace the
+tick provider without modifying the runner, metrics, or command.
+
 ## High-level data flow
 
 ```text
@@ -75,6 +87,8 @@ After dispatch, feature mods read typed messages such as:
 - `SunSettingsChangedReceived`.
 - `ChatSubmitReceived`;
 - `CommandSuggestionsResponseReceived`.
+- `KickReceived`;
+- `PlayerFlightSpeedChangedReceived`.
 
 Network feature systems should normally run after
 `NetworkMessageSet::DispatchPackets`.

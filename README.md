@@ -1,22 +1,21 @@
-# Minecraft Simple Demo
+# Modularis
 
-`minecraft_simple_demo` is a multiplayer voxel game built with Rust, Bevy, and
-Patchwork. Client and server are composed at compile time from small,
+`Modularis` is a multiplayer voxel game built with Rust, Bevy, and
+adopting the Patchwork architecture.
+Client and server are composed at compile time from small,
 replaceable mods.
 
-The architecture, feature pipelines, extension guides, and crate map live in
-the mdBook under [`documentation/`](documentation/).
+Check out the AI-generated
+<b>[documentation](https://paolobettelini.github.io/modularis)</b>.
 
-Build the documentation with:
 
-```sh
-cd documentation
-mdbook build
-```
 
-## Compose
+## Build and run
 
-From this repository root:
+You can either use the [Patchwork desktop application](https://github.com/paolobettelini/patchwork)
+or build every manually.
+
+To compose and build manually, from this repository root:
 
 ```sh
 patchwork compose \
@@ -32,8 +31,6 @@ patchwork compose \
   --cache ./build-client
 ```
 
-## Run
-
 Start the server:
 
 ```sh
@@ -45,7 +42,3 @@ Then start one or more clients:
 ```sh
 cargo run --manifest-path build-client/client/Cargo.toml
 ```
-
-Generated build directories and `mods/generated-*` crates are derived output.
-Change mods, contributor metadata, code generators, or modpacks, then compose
-again.

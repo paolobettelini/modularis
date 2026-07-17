@@ -4,8 +4,12 @@ modpacks = []
 ignore = []
 
 mods = [
+    "server-command-clear-vanilla-mod",
     "server-command-flight-vanilla-mod",
+    "server-command-flight-speed-vanilla-mod",
+    "server-command-kick-vanilla-mod",
     "server-command-teleport-vanilla-mod",
     "server-command-speed-vanilla-mod",
     "server-command-gravity-vanilla-mod",
+    "server-command-tps-vanilla-mod",
 ]

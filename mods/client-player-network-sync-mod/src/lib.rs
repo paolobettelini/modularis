@@ -3,7 +3,9 @@ use bevy_mod::BevyMod;
 use client_camera_api::{CameraAngles, CameraApi, PlayerCamera};
 use client_game_state_api::{GameState, GameStateApi, InGameOverlayState};
 use client_network_api::{ClientNetworkApi, ClientNetworkSender};
-use client_player_controller_api::{Player, PlayerControllerApi, PlayerControllerSet};
+use client_player_controller_api::{
+    Player, PlayerControllerApi, PlayerControllerSet, PreviousPlayerPosition,
+};
 use client_session_api::{ClientSession, ClientSessionApi};
 use generated_network_messages::{
     NetworkMessageSet, PlayerMovedReceived, PlayerRotationChangedReceived, ServerBoundMessage,
@@ -52,9 +54,7 @@ impl ClientPlayerNetworkSyncMod {
                 Update,
                 (
                     apply_authoritative_player_updates.after(NetworkMessageSet::DispatchPackets),
-                    apply_authoritative_player_target
-                        .after(PlayerControllerSet::Movement)
-                        .before(PlayerControllerSet::CameraSync),
+                    apply_authoritative_player_target.before(PlayerControllerSet::CameraSync),
                     send_player_movement.after(PlayerControllerSet::CameraSync),
                 )
                     .run_if(in_state(GameState::InGame)),
@@ -96,24 +96,26 @@ fn apply_authoritative_player_target(
     time: Res<Time>,
     overlay: Res<State<InGameOverlayState>>,
     mut target: ResMut<AuthoritativePlayerTarget>,
-    mut player: Query<&mut Transform, With<Player>>,
+    mut player: Query<(&mut Transform, &mut PreviousPlayerPosition), With<Player>>,
     mut camera: Query<&mut CameraAngles, With<PlayerCamera>>,
 ) {
     let playing = *overlay.get() == InGameOverlayState::Playing;
     let rotation_smoothing = 1.0 - (-35.0 * time.delta_secs()).exp();
     if let Some(target_position) = target.position
-        && let Ok(mut player) = player.single_mut()
+        && let Ok((mut player, mut previous)) = player.single_mut()
     {
         let delta = target_position - player.translation;
         let ignore_threshold = if playing { 0.03 } else { 0.01 };
         let snap_threshold = if playing { 0.75 } else { 0.25 };
         if delta.length() > snap_threshold {
             player.translation = target_position;
+            previous.0 = target_position;
         } else if delta.length() > ignore_threshold {
             // Server positions sent for the local player are corrections, not a
             // continuously refreshed interpolation target. Consume each one
             // once so a stale target cannot fight local gravity every frame.
             player.translation += delta * 0.5;
+            previous.0 = player.translation;
         }
         target.position = None;
     }

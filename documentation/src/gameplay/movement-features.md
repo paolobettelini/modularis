@@ -63,26 +63,44 @@ authoritative multiplier. A command, role system, status effect, region rule,
 or custom progression mod can therefore change speed without depending on the
 controller or transport implementation.
 
+Flight speed deliberately does not reuse this state. `player-flight-speed-api`
+defines the local `PlayerFlightSpeedMultiplier`, whose default is `2`, while
+`server-player-flight-speed-api` owns default/per-player authoritative values
+and ordered change events. Dedicated network contributor, server sync, client
+receive, and state mods replicate it. `/speed` and `/flightspeed` therefore
+change independent values, and a server may install different policies for
+each.
+
 ## Jump
 
-`JumpConfig` provides speed and a rearm interval.
+`JumpConfig` provides speed, a rearm interval, and an input-buffer duration.
+Vanilla prediction uses a vertical impulse equivalent to `0.42` block per 20 Hz
+tick.
 
 The client jump mod:
 
-1. reads the generated jump key setting;
-2. requires local `Grounded`;
-3. removes existing up-axis velocity;
-4. applies jump speed opposite gravity;
-5. clears grounded state;
-6. starts a short rearm gate;
+1. reads the generated jump key setting in `Update` and buffers the press;
+2. consumes that intention from the fixed physics schedule;
+3. requires local `Grounded`;
+4. removes existing up-axis velocity;
+5. applies jump speed opposite gravity;
+6. clears grounded state and starts a short rearm gate;
 7. sends `PlayerJumpRequest`.
 
-The rearm gate and grounded requirement prevent spacebar spam from repeatedly
-retriggering a jump at one contact boundary.
+The buffer prevents a short key press from being lost between two 20 Hz physics
+ticks and briefly preserves presses made just before landing. The rearm gate
+and grounded requirement prevent spacebar spam from repeatedly retriggering a
+jump at one contact boundary.
 
 The server jump mod receives the intent and checks authoritative ground contact
 against the player's world. The actual vertical position still arrives through
 the normal client movement request and is checked by the movement pipeline.
+
+`LocalPlayerJumped` is a narrow client ECS result event. The independent
+`client-player-sprint-jump-vanilla-mod` listens to it and, while sprint is held,
+adds an impulse equivalent to `0.20` block per tick in the gravity-relative
+camera-forward direction. Servers or clients that do not want this rule can
+omit that mod without replacing jump itself.
 
 A stronger server can track velocity and make jump intent directly update an
 authoritative physics state.
@@ -168,7 +186,8 @@ The vanilla control mod:
 - toggles flight only when capability is enabled;
 - uses jump to ascend;
 - uses Shift to descend;
-- applies a vertical speed of `7`;
+- uses the separate synchronized flight-speed multiplier for both planar and
+  vertical speed;
 - runs in `ForceOverrides`;
 - clears grounded state.
 
@@ -201,10 +220,10 @@ applied change.
 
 ## Adding a gravity or speed policy
 
-A policy mod should emit `SetServerPlayerGravity` or `SetServerPlayerSpeed`.
-It should not mutate the maps or send packets directly. Examples include
-dimension defaults, random gravity on join, level-based speed, temporary
-effects, and admin commands.
+A policy mod should emit `SetServerPlayerGravity`, `SetServerPlayerSpeed`, or
+`SetServerPlayerFlightSpeed`. It should not mutate the maps or send packets
+directly. Examples include dimension defaults, random gravity on join,
+level-based ground or flight speed, temporary effects, and admin commands.
 
 The current client protocol synchronizes the controlled player's value. If a
 renderer needs every remote player's gravity or speed, add a separate

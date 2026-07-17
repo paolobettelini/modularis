@@ -267,3 +267,9 @@ constructor.
 
 Do not add place behavior to the item contributor itself. The item definition
 must remain usable in servers with different rules.
+
+The demo currently follows this process for every non-air block: 30 block
+contributors have 30 matching block-item contributors, while `block-air`
+intentionally has no inventory item. This is checked at composition through the
+generated item registry, not by coupling block codegen to item codegen. A custom
+server is still free to omit any of those item contributors.

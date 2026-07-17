@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use server_chat_api::{
-    PublishServerChatMessage, ServerChatApi, ServerChatInputReceived, ServerChatSet,
-    ServerCommandRequested, ServerCommandSuggestionsReady, ServerCommandSuggestionsRequested,
+    ClearServerPlayerChatRequested, PublishServerChatMessage, ServerChatApi,
+    ServerChatInputReceived, ServerChatSet, ServerCommandRequested, ServerCommandSuggestionsReady,
+    ServerCommandSuggestionsRequested,
 };
 use tokio::task::JoinHandle;
 
@@ -13,6 +14,7 @@ impl ServerChatEventsMod {
         bevy.app
             .add_message::<ServerChatInputReceived>()
             .add_message::<PublishServerChatMessage>()
+            .add_message::<ClearServerPlayerChatRequested>()
             .add_message::<ServerCommandRequested>()
             .add_message::<ServerCommandSuggestionsRequested>()
             .add_message::<ServerCommandSuggestionsReady>()

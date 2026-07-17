@@ -6,7 +6,9 @@ use client_input_api::{InputApi, PlayerInput};
 use client_player_controller_api::{
     Grounded, PLAYER_EYE_HEIGHT, PLAYER_HEIGHT, PLAYER_RADIUS, Player, PlayerControllerApi,
     PlayerControllerSet, PlayerMovementConfig, PlayerPlanarMovementIntent, PlayerVelocity,
+    PreviousPlayerPosition,
 };
+use client_player_physics_tick_api::ClientPlayerPhysicsTickApi;
 use collision_api::{CollisionApi, CollisionService};
 use player_gravity_api::{Gravity, PlayerGravityApi, project_on_gravity_plane};
 use player_speed_api::{PlayerSpeedApi, PlayerSpeedMultiplier};
@@ -20,6 +22,7 @@ pub struct FpsPlayerControllerBevyImpl;
 
 impl FpsPlayerControllerBevyImpl {
     pub fn init<
+        T: ClientPlayerPhysicsTickApi,
         I: InputApi,
         C: CameraApi,
         K: CollisionApi,
@@ -28,6 +31,7 @@ impl FpsPlayerControllerBevyImpl {
         G: GameStateApi,
     >(
         bevy: &mut BevyMod,
+        _physics_tick: &mut T,
         _input: &mut I,
         _camera: &mut C,
         _collision: &mut K,
@@ -36,35 +40,33 @@ impl FpsPlayerControllerBevyImpl {
         _game_state: &mut G,
     ) -> Self {
         bevy.app
+            .insert_resource(Time::<Fixed>::from_hz(T::ticks_per_second()))
             .init_resource::<PlayerMovementConfig>()
             .init_resource::<PlayerPlanarMovementIntent>()
             .configure_sets(
-                Update,
+                FixedUpdate,
                 (
                     PlayerControllerSet::Input,
                     PlayerControllerSet::MovementModifiers,
                     PlayerControllerSet::ApplyMovementIntent,
+                    PlayerControllerSet::GravityForces,
+                    PlayerControllerSet::JumpForces,
                     PlayerControllerSet::Forces,
                     PlayerControllerSet::ForceOverrides,
                     PlayerControllerSet::Movement,
-                    PlayerControllerSet::CameraSync,
+                    PlayerControllerSet::PostMovement,
                 )
                     .chain(),
             )
+            .configure_sets(Update, PlayerControllerSet::CameraSync)
             .add_systems(
-                Update,
+                FixedUpdate,
                 collect_planar_movement_intent
                     .in_set(PlayerControllerSet::Input)
                     .run_if(in_state(InGameOverlayState::Playing)),
             )
             .add_systems(
-                Update,
-                apply_planar_movement_intent
-                    .in_set(PlayerControllerSet::ApplyMovementIntent)
-                    .run_if(in_state(InGameOverlayState::Playing)),
-            )
-            .add_systems(
-                Update,
+                FixedUpdate,
                 (
                     update_grounded_probe.in_set(PlayerControllerSet::Input),
                     move_player.in_set(PlayerControllerSet::Movement),
@@ -100,6 +102,8 @@ fn clear_planar_velocity(
 
 fn collect_planar_movement_intent(
     input: Res<PlayerInput>,
+    config: Res<PlayerMovementConfig>,
+    base_speed: Res<PlayerSpeedMultiplier>,
     gravity: Res<Gravity>,
     camera: Query<&Transform, (With<PlayerCamera>, Without<Player>)>,
     mut intent: ResMut<PlayerPlanarMovementIntent>,
@@ -117,25 +121,8 @@ fn collect_planar_movement_intent(
     }
     let right = forward.cross(up).normalize_or_zero();
     intent.direction = (forward * input.movement.y + right * input.movement.x).normalize_or_zero();
+    intent.target_speed = config.walk_speed * base_speed.0.max(0.0);
     intent.speed_multiplier = 1.0;
-}
-
-fn apply_planar_movement_intent(
-    intent: Res<PlayerPlanarMovementIntent>,
-    config: Res<PlayerMovementConfig>,
-    base_speed: Res<PlayerSpeedMultiplier>,
-    gravity: Res<Gravity>,
-    mut players: Query<&mut PlayerVelocity, With<Player>>,
-) {
-    let up = gravity.up();
-    for mut velocity in &mut players {
-        let vertical = up * velocity.0.dot(up);
-        velocity.0 = vertical
-            + intent.direction
-                * config.walk_speed
-                * base_speed.0.max(0.0)
-                * intent.speed_multiplier.max(0.0);
-    }
 }
 
 fn update_grounded_probe(
@@ -162,15 +149,21 @@ fn move_player(
     gravity: Res<Gravity>,
     collision: Res<CollisionService>,
     mut player: Query<
-        (&mut Transform, &mut PlayerVelocity, &mut Grounded),
+        (
+            &mut Transform,
+            &mut PreviousPlayerPosition,
+            &mut PlayerVelocity,
+            &mut Grounded,
+        ),
         (With<Player>, Without<PlayerCamera>),
     >,
 ) {
-    let Ok((mut transform, mut velocity, mut grounded)) = player.single_mut() else {
+    let Ok((mut transform, mut previous, mut velocity, mut grounded)) = player.single_mut() else {
         return;
     };
     let was_grounded = grounded.0;
     let start = transform.translation;
+    previous.0 = start;
     let movement = velocity.0 * time.delta_secs();
     let result = collision.resolve(start, movement, PLAYER_RADIUS, PLAYER_HEIGHT);
     transform.translation = result.position;
@@ -216,11 +209,15 @@ fn is_grounded_at(collision: &CollisionService, position: Vec3, gravity_directio
 
 fn sync_camera_to_player(
     gravity: Res<Gravity>,
-    player: Query<&Transform, (With<Player>, Without<PlayerCamera>)>,
+    fixed_time: Res<Time<Fixed>>,
+    player: Query<(&Transform, &PreviousPlayerPosition), (With<Player>, Without<PlayerCamera>)>,
     mut camera: Query<&mut Transform, (With<PlayerCamera>, Without<Player>)>,
 ) {
-    let (Ok(player), Ok(mut camera)) = (player.single(), camera.single_mut()) else {
+    let (Ok((player, previous)), Ok(mut camera)) = (player.single(), camera.single_mut()) else {
         return;
     };
-    camera.translation = player.translation + gravity.up() * PLAYER_EYE_HEIGHT;
+    let rendered_position = previous
+        .0
+        .lerp(player.translation, fixed_time.overstep_fraction());
+    camera.translation = rendered_position + gravity.up() * PLAYER_EYE_HEIGHT;
 }

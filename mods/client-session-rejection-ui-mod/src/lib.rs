@@ -41,7 +41,7 @@ fn show_rejection_reason(
     let Some(font) = font else {
         return;
     };
-    let Some(reason) = session.rejection_reason.take() else {
+    let Some(reason) = session.disconnect_reason.take() else {
         return;
     };
     commands.spawn((
