@@ -21,3 +21,4 @@ mods/generated-network-messages
 !mods/block-oak-log/assets/*.png
 !mods/block-cactus/assets/*.png
 *.ttf
+!media/preview.png
