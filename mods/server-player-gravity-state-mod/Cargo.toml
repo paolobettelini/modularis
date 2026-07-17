@@ -1,0 +1,22 @@
+[package]
+name = "server-player-gravity-state-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerPlayerGravityStateMod"
+provides = "server-player-gravity-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "player-gravity-api", "server-player-lifecycle-events-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+player-gravity-api = { path = "../player-gravity-api" }
+server-player-gravity-api = { path = "../server-player-gravity-api" }
+server-player-lifecycle-events-api = { path = "../server-player-lifecycle-events-api" }
+server-player-lifecycle-events-mod = { path = "../server-player-lifecycle-events-mod" }
+tokio = { version = "1.48.0", features = ["full"] }

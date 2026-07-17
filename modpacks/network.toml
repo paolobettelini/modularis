@@ -11,6 +11,7 @@ mods = [
     "session-network-messages-mod",
     "player-network-messages-mod",
     "player-flight-network-messages-mod",
+    "player-speed-network-messages-mod",
     "chunk-network-messages-mod",
     "dimension-network-messages-mod",
     "sky-network-messages-mod",

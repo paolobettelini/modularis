@@ -57,17 +57,29 @@ fn sync_dimension_changes(
                 color: change.current.sky_color,
             }),
         });
+        let moved = ClientBoundMessage::PlayerMoved(PlayerMoved {
+            player_id: player.id,
+            position: change.position,
+            yaw: player.yaw,
+            pitch: player.pitch,
+        });
         packets.write(ServerPacketOut {
             audience: ServerAudience::Player(change.player_id),
-            message: ClientBoundMessage::PlayerMoved(PlayerMoved {
-                player_id: player.id,
-                position: change.position,
-                yaw: player.yaw,
-                pitch: player.pitch,
-            }),
+            message: moved.clone(),
         });
 
         if change.previous == change.current.id {
+            let viewers = players
+                .players()
+                .into_iter()
+                .filter(|viewer| viewer.id != player.id)
+                .filter(|viewer| dimensions.dimension_id_for(viewer.id) == Some(change.current.id))
+                .map(|viewer| viewer.id)
+                .collect::<Vec<_>>();
+            packets.write(ServerPacketOut {
+                audience: ServerAudience::Players(viewers),
+                message: moved,
+            });
             continue;
         }
         let snapshot = players.players();

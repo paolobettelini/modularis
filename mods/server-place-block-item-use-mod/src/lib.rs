@@ -5,12 +5,13 @@ use block_edit_events_mod::BlockEditEventsMod;
 use inventory_events_api::{HeldItemUseDispatched, InventoryServerSet, ItemUseSucceeded};
 use inventory_events_mod::InventoryEventsMod;
 use item_use_api::ItemUseTarget;
-use player_gravity_api::{Gravity, PlayerGravityApi};
+use player_gravity_api::gravity_up;
 use player_hitbox_api::player_intersects_block;
 use server_block_interaction_rules_api::{
     ServerBlockInteractionRules, ServerBlockInteractionRulesApi,
 };
 use server_chunk_world_api::{ServerChunkWorld, ServerChunkWorldApi};
+use server_player_gravity_api::{ServerPlayerGravities, ServerPlayerGravityApi};
 use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
 use tokio::task::JoinHandle;
 
@@ -20,7 +21,7 @@ impl ServerPlaceBlockItemUseMod {
     pub fn init<
         W: ServerChunkWorldApi,
         P: ServerPlayerRegistryApi,
-        G: PlayerGravityApi,
+        G: ServerPlayerGravityApi,
         R: ServerBlockInteractionRulesApi,
     >(
         bevy: &mut BevyMod,
@@ -46,7 +47,7 @@ impl ServerPlaceBlockItemUseMod {
 fn apply_place_block_item(
     world: Res<ServerChunkWorld>,
     players: Res<ServerPlayerRegistry>,
-    gravity: Res<Gravity>,
+    gravities: Res<ServerPlayerGravities>,
     rules: Res<ServerBlockInteractionRules>,
     mut uses: MessageReader<HeldItemUseDispatched>,
     mut placed: MessageWriter<ServerBlockPlaced>,
@@ -62,7 +63,11 @@ fn apply_place_block_item(
         let Some(actor) = players.player(item_use.player_id) else {
             continue;
         };
-        if !rules.player_can_reach(actor.position, gravity.up(), adjacent) {
+        if !rules.player_can_reach(
+            actor.position,
+            gravity_up(gravities.gravity(actor.id)),
+            adjacent,
+        ) {
             continue;
         }
         let Some(scope) = world

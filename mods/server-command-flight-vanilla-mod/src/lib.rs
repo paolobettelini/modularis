@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use server_chat_api::{PublishServerChatMessage, ServerChatApi, ServerChatSet};
 use server_command_api::{
-    ServerCommandApi, ServerCommandRegistry, ServerCommandSource,
+    OnlinePlayerSuggestions, ServerCommandApi, ServerCommandRegistry, ServerCommandSource,
     brigadier::{
         arguments::string_argument_type::{get_string, greedy_string},
         builder::{
@@ -11,7 +11,6 @@ use server_command_api::{
             required_argument_builder::Argument,
         },
         context::CommandContext,
-        suggestion::{SuggestionProvider, Suggestions, SuggestionsBuilder},
     },
 };
 use server_player_flight_api::{
@@ -96,24 +95,6 @@ fn register_command(commands: &ServerCommandRegistry, queue: &FlightCommandQueue
         })
         .then(player_argument);
     commands.register(command);
-}
-
-struct OnlinePlayerSuggestions;
-
-impl SuggestionProvider<ServerCommandSource> for OnlinePlayerSuggestions {
-    fn get_suggestions(
-        &self,
-        context: CommandContext<ServerCommandSource>,
-        mut builder: SuggestionsBuilder,
-    ) -> Suggestions {
-        let remaining = builder.remaining_lowercase().to_string();
-        for player in &context.source.online_players {
-            if player.name.to_lowercase().starts_with(&remaining) {
-                builder = builder.suggest(&player.name);
-            }
-        }
-        builder.build()
-    }
 }
 
 fn apply_flight_commands(

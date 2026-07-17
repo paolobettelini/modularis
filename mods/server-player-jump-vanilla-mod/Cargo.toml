@@ -12,7 +12,7 @@ init = [
     "block-manager-api",
     "server-chunk-world-api",
     "server-player-registry-api",
-    "player-gravity-api",
+    "server-player-gravity-api",
     "network-protocol-mod",
 ]
 run = []
@@ -25,6 +25,7 @@ block-manager-api = { path = "../block-manager-api" }
 generated-network-messages = "0.1.0"
 player-block-collision-api = { path = "../player-block-collision-api" }
 player-gravity-api = { path = "../player-gravity-api" }
+server-player-gravity-api = { path = "../server-player-gravity-api" }
 player-hitbox-api = { path = "../player-hitbox-api" }
 player-jump-api = { path = "../player-jump-api" }
 player-network-message-types = { path = "../player-network-message-types" }

@@ -1,0 +1,34 @@
+[package]
+name = "server-player-speed-network-sync-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerPlayerSpeedNetworkSyncMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "server-player-speed-api",
+    "server-network-events-api",
+    "server-player-lifecycle-events-mod",
+    "network-protocol-mod",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+generated-network-messages = "0.1.0"
+network-protocol-mod = { path = "../network-protocol-mod" }
+player-speed-network-message-types = { path = "../player-speed-network-message-types" }
+player-network-message-types = { path = "../player-network-message-types" }
+server-network-events-api = { path = "../server-network-events-api" }
+server-player-lifecycle-events-api = { path = "../server-player-lifecycle-events-api" }
+server-player-lifecycle-events-mod = { path = "../server-player-lifecycle-events-mod" }
+server-player-speed-api = { path = "../server-player-speed-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-network-messages = { path = "../generated-network-messages" }

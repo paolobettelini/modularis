@@ -1,0 +1,19 @@
+[package]
+name = "client-player-speed-state-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientPlayerSpeedStateMod"
+provides = "player-speed-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+player-speed-api = { path = "../player-speed-api" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -102,6 +102,12 @@ The sync mod sends:
 Travel features only emit the request. They do not clear client chunks or
 manually edit visibility.
 
+The same request is also the generic teleport/reposition contract. If target
+and current dimensions are equal, the sync stage corrects the controlled
+player and publishes a normal movement update to other viewers, without
+pretending that the player left the world. If they differ, the existing
+leave/join visibility transition is used.
+
 ## Client dimension pipeline
 
 The client has:
@@ -112,7 +118,9 @@ ClientDimensionSet::Receive
   -> ApplyPlayer
 ```
 
-Receiving a new dimension emits `ClientDimensionChanged`.
+Receiving a server dimension/position message emits `ClientDimensionChanged`.
+Consumers compare `previous` and `current`: a same-dimension teleport moves the
+player but does not clear chunks or portal visuals.
 
 Independent mods:
 

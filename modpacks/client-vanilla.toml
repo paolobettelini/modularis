@@ -10,6 +10,7 @@ mods = [
     "client-block-interaction-rules-vanilla-mod",
     "client-chunk-layered-priority-vanilla-mod",
     "client-crosshair-bevy-mod",
+    "client-looked-block-outline-vanilla-mod",
     "client-hotbar-selection-input-mod",
     "client-hotbar-scroll-input-mod",
     "client-pause-menu-input-mod",

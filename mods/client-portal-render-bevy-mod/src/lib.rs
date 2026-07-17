@@ -106,7 +106,10 @@ fn clear_portals_for_dimension_change(
     mut changes: MessageReader<ClientDimensionChanged>,
     mut rendered: ResMut<RenderedPortals>,
 ) {
-    if changes.read().next().is_none() {
+    if !changes
+        .read()
+        .any(|change| change.previous != change.current)
+    {
         return;
     }
     despawn_all(&mut commands, &mut rendered);

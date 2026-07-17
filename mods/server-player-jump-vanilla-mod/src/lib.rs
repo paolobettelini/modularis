@@ -4,10 +4,11 @@ use block_manager_api::BlockManagerApi;
 use generated_network_messages::{NetworkMessageSet, PlayerJumpRequestReceived};
 use network_protocol_mod::NetworkProtocolMod;
 use player_block_collision_api::collides_at;
-use player_gravity_api::{Gravity, PlayerGravityApi};
+use player_gravity_api::{gravity_direction, gravity_up};
 use player_hitbox_api::{PLAYER_HEIGHT, PLAYER_RADIUS};
 use player_jump_api::JumpConfig;
 use server_chunk_world_api::{ServerChunkWorld, ServerChunkWorldApi};
+use server_player_gravity_api::{ServerPlayerGravities, ServerPlayerGravityApi};
 use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
 use std::marker::PhantomData;
 use tokio::task::JoinHandle;
@@ -15,7 +16,7 @@ use tokio::task::JoinHandle;
 pub struct ServerPlayerJumpVanillaMod<B>(PhantomData<B>);
 
 impl<B: BlockManagerApi> ServerPlayerJumpVanillaMod<B> {
-    pub fn init<W: ServerChunkWorldApi, P: ServerPlayerRegistryApi, G: PlayerGravityApi>(
+    pub fn init<W: ServerChunkWorldApi, P: ServerPlayerRegistryApi, G: ServerPlayerGravityApi>(
         bevy: &mut BevyMod,
         _blocks: &mut B,
         _world: &mut W,
@@ -36,21 +37,22 @@ impl<B: BlockManagerApi> ServerPlayerJumpVanillaMod<B> {
 }
 
 fn handle_jump_requests<B: BlockManagerApi>(
-    gravity: Res<Gravity>,
+    gravities: Res<ServerPlayerGravities>,
     jump: Res<JumpConfig>,
     world: Res<ServerChunkWorld>,
     registry: Res<ServerPlayerRegistry>,
     mut requests: MessageReader<PlayerJumpRequestReceived>,
 ) {
-    let up = gravity.up();
-    let direction = gravity.direction();
-    if direction.length_squared() == 0.0 {
-        return;
-    }
     for request in requests.read() {
         let Some(player) = registry.player_for_address(request.source) else {
             continue;
         };
+        let gravity = gravities.gravity(player.id);
+        let up = gravity_up(gravity);
+        let direction = gravity_direction(gravity);
+        if direction.length_squared() == 0.0 {
+            continue;
+        }
         let position = Vec3::from_array(player.position);
         if !is_grounded::<B>(&world, player.id, position, direction) {
             debug!(

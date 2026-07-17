@@ -143,23 +143,37 @@ request against current ECS state, emits domain events, and publishes feedback.
 Permissions should be another rule/mod in that stage rather than hardcoded in
 the generic dispatcher.
 
-## Flight command example
+## Vanilla command feature pack
 
-`server-command-flight-vanilla-mod` contributes:
+`server-commands-vanilla.toml` is an optional policy pack. It currently selects
+four independent command mods:
 
-```text
-/flight
-/flight <player>
-```
+| Mod | Syntax | Domain intention |
+| --- | --- | --- |
+| `server-command-flight-vanilla-mod` | `/flight [player]` | changes flight capability |
+| `server-command-teleport-vanilla-mod` | `/teleport <x> <y> <z>`, `/teleport <destination>`, `/teleport <subject> <x> <y> <z>`, `/teleport <subject> <destination>` | requests a dimension-aware reposition |
+| `server-command-speed-vanilla-mod` | `/speed <amount>`, `/speed <player> <amount>` | changes the authoritative movement multiplier |
+| `server-command-gravity-vanilla-mod` | `/setgravity <g>`, `/setgravity <x> <y> <z>`, and both forms prefixed by a player | changes that player's gravity vector |
 
-The player argument has a Brigadier suggestion provider backed by the online
-player snapshot. The command queues a flight intention; a Bevy system resolves
-the target, toggles `ServerPlayerFlightCapabilities`, emits the existing flight
-capability event, and sends personal feedback through chat.
+Speed `1` is the normal base speed. A scalar gravity `g` means `(0, -g, 0)`;
+three values set an arbitrary vector.
 
-The command therefore reuses the flight API and synchronization pipeline. It
-does not send the capability packet itself and it can be omitted from a server
-that grants flight through roles, regions, levels, or another UI.
+Player arguments use the online-player snapshot and are matched
+case-insensitively. The longest matching name prefix wins, so names containing
+spaces can be used in forms such as `/teleport Player1 Player 2`.
+
+Each command queues a narrow ECS intention. Flight emits the existing
+capability change, speed and gravity emit their per-player state changes, and
+teleport emits `RequestPlayerDimensionChange`. None of these command mods sends
+its domain packet directly.
+
+Teleport-to-player reads the destination player's dimension as well as their
+position. Teleport-to-coordinates keeps the subject in their current dimension.
+The dimension sync pipeline then updates visibility, local position and remote
+player replication.
+
+Servers can import the whole command pack, select only individual commands, or
+replace any command while keeping the underlying gameplay APIs.
 
 ## Player admission and command names
 

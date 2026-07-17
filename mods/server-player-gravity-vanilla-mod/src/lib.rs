@@ -1,10 +1,10 @@
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use block_manager_api::BlockManagerApi;
-use player_gravity_api::PlayerGravityApi;
 use player_network_message_types::PlayerId;
 use server_chunk_world_api::ServerChunkWorldApi;
 use server_network_api::ServerNetworkApi;
+use server_player_gravity_api::ServerPlayerGravityApi;
 use server_player_lifecycle_events_api::ServerPlayerLeft;
 use server_player_lifecycle_events_mod::ServerPlayerLifecycleEventsMod;
 use server_player_registry_api::ServerPlayerRegistryApi;
@@ -23,7 +23,7 @@ impl<B: BlockManagerApi> ServerPlayerGravityVanillaMod<B> {
         W: ServerChunkWorldApi,
         N: ServerNetworkApi,
         P: ServerPlayerRegistryApi,
-        G: PlayerGravityApi,
+        G: ServerPlayerGravityApi,
     >(
         bevy: &mut BevyMod,
         _blocks: &mut B,

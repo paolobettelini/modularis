@@ -7,6 +7,7 @@ use server_chunk_world_api::{ServerChunkWorld, ServerChunkWorldApi};
 use server_player_registry_api::{
     PendingServerPlayerMoves, ServerPlayerMovementSet, ServerPlayerRegistryApi,
 };
+use server_player_speed_api::{ServerPlayerSpeedApi, ServerPlayerSpeeds};
 use std::marker::PhantomData;
 use tokio::task::JoinHandle;
 use voxel_math_api::BlockPos;
@@ -16,11 +17,12 @@ const MAX_PLAYER_MOVE_DELTA: f32 = 2.0;
 pub struct ServerPlayerMovementCollisionVanillaMod<B>(PhantomData<B>);
 
 impl<B: BlockManagerApi> ServerPlayerMovementCollisionVanillaMod<B> {
-    pub fn init<W: ServerChunkWorldApi, P: ServerPlayerRegistryApi>(
+    pub fn init<W: ServerChunkWorldApi, P: ServerPlayerRegistryApi, S: ServerPlayerSpeedApi>(
         bevy: &mut BevyMod,
         _blocks: &mut B,
         _world_api: &mut W,
         _players: &mut P,
+        _speed: &mut S,
     ) -> Self {
         bevy.app.add_systems(
             Update,
@@ -36,14 +38,18 @@ impl<B: BlockManagerApi> ServerPlayerMovementCollisionVanillaMod<B> {
 
 fn validate_player_movement_collision<B: BlockManagerApi>(
     world: Res<ServerChunkWorld>,
+    speeds: Res<ServerPlayerSpeeds>,
     mut moves: ResMut<PendingServerPlayerMoves>,
 ) {
     for movement in &mut moves.moves {
         if movement.rejected {
             continue;
         }
-        let requested =
-            clamp_requested_movement(movement.current_position, movement.accepted_position);
+        let requested = clamp_requested_movement(
+            movement.current_position,
+            movement.accepted_position,
+            speeds.multiplier(movement.player_id),
+        );
         let delta = requested - movement.current_position;
         movement.accepted_position = resolve_player_collision(
             movement.current_position,
@@ -56,13 +62,16 @@ fn validate_player_movement_collision<B: BlockManagerApi>(
     }
 }
 
-fn clamp_requested_movement(current: Vec3, requested: Vec3) -> Vec3 {
+fn clamp_requested_movement(current: Vec3, requested: Vec3, speed_multiplier: f32) -> Vec3 {
     let movement = requested - current;
     let distance = movement.length();
-    if distance <= MAX_PLAYER_MOVE_DELTA {
+    let maximum = MAX_PLAYER_MOVE_DELTA * speed_multiplier.max(0.0);
+    if distance <= maximum {
         requested
+    } else if maximum <= f32::EPSILON {
+        current
     } else {
-        current + movement / distance * MAX_PLAYER_MOVE_DELTA
+        current + movement / distance * maximum
     }
 }
 

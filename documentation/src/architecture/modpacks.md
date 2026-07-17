@@ -96,13 +96,14 @@ changing controls or graphics.
 - chunk request handling;
 - bootstrap.
 
-`server-vanilla.toml` contains selected policy:
+`server-vanilla.toml` imports `server-biomes-vanilla.toml` and the independent
+`server-commands-vanilla.toml` command pack, then contains selected policy:
 
 - the imported `server-biomes-vanilla.toml` umbrella, whose separate
   Overworld, Nether, and Aether packs contain definitions and phased features;
 - the biome runtime registry, vanilla selector, and shared biome sampler;
 - global-chat audience policy and case-insensitive unique player names;
-- chat command routing and the optional `/flight` command;
+- chat command routing and optional flight, teleport, speed, and gravity commands;
 - player-interest chunk residency;
 - world-scope player visibility;
 - default dimension lifecycle;
@@ -111,6 +112,7 @@ changing controls or graphics.
 - Nether and Aether portal rules;
 - portal ignition and travel;
 - movement collision and jump validation;
+- per-player gravity and speed state/synchronization;
 - default inventory layout and loadout;
 - quantity stacking and consumption;
 - reach validation;

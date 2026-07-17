@@ -1,6 +1,6 @@
 name = "Minecraft demo vanilla server features"
 description = "Optional vanilla-style server gameplay features. Import this from a server profile only when you want classic behavior."
-modpacks = ["server-biomes-vanilla"]
+modpacks = ["server-biomes-vanilla", "server-commands-vanilla"]
 ignore = []
 
 mods = [
@@ -12,7 +12,6 @@ mods = [
     "server-player-name-unique-vanilla-mod",
     "server-chat-global-vanilla-mod",
     "server-chat-command-router-mod",
-    "server-command-flight-vanilla-mod",
     "server-player-dimension-lifecycle-vanilla-mod",
     "server-dimension-network-sync-mod",
     "server-player-flight-grant-all-vanilla-mod",
@@ -25,9 +24,12 @@ mods = [
     "server-portal-travel-vanilla-mod",
     "player-gravity-vanilla-mod",
     "player-gravity-network-messages-mod",
+    "server-player-gravity-state-mod",
     "player-jump-network-messages-mod",
     "server-player-movement-collision-vanilla-mod",
     "server-player-gravity-network-sync-mod",
+    "server-player-speed-state-mod",
+    "server-player-speed-network-sync-mod",
     "server-player-jump-vanilla-mod",
     "server-inventory-layout-default-impl",
     "server-block-interaction-rules-vanilla-mod",

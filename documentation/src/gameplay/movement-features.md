@@ -27,18 +27,41 @@ Helpers provide:
 Gravity is a vector, not a scalar. Camera, planar movement, jump direction, and
 flight direction use these helpers.
 
-Current gravity state is a global Bevy resource. It can change at runtime and
-is synchronized to clients, but it is not yet keyed per player or world scope.
+The client still exposes the controlled player's current gravity as the small
+`Gravity` resource used by prediction and camera math. Server authority is
+keyed by `PlayerId` through `ServerPlayerGravities`: it stores a default vector
+plus optional per-player overrides.
 
 ### Gravity mods
 
 - `player-gravity-vanilla-mod`: default resource provider;
+- `server-player-gravity-api`: per-player state and change contracts;
+- `server-player-gravity-state-mod`: neutral authoritative storage;
 - gravity network message contributors;
-- `server-player-gravity-network-sync-mod`: join/runtime synchronization;
+- `server-player-gravity-network-sync-mod`: target-specific join/runtime synchronization;
 - `client-player-gravity-network-receive-mod`: applies server state;
 - `client-player-gravity-prediction-vanilla-mod`: local force integration.
 
-Server authority chooses gravity. Client prediction applies it immediately.
+Server gameplay rules query the actor's gravity rather than a global policy.
+This includes jump direction, gravity integration, reach origin, block
+placement checks, and movement validation. Server authority chooses gravity;
+client prediction applies the synchronized local value immediately.
+
+## Base movement speed
+
+`player-speed-api` defines the local `PlayerSpeedMultiplier`; `1` is normal
+base speed. The FPS controller applies it before optional movement modifiers
+such as sprint.
+
+On the server, `ServerPlayerSpeeds` stores the default and per-player
+overrides. `SetServerPlayerSpeed` is the write contract and
+`ServerPlayerSpeedChanged` is the applied-result contract. Separate state and
+network-sync mods apply changes and synchronize only the affected player.
+
+The collision validator scales its permitted movement delta by the same
+authoritative multiplier. A command, role system, status effect, region rule,
+or custom progression mod can therefore change speed without depending on the
+controller or transport implementation.
 
 ## Jump
 
@@ -176,19 +199,14 @@ fn grant_admin_flight(
 The policy does not send packets directly. The existing sync mod observes the
 applied change.
 
-## Adding per-player gravity
+## Adding a gravity or speed policy
 
-The current global resource is insufficient for per-player gravity.
+A policy mod should emit `SetServerPlayerGravity` or `SetServerPlayerSpeed`.
+It should not mutate the maps or send packets directly. Examples include
+dimension defaults, random gravity on join, level-based speed, temporary
+effects, and admin commands.
 
-A clean extension would introduce:
-
-- server map `PlayerId -> Gravity`;
-- per-player change message;
-- packet containing player or local-player scope;
-- local gravity resource for the controlled player;
-- remote avatar orientation data;
-- movement validation using the actor's gravity;
-- dimension defaults as one policy source.
-
-Do not add random/player-specific branches to `Gravity(Vec3)` accessors. Change
-the state model and preserve the existing helper math.
+The current client protocol synchronizes the controlled player's value. If a
+renderer needs every remote player's gravity or speed, add a separate
+visibility-scoped replication/cache contract instead of turning the local
+prediction resource into a global player map.

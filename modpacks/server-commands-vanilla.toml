@@ -1,0 +1,11 @@
+name = "Minecraft demo vanilla server commands"
+description = "Optional vanilla-style server commands registered through Brigadier."
+modpacks = []
+ignore = []
+
+mods = [
+    "server-command-flight-vanilla-mod",
+    "server-command-teleport-vanilla-mod",
+    "server-command-speed-vanilla-mod",
+    "server-command-gravity-vanilla-mod",
+]

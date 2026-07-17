@@ -173,12 +173,10 @@ The Bevy provider uses a dedicated Gizmo group with line width and depth bias.
 The looked-block vanilla mod performs a reach-limited voxel raycast and owns the
 key `vanilla:looked-block`.
 
-The current main client modpack does not select outline provider/policy. Add:
-
-- `client-block-outline-bevy-mod`;
-- `client-looked-block-outline-vanilla-mod`;
-
-to enable it.
+The current client composition selects the renderer in `client.toml` and the
+looked-block policy in `client-vanilla.toml`. Both are required: the provider
+draws owner-keyed outline state, while the policy performs the raycast and
+publishes `vanilla:looked-block` updates.
 
 ## Adding a lighting stage
 

@@ -250,6 +250,7 @@ Message type/contributor families:
 - player;
 - gravity/jump;
 - flight;
+- player speed;
 - chunks;
 - block edits;
 - inventory/hotbar;
@@ -279,7 +280,7 @@ Policies and implementations:
 - `server-chat-global-vanilla-mod`;
 - `server-chat-command-router-mod`;
 - `server-command-brigadier-mod`;
-- `server-command-flight-vanilla-mod`.
+- flight, teleport, speed, and gravity vanilla command mods.
 
 ## Player movement
 
@@ -292,9 +293,12 @@ Contracts:
 - `player-block-collision-api`;
 - `player-hitbox-api`;
 - `player-gravity-api`;
+- `player-speed-api`;
 - `player-jump-api`;
 - `player-flight-api`;
-- `server-player-flight-api`.
+- `server-player-flight-api`;
+- `server-player-gravity-api`;
+- `server-player-speed-api`.
 
 Implementations/features:
 
@@ -304,6 +308,8 @@ Implementations/features:
 - `client-collision-block-aabb-impl`;
 - `client-player-spawn-mod`;
 - gravity prediction/network mods;
+- per-player server gravity state/sync mods;
+- local and server player speed state/sync mods;
 - client/server jump vanilla mods;
 - client sprint vanilla mod;
 - flight state, capability, sync, controls, and grant policy mods;

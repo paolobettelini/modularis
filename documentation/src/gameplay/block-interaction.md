@@ -206,8 +206,9 @@ Outlines are an independent client feature family:
 
 An owner key lets several mods maintain independent outlines.
 
-The active vanilla client currently selects the crosshair but does not include
-the outline renderer/policy in `client-vanilla.toml`. Add both optional mods to
-enable target highlighting.
+The active client selects the renderer in `client.toml` and the optional
+looked-block policy in `client-vanilla.toml`. Omitting the policy leaves the
+generic outline provider available for other features; omitting the provider
+leaves outline commands without a renderer.
 
 Crosshair and outline do not own or reposition each other.

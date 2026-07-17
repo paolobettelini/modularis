@@ -13,7 +13,7 @@ init = [
     "block-edit-events-mod",
     "server-chunk-world-api",
     "server-player-registry-api",
-    "player-gravity-api",
+    "server-player-gravity-api",
     "server-block-interaction-rules-api",
 ]
 run = []
@@ -32,5 +32,6 @@ player-hitbox-api = { path = "../player-hitbox-api" }
 server-chunk-world-api = { path = "../server-chunk-world-api" }
 server-player-registry-api = { path = "../server-player-registry-api" }
 player-gravity-api = { path = "../player-gravity-api" }
+server-player-gravity-api = { path = "../server-player-gravity-api" }
 server-block-interaction-rules-api = { path = "../server-block-interaction-rules-api" }
 tokio = { version = "1.48.0", features = ["full"] }

@@ -9,6 +9,7 @@ use client_player_controller_api::{
 };
 use collision_api::{CollisionApi, CollisionService};
 use player_gravity_api::{Gravity, PlayerGravityApi, project_on_gravity_plane};
+use player_speed_api::{PlayerSpeedApi, PlayerSpeedMultiplier};
 use tokio::task::JoinHandle;
 
 const GROUND_PROBE_DISTANCE: f32 = 0.01;
@@ -23,6 +24,7 @@ impl FpsPlayerControllerBevyImpl {
         C: CameraApi,
         K: CollisionApi,
         V: PlayerGravityApi,
+        M: PlayerSpeedApi,
         G: GameStateApi,
     >(
         bevy: &mut BevyMod,
@@ -30,6 +32,7 @@ impl FpsPlayerControllerBevyImpl {
         _camera: &mut C,
         _collision: &mut K,
         _gravity: &mut V,
+        _speed: &mut M,
         _game_state: &mut G,
     ) -> Self {
         bevy.app
@@ -120,14 +123,18 @@ fn collect_planar_movement_intent(
 fn apply_planar_movement_intent(
     intent: Res<PlayerPlanarMovementIntent>,
     config: Res<PlayerMovementConfig>,
+    base_speed: Res<PlayerSpeedMultiplier>,
     gravity: Res<Gravity>,
     mut players: Query<&mut PlayerVelocity, With<Player>>,
 ) {
     let up = gravity.up();
     for mut velocity in &mut players {
         let vertical = up * velocity.0.dot(up);
-        velocity.0 =
-            vertical + intent.direction * config.walk_speed * intent.speed_multiplier.max(0.0);
+        velocity.0 = vertical
+            + intent.direction
+                * config.walk_speed
+                * base_speed.0.max(0.0)
+                * intent.speed_multiplier.max(0.0);
     }
 }
 

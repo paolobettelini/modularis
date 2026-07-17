@@ -11,7 +11,8 @@ init = [
     "bevy-mod",
     "server-network-events-api",
     "server-player-lifecycle-events-mod",
-    "player-gravity-api",
+    "server-player-gravity-api",
+    "network-protocol-mod",
 ]
 run = []
 ownership = []
@@ -20,11 +21,13 @@ ownership = []
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 generated-network-messages = "0.1.0"
-player-gravity-api = { path = "../player-gravity-api" }
 player-gravity-network-message-types = { path = "../player-gravity-network-message-types" }
+player-network-message-types = { path = "../player-network-message-types" }
+network-protocol-mod = { path = "../network-protocol-mod" }
 server-network-events-api = { path = "../server-network-events-api" }
 server-player-lifecycle-events-api = { path = "../server-player-lifecycle-events-api" }
 server-player-lifecycle-events-mod = { path = "../server-player-lifecycle-events-mod" }
+server-player-gravity-api = { path = "../server-player-gravity-api" }
 tokio = { version = "1.48.0", features = ["full"] }
 
 [patch.crates-io]
