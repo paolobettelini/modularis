@@ -150,6 +150,13 @@ controller. The vanilla sneak camera mod uses this phase to lower eye height.
 
 `collision-api` exposes a closure-backed `CollisionService`.
 
+Besides full overlap and movement resolution, the service exposes a support
+probe used by grounded and sneak policies. A collision provider can install a
+specialized support query with `with_support_query`; otherwise the service
+falls back to a tiny movement resolution. The block-AABB implementation scans
+only the leading face of the hitbox, which avoids repeatedly traversing the
+whole volume of very large scaled players.
+
 The active implementation reads block instances from `ClientChunkCache`, asks
 `BlockShapeService` for each solid block's local AABB union, and resolves the
 player against the translated boxes. The server validator uses the same shape

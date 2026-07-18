@@ -11,7 +11,6 @@ use player_sneak_api::{LocalPlayerSneak, PlayerSneakApi};
 use tokio::task::JoinHandle;
 
 const SUPPORT_PROBE_DISTANCE: f32 = 0.05;
-const SUPPORT_EPSILON: f32 = 0.002;
 const PATH_SAMPLES: usize = 8;
 const BINARY_SEARCH_STEPS: usize = 8;
 
@@ -134,10 +133,13 @@ fn has_support(
     position: Vec3,
     down: Vec3,
 ) -> bool {
-    let requested = down * SUPPORT_PROBE_DISTANCE;
-    let resolved = collision.resolve(position, requested, hitbox.radius, hitbox.height);
-    let travelled = (resolved.position - position).dot(down);
-    travelled < SUPPORT_PROBE_DISTANCE - SUPPORT_EPSILON
+    collision.has_support(
+        position,
+        down,
+        SUPPORT_PROBE_DISTANCE,
+        hitbox.radius,
+        hitbox.height,
+    )
 }
 
 #[cfg(test)]

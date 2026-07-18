@@ -21,6 +21,52 @@ pub fn collides_at(
     !collision_boxes_overlapping(position, radius, height, shape_at).is_empty()
 }
 
+/// Tests for support in one direction by scanning only the leading surface of
+/// the player hitbox instead of its complete volume.
+///
+/// This matters for scaled players: a full collision query grows with
+/// `radius * radius * height`, while a support probe grows with the area of the
+/// face pointing toward `direction`.
+pub fn has_support_at(
+    position: Vec3,
+    direction: Vec3,
+    probe_distance: f32,
+    radius: f32,
+    height: f32,
+    shape_at: &impl Fn(BlockPos) -> BlockShape,
+) -> bool {
+    let direction = direction.normalize_or_zero();
+    if direction == Vec3::ZERO || probe_distance <= 0.0 {
+        return false;
+    }
+
+    let movement = direction * probe_distance;
+    let original_min = player_min(position, radius);
+    let original_max = player_max(position, radius, height);
+    let moved_min = original_min + movement;
+    let moved_max = original_max + movement;
+
+    for axis in [Axis::X, Axis::Y, Axis::Z] {
+        let delta = axis_value(movement, axis);
+        if delta.abs() <= f32::EPSILON {
+            continue;
+        }
+
+        let mut slab_min = moved_min;
+        let mut slab_max = moved_max;
+        if delta > 0.0 {
+            set_axis(&mut slab_min, axis, axis_value(original_max, axis) - SKIN);
+        } else {
+            set_axis(&mut slab_max, axis, axis_value(original_min, axis) + SKIN);
+        }
+
+        if shape_overlaps_support_slab(slab_min, slab_max, moved_min, moved_max, shape_at) {
+            return true;
+        }
+    }
+    false
+}
+
 pub fn resolve_player_collision(
     position: Vec3,
     movement: Vec3,
@@ -219,6 +265,41 @@ fn collision_boxes_overlapping(
     output
 }
 
+fn shape_overlaps_support_slab(
+    slab_min: Vec3,
+    slab_max: Vec3,
+    moved_player_min: Vec3,
+    moved_player_max: Vec3,
+    shape_at: &impl Fn(BlockPos) -> BlockShape,
+) -> bool {
+    // The one-cell margin supports model elements authored slightly outside
+    // their owning voxel, matching the full collision query.
+    let min_x = (slab_min.x + SKIN).floor() as i32 - 1;
+    let min_y = (slab_min.y + SKIN).floor() as i32 - 1;
+    let min_z = (slab_min.z + SKIN).floor() as i32 - 1;
+    let max_x = (slab_max.x - SKIN).floor() as i32 + 1;
+    let max_y = (slab_max.y - SKIN).floor() as i32 + 1;
+    let max_z = (slab_max.z - SKIN).floor() as i32 + 1;
+
+    for y in min_y..=max_y {
+        for z in min_z..=max_z {
+            for x in min_x..=max_x {
+                let origin = Vec3::new(x as f32, y as f32, z as f32);
+                for local in shape_at(BlockPos::new(x, y, z)).boxes() {
+                    let world_min = origin + local.min;
+                    let world_max = origin + local.max;
+                    if aabb_overlaps(slab_min, slab_max, world_min, world_max)
+                        && aabb_overlaps(moved_player_min, moved_player_max, world_min, world_max)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    false
+}
+
 fn aabb_overlaps(a_min: Vec3, a_max: Vec3, b_min: Vec3, b_max: Vec3) -> bool {
     a_min.x < b_max.x - SKIN
         && a_max.x > b_min.x + SKIN
@@ -351,5 +432,48 @@ mod tests {
 
         assert!(landed.grounded);
         assert!((landed.position.y - 0.501).abs() < 1.0e-4);
+    }
+
+    #[test]
+    fn support_probe_finds_the_floor_without_scanning_a_tall_hitbox() {
+        use std::cell::Cell;
+
+        let calls = Cell::new(0usize);
+        let supported = has_support_at(
+            Vec3::new(0.5, 1.001, 0.5),
+            Vec3::NEG_Y,
+            0.05,
+            6.0,
+            36.0,
+            &|position| {
+                calls.set(calls.get() + 1);
+                if position == BlockPos::new(0, 0, 0) {
+                    BlockShape::full_cube()
+                } else {
+                    BlockShape::empty()
+                }
+            },
+        );
+
+        assert!(supported);
+        assert!(
+            calls.get() < 1_000,
+            "support query made {} calls",
+            calls.get()
+        );
+    }
+
+    #[test]
+    fn support_probe_ignores_solids_inside_the_unscanned_body_volume() {
+        let supported = has_support_at(
+            Vec3::new(0.5, 1.001, 0.5),
+            Vec3::NEG_Y,
+            0.05,
+            6.0,
+            36.0,
+            &shape_at(BlockPos::new(0, 10, 0), BlockShape::full_cube()),
+        );
+
+        assert!(!supported);
     }
 }

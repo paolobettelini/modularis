@@ -195,6 +195,14 @@ Edge protection applies only while grounded. It samples the requested planar
 path along two gravity-relative axes and clamps each component at the last
 supported point. Jumping and flight are not converted into grounded movement.
 
+Those samples use `CollisionService::has_support`, not full movement
+resolution. Collision providers may attach an optimized support query; the
+block-AABB provider scans only the thin gravity-facing surface of the hitbox.
+This keeps sneak usable for strongly scaled players because the probe cost
+grows with hitbox surface area instead of its complete volume. Providers that
+do not implement the optional optimization transparently use the generic
+resolver fallback.
+
 The interaction behavior matches the usual voxel-game convention: sneaking
 does not disable block breaking. It bypasses right-click block activation, so a
 held placeable item can be used against a crafting table instead of opening its

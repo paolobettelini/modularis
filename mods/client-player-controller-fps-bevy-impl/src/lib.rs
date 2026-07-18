@@ -217,8 +217,10 @@ fn is_grounded_at(
     gravity_direction: Vec3,
 ) -> bool {
     gravity_direction.length_squared() > 0.0
-        && collision.collides(
-            position + gravity_direction * GROUND_PROBE_DISTANCE,
+        && collision.has_support(
+            position,
+            gravity_direction,
+            GROUND_PROBE_DISTANCE,
             hitbox.radius,
             hitbox.height,
         )

@@ -6,7 +6,10 @@ use block_shape_api::{BlockShape, BlockShapeApi, BlockShapeService};
 use client_chunk_cache_api::{ClientChunkCache, ClientChunkCacheApi};
 use collision_api::{CollisionApi, CollisionService};
 use generated_block_registry::BlockId;
-use player_block_collision_api::{collides_at as player_collides_at, resolve_player_collision};
+use player_block_collision_api::{
+    collides_at as player_collides_at, has_support_at as player_has_support_at,
+    resolve_player_collision,
+};
 use std::marker::PhantomData;
 use tokio::task::JoinHandle;
 use voxel_math_api::BlockPos;
@@ -23,21 +26,37 @@ impl<B: BlockManagerApi> BlockAabbCollisionImpl<B> {
         let cache = bevy.app.world().resource::<ClientChunkCache>().clone();
         let shapes = bevy.app.world().resource::<BlockShapeService>().clone();
         let collision_cache = cache.clone();
-        let resolve_cache = cache;
+        let resolve_cache = cache.clone();
+        let support_cache = cache;
         let collision_shapes = shapes.clone();
-        let resolve_shapes = shapes;
-        bevy.app.insert_resource(CollisionService::new(
-            move |position, radius, height| {
-                player_collides_at(position, radius, height, &|position| {
-                    collision_shape::<B>(&collision_cache, &collision_shapes, position)
-                })
-            },
-            move |position, movement, radius, height| {
-                resolve_player_collision(position, movement, radius, height, &|position| {
-                    collision_shape::<B>(&resolve_cache, &resolve_shapes, position)
-                })
-            },
-        ));
+        let resolve_shapes = shapes.clone();
+        let support_shapes = shapes;
+        bevy.app.insert_resource(
+            CollisionService::new(
+                move |position, radius, height| {
+                    player_collides_at(position, radius, height, &|position| {
+                        collision_shape::<B>(&collision_cache, &collision_shapes, position)
+                    })
+                },
+                move |position, movement, radius, height| {
+                    resolve_player_collision(position, movement, radius, height, &|position| {
+                        collision_shape::<B>(&resolve_cache, &resolve_shapes, position)
+                    })
+                },
+            )
+            .with_support_query(
+                move |position, direction, distance, radius, height| {
+                    player_has_support_at(
+                        position,
+                        direction,
+                        distance,
+                        radius,
+                        height,
+                        &|position| collision_shape::<B>(&support_cache, &support_shapes, position),
+                    )
+                },
+            ),
+        );
         Self(PhantomData)
     }
 
