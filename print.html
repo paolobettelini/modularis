@@ -4204,6 +4204,12 @@ therefore add a frame-local offset without accumulating it or changing the
 controller. The vanilla sneak camera mod uses this phase to lower eye height.</p>
 <h2 id="collision-service"><a class="header" href="#collision-service">Collision service</a></h2>
 <p><code>collision-api</code> exposes a closure-backed <code>CollisionService</code>.</p>
+<p>Besides full overlap and movement resolution, the service exposes a support
+probe used by grounded and sneak policies. A collision provider can install a
+specialized support query with <code>with_support_query</code>; otherwise the service
+falls back to a tiny movement resolution. The block-AABB implementation scans
+only the leading face of the hitbox, which avoids repeatedly traversing the
+whole volume of very large scaled players.</p>
 <p>The active implementation reads block instances from <code>ClientChunkCache</code>, asks
 <code>BlockShapeService</code> for each solid block's local AABB union, and resolves the
 player against the translated boxes. The server validator uses the same shape
@@ -4465,6 +4471,13 @@ input but replace only its movement speed or camera presentation.</p>
 <p>Edge protection applies only while grounded. It samples the requested planar
 path along two gravity-relative axes and clamps each component at the last
 supported point. Jumping and flight are not converted into grounded movement.</p>
+<p>Those samples use <code>CollisionService::has_support</code>, not full movement
+resolution. Collision providers may attach an optimized support query; the
+block-AABB provider scans only the thin gravity-facing surface of the hitbox.
+This keeps sneak usable for strongly scaled players because the probe cost
+grows with hitbox surface area instead of its complete volume. Providers that
+do not implement the optional optimization transparently use the generic
+resolver fallback.</p>
 <p>The interaction behavior matches the usual voxel-game convention: sneaking
 does not disable block breaking. It bypasses right-click block activation, so a
 held placeable item can be used against a crafting table instead of opening its
