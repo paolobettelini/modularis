@@ -7,7 +7,9 @@ use player_scale_network_message_types::PlayerScaleChanged;
 use server_network_events_api::{ServerAudience, ServerNetworkEventsApi, ServerPacketOut};
 use server_player_lifecycle_events_api::ServerPlayerJoined;
 use server_player_lifecycle_events_mod::ServerPlayerLifecycleEventsMod;
-use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
+use server_player_registry_api::{
+    ServerPlayerRegistry, ServerPlayerRegistryApi, ServerPlayerSessionSet,
+};
 use server_player_scale_api::{
     ServerPlayerScaleApi, ServerPlayerScaleChanged, ServerPlayerScaleSet, ServerPlayerScales,
 };
@@ -33,7 +35,9 @@ impl ServerPlayerScaleNetworkSyncMod {
     ) -> Self {
         bevy.app.add_systems(
             Update,
-            (sync_joined_player_state, sync_scale_changes).in_set(ServerPlayerScaleSet::Sync),
+            (sync_joined_player_state, sync_scale_changes)
+                .in_set(ServerPlayerScaleSet::Sync)
+                .after(ServerPlayerSessionSet::Sync),
         );
         Self
     }

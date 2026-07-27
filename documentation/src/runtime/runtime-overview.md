@@ -21,6 +21,7 @@ The server owns:
 - session identities;
 - authoritative positions;
 - authoritative chunks and edits;
+- runtime scope membership and instance lifecycle;
 - inventory and cell-menu state;
 - dimensions and portal state;
 - capability grants;
@@ -29,6 +30,11 @@ The server owns:
 
 The shared protocol carries intentions from client to server and authoritative
 results from server to client.
+
+Compile-time composition and runtime scope are separate. A modpack determines
+which systems and mechanics exist. The scope tree lets those selected systems
+apply to one lobby, match, team, private world, or subtree. See
+[Runtime scope trees and facets](../architecture/runtime-scopes.md).
 
 ## Server tick rate
 
@@ -89,6 +95,7 @@ After dispatch, feature mods read typed messages such as:
 - `CommandSuggestionsResponseReceived`.
 - `KickReceived`;
 - `PlayerFlightSpeedChangedReceived`.
+- `PlayerWorldChangedReceived`.
 
 Network feature systems should normally run after
 `NetworkMessageSet::DispatchPackets`.

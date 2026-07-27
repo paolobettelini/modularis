@@ -175,6 +175,7 @@ Infrastructure:
 - `chunk-storage-binary-format-lib`;
 - `server-chunk-provider-registry-mod`;
 - `server-chunk-storage-fs-impl`;
+- `server-chunk-storage-memory-impl`;
 - `server-chunk-storage-periodic-flush-mod`;
 - `server-chunk-storage-shutdown-flush-mod`;
 - `server-chunk-world-dynamic-impl`;
@@ -194,14 +195,17 @@ Providers:
 - `server-chunk-provider-nether-mod` (active biome-driven Nether provider);
 - `server-chunk-provider-aether-mod` (active biome-driven Aether provider);
 - `server-chunk-provider-checkerboard-mod`.
+- `server-chunk-provider-parkour-empty-mod`.
 
 Routing:
 
 - `server-chunk-routing-dimensions-mod`;
-- `server-chunk-routing-single-world-mod`.
+- `server-chunk-routing-single-world-mod`;
+- `server-chunk-routing-scopes-mod`.
 
 Residency:
 
+- `server-chunk-residency-player-interest-lib`;
 - `server-chunk-residency-player-interest-vanilla-mod`.
 
 ## Biomes and generation features
@@ -258,9 +262,14 @@ Infrastructure and providers:
 - `client-chunk-vertex-lighting-pipeline-mod`;
 - face-shading and ambient-occlusion vanilla mods.
 
-Dimension reset:
+World transition/reset:
 
 - `client-chunk-reset-on-dimension-change-mod`.
+- `client-world-context-api`;
+- `client-world-context-state-mod`;
+- `client-world-context-network-receive-mod`;
+- `client-chunk-reset-on-world-change-mod`;
+- `client-player-world-position-mod`.
 
 ## Animated grass
 
@@ -299,7 +308,7 @@ Contracts:
 - `server-network-events-api`;
 - `server-player-registry-api`;
 - `server-player-visibility-api`;
-- lifecycle event API/mod.
+- lifecycle event API/mod;
 - `server-player-admission-api`;
 - `server-audience-api`.
 
@@ -319,9 +328,9 @@ Routing/session:
 - `client-session-network-mod`;
 - `server-player-session-mod`;
 - `server-player-timeout-mod`;
-- `server-player-visibility-world-instance-mod`.
+- `server-player-visibility-world-instance-mod`;
 - `server-player-name-unique-vanilla-mod`;
-- `server-audience-basic-impl`.
+- `server-audience-basic-impl`;
 - `server-kick-api`, `server-kick-events-mod`, and `server-player-kick-mod`.
 
 Message type/contributor families:
@@ -337,9 +346,42 @@ Message type/contributor families:
 - inventory/hotbar;
 - cell menus;
 - dimension;
+- generic world context;
 - sky/sun;
 - portal;
 - chat and command completion.
+
+## Runtime scopes and custom instances
+
+Contracts:
+
+- `server-scope-api`;
+- `server-scope-world-api`;
+- `server-player-world-api`;
+- `client-world-context-api`.
+
+`server-scope-api` includes both indexed player membership and the generic
+`ServerScopeMembership` component for ordinary ECS entities.
+
+Providers and synchronization:
+
+- `server-scope-tree-mod`;
+- `server-scope-world-state-mod`;
+- `server-chunk-routing-scopes-mod`;
+- `server-audience-scope-impl`;
+- `server-player-visibility-scope-impl`;
+- `server-player-visibility-scope-sync-mod`;
+- `server-player-world-state-mod`;
+- `server-player-world-network-sync-mod`;
+- world-context message type/contributor and client receive/state/reset/position
+  mods.
+
+TheCrown:
+
+- `parkour-gameplay-lib`;
+- `server-chunk-provider-parkour-empty-mod`;
+- `thecrown-main-mod`;
+- `thecrown.toml`.
 
 ## Chat and commands
 
@@ -418,6 +460,22 @@ Implementations/features:
 - `server-player-movement-collision-vanilla-mod`;
 - `client-player-network-sync-mod`.
 
+Reusable server mechanic libraries:
+
+- `server-player-movement-collision-lib`;
+- `server-player-jump-lib`;
+- `server-player-name-unique-lib`;
+- `server-player-chat-lib`;
+- `server-block-break-reach-lib`;
+- `server-block-edit-world-lib`;
+- `server-place-block-item-use-lib`;
+- `server-crafting-table-menu-lib`;
+- `server-inventory-default-loadout-lib`;
+- `inventory-quantity-operations-lib`;
+- `server-player-dimension-lifecycle-lib`;
+- `server-portal-ignite-lib`;
+- `server-portal-travel-lib`.
+
 ## Player rendering and Blocky formats
 
 Contracts/parser:
@@ -494,6 +552,12 @@ Dimensions:
 - Overworld, Nether, Aether registration mods;
 - player lifecycle and network sync;
 - client dimension state/receive/position/reset mods.
+
+Generic instance transition:
+
+- `server-player-world-api` and state/network sync mods;
+- world-context message types/contributor;
+- client world-context state/receive/chunk-reset/player-position mods.
 
 Portals:
 

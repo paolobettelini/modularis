@@ -10,6 +10,7 @@ use server_player_flight_speed_api::{
 };
 use server_player_lifecycle_events_api::ServerPlayerJoined;
 use server_player_lifecycle_events_mod::ServerPlayerLifecycleEventsMod;
+use server_player_registry_api::ServerPlayerSessionSet;
 use tokio::task::JoinHandle;
 
 pub struct ServerPlayerFlightSpeedNetworkSyncMod;
@@ -25,7 +26,8 @@ impl ServerPlayerFlightSpeedNetworkSyncMod {
         bevy.app.add_systems(
             Update,
             (sync_joined_players, sync_flight_speed_changes)
-                .in_set(ServerPlayerFlightSpeedSet::Sync),
+                .in_set(ServerPlayerFlightSpeedSet::Sync)
+                .after(ServerPlayerSessionSet::Sync),
         );
         Self
     }

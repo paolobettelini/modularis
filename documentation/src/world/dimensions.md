@@ -1,4 +1,4 @@
-# Dimensions and world scopes
+# Dimensions and world contexts
 
 Dimensions are generated IDs with server-side definitions. They are not
 hardcoded branches in the chunk world.
@@ -147,8 +147,9 @@ Dimension::Overworld
   instance "match:2"
 ```
 
-The current registry has one static instance per dimension, but chunk routing
-and cache keys already use `WorldInstanceId`.
+The vanilla registry has one static instance per dimension. Scope-based routing
+can create any number of dynamic instances that reuse the same provider and
+semantic dimension.
 
 Durable identity is supplied separately by `server-world-catalog-api`. A
 catalog maps each persistent `WorldInstanceId` to a safe `WorldId` and root
@@ -186,7 +187,14 @@ Do not edit a central dimension match in the chunk world.
 ## Current scope limitation
 
 Client chunk cache keys contain only `ChunkPos`, not `WorldScopeId`. This is
-safe because the client clears the cache on real dimension changes.
+safe for one displayed world because the client clears the cache on both:
+
+- a semantic dimension transition;
+- a generic `PlayerWorldChanged` transition between runtime instances.
+
+`ClientWorldContext` keeps the latest world ID, transition position, and
+revision. The position consumer waits until the local player entity exists,
+which makes initial instance assignment safe during join.
 
 A client that displays several worlds at once would need scope-aware cache and
 render keys.

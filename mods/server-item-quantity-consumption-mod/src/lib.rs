@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use inventory_events_api::{InventoryCellSet, InventoryServerSet, ItemUseSucceeded};
 use inventory_events_mod::InventoryEventsMod;
-use item_quantity_meta::Quantity;
+use inventory_quantity_operations_lib::{QuantityConsumption, consume_one};
 use server_inventory_api::{ServerInventories, ServerInventoryApi};
 use tokio::task::JoinHandle;
 
@@ -35,22 +35,13 @@ fn consume_successful_uses(
         let Some(state) = inventories.get_mut(item_use.player_id) else {
             continue;
         };
-        let Some(mut current) = state.inventory.get(&item_use.cell).cloned() else {
+        let Some(current) = state.inventory.get(&item_use.cell).cloned() else {
             continue;
         };
-        if current.item != item_use.item_before_use.item {
-            continue;
-        }
-        let Some(quantity) = current.metadata.quantity else {
-            continue;
-        };
-        let next = match quantity {
-            Quantity::Infinite => continue,
-            Quantity::Finite(0 | 1) => None,
-            Quantity::Finite(value) => {
-                current.metadata.quantity = Some(Quantity::Finite(value - 1));
-                Some(current)
-            }
+        let next = match consume_one(&current, &item_use.item_before_use) {
+            QuantityConsumption::NotApplicable | QuantityConsumption::Unchanged => continue,
+            QuantityConsumption::Remove => None,
+            QuantityConsumption::Replace(next) => Some(next),
         };
         if state
             .inventory

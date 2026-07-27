@@ -17,5 +17,6 @@ bevy-mod = { path = "../bevy-mod" }
 inventory-events-api = { path = "../inventory-events-api" }
 inventory-events-mod = { path = "../inventory-events-mod" }
 item-quantity-meta = { path = "../item-quantity-meta" }
+inventory-quantity-operations-lib = { path = "../inventory-quantity-operations-lib" }
 server-inventory-api = { path = "../server-inventory-api" }
 tokio = { version = "1.48.0", features = ["full"] }

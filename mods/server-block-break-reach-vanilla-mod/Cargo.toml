@@ -28,4 +28,5 @@ server-player-gravity-api = { path = "../server-player-gravity-api" }
 server-player-hitbox-api = { path = "../server-player-hitbox-api" }
 server-block-interaction-rules-api = { path = "../server-block-interaction-rules-api" }
 server-player-registry-api = { path = "../server-player-registry-api" }
+server-block-break-reach-lib = { path = "../server-block-break-reach-lib" }
 tokio = { version = "1.48.0", features = ["full"] }

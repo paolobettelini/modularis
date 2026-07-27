@@ -1,0 +1,18 @@
+[package]
+name = "server-chunk-storage-memory-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerChunkStorageMemoryImpl"
+provides = "server-chunk-storage-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+server-chunk-storage-api = { path = "../server-chunk-storage-api" }
+tokio = { version = "1.48.0", features = ["full"] }

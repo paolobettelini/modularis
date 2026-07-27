@@ -17,6 +17,7 @@ mods = [
     "player-scale-network-messages-mod",
     "chunk-network-messages-mod",
     "dimension-network-messages-mod",
+    "world-context-network-messages-mod",
     "sky-network-messages-mod",
     "sun-network-messages-mod",
     "portal-network-messages-mod",

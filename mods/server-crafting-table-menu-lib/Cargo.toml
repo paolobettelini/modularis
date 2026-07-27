@@ -1,0 +1,16 @@
+[package]
+name = "server-crafting-table-menu-lib"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+audience-api = { path = "../audience-api" }
+cell-menu-api = { path = "../cell-menu-api" }
+generated-block-registry = "0.1.0"
+inventory-core-api = { path = "../inventory-core-api" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }
+voxel-math-api = { path = "../voxel-math-api" }
+
+[patch.crates-io]
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }

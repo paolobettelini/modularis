@@ -8,6 +8,7 @@ The demo follows one central rule:
 This rule is applied at several scales:
 
 - a block ID and a block placement rule are separate;
+- a reusable vanilla mechanic and its always-on vanilla glue are separate;
 - inventory storage and quantity stacking are separate;
 - network transport and packet meaning are separate;
 - chunk generation, routing, caching, residency, meshing, and rendering are
@@ -106,22 +107,27 @@ For example, a chunk request handler should depend on
 `server-chunk-world-dynamic-impl`. This lets a different modpack select a
 file-backed or database-backed world.
 
-## State identity and visibility
+## State identity, scopes, and visibility
 
 The project uses different concepts for different responsibilities:
 
-- `WorldInstanceId` identifies an instance;
+- `ScopeNodeId` identifies a node in the runtime hierarchy;
+- `WorldInstanceId` identifies a concrete world instance;
 - `ChunkProviderId` identifies a chunk source;
 - `WorldScopeId` identifies the combined world namespace;
 - `Audience` identifies who can observe or interact with state;
 - `PlayerId` identifies a session player;
 - domain IDs such as `CellMenuId` identify specific state objects.
 
-These types should not be collapsed into one universal "scope" type. A chest
-and a public entity may exist in the same world scope but have different
-audiences.
+These types should not be collapsed into one universal identifier. The runtime
+scope tree coordinates them through independent facets, but it does not erase
+their meaning. A chest and a public entity may exist in the same world while
+having different audiences; two players may share chat while using different
+world instances.
 
-The detailed rules are covered in the world and cell-menu chapters.
+The detailed rules are covered in
+[Runtime scope trees and facets](runtime-scopes.md), the world chapters, and
+the cell-menu chapter.
 
 ## Review checklist
 
@@ -134,6 +140,8 @@ When reviewing a change, ask:
 - Could a `SystemSet` insertion point avoid a hardcoded callback?
 - Is state keyed by the correct identity?
 - Does a default behavior belong in a vanilla modpack instead of the base?
+- Can a custom server call the mechanic without selecting its always-on
+  vanilla glue?
 - Is a mod creating an item or block instance with a future-proof metadata
   default?
 - Could two selected mods cooperate, or does one silently overwrite the other?

@@ -30,6 +30,7 @@ player-block-collision-api = { path = "../player-block-collision-api" }
 player-gravity-api = { path = "../player-gravity-api" }
 server-player-gravity-api = { path = "../server-player-gravity-api" }
 server-player-hitbox-api = { path = "../server-player-hitbox-api" }
+server-player-jump-lib = { path = "../server-player-jump-lib" }
 player-hitbox-api = { path = "../player-hitbox-api" }
 player-jump-api = { path = "../player-jump-api" }
 player-network-message-types = { path = "../player-network-message-types" }

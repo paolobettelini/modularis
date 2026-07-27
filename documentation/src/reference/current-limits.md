@@ -106,7 +106,8 @@ Current limits:
 
 - no maximum finite stack size;
 - no durability/equipment semantics;
-- the selected audience resolver maps shared audiences to all online players;
+- the vanilla audience resolver maps shared audiences to all online players,
+  while the scope provider interprets shared IDs as scope subtrees;
 - cell-menu state is not persistent;
 - no recipe system;
 - no transaction revision in optimistic UI;
@@ -120,12 +121,32 @@ Design direction:
 - generated recipes;
 - operation acknowledgements/revisions.
 
+## Runtime scopes and instances
+
+Current limits:
+
+- scope hierarchy and scoped messages are local to one process;
+- each player has one primary scope membership;
+- scope IDs are strings and are not persisted or negotiated with a cluster;
+- lifecycle orchestration owns route/facet cleanup explicitly;
+- the generic client displays one world context at a time;
+- scope migration has no cross-process handoff protocol.
+
+Design direction:
+
+- broker-backed instance allocation above local server processes;
+- serialized migration snapshots and durable scope identity;
+- optional many-to-many subscriptions kept separate from primary membership;
+- reusable lifecycle events for externally managed scope services;
+- scope/revision-aware client caches for multi-world rendering.
+
 ## Dimensions and portals
 
 Current limits:
 
 - static definitions registered at startup;
-- one instance per demo dimension;
+- one static instance per dimension in the vanilla registry, while custom
+  scope routing may create dynamic same-dimension instances;
 - only vertical `4x5` portal geometry;
 - active portal state is not persistent;
 - frame destruction does not fully invalidate portals;
@@ -133,8 +154,8 @@ Current limits:
 
 Design direction:
 
-- dynamic instance lifecycle;
-- generic scope-aware visibility;
+- persistent dynamic instance catalogs;
+- additional scope-aware entity domains beyond players;
 - pluggable portal geometry;
 - state persistence and invalidation pipeline.
 
@@ -165,6 +186,8 @@ Watch for:
 - concrete feature dependencies creeping into neutral base mods;
 - one resource becoming a gameplay god object;
 - global resources where player/world scope is needed;
+- treating one scope facet as if it controlled every domain;
+- putting reusable mechanics back inside always-on vanilla glue;
 - system ordering based on private function names;
 - packet contributors being centralized again;
 - UI mods mutating authoritative caches without reconciliation;

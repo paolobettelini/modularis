@@ -1,0 +1,19 @@
+[package]
+name = "server-player-visibility-scope-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerPlayerVisibilityScopeImpl"
+provides = "server-player-visibility-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-scope-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+server-player-visibility-api = { path = "../server-player-visibility-api" }
+server-scope-api = { path = "../server-scope-api" }
+tokio = { version = "1.48.0", features = ["full"] }

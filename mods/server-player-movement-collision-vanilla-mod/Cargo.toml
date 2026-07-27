@@ -36,6 +36,7 @@ server-player-speed-api = { path = "../server-player-speed-api" }
 server-player-flight-api = { path = "../server-player-flight-api" }
 server-player-flight-speed-api = { path = "../server-player-flight-speed-api" }
 server-player-hitbox-api = { path = "../server-player-hitbox-api" }
+server-player-movement-collision-lib = { path = "../server-player-movement-collision-lib" }
 tokio = { version = "1.48.0", features = ["full"] }
 voxel-math-api = { path = "../voxel-math-api" }
 

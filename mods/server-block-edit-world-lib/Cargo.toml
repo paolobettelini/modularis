@@ -1,0 +1,8 @@
+[package]
+name = "server-block-edit-world-lib"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+block-edit-events-api = { path = "../block-edit-events-api" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }

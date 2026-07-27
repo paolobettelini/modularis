@@ -10,6 +10,20 @@ pub enum ServerPlayerMovementSet {
     Sync,
 }
 
+/// Public join/leave phases used by custom server orchestration.
+///
+/// In particular, `Initialize` runs after the player has a stable `PlayerId`
+/// but before `JoinAccepted` and the initial visibility snapshot are sent.
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ServerPlayerSessionSet {
+    Receive,
+    Validate,
+    Register,
+    Initialize,
+    Sync,
+    Cleanup,
+}
+
 #[derive(Debug, Clone)]
 pub struct PendingServerPlayerMove {
     pub source: SocketAddr,
@@ -25,6 +39,16 @@ pub struct PendingServerPlayerMove {
 #[derive(Resource, Default)]
 pub struct PendingServerPlayerMoves {
     pub moves: Vec<PendingServerPlayerMove>,
+}
+
+#[derive(Message, Debug, Clone, Copy, PartialEq)]
+pub struct ServerPlayerMovementApplied {
+    pub player_id: PlayerId,
+    pub previous_position: Vec3,
+    pub position: Vec3,
+    pub yaw: f32,
+    pub pitch: f32,
+    pub corrected: bool,
 }
 
 #[derive(Resource, Clone)]

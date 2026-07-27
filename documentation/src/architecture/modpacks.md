@@ -50,6 +50,7 @@ The top-level client selects neutral state and concrete presentation:
 - inventory and cell-menu UI;
 - Blocky remote player rendering;
 - dimension, sky, sun, and portal client state;
+- generic world-context state, cache reset, and authoritative repositioning;
 - bootstrap.
 
 `client-vanilla.toml` adds optional behavior:
@@ -84,24 +85,28 @@ changing controls or graphics.
 
 ## Server composition
 
-`server-base.toml` contains infrastructure:
+`server-core.toml` is the smallest reusable headless foundation:
 
 - server configuration;
 - replaceable server tick provider, metrics, and headless Bevy runner;
 - TCP transport;
 - server packet events and routing;
 - lifecycle messages;
-- authoritative inventory and cell-menu state;
-- network receive/sync bridges;
-- block edit network bridges;
 - sessions and timeout;
 - player admission contracts;
 - generic kick contracts and authoritative cleanup;
+- bootstrap.
+
+`server-base.toml` is a convenience umbrella. It imports `server-core.toml` and
+adds neutral, but optional, feature pipelines:
+
+- authoritative inventory and cell-menu state;
+- their network receive/sync bridges;
+- block edit network bridges;
+- chunk request handling;
 - chat ECS contracts, network bridges, and the Brigadier command provider;
 - flight capability state and synchronization;
-- sun state and synchronization;
-- chunk request handling;
-- bootstrap.
+- sun state and synchronization.
 
 `server-vanilla.toml` imports `server-biomes-vanilla.toml` and the independent
 `server-commands-vanilla.toml` command pack, then contains selected policy:
@@ -146,11 +151,37 @@ checkerboard provider, or a custom biome composition.
 It can also replace filesystem persistence with an in-memory, database, remote,
 or application-specific storage provider without changing terrain generation.
 
+## TheCrown composition
+
+`thecrown.toml` is a second top-level server profile. It imports only
+`server-core.toml`, then explicitly selects the neutral chat, outbound block
+edit, flight, and sun pipelines it uses. It imports neither
+`server-base.toml` nor `server-vanilla.toml`.
+
+It selects:
+
+- the runtime scope tree;
+- scope-backed world routing, audience, and player visibility;
+- transient in-memory chunk storage;
+- an empty parkour chunk provider;
+- generic player world-context synchronization;
+- selected reusable movement policies;
+- one custom `thecrown-main-mod` orchestrator.
+
+It deliberately omits default inventory loadout, block mutation glue, item
+placement, dimensions, portals, biome generation, and crafting-table behavior.
+The result validates that those features are not accidentally required by the
+server foundation.
+
+See [TheCrown multi-instance parkour server](../development/thecrown-parkour.md)
+for its runtime topology.
+
 ## Why vanilla is not base
 
 Suppose a custom server wants inventories but no block placement. It can use
 `server-base.toml` and select the inventory layout/loadout mods it wants, while
-omitting `server-place-block-item-use-mod`.
+omitting `server-place-block-item-use-mod`. A server that does not need
+inventory infrastructure at all can start from `server-core.toml`.
 
 Suppose another server wants players to move through blocks. It can omit
 `server-player-movement-collision-vanilla-mod` or provide a different validator.
@@ -165,6 +196,11 @@ Suppose a server wants team worlds. It can replace:
 without replacing TCP, packet generation, or the chunk storage backend.
 
 These are only possible when default behavior remains outside the base.
+
+When a vanilla behavior must apply only in some runtime scopes, omit its
+always-on glue mod and call the corresponding `*-lib` mechanic from custom
+orchestration. See
+[Vanilla mechanics as reusable libraries](vanilla-libraries.md).
 
 ## Designing a new feature pack
 

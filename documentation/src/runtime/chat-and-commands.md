@@ -115,6 +115,12 @@ The selected vanilla policy has two independent mods:
 player IDs and converts published messages into packets. The basic audience
 provider sends `Everyone` and shared audiences to all online players.
 
+Formatting attributed player text is reusable through
+`server-player-chat-lib`: the caller supplies the audience. TheCrown resolves
+the player's nearest chat facet, passes that scope as `Audience::Shared`, and
+uses `server-audience-scope-impl` to reach only members of the same parkour
+instance. Its world and player visibility boundaries remain independent.
+
 A proximity chat replacement can omit the global mod and publish to a custom
 shared audience. A no-chat server can omit both routing policies while keeping
 commands through a different input surface.
@@ -204,6 +210,11 @@ player replication.
 
 Servers can import the whole command pack, select only individual commands, or
 replace any command while keeping the underlying gameplay APIs.
+
+A server that needs commands only in selected runtime scopes should omit the
+blanket command mod or make its queued ECS handler check the source player's
+scope. Completion policy must use the same rule if hidden commands should not
+be suggested outside that scope.
 
 ## Player admission and command names
 

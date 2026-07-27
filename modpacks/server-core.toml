@@ -1,0 +1,20 @@
+name = "Minecraft demo server core"
+description = "Minimal headless process, transport, session lifecycle and cleanup infrastructure."
+modpacks = ["common"]
+ignore = []
+
+mods = [
+    "server-config-local-impl",
+    "server-tick-rate-20hz-default-impl",
+    "server-bevy-runner-mod",
+    "server-tick-metrics-mod",
+    "server-network-tcp-impl",
+    "server-network-events-api",
+    "server-network-router-mod",
+    "server-player-lifecycle-events-mod",
+    "server-kick-events-mod",
+    "server-player-session-mod",
+    "server-player-kick-mod",
+    "server-player-timeout-mod",
+    "server-game-bootstrap-mod",
+]

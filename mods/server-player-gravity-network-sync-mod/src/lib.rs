@@ -11,7 +11,9 @@ use server_player_gravity_api::{
 };
 use server_player_lifecycle_events_api::ServerPlayerJoined;
 use server_player_lifecycle_events_mod::ServerPlayerLifecycleEventsMod;
-use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
+use server_player_registry_api::{
+    ServerPlayerRegistry, ServerPlayerRegistryApi, ServerPlayerSessionSet,
+};
 use server_player_visibility_api::{ServerPlayerVisibility, ServerPlayerVisibilityApi};
 use tokio::task::JoinHandle;
 
@@ -35,7 +37,8 @@ impl ServerPlayerGravityNetworkSyncMod {
         bevy.app.add_systems(
             Update,
             (sync_gravity_to_new_players, sync_gravity_changes)
-                .in_set(ServerPlayerGravitySet::Sync),
+                .in_set(ServerPlayerGravitySet::Sync)
+                .after(ServerPlayerSessionSet::Sync),
         );
         Self
     }

@@ -5,6 +5,7 @@ use network_protocol_mod::NetworkProtocolMod;
 use server_network_events_api::{ServerAudience, ServerNetworkEventsApi, ServerPacketOut};
 use server_player_lifecycle_events_api::ServerPlayerJoined;
 use server_player_lifecycle_events_mod::ServerPlayerLifecycleEventsMod;
+use server_player_registry_api::ServerPlayerSessionSet;
 use server_sun_api::{ServerSunApi, ServerSunChanged, ServerSunSet, ServerSunState};
 use sun_network_message_types::SunSettingsChanged;
 use tokio::task::JoinHandle;
@@ -21,7 +22,9 @@ impl ServerSunNetworkSyncMod {
     ) -> Self {
         bevy.app.add_systems(
             Update,
-            (sync_joining_players, broadcast_sun_changes).in_set(ServerSunSet::Sync),
+            (sync_joining_players, broadcast_sun_changes)
+                .in_set(ServerSunSet::Sync)
+                .after(ServerPlayerSessionSet::Sync),
         );
         Self
     }

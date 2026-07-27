@@ -1,0 +1,10 @@
+[package]
+name = "server-chunk-residency-player-interest-lib"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+player-network-message-types = { path = "../player-network-message-types" }
+server-chunk-residency-api = { path = "../server-chunk-residency-api" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }
+voxel-math-api = { path = "../voxel-math-api" }

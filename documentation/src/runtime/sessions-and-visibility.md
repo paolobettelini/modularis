@@ -51,6 +51,7 @@ name saved by the user, and uniqueness is still authoritative on the server.
 `server-player-lifecycle-events-mod` exposes:
 
 - `ServerPlayerJoined`;
+- `ServerPlayerReady`;
 - `ServerPlayerLeft`.
 
 Independent features listen to these messages to:
@@ -63,6 +64,13 @@ Independent features listen to these messages to:
 
 Session code should not call all these features directly.
 
+`ServerPlayerJoined` means the registry entry exists. Systems in
+`ServerPlayerSessionSet::Initialize` may now assign scopes, worlds, inventory,
+and capabilities before the initial snapshot is built.
+
+`ServerPlayerReady` means `JoinAccepted` has been queued. It is suitable for
+welcome messages and state that should follow the accepted packet.
+
 ## Join flow
 
 ```text
@@ -70,11 +78,12 @@ JoinRequestReceived
   -> sanitize candidate
   -> composable admission rules
   -> reject through generic kick, or register address/player
-  -> player created or reused
+  -> ServerPlayerJoined
+  -> Initialize: scope/world/game state assignment
   -> visible player snapshot selected
   -> JoinAccepted sent to source address
-  -> ServerPlayerJoined emitted
   -> PlayerJoined sent only to allowed viewers
+  -> ServerPlayerReady
 ```
 
 The local client does not render its own avatar because the accepted packet
@@ -129,10 +138,15 @@ can_see(viewer, subject) -> bool
 
 It also computes all viewers of one subject.
 
-The active `server-player-visibility-world-instance-mod` compares the world
+The vanilla server selects
+`server-player-visibility-world-instance-mod`, which compares the chunk world
 scope resolved for viewer and subject. Players in different dimensions or
 provider-backed instances do not receive each other's join, movement, rotation,
 leave, gravity, or model-scale updates.
+
+TheCrown selects `server-player-visibility-scope-impl`. It compares the nearest
+`visibility` facet in each player's scope ancestry. This lets entity visibility
+vary independently from chat and chunks.
 
 Gravity and scale synchronization are subject-oriented. On join, the new
 client receives attributes for itself and every subject it may currently see;
@@ -179,10 +193,14 @@ Replace the provider with a policy based on:
 The provider must remain deterministic enough for join snapshots and later
 updates to agree.
 
-If visibility changes without movement or dimension change, add a feature that
-emits the required `PlayerJoined` and `PlayerLeft` deltas. The current API
-answers visibility queries but does not maintain a general dynamic diff
-engine.
+For scope-based visibility,
+`server-player-visibility-scope-sync-mod` reacts to
+`ServerPlayerScopeChanged` and emits the required `PlayerJoined` and
+`PlayerLeft` deltas for live migrations. The session pipeline still owns the
+initial join and final leave.
+
+Another visibility provider must provide equivalent transition
+synchronization when its policy changes at runtime.
 
 ## Do not confuse audience and visibility
 
@@ -192,10 +210,16 @@ engine.
 
 `Audience` in `audience-api` describes ownership/sharing of state such as cell
 menus and chat. It currently has personal, shared-ID, and everyone variants.
-`server-audience-api` turns that domain-level value into player IDs. The basic
-provider maps `Everyone` and `Shared` to all online players and `Personal` to
-one online player. Servers can replace it with team, permission, distance, or
-world-scope policy without changing chat packet code.
+`server-audience-api` turns that domain-level value into player IDs.
+
+The vanilla basic provider maps `Everyone` and `Shared` to all online players
+and `Personal` to one online player. The scope provider treats a shared ID as a
+scope node and resolves online members in that subtree. Servers can replace
+either with team, permission, distance, subscription, or application-specific
+policy without changing chat packet code.
 
 They can all resolve to player lists, but keeping them separate allows each
 domain to choose its own policy.
+
+See [Runtime scope trees and facets](../architecture/runtime-scopes.md) for
+hierarchical membership and migration.

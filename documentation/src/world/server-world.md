@@ -161,6 +161,11 @@ dimension and returns the dimension's instance/provider.
 An alternate `server-chunk-routing-single-world-mod` exists for servers without
 dimensions.
 
+`server-chunk-routing-scopes-mod` is the runtime-hierarchy provider. It resolves
+the player's primary scope, finds the nearest world facet, and uses the route
+bound there. A parent can therefore share a route with all descendants, while
+a child can override only its own subtree.
+
 Custom routing may choose based on:
 
 - player ID;
@@ -173,6 +178,10 @@ Custom routing may choose based on:
 
 If routing changes for an existing player, client synchronization must reset or
 version the affected cache.
+
+`server-player-world-api` and the `PlayerWorldChanged` packet provide that
+generic transition without pretending that every world switch is a dimension
+change.
 
 ## World scope and resident keys
 
@@ -255,6 +264,10 @@ The storage backend is therefore a decorator between the resident cache and
 generation. Terrain providers do not perform file I/O and streaming code does
 not know whether a chunk came from disk or procedural generation.
 
+`server-chunk-storage-memory-impl` provides the same storage contract for
+transient worlds. It keeps generated and edited chunks available across
+resident-cache eviction and can discard all data for one runtime instance.
+
 If queueing a modified chunk fails, the world marks it as unpersisted and keeps
 it resident. Residency maintenance retries the write and refuses to evict that
 chunk until storage accepts it. This avoids silently losing an edit because of
@@ -274,7 +287,8 @@ The complete filesystem format and flush policy are documented in
 - `break_block` only when current block is not air;
 - resident key lookup;
 - cache retention;
-- resident key enumeration.
+- resident key enumeration;
+- explicit transient-instance discard.
 
 The API returns structured errors:
 
@@ -315,6 +329,11 @@ Alternative policies may retain:
 
 Keep request authorization separate from cache eviction if their rules differ.
 The current vanilla policy is intentionally simple.
+
+Its desired-key calculation lives in
+`server-chunk-residency-player-interest-lib`. A custom orchestrator can reuse
+the calculation for only selected viewers without installing the blanket
+vanilla timer system.
 
 ## Synchronous generation limit
 

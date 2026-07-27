@@ -1,0 +1,20 @@
+[package]
+name = "server-portal-travel-lib"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+generated-block-registry = "0.1.0"
+player-network-message-types = { path = "../player-network-message-types" }
+portal-api = { path = "../portal-api" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }
+server-dimension-api = { path = "../server-dimension-api" }
+server-player-hitbox-api = { path = "../server-player-hitbox-api" }
+server-portal-api = { path = "../server-portal-api" }
+voxel-math-api = { path = "../voxel-math-api" }
+world-instance-api = { path = "../world-instance-api" }
+
+[patch.crates-io]
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }

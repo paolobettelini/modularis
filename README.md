@@ -15,7 +15,7 @@ Check out the AI-generated
 ## Build and run
 
 You can either use the [Patchwork desktop application](https://github.com/paolobettelini/patchwork)
-or build every manually.
+or build everything manually.
 
 To compose and build manually, from this repository root:
 
@@ -44,3 +44,18 @@ Then start one or more clients:
 ```sh
 cargo run --manifest-path build-client/client/Cargo.toml
 ```
+
+The same client can connect to the alternate scoped parkour server:
+
+```sh
+patchwork compose \
+  --modpack thecrown \
+  --modpacks-folder ./modpacks \
+  --mods-folder ./mods \
+  --cache ./build-thecrown
+
+cargo run --manifest-path build-thecrown/thecrown/Cargo.toml
+```
+
+`thecrown` uses runtime scope nodes to host separate parkour chat groups and a
+private transient world for every player.

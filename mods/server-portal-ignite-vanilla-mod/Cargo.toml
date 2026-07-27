@@ -31,4 +31,5 @@ portal-api = { path = "../portal-api" }
 server-chunk-world-api = { path = "../server-chunk-world-api" }
 server-dimension-api = { path = "../server-dimension-api" }
 server-portal-api = { path = "../server-portal-api" }
+server-portal-ignite-lib = { path = "../server-portal-ignite-lib" }
 tokio = { version = "1.48.0", features = ["full"] }

@@ -10,17 +10,29 @@ use server_kick_api::{ServerKickApi, ServerKickRequested, ServerKickSet, ServerK
 use server_network_api::{ServerNetworkApi, ServerNetworkSender};
 use server_network_events_api::{ServerAudience, ServerNetworkEventsApi, ServerPacketOut};
 use server_player_admission_api::{ServerJoinCandidate, ServerPlayerAdmissionRules};
-use server_player_lifecycle_events_api::{ServerPlayerJoined, ServerPlayerLeft};
+use server_player_lifecycle_events_api::{ServerPlayerJoined, ServerPlayerLeft, ServerPlayerReady};
 use server_player_lifecycle_events_mod::ServerPlayerLifecycleEventsMod;
 use server_player_registry_api::{
-    PendingServerPlayerMove, PendingServerPlayerMoves, ServerPlayerMovementSet,
-    ServerPlayerRegistry, ServerPlayerRegistryApi,
+    PendingServerPlayerMove, PendingServerPlayerMoves, ServerPlayerMovementApplied,
+    ServerPlayerMovementSet, ServerPlayerRegistry, ServerPlayerRegistryApi, ServerPlayerSessionSet,
 };
 use server_player_visibility_api::{ServerPlayerVisibility, ServerPlayerVisibilityApi};
 use session_network_message_types::JoinAccepted;
 use tokio::task::JoinHandle;
 
 const LOCAL_PLAYER_CORRECTION_THRESHOLD: f32 = 0.15;
+
+#[derive(Debug)]
+struct PendingServerJoin {
+    source: std::net::SocketAddr,
+    name: String,
+    rejection: Option<String>,
+    player: Option<player_network_message_types::NetworkPlayer>,
+    newly_joined: bool,
+}
+
+#[derive(Resource, Default)]
+struct PendingServerJoins(Vec<PendingServerJoin>);
 
 pub struct ServerPlayerSessionMod;
 
@@ -43,6 +55,20 @@ impl ServerPlayerSessionMod {
             .init_resource::<ServerPlayerRegistry>()
             .init_resource::<ServerPlayerAdmissionRules>()
             .init_resource::<PendingServerPlayerMoves>()
+            .init_resource::<PendingServerJoins>()
+            .add_message::<ServerPlayerMovementApplied>()
+            .configure_sets(
+                Update,
+                (
+                    ServerPlayerSessionSet::Receive,
+                    ServerPlayerSessionSet::Validate,
+                    ServerPlayerSessionSet::Register,
+                    ServerPlayerSessionSet::Initialize,
+                    ServerPlayerSessionSet::Sync,
+                    ServerPlayerSessionSet::Cleanup,
+                )
+                    .chain(),
+            )
             .configure_sets(
                 Update,
                 (
@@ -56,10 +82,17 @@ impl ServerPlayerSessionMod {
             .add_systems(
                 Update,
                 (
-                    handle_join
+                    collect_join_requests
                         .after(NetworkMessageSet::DispatchPackets)
+                        .in_set(ServerPlayerSessionSet::Receive),
+                    validate_join_requests
+                        .in_set(ServerPlayerSessionSet::Validate)
                         .before(ServerKickSet::Apply),
-                    handle_leave.after(NetworkMessageSet::DispatchPackets),
+                    register_joined_players.in_set(ServerPlayerSessionSet::Register),
+                    sync_joined_players.in_set(ServerPlayerSessionSet::Sync),
+                    handle_leave
+                        .after(NetworkMessageSet::DispatchPackets)
+                        .in_set(ServerPlayerSessionSet::Cleanup),
                 ),
             )
             .add_systems(
@@ -82,16 +115,9 @@ impl ServerPlayerSessionMod {
 
 impl ServerPlayerRegistryApi for ServerPlayerSessionMod {}
 
-fn handle_join(
+fn collect_join_requests(
     mut joins: MessageReader<JoinRequestReceived>,
-    mut registry: ResMut<ServerPlayerRegistry>,
-    network: Res<ServerNetworkSender>,
-    time: Res<Time>,
-    mut joined: MessageWriter<ServerPlayerJoined>,
-    mut packets: MessageWriter<ServerPacketOut>,
-    visibility: Res<ServerPlayerVisibility>,
-    admission: Res<ServerPlayerAdmissionRules>,
-    mut kicks: MessageWriter<ServerKickRequested>,
+    mut pending: ResMut<PendingServerJoins>,
 ) {
     for join in joins.read() {
         let name = {
@@ -102,22 +128,74 @@ fn handle_join(
                 trimmed.chars().take(32).collect()
             }
         };
-        let already_joined = registry.player_for_address(join.source).is_some();
-        if !already_joined {
+        pending.0.push(PendingServerJoin {
+            source: join.source,
+            name,
+            rejection: None,
+            player: None,
+            newly_joined: false,
+        });
+    }
+}
+
+fn validate_join_requests(
+    registry: Res<ServerPlayerRegistry>,
+    admission: Res<ServerPlayerAdmissionRules>,
+    mut pending: ResMut<PendingServerJoins>,
+) {
+    for join in &mut pending.0 {
+        if registry.player_for_address(join.source).is_none() {
             let candidate = ServerJoinCandidate {
                 address: join.source,
-                name: name.clone(),
+                name: join.name.clone(),
             };
             if let Err(reason) = admission.validate(&candidate, &registry.players()) {
-                kicks.write(ServerKickRequested {
-                    target: ServerKickTarget::Address(join.source),
-                    reason,
-                });
-                continue;
+                join.rejection = Some(reason);
             }
         }
-        let player = registry.join(join.source, name, time.elapsed_secs_f64());
+    }
+}
+
+fn register_joined_players(
+    mut registry: ResMut<ServerPlayerRegistry>,
+    network: Res<ServerNetworkSender>,
+    time: Res<Time>,
+    mut pending: ResMut<PendingServerJoins>,
+    mut joined: MessageWriter<ServerPlayerJoined>,
+    mut kicks: MessageWriter<ServerKickRequested>,
+) {
+    for join in &mut pending.0 {
+        if let Some(reason) = join.rejection.clone() {
+            kicks.write(ServerKickRequested {
+                target: ServerKickTarget::Address(join.source),
+                reason,
+            });
+            continue;
+        }
+        join.newly_joined = registry.player_for_address(join.source).is_none();
+        let player = registry.join(join.source, join.name.clone(), time.elapsed_secs_f64());
         network.register_client(join.source);
+        if join.newly_joined {
+            joined.write(ServerPlayerJoined {
+                player_id: player.id,
+            });
+        }
+        join.player = Some(player);
+    }
+}
+
+fn sync_joined_players(
+    registry: Res<ServerPlayerRegistry>,
+    visibility: Res<ServerPlayerVisibility>,
+    mut pending: ResMut<PendingServerJoins>,
+    mut packets: MessageWriter<ServerPacketOut>,
+    mut ready: MessageWriter<ServerPlayerReady>,
+) {
+    for join in std::mem::take(&mut pending.0) {
+        let Some(player) = join.player else {
+            continue;
+        };
+        let player_id = player.id;
         let visible_players = registry
             .players()
             .into_iter()
@@ -131,16 +209,14 @@ fn handle_join(
             audience: ServerAudience::Address(join.source),
             message: accepted,
         });
-        if !already_joined {
-            joined.write(ServerPlayerJoined {
-                player_id: player.id,
-            });
+        if join.newly_joined {
             let viewers = visibility.viewers_of(&player, &registry.players());
             packets.write(ServerPacketOut {
                 audience: ServerAudience::Players(viewers),
                 message: ClientBoundMessage::PlayerJoined(PlayerJoined { player }),
             });
         }
+        ready.write(ServerPlayerReady { player_id });
     }
 }
 
@@ -204,6 +280,7 @@ fn apply_validated_movements(
     time: Res<Time>,
     mut pending: ResMut<PendingServerPlayerMoves>,
     mut packets: MessageWriter<ServerPacketOut>,
+    mut applied: MessageWriter<ServerPlayerMovementApplied>,
     visibility: Res<ServerPlayerVisibility>,
 ) {
     let moves = std::mem::take(&mut pending.moves);
@@ -220,6 +297,17 @@ fn apply_validated_movements(
             movement.pitch,
             time.elapsed_secs_f64(),
         ) {
+            let position = Vec3::from_array(player.position);
+            applied.write(ServerPlayerMovementApplied {
+                player_id: player.id,
+                previous_position: movement.current_position,
+                position,
+                yaw: player.yaw,
+                pitch: player.pitch,
+                corrected: movement.rejected
+                    || movement.requested_position.distance(position)
+                        > LOCAL_PLAYER_CORRECTION_THRESHOLD,
+            });
             let moved = ClientBoundMessage::PlayerMoved(PlayerMoved {
                 player_id: player.id,
                 position: player.position,

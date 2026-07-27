@@ -1,7 +1,6 @@
 use bevy_mod::BevyMod;
-use server_player_admission_api::{
-    ServerJoinCandidate, ServerPlayerAdmissionRule, ServerPlayerAdmissionRules,
-};
+use server_player_admission_api::ServerPlayerAdmissionRules;
+use server_player_name_unique_lib::UniquePlayerNameRule;
 use server_player_registry_api::ServerPlayerRegistryApi;
 use tokio::task::JoinHandle;
 
@@ -21,32 +20,11 @@ impl ServerPlayerNameUniqueVanillaMod {
     }
 }
 
-struct UniquePlayerNameRule;
-
-impl ServerPlayerAdmissionRule for UniquePlayerNameRule {
-    fn validate(
-        &self,
-        candidate: &ServerJoinCandidate,
-        online: &[player_network_message_types::NetworkPlayer],
-    ) -> Result<(), String> {
-        if online
-            .iter()
-            .any(|player| player.name.eq_ignore_ascii_case(&candidate.name))
-        {
-            Err(format!(
-                "A player named '{}' is already connected",
-                candidate.name
-            ))
-        } else {
-            Ok(())
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use player_network_message_types::NetworkPlayer;
+    use server_player_admission_api::{ServerJoinCandidate, ServerPlayerAdmissionRule};
     use std::net::{Ipv4Addr, SocketAddr};
 
     fn candidate(name: &str) -> ServerJoinCandidate {

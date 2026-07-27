@@ -305,6 +305,23 @@ impl ServerChunkWorldBackend for DynamicServerChunkWorld {
             .cloned()
             .collect()
     }
+
+    fn discard_instance(&self, instance: &world_instance_api::WorldInstanceId) -> usize {
+        let mut chunks = self
+            .chunks
+            .write()
+            .expect("resident server chunks lock poisoned");
+        let before = chunks.len();
+        chunks.retain(|key, _| &key.instance != instance);
+        self.unpersisted
+            .write()
+            .expect("unpersisted server chunks lock poisoned")
+            .retain(|key| &key.instance != instance);
+        if let Err(error) = self.storage.discard_instance(instance) {
+            warn!("failed to discard transient world '{instance}': {error}");
+        }
+        before - chunks.len()
+    }
 }
 
 #[cfg(test)]
@@ -402,6 +419,28 @@ mod tests {
 
         assert_eq!(
             world.block_for_player(7, position).unwrap().block,
+            BlockId::Glowstone
+        );
+    }
+
+    #[test]
+    fn discarding_a_transient_instance_removes_resident_and_stored_chunks() {
+        let world = player_isolated_world();
+        let position = BlockPos::new(8, 9, 10);
+        world
+            .set_block_for_player(1, position, BlockId::Stone)
+            .unwrap();
+        world
+            .set_block_for_player(2, position, BlockId::Glowstone)
+            .unwrap();
+
+        assert_eq!(world.discard_instance(&WorldInstanceId::new("player:1")), 1);
+        assert_eq!(
+            world.block_for_player(1, position).unwrap().block,
+            BlockId::Air
+        );
+        assert_eq!(
+            world.block_for_player(2, position).unwrap().block,
             BlockId::Glowstone
         );
     }

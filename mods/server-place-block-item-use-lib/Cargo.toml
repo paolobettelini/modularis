@@ -1,0 +1,25 @@
+[package]
+name = "server-place-block-item-use-lib"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+block-edit-events-api = { path = "../block-edit-events-api" }
+block-instance-api = { path = "../block-instance-api" }
+block-manager-api = { path = "../block-manager-api" }
+block-shape-api = { path = "../block-shape-api" }
+inventory-events-api = { path = "../inventory-events-api" }
+item-use-api = { path = "../item-use-api" }
+player-gravity-api = { path = "../player-gravity-api" }
+player-hitbox-api = { path = "../player-hitbox-api" }
+server-block-interaction-rules-api = { path = "../server-block-interaction-rules-api" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }
+server-player-gravity-api = { path = "../server-player-gravity-api" }
+server-player-hitbox-api = { path = "../server-player-hitbox-api" }
+server-player-registry-api = { path = "../server-player-registry-api" }
+
+[patch.crates-io]
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }
+generated-item-metadata = { path = "../generated-item-metadata" }
+generated-item-registry = { path = "../generated-item-registry" }

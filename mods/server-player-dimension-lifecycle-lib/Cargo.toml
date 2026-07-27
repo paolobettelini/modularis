@@ -1,0 +1,9 @@
+[package]
+name = "server-player-dimension-lifecycle-lib"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+player-network-message-types = { path = "../player-network-message-types" }
+server-dimension-api = { path = "../server-dimension-api" }
+server-player-registry-api = { path = "../server-player-registry-api" }

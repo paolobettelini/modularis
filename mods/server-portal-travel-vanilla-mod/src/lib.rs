@@ -4,10 +4,9 @@ use block_edit_events_api::{ServerBlockBroken, ServerBlockPlaced};
 use block_edit_events_mod::BlockEditEventsMod;
 use generated_block_registry::BlockId;
 use player_network_message_types::PlayerId;
-use portal_api::{PortalAxis, PortalFrame};
 use server_chunk_world_api::{ServerChunkWorld, ServerChunkWorldApi};
 use server_dimension_api::{
-    Dimension, RequestPlayerDimensionChange, ServerDimensionApi, ServerDimensionSet,
+    RequestPlayerDimensionChange, ServerDimensionApi, ServerDimensionSet,
     ServerPlayerDimensionChanged,
 };
 use server_player_hitbox_api::{ServerPlayerHitboxApi, ServerPlayerHitboxes};
@@ -17,20 +16,13 @@ use server_player_registry_api::{
 use server_portal_api::{
     ActivePortal, ServerPortalApi, ServerPortalOpened, ServerPortalSet, ServerPortals,
 };
+use server_portal_travel_lib::{
+    DEFAULT_PORTAL_COOLDOWN_SECONDS, PendingReturnPortal, detect_portal_travel as decide_travel,
+    find_return_portal_frame, return_portal_exists,
+};
 use std::collections::HashMap;
 use tokio::task::JoinHandle;
 use voxel_math_api::BlockPos;
-
-const PORTAL_COOLDOWN_SECONDS: f64 = 1.5;
-
-#[derive(Debug, Clone)]
-struct PendingReturnPortal {
-    expected_dimension: Dimension,
-    source_dimension: Dimension,
-    source_position: [f32; 3],
-    frame_block: BlockId,
-    color: [f32; 4],
-}
 
 #[derive(Resource, Default)]
 struct PortalTravelState {
@@ -98,48 +90,17 @@ fn detect_portal_travel(
         {
             continue;
         }
-        let block = BlockPos::new(
-            player.position[0].floor() as i32,
-            player.position[1].floor() as i32,
-            player.position[2].floor() as i32,
-        );
-        let Some(scope) = world
-            .resident_key_for_player(player.id, block.chunk())
-            .map(|key| key.scope())
+        let Some(decision) = decide_travel(&world, &dimensions, &hitboxes, &portals, &player)
         else {
             continue;
         };
-        let hitbox = hitboxes.hitbox(player.id);
-        let Some(portal) = portals.in_scope(&scope).find(|portal| {
-            portal
-                .frame
-                .contains_player(player.position, hitbox.radius, hitbox.height)
-        }) else {
-            continue;
-        };
-        let Some(source_dimension) = dimensions.dimension_id_for(player.id) else {
-            continue;
-        };
-        if portal.destination_position.is_none() {
-            state.pending_returns.insert(
-                player.id,
-                PendingReturnPortal {
-                    expected_dimension: portal.destination,
-                    source_dimension,
-                    source_position: portal.frame.safe_position_beside(),
-                    frame_block: portal.frame_block,
-                    color: portal.color,
-                },
-            );
+        if let Some(pending) = decision.pending_return {
+            state.pending_returns.insert(player.id, pending);
         }
-        requests.write(RequestPlayerDimensionChange {
-            player_id: player.id,
-            target: portal.destination,
-            position: portal.destination_position,
-        });
+        requests.write(decision.request);
         state
             .cooldowns
-            .insert(player.id, now + PORTAL_COOLDOWN_SECONDS);
+            .insert(player.id, now + DEFAULT_PORTAL_COOLDOWN_SECONDS);
     }
 }
 
@@ -170,27 +131,10 @@ fn create_return_portals(
         else {
             continue;
         };
-        if portals.in_scope(&scope).any(|portal| {
-            portal.frame_block == pending.frame_block
-                && portal.destination == pending.source_dimension
-                && portal.destination_position == Some(pending.source_position)
-        }) {
+        if return_portal_exists(&portals, &scope, &pending) {
             continue;
         }
-        let frame = (0..16)
-            .map(|slot| PortalFrame {
-                origin: BlockPos::new(
-                    spawn.x - 2 + (slot % 4) * 6,
-                    spawn.y,
-                    spawn.z + 3 + (slot / 4) * 6,
-                ),
-                axis: PortalAxis::X,
-            })
-            .find(|candidate| {
-                !portals
-                    .in_scope(&scope)
-                    .any(|portal| portal.frame == *candidate)
-            });
+        let frame = find_return_portal_frame(&portals, &scope, spawn);
         let Some(frame) = frame else {
             warn!("no free return portal slot near the dimension spawn");
             continue;

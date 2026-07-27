@@ -1,0 +1,20 @@
+[package]
+name = "world-context-network-messages-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "WorldContextNetworkMessagesMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.network.messages]
+clientbound = ["world_context_network_message_types::PlayerWorldChanged"]
+serverbound = []
+
+[dependencies]
+tokio = { version = "1.48.0", features = ["full"] }
+world-context-network-message-types = { path = "../world-context-network-message-types" }

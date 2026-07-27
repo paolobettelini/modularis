@@ -1,0 +1,8 @@
+[package]
+name = "server-player-name-unique-lib"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+player-network-message-types = { path = "../player-network-message-types" }
+server-player-admission-api = { path = "../server-player-admission-api" }

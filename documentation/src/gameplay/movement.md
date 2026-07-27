@@ -226,6 +226,11 @@ The vanilla collision validator:
 - resolves the requested movement against server blocks;
 - preserves world-scope-aware block queries.
 
+The calculation is exposed separately by
+`server-player-movement-collision-lib`. The vanilla validator applies it to
+every pending move. A server with different rules per runtime scope can omit
+that blanket validator and call the same resolver only for selected players.
+
 The apply stage updates the registry and synchronizes visible remote players.
 
 ## Corrections

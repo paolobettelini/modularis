@@ -56,6 +56,24 @@ Then check:
 cargo check --manifest-path build-server/server/Cargo.toml
 ```
 
+## Compose the TheCrown server
+
+The alternate scoped parkour server uses the same client:
+
+```sh
+patchwork compose \
+  --modpack thecrown \
+  --modpacks-folder ./modpacks \
+  --mods-folder ./mods \
+  --cache ./build-thecrown
+```
+
+Check it with:
+
+```sh
+cargo check --manifest-path build-thecrown/thecrown/Cargo.toml
+```
+
 Recompose after changing:
 
 - a modpack;
@@ -93,6 +111,12 @@ Start one or more clients in other terminals:
 cargo run --manifest-path build-client/client/Cargo.toml
 ```
 
+To run TheCrown instead of the vanilla server:
+
+```sh
+cargo run --manifest-path build-thecrown/thecrown/Cargo.toml
+```
+
 Default controls:
 
 | Action | Default |
@@ -116,6 +140,7 @@ Do not make source changes in:
 ```text
 build-client/
 build-server/
+build-thecrown/
 mods/generated-*/
 ```
 

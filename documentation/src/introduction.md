@@ -19,6 +19,10 @@ That distinction explains most architectural decisions in the repository:
 - a concrete implementation is usually hidden behind a small API crate;
 - optional behavior is placed in a feature mod, often in a `*-vanilla-mod`
   crate;
+- reusable mechanics live in ordinary `*-lib` crates so custom orchestration
+  can call them conditionally;
+- runtime scope nodes let one compiled server host different worlds, chat
+  groups, visibility sets, and game instances;
 - generated build directories are disposable output, not source code.
 
 The goal is not only to demonstrate Minecraft-like mechanics. The demo is also
@@ -33,6 +37,8 @@ For example, a custom server may:
 - replace the terrain generator without changing the chunk cache;
 - grant flight only to some players;
 - use a different inventory layout or item-use pipeline;
+- share chat between players while giving each one a private world;
+- create and destroy minigame instances on demand;
 - add a new dimension and portal rule without editing a central dimension enum;
 - replace the chunk mesher or player renderer on the client.
 
@@ -54,6 +60,8 @@ If you are new to the project, read these chapters first:
 3. [Patchwork composition](./architecture/patchwork-composition.md)
 4. [Mod anatomy and lifecycle](./architecture/mod-anatomy.md)
 5. [APIs, providers, and ECS contracts](./architecture/apis-and-events.md)
+6. [Runtime scope trees and facets](./architecture/runtime-scopes.md)
+7. [Vanilla mechanics as reusable libraries](./architecture/vanilla-libraries.md)
 
 If you want to add gameplay, continue with:
 
@@ -85,7 +93,12 @@ This book uses the following terms:
 - **generated crate**: a crate created by Patchwork codegen from the final
   composition;
 - **vanilla mod**: the demo's default Minecraft-like behavior, kept optional;
+- **scope node**: an ECS-backed runtime node in a parent/child hierarchy;
+- **scope facet**: a domain-specific boundary inherited from the nearest
+  ancestor;
 - **world scope**: the namespace formed by a world instance and chunk provider;
+- **world context**: the concrete world instance currently displayed by one
+  client;
 - **audience**: the players allowed to observe or interact with some state.
 
 The names are architectural roles. A single crate may fill more than one role,

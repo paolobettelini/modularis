@@ -159,6 +159,16 @@ cell.
 
 The crafting table is a vanilla cell-menu behavior.
 
+Its mechanic and policy are separate:
+
+- `server-crafting-table-menu-lib` verifies the target and builds the menu
+  request;
+- `server-crafting-table-menu-vanilla-mod` applies that mechanic to every
+  matching open intent.
+
+A scoped custom server can omit the glue mod and call the library only for
+selected players, nodes, permissions, or game phases.
+
 Client:
 
 1. a specific right-click handler sees `BlockId::CraftingTable`;
@@ -219,6 +229,7 @@ shared audience to all online players. Chat uses this service directly.
 
 Cell menus additionally track active viewers and validate each interaction, so
 they do not broadcast every menu mutation to the whole resolved audience.
-Teams, distance, permissions, and world visibility still require a replacement
-resolver and matching domain validation. Audience resolution must never be
-treated as sufficient authorization by itself.
+The scope resolver interprets `Audience::Shared` as a scope node and returns
+members in its subtree. Teams, distance, permissions, and world visibility may
+still require a replacement resolver and matching domain validation. Audience
+resolution must never be treated as sufficient authorization by itself.

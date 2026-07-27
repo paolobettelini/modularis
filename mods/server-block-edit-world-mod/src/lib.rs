@@ -1,10 +1,10 @@
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use block_edit_events_api::{
-    PendingBlockBreak, PendingBlockBreaks, ServerBlockBreakRequested, ServerBlockBroken,
-    ServerBlockEditSet,
+    PendingBlockBreaks, ServerBlockBreakRequested, ServerBlockBroken, ServerBlockEditSet,
 };
 use block_edit_events_mod::BlockEditEventsMod;
+use server_block_edit_world_lib::{allow_block_break, apply_block_break};
 use server_chunk_world_api::{ServerChunkWorld, ServerChunkWorldApi};
 use tokio::task::JoinHandle;
 
@@ -35,11 +35,7 @@ fn collect_break_requests(
     mut pending: ResMut<PendingBlockBreaks>,
 ) {
     for request in requests.read() {
-        pending.breaks.push(PendingBlockBreak {
-            player_id: request.player_id,
-            position: request.position,
-            allowed: true,
-        });
+        pending.breaks.push(allow_block_break(request));
     }
 }
 
@@ -50,18 +46,11 @@ fn break_blocks(
 ) {
     let requests = std::mem::take(&mut pending.breaks);
     for request in requests {
-        if !request.allowed {
-            continue;
-        }
-        match world.break_block_for_player(request.player_id, request.position) {
-            Ok(mutation) => {
-                broken.write(ServerBlockBroken {
-                    player_id: request.player_id,
-                    scope: mutation.scope,
-                    position: mutation.position,
-                    previous: mutation.previous,
-                });
+        match apply_block_break(&world, &request) {
+            Ok(Some(event)) => {
+                broken.write(event);
             }
+            Ok(None) => {}
             Err(error) => debug!("ignored block break request: {error:?}"),
         }
     }

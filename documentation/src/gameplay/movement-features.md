@@ -144,6 +144,11 @@ The server jump mod receives the intent and checks authoritative ground contact
 against the player's world. The actual vertical position still arrives through
 the normal client movement request and is checked by the movement pipeline.
 
+Ground probing and jump validation are exposed by
+`server-player-jump-lib`. `server-player-jump-vanilla-mod` is the always-on
+adapter; a custom game can call the library only in scopes where jumping is
+enabled.
+
 `LocalPlayerJumped` is a narrow client ECS result event. The independent
 `client-player-sprint-jump-vanilla-mod` listens to it and, while sprint is held,
 adds an impulse equivalent to `0.20` block per tick in the gravity-relative

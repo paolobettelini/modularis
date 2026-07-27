@@ -158,6 +158,13 @@ impl ServerChunkStorageBackend for FilesystemChunkStorage {
             .map(|region| region.dirty_chunks.len())
             .sum()
     }
+
+    fn discard_instance(&self, _instance: &WorldInstanceId) -> Result<usize, ChunkStorageError> {
+        // Filesystem worlds are durable. Deletion requires a separate,
+        // explicit world-management policy and must never happen as a side
+        // effect of unloading a runtime scope.
+        Ok(0)
+    }
 }
 
 impl Drop for FilesystemChunkStorage {

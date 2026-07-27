@@ -1,0 +1,21 @@
+[package]
+name = "server-chunk-routing-scopes-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerChunkRoutingScopesMod"
+provides = "server-chunk-routing-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-scope-api", "server-scope-world-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+server-chunk-provider-api = { path = "../server-chunk-provider-api" }
+server-chunk-routing-api = { path = "../server-chunk-routing-api" }
+server-scope-api = { path = "../server-scope-api" }
+server-scope-world-api = { path = "../server-scope-world-api" }
+tokio = { version = "1.48.0", features = ["full"] }

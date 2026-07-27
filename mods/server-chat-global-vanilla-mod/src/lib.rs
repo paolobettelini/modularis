@@ -4,6 +4,7 @@ use bevy_mod::BevyMod;
 use server_chat_api::{
     PublishServerChatMessage, ServerChatApi, ServerChatInputReceived, ServerChatSet,
 };
+use server_player_chat_lib::player_chat_message;
 use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
 use tokio::task::JoinHandle;
 
@@ -31,12 +32,10 @@ fn publish_global_chat(
     mut messages: MessageWriter<PublishServerChatMessage>,
 ) {
     for input in inputs.read().filter(|input| !input.text.starts_with('/')) {
-        let Some(player) = players.player(input.player_id) else {
-            continue;
-        };
-        messages.write(PublishServerChatMessage {
-            audience: Audience::everyone(),
-            text: format!("[{}] {}", player.name, input.text),
-        });
+        if let Some(message) =
+            player_chat_message(&players, input.player_id, &input.text, Audience::everyone())
+        {
+            messages.write(message);
+        }
     }
 }

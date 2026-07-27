@@ -1,23 +1,14 @@
 name = "Minecraft demo server foundation"
-description = "Server transport, sessions and authoritative pipelines without vanilla gameplay policy."
-modpacks = ["common"]
+description = "Convenience umbrella for the core plus neutral chat, inventory, cell-menu, block-edit, flight and sun pipelines."
+modpacks = ["server-core"]
 ignore = []
 
 mods = [
-    "server-config-local-impl",
-    "server-tick-rate-20hz-default-impl",
-    "server-bevy-runner-mod",
-    "server-tick-metrics-mod",
-    "server-network-tcp-impl",
-    "server-network-events-api",
-    "server-network-router-mod",
     "server-chat-events-mod",
     "server-chat-network-receive-mod",
     "server-chat-network-sync-mod",
     "server-chat-clear-network-sync-mod",
     "server-command-brigadier-mod",
-    "server-player-lifecycle-events-mod",
-    "server-kick-events-mod",
     "server-inventory-authoritative-mod",
     "server-inventory-network-receive-mod",
     "server-inventory-network-sync-mod",
@@ -27,13 +18,9 @@ mods = [
     "server-cell-menu-network-sync-mod",
     "server-block-edit-network-receive-mod",
     "server-block-edit-network-send-mod",
-    "server-player-session-mod",
-    "server-player-kick-mod",
+    "server-chunk-request-mod",
     "server-player-flight-capability-mod",
     "server-player-flight-network-sync-mod",
     "server-sun-state-mod",
     "server-sun-network-sync-mod",
-    "server-player-timeout-mod",
-    "server-chunk-request-mod",
-    "server-game-bootstrap-mod",
 ]

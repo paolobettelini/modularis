@@ -1,13 +1,12 @@
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use server_chunk_residency_api::{ServerChunkResidencyApi, ServerChunkResidencyConfig};
-use server_chunk_world_api::{ResidentChunkKey, ServerChunkWorld, ServerChunkWorldApi};
+use server_chunk_residency_player_interest_lib::player_interest_chunks;
+use server_chunk_world_api::{ServerChunkWorld, ServerChunkWorldApi};
 use server_player_registry_api::{
     ServerPlayerMovementSet, ServerPlayerRegistry, ServerPlayerRegistryApi,
 };
-use std::collections::HashSet;
 use tokio::task::JoinHandle;
-use voxel_math_api::{BlockPos, ChunkPos};
 
 #[derive(Resource)]
 struct ChunkResidencyMaintenanceTimer(Timer);
@@ -61,24 +60,6 @@ fn maintain_player_chunk_residency(
         return;
     }
 
-    let mut desired = HashSet::<ResidentChunkKey>::new();
-    for player in players.players() {
-        let center = BlockPos::new(
-            player.position[0].floor() as i32,
-            player.position[1].floor() as i32,
-            player.position[2].floor() as i32,
-        )
-        .chunk();
-        for y in -config.vertical_radius.max(0)..=config.vertical_radius.max(0) {
-            for z in -config.horizontal_radius.max(0)..=config.horizontal_radius.max(0) {
-                for x in -config.horizontal_radius.max(0)..=config.horizontal_radius.max(0) {
-                    let position = ChunkPos::new(center.x + x, center.y + y, center.z + z);
-                    if let Some(key) = world.resident_key_for_player(player.id, position) {
-                        desired.insert(key);
-                    }
-                }
-            }
-        }
-    }
+    let desired = player_interest_chunks(&world, players.players(), *config);
     world.retain_resident(&desired);
 }

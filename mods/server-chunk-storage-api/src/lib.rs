@@ -44,6 +44,15 @@ pub trait ServerChunkStorageBackend: Send + Sync + 'static {
     fn flush(&self) -> Result<ChunkStorageFlushReport, ChunkStorageError>;
 
     fn pending_chunks(&self) -> usize;
+
+    /// Discards transient data for one runtime world.
+    ///
+    /// Persistent backends may deliberately return `Ok(0)` and keep their
+    /// durable files. Runtime instance managers should call this only when
+    /// their own lifecycle policy says the world is disposable.
+    fn discard_instance(&self, _instance: &WorldInstanceId) -> Result<usize, ChunkStorageError> {
+        Ok(0)
+    }
 }
 
 #[derive(Resource, Clone)]
@@ -76,6 +85,10 @@ impl ServerChunkStorage {
 
     pub fn pending_chunks(&self) -> usize {
         self.0.pending_chunks()
+    }
+
+    pub fn discard_instance(&self, instance: &WorldInstanceId) -> Result<usize, ChunkStorageError> {
+        self.0.discard_instance(instance)
     }
 }
 
@@ -119,5 +132,15 @@ impl ServerChunkStorageBackend for MemoryChunkStorage {
 
     fn pending_chunks(&self) -> usize {
         0
+    }
+
+    fn discard_instance(&self, instance: &WorldInstanceId) -> Result<usize, ChunkStorageError> {
+        let mut chunks = self
+            .chunks
+            .write()
+            .expect("memory chunk storage lock poisoned");
+        let before = chunks.len();
+        chunks.retain(|key, _| &key.instance != instance);
+        Ok(before - chunks.len())
     }
 }

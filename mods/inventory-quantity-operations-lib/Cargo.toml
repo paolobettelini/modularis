@@ -1,0 +1,12 @@
+[package]
+name = "inventory-quantity-operations-lib"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+item-instance-api = { path = "../item-instance-api" }
+item-quantity-meta = { path = "../item-quantity-meta" }
+
+[patch.crates-io]
+generated-item-metadata = { path = "../generated-item-metadata" }
+generated-item-registry = { path = "../generated-item-registry" }

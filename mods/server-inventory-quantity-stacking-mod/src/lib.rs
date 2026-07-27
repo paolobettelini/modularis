@@ -4,7 +4,7 @@ use inventory_events_api::{
     InventoryCellSet, InventoryMoveHandled, InventoryMoveRequested, InventoryValidationSet,
 };
 use inventory_events_mod::InventoryEventsMod;
-use item_quantity_meta::Quantity;
+use inventory_quantity_operations_lib::merge_compatible_items;
 use server_inventory_api::{ServerInventories, ServerInventoryApi};
 use tokio::task::JoinHandle;
 
@@ -38,26 +38,15 @@ fn stack_compatible_items(
         let Some(state) = inventories.get_mut(request.player_id) else {
             continue;
         };
-        let Some(mut source) = state.inventory.get(&request.from).cloned() else {
+        let Some(source) = state.inventory.get(&request.from).cloned() else {
             continue;
         };
-        let Some(mut target) = state.inventory.get(&request.to).cloned() else {
+        let Some(target) = state.inventory.get(&request.to).cloned() else {
             continue;
         };
-        if source.item != target.item {
-            continue;
-        }
-        let (Some(source_quantity), Some(target_quantity)) =
-            (source.metadata.quantity, target.metadata.quantity)
-        else {
+        let Some(target) = merge_compatible_items(&source, &target) else {
             continue;
         };
-        source.metadata.quantity = None;
-        target.metadata.quantity = None;
-        if source.metadata != target.metadata {
-            continue;
-        }
-        target.metadata.quantity = Some(merge(source_quantity, target_quantity));
         let _ = state.inventory.set(request.from.clone(), None);
         let _ = state
             .inventory
@@ -76,14 +65,5 @@ fn stack_compatible_items(
             cell: request.to.clone(),
             item: Some(target),
         });
-    }
-}
-
-fn merge(left: Quantity, right: Quantity) -> Quantity {
-    match (left, right) {
-        (Quantity::Infinite, _) | (_, Quantity::Infinite) => Quantity::Infinite,
-        (Quantity::Finite(left), Quantity::Finite(right)) => {
-            Quantity::Finite(left.saturating_add(right))
-        }
     }
 }

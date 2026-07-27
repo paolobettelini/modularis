@@ -1,0 +1,19 @@
+[package]
+name = "server-scope-world-state-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerScopeWorldStateMod"
+provides = "server-scope-world-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-scope-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+server-scope-api = { path = "../server-scope-api" }
+server-scope-world-api = { path = "../server-scope-world-api" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -6,6 +6,7 @@ use player_speed_network_message_types::PlayerSpeedChanged;
 use server_network_events_api::{ServerAudience, ServerNetworkEventsApi, ServerPacketOut};
 use server_player_lifecycle_events_api::ServerPlayerJoined;
 use server_player_lifecycle_events_mod::ServerPlayerLifecycleEventsMod;
+use server_player_registry_api::ServerPlayerSessionSet;
 use server_player_speed_api::{
     ServerPlayerSpeedApi, ServerPlayerSpeedChanged, ServerPlayerSpeedSet, ServerPlayerSpeeds,
 };
@@ -23,7 +24,9 @@ impl ServerPlayerSpeedNetworkSyncMod {
     ) -> Self {
         bevy.app.add_systems(
             Update,
-            (sync_joined_players, sync_speed_changes).in_set(ServerPlayerSpeedSet::Sync),
+            (sync_joined_players, sync_speed_changes)
+                .in_set(ServerPlayerSpeedSet::Sync)
+                .after(ServerPlayerSessionSet::Sync),
         );
         Self
     }

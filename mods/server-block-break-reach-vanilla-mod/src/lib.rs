@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use block_edit_events_api::{PendingBlockBreaks, ServerBlockEditSet};
 use block_edit_events_mod::BlockEditEventsMod;
-use player_gravity_api::gravity_up;
+use server_block_break_reach_lib::block_break_is_in_reach;
 use server_block_interaction_rules_api::{
     ServerBlockInteractionRules, ServerBlockInteractionRulesApi,
 };
@@ -51,16 +51,6 @@ fn validate_block_break_reach(
     mut pending: ResMut<PendingBlockBreaks>,
 ) {
     for request in &mut pending.breaks {
-        if !request.allowed {
-            continue;
-        }
-        request.allowed = players.player(request.player_id).is_some_and(|player| {
-            rules.player_can_reach_from_eye(
-                player.position,
-                gravity_up(gravities.gravity(player.id)),
-                hitboxes.hitbox(player.id).eye_height,
-                request.position,
-            )
-        });
+        request.allowed = block_break_is_in_reach(&players, &gravities, &hitboxes, *rules, request);
     }
 }

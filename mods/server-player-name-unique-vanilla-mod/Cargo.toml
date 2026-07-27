@@ -16,4 +16,5 @@ bevy-mod = { path = "../bevy-mod" }
 player-network-message-types = { path = "../player-network-message-types" }
 server-player-admission-api = { path = "../server-player-admission-api" }
 server-player-registry-api = { path = "../server-player-registry-api" }
+server-player-name-unique-lib = { path = "../server-player-name-unique-lib" }
 tokio = { version = "1.48.0", features = ["full"] }

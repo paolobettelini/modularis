@@ -1,0 +1,20 @@
+[package]
+name = "server-audience-scope-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerAudienceScopeImpl"
+provides = "server-audience-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-scope-api"]
+run = []
+ownership = []
+
+[dependencies]
+audience-api = { path = "../audience-api" }
+bevy-mod = { path = "../bevy-mod" }
+server-audience-api = { path = "../server-audience-api" }
+server-scope-api = { path = "../server-scope-api" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -140,6 +140,11 @@ Most default items have infinite quantity for testing. Grass has a finite stack.
 The loadout mod is vanilla policy. A custom server can replace it without
 changing inventory storage or synchronization.
 
+The item construction itself is exposed by
+`server-inventory-default-loadout-lib`, so an orchestrator may grant that
+loadout only in selected scopes or use it as the starting point for another
+policy.
+
 ## Stack handling
 
 `server-inventory-quantity-stacking-mod` runs before generic move/swap.
@@ -152,6 +157,10 @@ It merges only when:
 
 Finite quantities use saturating addition. If either quantity is infinite, the
 result is infinite.
+
+Stack compatibility and quantity merge live in
+`inventory-quantity-operations-lib`; the selected stacking mod only connects
+those operations to the authoritative inventory pipeline.
 
 After handling it emits `InventoryMoveHandled`, preventing generic swap.
 

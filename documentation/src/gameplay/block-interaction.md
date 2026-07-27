@@ -136,6 +136,11 @@ Allowed edits call `ServerChunkWorld::break_block_for_player`.
 
 The world route is resolved for the actor, so edits affect the correct scope.
 
+The always-on world glue delegates to `server-block-edit-world-lib`. A custom
+server can omit `server-block-edit-world-mod`, inspect the same pending request
+inside its own scope or game rules, and call the library only where breaking is
+valid.
+
 Success emits:
 
 ```rust
@@ -175,6 +180,11 @@ The vanilla placement mod requires:
 - no visible player's current per-player hitbox overlapping any AABB of the
   placed shape;
 - target block is air.
+
+The full check and apply operation lives in
+`server-place-block-item-use-lib`; the mod is only the blanket ECS listener.
+This lets a custom game reuse `PlaceBlock` semantics conditionally without
+enabling placement in every runtime node.
 
 It calls `place_block_for_player` and emits:
 

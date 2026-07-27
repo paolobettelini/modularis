@@ -59,6 +59,9 @@ pub trait ServerChunkWorldBackend: Send + Sync + 'static {
     ) -> Result<BlockMutation, WorldEditError>;
     fn retain_resident(&self, desired: &HashSet<ResidentChunkKey>);
     fn resident_keys(&self) -> Vec<ResidentChunkKey>;
+    fn discard_instance(&self, _instance: &WorldInstanceId) -> usize {
+        0
+    }
 }
 
 #[derive(Resource, Clone)]
@@ -139,6 +142,10 @@ impl ServerChunkWorld {
 
     pub fn resident_keys(&self) -> Vec<ResidentChunkKey> {
         self.0.resident_keys()
+    }
+
+    pub fn discard_instance(&self, instance: &WorldInstanceId) -> usize {
+        self.0.discard_instance(instance)
     }
 }
 

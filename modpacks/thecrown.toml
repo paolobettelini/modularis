@@ -1,0 +1,62 @@
+name = "TheCrown"
+description = "Scoped multi-instance parkour server demonstrating a custom monolithic orchestrator over reusable Patchwork libraries."
+color = "#7a5cff"
+modpacks = ["server-core"]
+ignore = []
+
+mods = [
+    # Only the neutral feature pipelines used by this server. Inventory,
+    # cell-menu and inbound block-edit pipelines are intentionally absent.
+    "server-chat-events-mod",
+    "server-chat-network-receive-mod",
+    "server-chat-network-sync-mod",
+    "server-command-brigadier-mod",
+    "server-block-edit-network-send-mod",
+    "server-chunk-request-mod",
+    "server-player-flight-capability-mod",
+    "server-player-flight-network-sync-mod",
+    "server-sun-state-mod",
+    "server-sun-network-sync-mod",
+
+    # Runtime hierarchy and scoped policies.
+    "server-scope-tree-mod",
+    "server-scope-world-state-mod",
+    "server-player-world-state-mod",
+    "server-player-world-network-sync-mod",
+    "server-audience-scope-impl",
+    "server-player-visibility-scope-impl",
+    "server-player-visibility-scope-sync-mod",
+
+    # Transient, independently routed player worlds.
+    "server-chunk-provider-registry-mod",
+    "server-chunk-storage-memory-impl",
+    "server-chunk-provider-parkour-empty-mod",
+    "server-chunk-routing-scopes-mod",
+    "server-chunk-world-dynamic-impl",
+    "server-chunk-residency-player-interest-vanilla-mod",
+
+    # Reused movement mechanics. These remain selectable policies: TheCrown
+    # chooses them, but the foundation does not force them.
+    "player-gravity-vanilla-mod",
+    "player-gravity-network-messages-mod",
+    "player-jump-network-messages-mod",
+    "server-player-gravity-state-mod",
+    "server-player-gravity-network-sync-mod",
+    "voxel-model-assets-fs-impl",
+    "block-shape-voxel-model-impl",
+    "server-player-hitbox-state-mod",
+    "server-player-speed-state-mod",
+    "server-player-speed-network-sync-mod",
+    "server-player-flight-speed-state-mod",
+    "server-player-flight-speed-network-sync-mod",
+    "server-player-movement-collision-vanilla-mod",
+    "server-player-jump-vanilla-mod",
+
+    # Optional conventional admission/command routing reused as libraries of
+    # behavior around the custom game.
+    "server-player-name-unique-vanilla-mod",
+    "server-chat-command-router-mod",
+
+    # One deliberately monolithic custom server orchestration mod.
+    "thecrown-main-mod",
+]

@@ -1,0 +1,19 @@
+[package]
+name = "server-portal-ignite-lib"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+block-manager-api = { path = "../block-manager-api" }
+inventory-events-api = { path = "../inventory-events-api" }
+item-use-api = { path = "../item-use-api" }
+portal-api = { path = "../portal-api" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }
+server-dimension-api = { path = "../server-dimension-api" }
+server-portal-api = { path = "../server-portal-api" }
+
+[patch.crates-io]
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }
+generated-item-metadata = { path = "../generated-item-metadata" }
+generated-item-registry = { path = "../generated-item-registry" }

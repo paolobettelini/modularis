@@ -3,6 +3,7 @@ use bevy_mod::BevyMod;
 use server_player_flight_api::{ServerPlayerFlightApi, SetPlayerFlightCapability};
 use server_player_lifecycle_events_api::ServerPlayerJoined;
 use server_player_lifecycle_events_mod::ServerPlayerLifecycleEventsMod;
+use server_player_registry_api::ServerPlayerSessionSet;
 use tokio::task::JoinHandle;
 
 pub struct ServerPlayerFlightGrantAllVanillaMod;
@@ -13,7 +14,10 @@ impl ServerPlayerFlightGrantAllVanillaMod {
         _flight: &mut F,
         _lifecycle: &mut ServerPlayerLifecycleEventsMod,
     ) -> Self {
-        bevy.app.add_systems(Update, grant_flight_on_join);
+        bevy.app.add_systems(
+            Update,
+            grant_flight_on_join.in_set(ServerPlayerSessionSet::Initialize),
+        );
         Self
     }
 

@@ -1,0 +1,10 @@
+[package]
+name = "server-player-chat-lib"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+audience-api = { path = "../audience-api" }
+player-network-message-types = { path = "../player-network-message-types" }
+server-chat-api = { path = "../server-chat-api" }
+server-player-registry-api = { path = "../server-player-registry-api" }

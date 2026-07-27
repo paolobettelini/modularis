@@ -483,21 +483,26 @@ Start from the smallest useful composition:
 ```toml
 name = "Custom server"
 description = "A server with selected rules."
-modpacks = ["server-base"]
+modpacks = ["server-core"]
 ignore = []
 
 mods = [
+    # Add only neutral feature pipelines that this server uses.
+    "server-chat-events-mod",
+    "server-chat-network-receive-mod",
+    "server-chat-network-sync-mod",
     "server-chunk-provider-registry-mod",
     "my-chunk-provider-mod",
     "my-chunk-routing-mod",
     "server-chunk-world-dynamic-impl",
     "my-player-visibility-mod",
-    "my-inventory-layout-mod",
 ]
 ```
 
-Add only desired vanilla feature mods. Do not import `server.toml`, because it
-already chooses the demo world and vanilla pack.
+Add only desired neutral pipelines and vanilla feature mods. Import
+`server-base.toml` instead when its complete convenience bundle is useful. Do
+not import `server.toml`, because it already chooses the demo world and vanilla
+pack.
 
 Compose early. Missing API errors reveal which neutral contracts still need a
 provider.

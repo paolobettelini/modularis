@@ -134,6 +134,16 @@ The player movement pipeline is:
 Receive -> Validate -> Apply -> Sync
 ```
 
+The session pipeline is:
+
+```text
+Receive -> Validate -> Register -> Initialize -> Sync -> Cleanup
+```
+
+`Initialize` is the insertion point for assigning runtime scopes, worlds,
+inventories, capabilities, and other state that the first client snapshot must
+observe. `ServerPlayerReady` is emitted after `JoinAccepted` has been queued.
+
 The client controller pipeline is:
 
 ```text
@@ -227,3 +237,16 @@ A good cross-mod event:
 For example, `ServerBlockPlaced` includes player, scope, position, new block,
 and replaced block. This is enough for synchronization, logging, achievements,
 or custom reactions without querying hidden state.
+
+## Hierarchical event routing
+
+Some domain events need a runtime location in addition to a schedule phase.
+`ScopedMessage<T>` carries a `ScopeNodeId` and a propagation mode. Listeners
+filter it against the scope tree using `reaches`.
+
+This is complementary to `SystemSet`:
+
+- a set answers **when** a system participates;
+- a scope answers **where** an event applies.
+
+See [Runtime scope trees and facets](runtime-scopes.md).
