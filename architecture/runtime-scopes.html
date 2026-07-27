@@ -1,0 +1,491 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Runtime scope trees and facets - Minecraft Simple Demo Architecture</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting-started/project-overview.html"><strong aria-hidden="true">1.1.</strong> Project overview</a></li><li class="chapter-item expanded "><a href="../getting-started/build-and-run.html"><strong aria-hidden="true">1.2.</strong> Build and run</a></li></ol></li><li class="chapter-item expanded "><a href="../architecture/foundations.html"><strong aria-hidden="true">2.</strong> Architecture foundations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../architecture/patchwork-composition.html"><strong aria-hidden="true">2.1.</strong> Patchwork composition</a></li><li class="chapter-item expanded "><a href="../architecture/mod-anatomy.html"><strong aria-hidden="true">2.2.</strong> Mod anatomy and lifecycle</a></li><li class="chapter-item expanded "><a href="../architecture/apis-and-events.html"><strong aria-hidden="true">2.3.</strong> APIs, providers, and ECS contracts</a></li><li class="chapter-item expanded "><a href="../architecture/runtime-scopes.html" class="active"><strong aria-hidden="true">2.4.</strong> Runtime scope trees and facets</a></li><li class="chapter-item expanded "><a href="../architecture/vanilla-libraries.html"><strong aria-hidden="true">2.5.</strong> Vanilla mechanics as reusable libraries</a></li><li class="chapter-item expanded "><a href="../architecture/code-generation.html"><strong aria-hidden="true">2.6.</strong> Code generation and registries</a></li><li class="chapter-item expanded "><a href="../architecture/modpacks.html"><strong aria-hidden="true">2.7.</strong> Modpacks and feature boundaries</a></li><li class="chapter-item expanded "><a href="../architecture/assets-and-output.html"><strong aria-hidden="true">2.8.</strong> Assets and generated output</a></li></ol></li><li class="chapter-item expanded "><a href="../runtime/runtime-overview.html"><strong aria-hidden="true">3.</strong> Runtime and networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../runtime/bevy-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Bevy application lifecycle</a></li><li class="chapter-item expanded "><a href="../runtime/networking.html"><strong aria-hidden="true">3.2.</strong> Protocol, transport, and framing</a></li><li class="chapter-item expanded "><a href="../runtime/sessions-and-visibility.html"><strong aria-hidden="true">3.3.</strong> Sessions, routing, and visibility</a></li><li class="chapter-item expanded "><a href="../runtime/chat-and-commands.html"><strong aria-hidden="true">3.4.</strong> Chat, commands, and completion</a></li><li class="chapter-item expanded "><a href="../runtime/sounds.html"><strong aria-hidden="true">3.5.</strong> Sounds, audiences, and spatial playback</a></li></ol></li><li class="chapter-item expanded "><a href="../world/world-overview.html"><strong aria-hidden="true">4.</strong> World architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../world/blocks-and-items.html"><strong aria-hidden="true">4.1.</strong> Blocks, items, and metadata</a></li><li class="chapter-item expanded "><a href="../world/voxel-models.html"><strong aria-hidden="true">4.2.</strong> JSON voxel models and textures</a></li><li class="chapter-item expanded "><a href="../world/chunk-storage.html"><strong aria-hidden="true">4.3.</strong> Chunk coordinates and storage</a></li><li class="chapter-item expanded "><a href="../world/server-world.html"><strong aria-hidden="true">4.4.</strong> Server world providers and residency</a></li><li class="chapter-item expanded "><a href="../world/biomes.html"><strong aria-hidden="true">4.5.</strong> Biomes and world-generation features</a></li><li class="chapter-item expanded "><a href="../world/client-chunks.html"><strong aria-hidden="true">4.6.</strong> Client streaming, meshing, and rendering</a></li><li class="chapter-item expanded "><a href="../world/dimensions.html"><strong aria-hidden="true">4.7.</strong> Dimensions and world scopes</a></li><li class="chapter-item expanded "><a href="../world/portals.html"><strong aria-hidden="true">4.8.</strong> Portals</a></li></ol></li><li class="chapter-item expanded "><a href="../gameplay/gameplay-overview.html"><strong aria-hidden="true">5.</strong> Gameplay systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../gameplay/movement.html"><strong aria-hidden="true">5.1.</strong> Player movement and prediction</a></li><li class="chapter-item expanded "><a href="../gameplay/movement-features.html"><strong aria-hidden="true">5.2.</strong> Gravity, jump, sprint, and flight</a></li><li class="chapter-item expanded "><a href="../gameplay/block-interaction.html"><strong aria-hidden="true">5.3.</strong> Block interaction and world edits</a></li><li class="chapter-item expanded "><a href="../gameplay/inventory.html"><strong aria-hidden="true">5.4.</strong> Inventory, hotbar, and item use</a></li><li class="chapter-item expanded "><a href="../gameplay/cell-menus.html"><strong aria-hidden="true">5.5.</strong> Cell menus, audiences, and crafting tables</a></li></ol></li><li class="chapter-item expanded "><a href="../client/client-overview.html"><strong aria-hidden="true">6.</strong> Client systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../client/input-settings-menus.html"><strong aria-hidden="true">6.1.</strong> Input, settings, menus, and game state</a></li><li class="chapter-item expanded "><a href="../client/graphics.html"><strong aria-hidden="true">6.2.</strong> Graphics, lighting, sky, and outlines</a></li><li class="chapter-item expanded "><a href="../client/animated-grass.html"><strong aria-hidden="true">6.3.</strong> Animated grass and wind</a></li><li class="chapter-item expanded "><a href="../client/blocky-models.html"><strong aria-hidden="true">6.4.</strong> Blocky models and animation</a></li></ol></li><li class="chapter-item expanded "><a href="../development/developer-guide.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../development/extension-cookbook.html"><strong aria-hidden="true">7.1.</strong> Extension cookbook</a></li><li class="chapter-item expanded "><a href="../development/thecrown-parkour.html"><strong aria-hidden="true">7.2.</strong> TheCrown multi-instance parkour server</a></li><li class="chapter-item expanded "><a href="../development/testing-and-performance.html"><strong aria-hidden="true">7.3.</strong> Testing, debugging, and performance</a></li><li class="chapter-item expanded "><a href="../reference/crate-map.html"><strong aria-hidden="true">7.4.</strong> Crate map</a></li><li class="chapter-item expanded "><a href="../reference/current-limits.html"><strong aria-hidden="true">7.5.</strong> Current limits and design direction</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Minecraft Simple Demo Architecture</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="runtime-scope-trees-and-facets"><a class="header" href="#runtime-scope-trees-and-facets">Runtime scope trees and facets</a></h1>
+<p>Compile-time Patchwork composition decides which capabilities exist in an
+executable. Runtime scopes decide where selected capabilities apply.</p>
+<p>This distinction is important:</p>
+<ul>
+<li>a modpack can include chat support once;</li>
+<li>the running server can create several chat groups;</li>
+<li>a modpack can include one chunk world service;</li>
+<li>the running server can route different players to different world instances;</li>
+<li>a modpack can include player synchronization;</li>
+<li>the running server can decide that some players must not see each other.</li>
+</ul>
+<p>The scope system is intended for lobbies, minigames, private maps, parties,
+teams, temporary arenas, and custom server topologies. It does not prescribe
+one of those designs.</p>
+<h2 id="nodes-are-runtime-ecs-entities"><a class="header" href="#nodes-are-runtime-ecs-entities">Nodes are runtime ECS entities</a></h2>
+<p><code>server-scope-api</code> defines <code>ScopeNodeId</code>, <code>ServerScopeNode</code>, and
+<code>ServerScopes</code>. Every node has:</p>
+<ul>
+<li>a stable string ID;</li>
+<li>an optional parent;</li>
+<li>zero or more children;</li>
+<li>an ECS entity;</li>
+<li>zero or more facet boundaries.</li>
+</ul>
+<p>The ECS entity is deliberate. A feature can attach its own components without
+changing the scope core:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Component)]
+struct MatchRound {
+    phase: RoundPhase,
+    remaining_seconds: f32,
+}
+
+let entity = scopes.spawn(
+    &amp;mut commands,
+    ScopeNodeDescriptor::child(&quot;match-42&quot;, lobby_scope),
+)?;
+commands.entity(entity).insert(MatchRound::new());
+<span class="boring">}
+</span></code></pre></pre>
+<p>The scope API knows nothing about rounds, teams, worlds, chat, scores, or game
+rules. It only owns hierarchy and membership.</p>
+<p>Ordinary gameplay entities can carry:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>ServerScopeMembership {
+    scope: arena_scope,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>This is the common hook for future NPC, drop, projectile, machine, or entity
+replication systems. Player sessions currently use the indexed player
+membership in <code>ServerScopes</code> because <code>NetworkPlayer</code> records are not ECS
+entities.</p>
+<h2 id="one-tree-independent-facets"><a class="header" href="#one-tree-independent-facets">One tree, independent facets</a></h2>
+<p>A node does not automatically isolate every subsystem. Instead, a feature
+resolves a named <strong>facet</strong> from a node towards the root. The nearest ancestor
+that owns that facet is the effective boundary.</p>
+<p>The built-in facets are:</p>
+<ul>
+<li><code>patchwork:chat</code>;</li>
+<li><code>patchwork:visibility</code>;</li>
+<li><code>patchwork:world</code>.</li>
+</ul>
+<p>Mods may define more facet IDs for entities, permissions, scoreboard state,
+weather, commands, damage, or any other scoped domain.</p>
+<p>Consider:</p>
+<pre><code class="language-text">root
+└── network
+    └── parkour-1                    [chat]
+        ├── player-7                 [world, visibility]
+        └── player-12                [world, visibility]
+</code></pre>
+<p>Both players resolve chat to <code>parkour-1</code>, so they share chat. Each resolves
+world and visibility to its own leaf, so they receive different chunks and do
+not see each other's avatar.</p>
+<p>Moving the world facet to <code>parkour-1</code> would make the map shared without changing
+chat or visibility. Moving the visibility facet to <code>parkour-1</code> would expose
+players to each other without changing the world. This is why the architecture
+does not use one universal <code>InstanceId</code> to answer every policy question.</p>
+<h2 id="creating-and-assigning-scopes"><a class="header" href="#creating-and-assigning-scopes">Creating and assigning scopes</a></h2>
+<p><code>server-scope-tree-mod</code> provides the scope API and creates
+<code>patchwork:root</code>. An orchestrator may create children directly:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let match_scope = ScopeNodeId::new(&quot;parkour-1&quot;);
+scopes.spawn(
+    &amp;mut commands,
+    ScopeNodeDescriptor::child(match_scope.0.clone(), scopes.root())
+        .with_facet(ScopeFacetId::chat()),
+)?;
+
+let player_scope = ScopeNodeId::new(&quot;parkour-1:player-7&quot;);
+scopes.spawn(
+    &amp;mut commands,
+    ScopeNodeDescriptor::child(player_scope.0.clone(), match_scope)
+        .with_facet(ScopeFacetId::visibility()),
+)?;
+<span class="boring">}
+</span></code></pre></pre>
+<p>A player currently has one primary scope membership. It may be assigned
+directly when immediate orchestration is required:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let previous = scopes.assign_player(player_id, player_scope.clone())?;
+<span class="boring">}
+</span></code></pre></pre>
+<p>or through the ECS contract:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>scope_requests.write(SetServerPlayerScope {
+    player_id,
+    target: player_scope,
+});
+<span class="boring">}
+</span></code></pre></pre>
+<p>Membership changes produce <code>ServerPlayerScopeChanged</code>. Features that maintain
+client-visible state can react to this result instead of observing the request.</p>
+<p>The one-primary-membership rule does not prevent other grouping systems.
+Parties, permissions, subscriptions, and teams may be separate components or
+resources. The primary scope describes the player's place in this hierarchy;
+it is not intended to replace every many-to-many relationship.</p>
+<h2 id="scoped-messages"><a class="header" href="#scoped-messages">Scoped messages</a></h2>
+<p>Bevy messages remain the runtime integration bus. <code>ScopedMessage&lt;T&gt;</code> adds:</p>
+<ul>
+<li>an origin scope;</li>
+<li>a domain payload;</li>
+<li>a propagation mode.</li>
+</ul>
+<p>Available propagation modes are:</p>
+<ul>
+<li><code>Exact</code>: only the origin;</li>
+<li><code>Descendants</code>: origin and its subtree;</li>
+<li><code>Ancestors</code>: origin and its ancestry;</li>
+<li><code>Lineage</code>: both directions along the same branch.</li>
+</ul>
+<p>Example:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug, Clone)]
+struct RoundEnded {
+    winner: PlayerId,
+}
+
+app.add_message::&lt;ScopedMessage&lt;RoundEnded&gt;&gt;();
+
+events.write(ScopedMessage {
+    origin: match_scope,
+    propagation: ScopePropagation::Descendants,
+    payload: RoundEnded { winner },
+});
+<span class="boring">}
+</span></code></pre></pre>
+<p>A listener calls <code>event.reaches(&amp;scopes, &amp;listener_scope)</code> before handling the
+payload. The envelope does not clone events into per-node queues and does not
+hide routing work in a global dispatcher. This keeps normal Bevy scheduling,
+message lifetime, and ordering visible.</p>
+<p>Use a scoped message when propagation through the hierarchy is part of the
+domain rule. Use an ordinary message carrying a <code>ScopeNodeId</code> when consumers
+need exact routing logic of their own.</p>
+<h2 id="scoped-world-routing"><a class="header" href="#scoped-world-routing">Scoped world routing</a></h2>
+<p><code>server-scope-world-api</code> associates a <code>ServerChunkRoute</code> with a scope node. A
+route contains:</p>
+<ul>
+<li><code>WorldInstanceId</code>;</li>
+<li><code>ChunkProviderId</code>.</li>
+</ul>
+<p>Binding a route adds the world facet to that node. Children inherit the nearest
+bound route:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>scope_worlds.bind(
+    &amp;scopes,
+    arena_scope.clone(),
+    ServerChunkRoute {
+        instance: WorldInstanceId::new(&quot;parkour:7&quot;),
+        provider: ChunkProviderId::primary(),
+    },
+)?;
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>server-chunk-routing-scopes-mod</code> turns this lookup into the existing
+<code>ServerChunkRouter</code> API. Chunk generation, storage, residency, requests, and
+world mutation therefore remain unchanged. They see an ordinary route after
+the scope provider has selected it.</p>
+<p>This supports several useful layouts:</p>
+<ul>
+<li>one parent route inherited by all children for a shared map;</li>
+<li>one route per player for private maps;</li>
+<li>one provider shared by many instances;</li>
+<li>different providers below the same parent;</li>
+<li>a shared immutable source with independent chat or entity facets.</li>
+</ul>
+<h2 id="world-context-is-not-dimension"><a class="header" href="#world-context-is-not-dimension">World context is not dimension</a></h2>
+<p><code>Dimension</code> describes a generated domain such as Overworld or Nether.
+<code>WorldInstanceId</code> identifies a concrete runtime world. Two parkour arenas may
+both use Overworld rules while containing different blocks.</p>
+<p>For this reason, <code>PlayerWorldChanged</code> is separate from the dimension packet.
+The server sends:</p>
+<ul>
+<li>world instance ID;</li>
+<li>authoritative transition position.</li>
+</ul>
+<p>The client:</p>
+<ol>
+<li>stores a revisioned <code>ClientWorldContext</code>;</li>
+<li>clears chunk cache and active render state;</li>
+<li>waits until the local player entity exists;</li>
+<li>applies the authoritative position and resets velocity.</li>
+</ol>
+<p>The latest position is persistent state, not only a transient event. This
+prevents an initial world assignment from being lost when it arrives before
+the local player entity is spawned.</p>
+<h2 id="audience-and-player-visibility"><a class="header" href="#audience-and-player-visibility">Audience and player visibility</a></h2>
+<p>Two scope providers adapt existing domain contracts:</p>
+<ul>
+<li><code>server-audience-scope-impl</code> resolves <code>Audience::Shared(scope_id)</code> to online
+members in that subtree;</li>
+<li><code>server-player-visibility-scope-impl</code> lets two players see each other only
+when their nearest visibility facet is the same.</li>
+</ul>
+<p>These remain different policies. Chat or a shared cell menu uses an
+<code>Audience</code>; player entity synchronization uses <code>ServerPlayerVisibility</code>.</p>
+<p><code>server-player-visibility-scope-sync-mod</code> computes <code>PlayerJoined</code> and
+<code>PlayerLeft</code> deltas when a live player changes visibility boundary. Initial
+join and final leave stay owned by the session pipeline.</p>
+<h2 id="join-ordering"><a class="header" href="#join-ordering">Join ordering</a></h2>
+<p>Scope assignment often affects the very first packets a client receives. The
+session pipeline therefore exposes:</p>
+<pre><code class="language-text">Receive
+  -&gt; Validate
+  -&gt; Register
+  -&gt; Initialize
+  -&gt; Sync
+  -&gt; Cleanup
+</code></pre>
+<p><code>ServerPlayerJoined</code> is emitted in <code>Register</code>. Instance orchestrators run in
+<code>Initialize</code>, where they can:</p>
+<ul>
+<li>create or select a node;</li>
+<li>assign membership;</li>
+<li>bind a world route;</li>
+<li>initialize scoped gameplay state;</li>
+<li>request a world transition.</li>
+</ul>
+<p>Only after that does <code>Sync</code> build the join snapshot using the selected
+visibility provider. <code>ServerPlayerReady</code> is emitted after <code>JoinAccepted</code> has
+been queued and is appropriate for welcome messages or later synchronization.</p>
+<p>Avoid assigning the initial scope after <code>Sync</code>: the client could briefly
+receive players or state from the wrong instance.</p>
+<h2 id="cleanup-and-transient-worlds"><a class="header" href="#cleanup-and-transient-worlds">Cleanup and transient worlds</a></h2>
+<p>Removing a dynamic arena is a policy decision owned by its orchestrator.
+A normal cleanup sequence is:</p>
+<ol>
+<li>remove the player or subtree membership;</li>
+<li>unbind scope world routes;</li>
+<li>discard transient world data;</li>
+<li>remove the scope subtree;</li>
+<li>despawn returned ECS entities.</li>
+</ol>
+<p><code>ServerChunkWorld::discard_instance</code> clears resident chunks and asks storage to
+discard that instance. The in-memory storage provider deletes its data.
+Filesystem storage intentionally keeps durable files.</p>
+<p>This distinction prevents a generic scope deletion from silently destroying a
+persistent world.</p>
+<h2 id="a-custom-monolithic-orchestrator-is-valid"><a class="header" href="#a-custom-monolithic-orchestrator-is-valid">A custom monolithic orchestrator is valid</a></h2>
+<p>Patchwork modularity does not require every custom game's control flow to be a
+different mod. A server developer may write one <code>main</code> feature mod that:</p>
+<ul>
+<li>validates players;</li>
+<li>assigns them to dynamic nodes;</li>
+<li>calls reusable mechanics conditionally;</li>
+<li>attaches game-specific ECS components;</li>
+<li>creates and destroys instances;</li>
+<li>chooses audiences and world routes.</li>
+</ul>
+<p>That is not a god mod when domain mechanisms still live behind reusable
+contracts and libraries. It is the application's policy boundary.</p>
+<h2 id="process-boundaries"><a class="header" href="#process-boundaries">Process boundaries</a></h2>
+<p>The current scope tree is in-process. It can model many runtime instances in
+one executable, but it is not a cluster scheduler or message broker.</p>
+<p>A future multi-machine deployment can place a global allocator above several
+server processes. Each process can still use the same scope model for the
+instances it hosts. Cross-process scope migration will need explicit durable
+identity, serialization, handoff, and broker contracts; these concerns should
+not be hidden inside the local ECS tree.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../architecture/apis-and-events.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../architecture/vanilla-libraries.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../architecture/apis-and-events.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../architecture/vanilla-libraries.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>

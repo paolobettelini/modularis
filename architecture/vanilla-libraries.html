@@ -1,0 +1,381 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Vanilla mechanics as reusable libraries - Minecraft Simple Demo Architecture</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting-started/project-overview.html"><strong aria-hidden="true">1.1.</strong> Project overview</a></li><li class="chapter-item expanded "><a href="../getting-started/build-and-run.html"><strong aria-hidden="true">1.2.</strong> Build and run</a></li></ol></li><li class="chapter-item expanded "><a href="../architecture/foundations.html"><strong aria-hidden="true">2.</strong> Architecture foundations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../architecture/patchwork-composition.html"><strong aria-hidden="true">2.1.</strong> Patchwork composition</a></li><li class="chapter-item expanded "><a href="../architecture/mod-anatomy.html"><strong aria-hidden="true">2.2.</strong> Mod anatomy and lifecycle</a></li><li class="chapter-item expanded "><a href="../architecture/apis-and-events.html"><strong aria-hidden="true">2.3.</strong> APIs, providers, and ECS contracts</a></li><li class="chapter-item expanded "><a href="../architecture/runtime-scopes.html"><strong aria-hidden="true">2.4.</strong> Runtime scope trees and facets</a></li><li class="chapter-item expanded "><a href="../architecture/vanilla-libraries.html" class="active"><strong aria-hidden="true">2.5.</strong> Vanilla mechanics as reusable libraries</a></li><li class="chapter-item expanded "><a href="../architecture/code-generation.html"><strong aria-hidden="true">2.6.</strong> Code generation and registries</a></li><li class="chapter-item expanded "><a href="../architecture/modpacks.html"><strong aria-hidden="true">2.7.</strong> Modpacks and feature boundaries</a></li><li class="chapter-item expanded "><a href="../architecture/assets-and-output.html"><strong aria-hidden="true">2.8.</strong> Assets and generated output</a></li></ol></li><li class="chapter-item expanded "><a href="../runtime/runtime-overview.html"><strong aria-hidden="true">3.</strong> Runtime and networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../runtime/bevy-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Bevy application lifecycle</a></li><li class="chapter-item expanded "><a href="../runtime/networking.html"><strong aria-hidden="true">3.2.</strong> Protocol, transport, and framing</a></li><li class="chapter-item expanded "><a href="../runtime/sessions-and-visibility.html"><strong aria-hidden="true">3.3.</strong> Sessions, routing, and visibility</a></li><li class="chapter-item expanded "><a href="../runtime/chat-and-commands.html"><strong aria-hidden="true">3.4.</strong> Chat, commands, and completion</a></li><li class="chapter-item expanded "><a href="../runtime/sounds.html"><strong aria-hidden="true">3.5.</strong> Sounds, audiences, and spatial playback</a></li></ol></li><li class="chapter-item expanded "><a href="../world/world-overview.html"><strong aria-hidden="true">4.</strong> World architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../world/blocks-and-items.html"><strong aria-hidden="true">4.1.</strong> Blocks, items, and metadata</a></li><li class="chapter-item expanded "><a href="../world/voxel-models.html"><strong aria-hidden="true">4.2.</strong> JSON voxel models and textures</a></li><li class="chapter-item expanded "><a href="../world/chunk-storage.html"><strong aria-hidden="true">4.3.</strong> Chunk coordinates and storage</a></li><li class="chapter-item expanded "><a href="../world/server-world.html"><strong aria-hidden="true">4.4.</strong> Server world providers and residency</a></li><li class="chapter-item expanded "><a href="../world/biomes.html"><strong aria-hidden="true">4.5.</strong> Biomes and world-generation features</a></li><li class="chapter-item expanded "><a href="../world/client-chunks.html"><strong aria-hidden="true">4.6.</strong> Client streaming, meshing, and rendering</a></li><li class="chapter-item expanded "><a href="../world/dimensions.html"><strong aria-hidden="true">4.7.</strong> Dimensions and world scopes</a></li><li class="chapter-item expanded "><a href="../world/portals.html"><strong aria-hidden="true">4.8.</strong> Portals</a></li></ol></li><li class="chapter-item expanded "><a href="../gameplay/gameplay-overview.html"><strong aria-hidden="true">5.</strong> Gameplay systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../gameplay/movement.html"><strong aria-hidden="true">5.1.</strong> Player movement and prediction</a></li><li class="chapter-item expanded "><a href="../gameplay/movement-features.html"><strong aria-hidden="true">5.2.</strong> Gravity, jump, sprint, and flight</a></li><li class="chapter-item expanded "><a href="../gameplay/block-interaction.html"><strong aria-hidden="true">5.3.</strong> Block interaction and world edits</a></li><li class="chapter-item expanded "><a href="../gameplay/inventory.html"><strong aria-hidden="true">5.4.</strong> Inventory, hotbar, and item use</a></li><li class="chapter-item expanded "><a href="../gameplay/cell-menus.html"><strong aria-hidden="true">5.5.</strong> Cell menus, audiences, and crafting tables</a></li></ol></li><li class="chapter-item expanded "><a href="../client/client-overview.html"><strong aria-hidden="true">6.</strong> Client systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../client/input-settings-menus.html"><strong aria-hidden="true">6.1.</strong> Input, settings, menus, and game state</a></li><li class="chapter-item expanded "><a href="../client/graphics.html"><strong aria-hidden="true">6.2.</strong> Graphics, lighting, sky, and outlines</a></li><li class="chapter-item expanded "><a href="../client/animated-grass.html"><strong aria-hidden="true">6.3.</strong> Animated grass and wind</a></li><li class="chapter-item expanded "><a href="../client/blocky-models.html"><strong aria-hidden="true">6.4.</strong> Blocky models and animation</a></li></ol></li><li class="chapter-item expanded "><a href="../development/developer-guide.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../development/extension-cookbook.html"><strong aria-hidden="true">7.1.</strong> Extension cookbook</a></li><li class="chapter-item expanded "><a href="../development/thecrown-parkour.html"><strong aria-hidden="true">7.2.</strong> TheCrown multi-instance parkour server</a></li><li class="chapter-item expanded "><a href="../development/testing-and-performance.html"><strong aria-hidden="true">7.3.</strong> Testing, debugging, and performance</a></li><li class="chapter-item expanded "><a href="../reference/crate-map.html"><strong aria-hidden="true">7.4.</strong> Crate map</a></li><li class="chapter-item expanded "><a href="../reference/current-limits.html"><strong aria-hidden="true">7.5.</strong> Current limits and design direction</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Minecraft Simple Demo Architecture</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="vanilla-mechanics-as-reusable-libraries"><a class="header" href="#vanilla-mechanics-as-reusable-libraries">Vanilla mechanics as reusable libraries</a></h1>
+<p>A vanilla feature has two different parts:</p>
+<ol>
+<li>the mechanic itself;</li>
+<li>the policy that decides when it always applies.</li>
+</ol>
+<p>Keeping both parts in one Bevy mod makes the feature selectable at compile
+time, but it is still too rigid for a custom server. A server may want to open
+a crafting table only in one lobby, apply collision only to one game mode, or
+allow block placement only after a custom permission check.</p>
+<p>The server therefore uses three layers.</p>
+<h2 id="the-three-layers"><a class="header" href="#the-three-layers">The three layers</a></h2>
+<h3 id="contract-layer"><a class="header" href="#contract-layer">Contract layer</a></h3>
+<p>API and event crates define data, resources, messages, and <code>SystemSet</code> phases.
+They do not choose vanilla behavior.</p>
+<p>Examples:</p>
+<ul>
+<li><code>block-edit-events-api</code>;</li>
+<li><code>server-player-registry-api</code>;</li>
+<li><code>inventory-events-api</code>;</li>
+<li><code>server-chunk-world-api</code>;</li>
+<li><code>server-portal-api</code>.</li>
+</ul>
+<h3 id="mechanic-library"><a class="header" href="#mechanic-library">Mechanic library</a></h3>
+<p>A <code>*-lib</code> crate contains callable Rust logic. It has no
+<code>[package.metadata.mod]</code> entry and Patchwork does not initialize it.</p>
+<p>A mechanic library should:</p>
+<ul>
+<li>take all required state explicitly;</li>
+<li>return a decision, request, mutation result, or event;</li>
+<li>avoid registering an always-on Bevy system;</li>
+<li>avoid choosing a global audience unless that is the mechanic's input;</li>
+<li>avoid owning lifecycle policy.</li>
+</ul>
+<h3 id="vanilla-glue-mod"><a class="header" href="#vanilla-glue-mod">Vanilla glue mod</a></h3>
+<p>The corresponding vanilla mod is intentionally small. It listens at a public
+ECS phase, calls the library, and publishes the result.</p>
+<p>The crafting-table path is:</p>
+<pre><code class="language-text">server-crafting-table-menu-lib
+    reusable block check + menu request construction
+
+server-crafting-table-menu-vanilla-mod
+    listen to every CellMenuOpenIntent
+    call the library
+    emit CellMenuOpenRequested when it matches
+</code></pre>
+<p>A custom server omits the vanilla glue and calls
+<code>crafting_table_open_request</code> only when its own scope, permission, round, or
+team rules permit it.</p>
+<h2 id="current-reusable-mechanics"><a class="header" href="#current-reusable-mechanics">Current reusable mechanics</a></h2>
+<table><thead><tr><th>Library</th><th>Reusable operation</th><th>Vanilla glue</th></tr></thead><tbody>
+<tr><td><code>server-player-chat-lib</code></td><td>format attributed player chat for a supplied audience</td><td><code>server-chat-global-vanilla-mod</code></td></tr>
+<tr><td><code>server-player-name-unique-lib</code></td><td>case-insensitive unique-name admission rule</td><td><code>server-player-name-unique-vanilla-mod</code></td></tr>
+<tr><td><code>server-player-movement-collision-lib</code></td><td>clamp and resolve an authoritative move against block shapes</td><td><code>server-player-movement-collision-vanilla-mod</code></td></tr>
+<tr><td><code>server-player-jump-lib</code></td><td>test grounding and validate a jump against gravity/hitbox/world state</td><td><code>server-player-jump-vanilla-mod</code></td></tr>
+<tr><td><code>server-block-break-reach-lib</code></td><td>evaluate vanilla reach for a pending break</td><td><code>server-block-break-reach-vanilla-mod</code></td></tr>
+<tr><td><code>server-block-edit-world-lib</code></td><td>create a pending break and apply an allowed mutation</td><td><code>server-block-edit-world-mod</code></td></tr>
+<tr><td><code>server-place-block-item-use-lib</code></td><td>validate and apply a <code>PlaceBlock</code> item use</td><td><code>server-place-block-item-use-mod</code></td></tr>
+<tr><td><code>server-crafting-table-menu-lib</code></td><td>build the shared crafting-table menu request</td><td><code>server-crafting-table-menu-vanilla-mod</code></td></tr>
+<tr><td><code>server-inventory-default-loadout-lib</code></td><td>construct the demo inventory and hotbar reset</td><td><code>server-inventory-default-loadout-mod</code></td></tr>
+<tr><td><code>inventory-quantity-operations-lib</code></td><td>quantity stacking and one-use consumption</td><td>quantity stacking/consumption mods</td></tr>
+<tr><td><code>server-player-dimension-lifecycle-lib</code></td><td>initialize and apply dimension changes</td><td>dimension lifecycle vanilla mod</td></tr>
+<tr><td><code>server-portal-ignite-lib</code></td><td>evaluate a portal ignition attempt</td><td>portal ignition vanilla mod</td></tr>
+<tr><td><code>server-portal-travel-lib</code></td><td>detect travel and select/create a return frame</td><td>portal travel vanilla mod</td></tr>
+<tr><td><code>server-chunk-residency-player-interest-lib</code></td><td>compute resident keys for chosen viewers</td><td>player-interest residency vanilla mod</td></tr>
+</tbody></table>
+<p>Some vanilla mods are already only declarative data or a one-line policy and
+do not need a separate algorithm library. Examples include:</p>
+<ul>
+<li>registering a portal rule;</li>
+<li>registering a biome definition or generation feature;</li>
+<li>selecting default sun values;</li>
+<li>publishing block interaction constants;</li>
+<li>granting a public capability message on join;</li>
+<li>registering a command whose effect is already a public request.</li>
+</ul>
+<p>If one of these gains substantial reusable logic, extract that logic at that
+time.</p>
+<h2 id="conditional-use-from-a-custom-server"><a class="header" href="#conditional-use-from-a-custom-server">Conditional use from a custom server</a></h2>
+<p>A custom orchestrator can use the same mechanic for only part of the tree:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn handle_open_intents(
+    scopes: Res&lt;ServerScopes&gt;,
+    world: Res&lt;ServerChunkWorld&gt;,
+    rounds: Query&lt;&amp;RoundRules&gt;,
+    mut intents: MessageReader&lt;CellMenuOpenIntent&gt;,
+    mut opens: MessageWriter&lt;CellMenuOpenRequested&gt;,
+) {
+    for intent in intents.read() {
+        let Some(scope) = scopes.player_scope(intent.player_id) else {
+            continue;
+        };
+        let Some(entity) = scopes.entity(&amp;scope) else {
+            continue;
+        };
+        let Ok(rules) = rounds.get(entity) else {
+            continue;
+        };
+        if !rules.allow_crafting {
+            continue;
+        }
+        if let Some(request) = crafting_table_open_request(&amp;world, intent) {
+            opens.write(request);
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>The library does not need to know what a round is. The custom server does not
+need to copy the geometry or menu construction logic.</p>
+<h2 id="libraries-may-still-use-domain-types"><a class="header" href="#libraries-may-still-use-domain-types">Libraries may still use domain types</a></h2>
+<p>“Reusable” does not mean “free of every dependency.” A block placement library
+can depend on:</p>
+<ul>
+<li><code>ServerChunkWorld</code>;</li>
+<li><code>BlockInstance</code>;</li>
+<li>player hitboxes;</li>
+<li>item metadata;</li>
+<li>block positions.</li>
+</ul>
+<p>Those are its domain contract. It should not depend on:</p>
+<ul>
+<li>the vanilla mod that calls it;</li>
+<li>a concrete filesystem storage provider;</li>
+<li>one top-level server modpack;</li>
+<li>one hardcoded lobby or global audience.</li>
+</ul>
+<h2 id="system-sets-remain-the-composition-surface"><a class="header" href="#system-sets-remain-the-composition-surface">System sets remain the composition surface</a></h2>
+<p>The glue mod should run in an existing public phase:</p>
+<pre><code class="language-text">receive
+  -&gt; collect
+  -&gt; validate
+  -&gt; dispatch
+  -&gt; apply effects
+  -&gt; consume
+  -&gt; synchronize
+</code></pre>
+<p>A custom server may:</p>
+<ul>
+<li>replace the glue;</li>
+<li>add validators before it;</li>
+<li>call the same library from another phase;</li>
+<li>use the mechanic only for selected scope nodes;</li>
+<li>combine several mechanics in one custom system.</li>
+</ul>
+<p>The library returns domain output; ECS ordering still belongs to the
+orchestrator.</p>
+<h2 id="a-monolithic-main-mod-is-not-an-architecture-failure"><a class="header" href="#a-monolithic-main-mod-is-not-an-architecture-failure">A monolithic <code>Main</code> mod is not an architecture failure</a></h2>
+<p>A custom server's main mod is allowed to contain a large amount of policy. It
+may be the easiest place to understand:</p>
+<ul>
+<li>admission;</li>
+<li>matchmaking;</li>
+<li>scope allocation;</li>
+<li>game lifecycle;</li>
+<li>conditional feature activation;</li>
+<li>cleanup.</li>
+</ul>
+<p>The warning sign is not file size by itself. The warning sign is duplicating
+generic mechanics or reaching through concrete implementations.</p>
+<p>A healthy custom main:</p>
+<ul>
+<li>depends on APIs, event contracts, and mechanic libraries;</li>
+<li>stores game-specific state as ECS components/resources;</li>
+<li>emits public requests and results;</li>
+<li>chooses scope and audience explicitly;</li>
+<li>leaves transport, storage, protocol, and reusable mechanics replaceable.</li>
+</ul>
+<h2 id="refactor-checklist-for-a-vanilla-feature"><a class="header" href="#refactor-checklist-for-a-vanilla-feature">Refactor checklist for a vanilla feature</a></h2>
+<p>When a vanilla mod grows, ask:</p>
+<ol>
+<li>Can a custom server call the useful operation without selecting the
+always-on mod?</li>
+<li>Are conditions such as scope, permission, or game phase inputs rather than
+hidden globals?</li>
+<li>Does the library return enough information for custom synchronization?</li>
+<li>Is authoritative mutation still performed exactly once?</li>
+<li>Does the glue run in a public <code>SystemSet</code>?</li>
+<li>Can another mod replace the policy without depending on the vanilla mod?</li>
+<li>Is declarative registration being needlessly wrapped in another layer?</li>
+</ol>
+<p>Extract the smallest stable mechanic. Do not create a library that simply
+renames one line without adding a useful call boundary.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../architecture/runtime-scopes.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../architecture/code-generation.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../architecture/runtime-scopes.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../architecture/code-generation.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>
