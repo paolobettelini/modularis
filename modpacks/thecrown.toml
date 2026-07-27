@@ -10,6 +10,8 @@ mods = [
     "server-chat-events-mod",
     "server-chat-network-receive-mod",
     "server-chat-network-sync-mod",
+    "server-sound-events-mod",
+    "server-sound-network-sync-mod",
     "server-command-brigadier-mod",
     "server-block-edit-network-send-mod",
     "server-chunk-request-mod",

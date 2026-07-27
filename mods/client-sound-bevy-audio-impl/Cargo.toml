@@ -1,0 +1,30 @@
+[package]
+name = "client-sound-bevy-audio-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientSoundBevyAudioImpl"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-bevy-default-plugins-mod",
+    "client-sound-api",
+    "client-camera-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = { version = "0.17.3", features = ["mp3"] }
+bevy-mod = { path = "../bevy-mod" }
+client-bevy-default-plugins-mod = { path = "../client-bevy-default-plugins-mod" }
+client-camera-api = { path = "../client-camera-api" }
+client-sound-api = { path = "../client-sound-api" }
+generated-sound-registry = "0.1.0"
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-sound-registry = { path = "../generated-sound-registry" }
+

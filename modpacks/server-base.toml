@@ -8,6 +8,8 @@ mods = [
     "server-chat-network-receive-mod",
     "server-chat-network-sync-mod",
     "server-chat-clear-network-sync-mod",
+    "server-sound-events-mod",
+    "server-sound-network-sync-mod",
     "server-command-brigadier-mod",
     "server-inventory-authoritative-mod",
     "server-inventory-network-receive-mod",

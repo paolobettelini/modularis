@@ -1,0 +1,9 @@
+name = "Minecraft demo sounds"
+description = "Sound declarations and the generated sound registry shared by client and server."
+modpacks = []
+ignore = []
+
+mods = [
+    "sound-note-block-bass",
+    "sound-registry-codegen",
+]

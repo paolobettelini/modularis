@@ -22,8 +22,8 @@ It also demonstrates that a custom server may keep one monolithic policy mod
 while reusing small Patchwork libraries.
 
 The composition starts from `server-core.toml`, not the larger
-`server-base.toml` umbrella. It then selects only the neutral chat, outbound
-block-edit, chunk-request, flight, and sun pipelines it actually uses.
+`server-base.toml` umbrella. It then selects only the neutral chat, sound,
+outbound block-edit, chunk-request, flight, and sun pipelines it actually uses.
 
 ## Runtime topology
 
@@ -143,12 +143,24 @@ Landing farther along the queue:
 - updates combo based on elapsed time.
 
 Falling more than the configured distance below the start resets the run.
+The reset relocates the player inside the same private world. The client
+advances its authoritative world revision to apply the position and clear
+movement velocity, but it does not clear the chunk cache unless the world ID
+actually changes. This keeps the rebuilt course visible while preserving the
+full reset behavior for real world transitions.
 
-The original prototype played a pitched note on every checkpoint. The demo
-does not yet have a generic server-to-client sound contract, so the main mod
-contains a clear `TODO(audio)` at the result boundary. Sound should later be a
-separate event and network feature, not a direct call inside the parkour
-library.
+Every successful checkpoint publishes `PlayServerSound` with
+`SoundId::NoteBlockBass`. The request uses a personal audience, the accepted
+player position as its spatial emitter, volume `1.0`, and the original pitch
+formula:
+
+```rust
+let pitch = 0.9 + (combo - 1) as f32 * 0.05;
+```
+
+The parkour library still knows nothing about sound. TheCrown's orchestration
+mod translates the gameplay result into the generic sound event, and the
+separate sound network bridge delivers it.
 
 ## Chat and visibility are intentionally different
 

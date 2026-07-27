@@ -1,0 +1,20 @@
+[package]
+name = "sound-note-block-bass"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "SoundNoteBlockBassMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.sound]
+id = "demo:note-block-bass"
+
+[dependencies]
+sound-api = { path = "../sound-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+

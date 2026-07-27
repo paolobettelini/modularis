@@ -1,0 +1,12 @@
+[package]
+name = "sound-network-message-types"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+generated-sound-registry = "0.1.0"
+serde = { version = "1.0", features = ["derive"] }
+
+[patch.crates-io]
+generated-sound-registry = { path = "../generated-sound-registry" }
+

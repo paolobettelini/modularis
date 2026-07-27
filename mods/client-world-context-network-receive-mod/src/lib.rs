@@ -35,14 +35,10 @@ fn receive_world_changes(
     mut changed: MessageWriter<ClientWorldChanged>,
 ) {
     for packet in packets.read() {
-        let previous = context.id.replace(packet.0.world_id.clone());
-        context.revision = context.revision.wrapping_add(1);
-        context.position = Some(packet.0.position);
-        changed.write(ClientWorldChanged {
-            previous,
-            current: packet.0.world_id.clone(),
-            revision: context.revision,
-            position: packet.0.position,
-        });
+        if let Some(change) =
+            context.apply_authoritative_update(packet.0.world_id.clone(), packet.0.position)
+        {
+            changed.write(change);
+        }
     }
 }

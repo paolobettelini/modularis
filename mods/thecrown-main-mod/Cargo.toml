@@ -16,6 +16,7 @@ init = [
     "server-player-world-api",
     "server-player-lifecycle-events-mod",
     "server-chat-api",
+    "server-sound-api",
     "block-edit-events-mod",
 ]
 run = []
@@ -29,6 +30,7 @@ block-edit-events-api = { path = "../block-edit-events-api" }
 block-edit-events-mod = { path = "../block-edit-events-mod" }
 block-instance-api = { path = "../block-instance-api" }
 generated-block-registry = "0.1.0"
+generated-sound-registry = "0.1.0"
 parkour-gameplay-lib = { path = "../parkour-gameplay-lib" }
 player-network-message-types = { path = "../player-network-message-types" }
 server-chat-api = { path = "../server-chat-api" }
@@ -42,9 +44,11 @@ server-player-registry-api = { path = "../server-player-registry-api" }
 server-player-world-api = { path = "../server-player-world-api" }
 server-scope-api = { path = "../server-scope-api" }
 server-scope-world-api = { path = "../server-scope-world-api" }
+server-sound-api = { path = "../server-sound-api" }
 tokio = { version = "1.48.0", features = ["full"] }
 world-instance-api = { path = "../world-instance-api" }
 
 [patch.crates-io]
 generated-block-metadata = { path = "../generated-block-metadata" }
 generated-block-registry = { path = "../generated-block-registry" }
+generated-sound-registry = { path = "../generated-sound-registry" }

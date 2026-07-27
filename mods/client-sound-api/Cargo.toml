@@ -1,0 +1,12 @@
+[package]
+name = "client-sound-api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy = "0.17.3"
+generated-sound-registry = "0.1.0"
+
+[patch.crates-io]
+generated-sound-registry = { path = "../generated-sound-registry" }
+

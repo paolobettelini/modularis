@@ -29,10 +29,35 @@ as families.
 | `item-metadata-registry-codegen` | `generated-item-metadata` | `item-*-meta` |
 | `dimension-registry-codegen` | `generated-dimension-registry` | `dimension-*` |
 | `biome-registry-codegen` | `generated-biome-registry` | `biome-*` identity contributors |
+| `sound-registry-codegen` | `generated-sound-registry` | `sound-*` contributors |
 | `client-settings-registry-codegen` | `generated-client-settings-registry` | `client-setting-*` |
 | `network-protocol-mod` / `network-codegen-utils` | `generated-network-messages` | `*-network-messages-mod` |
 
 Support generators use `codegen-utils` and `network-codegen-utils`.
+
+## Sound domain
+
+Definitions and codegen:
+
+- `sound-api`;
+- `sound-registry-codegen`;
+- `generated-sound-registry`;
+- `sound-note-block-bass`.
+
+Server contracts and routing:
+
+- `server-sound-api`;
+- `server-sound-events-mod`;
+- `server-sound-network-sync-mod`.
+
+Protocol and client playback:
+
+- `sound-network-message-types`;
+- `sound-network-messages-mod`;
+- `client-sound-api`;
+- `client-sound-events-mod`;
+- `client-sound-network-receive-mod`;
+- `client-sound-bevy-audio-impl`.
 
 ## Block domain
 

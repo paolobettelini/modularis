@@ -11,6 +11,7 @@ The current generated domains are:
 - item metadata;
 - dimensions;
 - biomes;
+- sounds;
 - client settings;
 - network messages and Bevy packet events.
 
@@ -34,6 +35,10 @@ The block registry generator finds every selected package with
 - string conversion;
 - mapping to each contributor's `BLOCK_INFO`;
 - mapping to each contributor's `RENDER_INFO`.
+
+Sound contributors follow the same pattern with `package.metadata.sound`. The
+generated sound registry maps `SoundId` variants to each contributor's
+`SOUND_INFO`, including its namespaced asset path.
 
 The owner manifest declares the output:
 

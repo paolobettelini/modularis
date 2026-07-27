@@ -5,6 +5,7 @@ use block_edit_events_api::{ServerBlockBroken, ServerBlockEditSet, ServerBlockPl
 use block_edit_events_mod::BlockEditEventsMod;
 use block_instance_api::BlockInstance;
 use generated_block_registry::BlockId;
+use generated_sound_registry::SoundId;
 use parkour_gameplay_lib::{ParkourBlockEdit, ParkourConfig, ParkourRun, ParkourUpdate};
 use player_network_message_types::PlayerId;
 use server_chat_api::{
@@ -28,6 +29,7 @@ use server_scope_api::{
     ServerScopeSet, ServerScopes,
 };
 use server_scope_world_api::{ServerScopeWorldApi, ServerScopeWorlds};
+use server_sound_api::{PlayServerSound, ServerSoundApi, ServerSoundSet, SoundPlayback};
 use std::collections::HashMap;
 use tokio::task::JoinHandle;
 use world_instance_api::WorldInstanceId;
@@ -92,6 +94,7 @@ impl TheCrownMainMod {
         P: ServerPlayerRegistryApi,
         PW: ServerPlayerWorldApi,
         C: ServerChatApi,
+        A: ServerSoundApi,
     >(
         bevy: &mut BevyMod,
         _scopes_api: &mut S,
@@ -101,6 +104,7 @@ impl TheCrownMainMod {
         _player_world_api: &mut PW,
         _lifecycle: &mut ServerPlayerLifecycleEventsMod,
         _chat_api: &mut C,
+        _sound_api: &mut A,
         _block_edits: &mut BlockEditEventsMod,
     ) -> Self {
         bevy.app
@@ -121,7 +125,8 @@ impl TheCrownMainMod {
                 progress_parkour
                     .after(ServerPlayerMovementSet::Apply)
                     .before(ServerPlayerMovementSet::Sync)
-                    .before(ServerBlockEditSet::Sync),
+                    .before(ServerBlockEditSet::Sync)
+                    .in_set(ServerSoundSet::Publish),
             )
             .add_systems(Update, publish_instance_chat.in_set(ServerChatSet::Publish))
             .add_systems(
@@ -261,6 +266,7 @@ fn progress_parkour(
     mut placed: MessageWriter<ServerBlockPlaced>,
     mut world_changes: MessageWriter<RequestServerPlayerWorldChange>,
     mut messages: MessageWriter<PublishServerChatMessage>,
+    mut sounds: MessageWriter<PlayServerSound>,
 ) {
     for movement in movements.read() {
         let Some(arena) = runtime.players.get(&movement.player_id) else {
@@ -289,9 +295,16 @@ fn progress_parkour(
             });
         }
         publish_score(movement.player_id, &update, &mut messages);
-
-        // TODO(audio): publish a domain-level parkour checkpoint sound event
-        // once the demo has a generic server-to-client sound contract.
+        if update.score_changed && update.teleport.is_none() {
+            let pitch = 0.9 + (update.combo - 1) as f32 * 0.05;
+            sounds.write(PlayServerSound {
+                audience: Audience::personal(movement.player_id),
+                playback: SoundPlayback::new(SoundId::NoteBlockBass)
+                    .with_volume(1.0)
+                    .with_pitch(pitch)
+                    .at(movement.position.to_array()),
+            });
+        }
     }
 }
 

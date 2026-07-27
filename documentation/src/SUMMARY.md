@@ -17,6 +17,7 @@
   - [Protocol, transport, and framing](./runtime/networking.md)
   - [Sessions, routing, and visibility](./runtime/sessions-and-visibility.md)
   - [Chat, commands, and completion](./runtime/chat-and-commands.md)
+  - [Sounds, audiences, and spatial playback](./runtime/sounds.md)
 - [World architecture](./world/world-overview.md)
   - [Blocks, items, and metadata](./world/blocks-and-items.md)
   - [JSON voxel models and textures](./world/voxel-models.md)

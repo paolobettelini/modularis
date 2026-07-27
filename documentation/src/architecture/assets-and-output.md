@@ -128,3 +128,7 @@ modpacks.
 Prefer lowercase stable filenames. Model IDs are generated registry data and
 some asset paths may be serialized in metadata or stored in resources, so
 renaming them is a compatibility change.
+
+Sound contributors use the same namespace. For example,
+`mods/sound-note-block-bass/assets/note_block_bass.mp3` is loaded at runtime as
+`sound-note-block-bass/note_block_bass.mp3`.
