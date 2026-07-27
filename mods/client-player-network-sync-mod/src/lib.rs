@@ -7,6 +7,7 @@ use client_player_controller_api::{
     Player, PlayerControllerApi, PlayerControllerSet, PreviousPlayerPosition,
 };
 use client_session_api::{ClientSession, ClientSessionApi};
+use client_world_context_api::{ClientWorldContext, ClientWorldContextSet};
 use generated_network_messages::{
     NetworkMessageSet, PlayerMovedReceived, PlayerRotationChangedReceived, ServerBoundMessage,
 };
@@ -22,6 +23,7 @@ struct MovementSendTimer(Timer);
 struct AuthoritativePlayerTarget {
     position: Option<Vec3>,
     rotation: Option<(f32, f32)>,
+    world_revision: u64,
 }
 
 pub struct ClientPlayerNetworkSyncMod;
@@ -54,7 +56,10 @@ impl ClientPlayerNetworkSyncMod {
                 Update,
                 (
                     apply_authoritative_player_updates.after(NetworkMessageSet::DispatchPackets),
-                    apply_authoritative_player_target.before(PlayerControllerSet::CameraSync),
+                    apply_authoritative_player_target
+                        .after(apply_authoritative_player_updates)
+                        .after(ClientWorldContextSet::ApplyPlayer)
+                        .before(PlayerControllerSet::CameraSync),
                     send_player_movement.after(PlayerControllerSet::CameraSync),
                 )
                     .run_if(in_state(GameState::InGame)),
@@ -95,10 +100,22 @@ fn apply_authoritative_player_updates(
 fn apply_authoritative_player_target(
     time: Res<Time>,
     overlay: Res<State<InGameOverlayState>>,
+    world_context: Option<Res<ClientWorldContext>>,
     mut target: ResMut<AuthoritativePlayerTarget>,
     mut player: Query<(&mut Transform, &mut PreviousPlayerPosition), With<Player>>,
     mut camera: Query<&mut CameraAngles, With<PlayerCamera>>,
 ) {
+    if let Some(world_context) = world_context
+        && target.world_revision != world_context.revision
+    {
+        // A world-context relocation is a stronger authoritative correction
+        // than ordinary movement reconciliation. Discard any position target
+        // produced before the relocation so it cannot pull the respawned
+        // player back toward the old falling position.
+        target.position = None;
+        target.world_revision = world_context.revision;
+    }
+
     let playing = *overlay.get() == InGameOverlayState::Playing;
     let rotation_smoothing = 1.0 - (-35.0 * time.delta_secs()).exp();
     if let Some(target_position) = target.position

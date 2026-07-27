@@ -195,6 +195,9 @@ safe for one displayed world because the client clears the cache on both:
 `ClientWorldContext` keeps the latest world ID, transition position, and
 revision. The position consumer waits until the local player entity exists,
 which makes initial instance assignment safe during join.
+Every authoritative relocation also clears the ordinary movement-correction
+target from the previous revision. This prevents a late correction from the
+old position from pulling a respawned player away from the requested spawn.
 
 A client that displays several worlds at once would need scope-aware cache and
 render keys.

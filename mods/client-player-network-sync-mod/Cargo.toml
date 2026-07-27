@@ -28,6 +28,7 @@ client-game-state-api = { path = "../client-game-state-api" }
 client-network-api = { path = "../client-network-api" }
 client-player-controller-api = { path = "../client-player-controller-api" }
 client-session-api = { path = "../client-session-api" }
+client-world-context-api = { path = "../client-world-context-api" }
 generated-network-messages = "0.1.0"
 network-protocol-mod = { path = "../network-protocol-mod" }
 player-gravity-api = { path = "../player-gravity-api" }
