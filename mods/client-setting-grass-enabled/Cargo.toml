@@ -1,0 +1,25 @@
+[package]
+name = "client-setting-grass-enabled"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientSettingGrassEnabledMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.setting]
+id = "grass.enabled"
+label = "Enabled"
+type = "bool"
+input = "bool"
+default = true
+section = "graphics/grass"
+section_label = "Grass"
+
+[dependencies]
+settings-schema-api = { path = "../settings-schema-api" }
+tokio = { version = "1.48.0", features = ["full"] }

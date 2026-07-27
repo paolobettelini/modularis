@@ -1,0 +1,40 @@
+[package]
+name = "client-grass-render-bevy-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientGrassRenderBevyImpl"
+provides = "client-grass-render-api"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-bevy-default-plugins-mod",
+    "client-chunk-cache-api",
+    "client-chunk-streaming-api",
+    "client-game-state-api",
+    "client-dimension-api",
+    "client-grass-mesh-api",
+    "client-grass-interaction-api",
+    "client-grass-settings-api",
+    "client-wind-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-bevy-default-plugins-mod = { path = "../client-bevy-default-plugins-mod" }
+client-chunk-cache-api = { path = "../client-chunk-cache-api" }
+client-chunk-streaming-api = { path = "../client-chunk-streaming-api" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-dimension-api = { path = "../client-dimension-api" }
+client-grass-mesh-api = { path = "../client-grass-mesh-api" }
+client-grass-interaction-api = { path = "../client-grass-interaction-api" }
+client-grass-render-api = { path = "../client-grass-render-api" }
+client-grass-settings-api = { path = "../client-grass-settings-api" }
+client-wind-api = { path = "../client-wind-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { path = "../voxel-math-api" }

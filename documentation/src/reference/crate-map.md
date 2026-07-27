@@ -77,6 +77,7 @@ Current block contributors:
 - `block-packed-ice`;
 - `block-red-sand` and `block-sand`;
 - `block-snow`;
+- `block-short-grass`;
 - `block-soul-sand` and `block-soul-soil`;
 - `block-stone`;
 - `block-terracotta`.
@@ -216,6 +217,7 @@ Phased features:
 - cacti;
 - packed-ice patches;
 - rock boulders;
+- sparse/dense short grass;
 - birch trees;
 - glowstone clusters;
 - crystal spires.
@@ -247,6 +249,33 @@ Infrastructure and providers:
 Dimension reset:
 
 - `client-chunk-reset-on-dimension-change-mod`.
+
+## Animated grass
+
+Contracts:
+
+- `client-grass-settings-api`;
+- `client-grass-mesh-api`;
+- `client-grass-render-api`;
+- `client-grass-tint-api`;
+- `client-grass-interaction-api`;
+- `client-wind-api`.
+
+Providers and policy:
+
+- `client-grass-settings-generated-impl`;
+- `client-grass-mesh-fabric-style-impl`;
+- `client-grass-render-bevy-impl`;
+- `client-grass-tint-vanilla-mod`;
+- `client-grass-interaction-state-mod`;
+- `client-grass-player-contact-vanilla-mod`;
+- `client-grass-network-player-contact-vanilla-mod`;
+- `client-wind-grass-settings-vanilla-mod`;
+- the `client-setting-grass-*` contributor family.
+
+Server placement:
+
+- `server-biome-feature-short-grass-vanilla-mod`.
 
 ## Network and sessions
 

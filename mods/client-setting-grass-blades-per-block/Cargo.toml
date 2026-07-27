@@ -1,0 +1,27 @@
+[package]
+name = "client-setting-grass-blades-per-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientSettingGrassBladesPerBlockMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.setting]
+id = "grass.blades_per_block"
+label = "Blades per block"
+type = "i32"
+input = "i32"
+default = 32
+min = 1
+max = 64
+section = "graphics/grass"
+section_label = "Grass"
+
+[dependencies]
+settings-schema-api = { path = "../settings-schema-api" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -1,0 +1,36 @@
+[package]
+name = "client-grass-mesh-fabric-style-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientGrassMeshFabricStyleImpl"
+provides = "client-grass-mesh-api"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-grass-settings-api",
+    "client-grass-tint-api",
+    "block-short-grass",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+block-short-grass = { path = "../block-short-grass" }
+chunk-api = { path = "../chunk-api" }
+client-dimension-api = { path = "../client-dimension-api" }
+client-grass-mesh-api = { path = "../client-grass-mesh-api" }
+client-grass-settings-api = { path = "../client-grass-settings-api" }
+client-grass-tint-api = { path = "../client-grass-tint-api" }
+generated-block-registry = "0.1.0"
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { path = "../voxel-math-api" }
+
+[patch.crates-io]
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }

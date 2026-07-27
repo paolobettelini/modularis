@@ -22,3 +22,4 @@ mods/generated-network-messages
 !mods/block-cactus/assets/*.png
 *.ttf
 !media/preview.png
+grass-mod-minecraft

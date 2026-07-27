@@ -11,6 +11,7 @@ mods = [
     "server-biome-feature-cacti-vanilla-mod",
     "server-biome-feature-ice-patches-vanilla-mod",
     "server-biome-feature-boulders-vanilla-mod",
+    "server-biome-feature-short-grass-vanilla-mod",
     "server-biome-plains-vanilla-mod",
     "server-biome-forest-vanilla-mod",
     "server-biome-birch-forest-vanilla-mod",

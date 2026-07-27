@@ -17,6 +17,8 @@ label = "Jump key"
 type = "string"
 input = "keybinding"
 default = "Space"
+section = "controls/keybinds"
+section_label = "Keybinds"
 
 [dependencies]
 settings-schema-api = { path = "../settings-schema-api" }

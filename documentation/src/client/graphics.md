@@ -218,3 +218,14 @@ A more advanced renderer may add:
 
 It should keep streaming and server protocol independent unless its data needs
 truly require a new contract.
+
+## Custom materials and standard passes
+
+A material with a custom vertex layout cannot automatically assume that Bevy's
+standard depth prepass or shadow shaders accept that layout. The animated grass
+renderer uses custom attributes and vertex deformation, so its material plugin
+disables those standard passes and renders through its custom forward shader.
+
+If a future graphics mod adds grass shadows, it should provide a compatible
+shadow pipeline that reproduces the same vertex deformation. This keeps the
+base grass feature valid without coupling it to one lighting implementation.

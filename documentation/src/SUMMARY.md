@@ -33,6 +33,7 @@
 - [Client systems](./client/client-overview.md)
   - [Input, settings, menus, and game state](./client/input-settings-menus.md)
   - [Graphics, lighting, sky, and outlines](./client/graphics.md)
+  - [Animated grass and wind](./client/animated-grass.md)
   - [Blocky models and animation](./client/blocky-models.md)
 - [Developer guide](./development/developer-guide.md)
   - [Extension cookbook](./development/extension-cookbook.md)

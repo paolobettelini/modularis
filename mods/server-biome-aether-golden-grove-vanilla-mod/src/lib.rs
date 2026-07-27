@@ -11,6 +11,9 @@ use server_biome_feature_glowstone_clusters_vanilla_mod::{
 use server_biome_feature_oak_trees_vanilla_mod::{
     ServerBiomeFeatureOakTreesVanillaMod, dense_oak_trees_feature_id,
 };
+use server_biome_feature_short_grass_vanilla_mod::{
+    ServerBiomeFeatureShortGrassVanillaMod, dense_short_grass_feature_id,
+};
 use tokio::task::JoinHandle;
 
 pub struct ServerBiomeAetherGoldenGroveVanillaMod;
@@ -22,6 +25,7 @@ impl ServerBiomeAetherGoldenGroveVanillaMod {
         _declaration: &mut biome_aether_golden_grove::BiomeAetherGoldenGroveMod,
         _oak_trees: &mut ServerBiomeFeatureOakTreesVanillaMod,
         _glowstone: &mut ServerBiomeFeatureGlowstoneClustersVanillaMod,
+        _short_grass: &mut ServerBiomeFeatureShortGrassVanillaMod,
     ) -> Self {
         bevy.app
             .world()
@@ -56,6 +60,7 @@ impl ServerBiomeAetherGoldenGroveVanillaMod {
                 features: vec![
                     dense_oak_trees_feature_id(),
                     glowstone_clusters_feature_id(),
+                    dense_short_grass_feature_id(),
                 ],
             })
             .expect("Golden Grove biome definition must be unique");

@@ -70,15 +70,56 @@ settings.get_i32(SettingKey::GraphicsRenderDistance)
 settings.get_string(SettingKey::ControlsJumpKey)
 ```
 
-Consumers still clamp or validate domain ranges:
+Numeric contributors may declare optional inclusive `min` and `max` bounds.
+The generated schema carries those bounds into the store and UI. Step buttons
+clamp at each endpoint, direct text input cannot commit an out-of-range value,
+and programmatic writes through `SettingsStore::set` are normalized as well.
 
-- FOV is clamped to `30..=120` degrees;
-- render distance is clamped to the streaming maximum;
+Consumers still validate semantic constraints that cannot be expressed by a
+simple range:
+
 - invalid key strings fall back to defaults;
 - invalid server addresses fail during connection.
 
-Generated schema type validation does not replace feature-level range
-validation.
+Codegen rejects bounds on nonnumeric settings, inverted ranges, and defaults
+outside their declared range.
+
+### Grouped setting sections
+
+A contributor can optionally place itself in a nested settings screen:
+
+```toml
+section = "graphics/grass"
+section_label = "Grass"
+```
+
+Section IDs are slash-separated paths. Codegen stores the complete section
+path, generates missing ancestors, and records the parent of each section. The
+generic settings menu creates the resulting navigation tree. For example:
+
+```text
+Settings
+├─ Graphics
+│  ├─ FOV
+│  ├─ Render distance
+│  └─ Grass
+│     └─ grass settings
+├─ Controls
+│  ├─ Mouse sensitivity
+│  └─ Keybinds
+│     └─ feature keys
+└─ Network
+   ├─ Player name
+   └─ Server address
+```
+
+Every page uses the generic vertically scrollable menu container. A feature
+does not need to modify the menu provider to gain its own inner page.
+
+Each path segment must contain only ASCII letters, numbers, `-`, or `_`.
+Section IDs must be stable. Codegen rejects invalid paths and contributors that
+reuse one explicit ID with different labels. A setting without `section`
+remains on the root screen.
 
 ## Setting input providers
 
@@ -119,6 +160,10 @@ label = "Master volume"
 type = "f32"
 input = "f32"
 default = 0.8
+min = 0.0
+max = 1.0
+section = "audio"
+section_label = "Audio"
 ```
 
 Add it to the client modpack and recompose.
@@ -144,6 +189,8 @@ SettingInputContext {
     label,
     value,
     action,
+    min,
+    max,
 }
 ```
 

@@ -65,7 +65,13 @@ fn update_active_chunks(
         camera.translation.z.floor() as i32,
     )
     .chunk();
-    focus.center = Some(center);
+    // Do not mark the shared focus resource as changed while the camera remains
+    // in the same chunk. Consumers use change detection to reprioritize or
+    // rebuild chunk-derived data, and a false positive here can keep their work
+    // queues permanently pinned to the closest chunks.
+    if focus.center != Some(center) {
+        focus.center = Some(center);
+    }
     let radius = settings
         .get_i32(SettingKey::GraphicsRenderDistance)
         .unwrap_or(8)

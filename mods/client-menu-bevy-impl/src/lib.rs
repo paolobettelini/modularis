@@ -1,5 +1,6 @@
 use bevy::{
     input::keyboard::{Key, KeyboardInput},
+    input::mouse::{MouseScrollUnit, MouseWheel},
     prelude::*,
 };
 use bevy_mod::BevyMod;
@@ -47,6 +48,7 @@ impl MenuBevyImpl {
                     number_adjust_interactions,
                     textbox_keyboard_input,
                     keybinding_keyboard_input,
+                    scroll_menu,
                 )
                     .chain(),
             );
@@ -67,12 +69,19 @@ impl MenuApi for MenuBevyImpl {
 #[derive(Component)]
 struct MenuButton(MenuButtonAction);
 
+#[derive(Component, Debug, Clone, Copy)]
+struct MenuRoot(MenuTarget);
+
+#[derive(Component)]
+struct MenuScroll;
+
 #[derive(Component)]
 struct MenuTextbox {
     action: String,
     value: String,
     value_text: Entity,
     kind: MenuTextInputKind,
+    number_range: Option<MenuNumberRange>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -80,6 +89,12 @@ enum MenuTextInputKind {
     String,
     I32,
     F32,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct MenuNumberRange {
+    min: Option<f64>,
+    max: Option<f64>,
 }
 
 #[derive(Component)]
@@ -101,6 +116,7 @@ struct MenuNumberAdjust {
     action: String,
     kind: MenuNumberKind,
     delta: f64,
+    range: MenuNumberRange,
 }
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -173,6 +189,7 @@ fn spawn_menu<S: States>(commands: &mut Commands, screen: MenuScreen, despawn: D
     commands
         .spawn((
             despawn,
+            MenuRoot(screen.target),
             Node {
                 width: percent(100),
                 height: percent(100),
@@ -187,12 +204,16 @@ fn spawn_menu<S: States>(commands: &mut Commands, screen: MenuScreen, despawn: D
             root.spawn((
                 Node {
                     width: px(520),
+                    max_height: percent(90),
                     padding: UiRect::all(px(32)),
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Stretch,
                     row_gap: px(14),
+                    overflow: Overflow::scroll_y(),
                     ..default()
                 },
+                MenuScroll,
+                ScrollPosition::default(),
                 BackgroundColor(Color::srgba(0.08, 0.10, 0.14, 0.97)),
                 BorderRadius::all(px(12)),
             ))
@@ -294,6 +315,7 @@ fn spawn_menu<S: States>(commands: &mut Commands, screen: MenuScreen, despawn: D
                                     value_text: textbox_entity
                                         .expect("textbox text entity should be created"),
                                     kind: MenuTextInputKind::String,
+                                    number_range: None,
                                 });
                         }
                         MenuWidget::NumberInput {
@@ -302,6 +324,8 @@ fn spawn_menu<S: States>(commands: &mut Commands, screen: MenuScreen, despawn: D
                             action,
                             kind,
                             step,
+                            min,
+                            max,
                             ..
                         } => {
                             column.spawn((
@@ -329,6 +353,7 @@ fn spawn_menu<S: States>(commands: &mut Commands, screen: MenuScreen, despawn: D
                                             action: action.clone(),
                                             kind,
                                             delta: -step,
+                                            range: MenuNumberRange { min, max },
                                         },
                                     );
 
@@ -368,6 +393,7 @@ fn spawn_menu<S: States>(commands: &mut Commands, screen: MenuScreen, despawn: D
                                             MenuNumberKind::I32 => MenuTextInputKind::I32,
                                             MenuNumberKind::F32 => MenuTextInputKind::F32,
                                         },
+                                        number_range: Some(MenuNumberRange { min, max }),
                                     });
 
                                     spawn_number_adjust_button(
@@ -377,6 +403,7 @@ fn spawn_menu<S: States>(commands: &mut Commands, screen: MenuScreen, despawn: D
                                             action,
                                             kind,
                                             delta: step,
+                                            range: MenuNumberRange { min, max },
                                         },
                                     );
                                 });
@@ -529,7 +556,10 @@ fn paint_button_interactions(
 }
 
 fn menu_button_interactions(
+    mut commands: Commands,
     buttons: Query<(&Interaction, &MenuButton), Changed<Interaction>>,
+    roots: Query<(Entity, &MenuRoot)>,
+    registry: Res<MenuRegistryHandle>,
     mut state_commands: MessageWriter<GameStateCommand>,
     mut overlay_commands: MessageWriter<InGameOverlayCommand>,
     mut focused: ResMut<FocusedMenuInput>,
@@ -545,6 +575,24 @@ fn menu_button_interactions(
             }
             MenuButtonAction::ChangeInGameOverlay(command) => {
                 overlay_commands.write(*command);
+            }
+            MenuButtonAction::OpenScreen(id) => {
+                let Ok((root, target)) = roots.single() else {
+                    continue;
+                };
+                let Some(screen) = registry.screen_by_id_for_target(id, target.0) else {
+                    warn!("no menu screen '{id}' registered for {:?}", target.0);
+                    continue;
+                };
+                commands.entity(root).despawn();
+                match target.0 {
+                    MenuTarget::Game(state) => {
+                        spawn_menu(&mut commands, screen, DespawnOnExit(state));
+                    }
+                    MenuTarget::InGameOverlay(state) => {
+                        spawn_menu(&mut commands, screen, DespawnOnExit(state));
+                    }
+                }
             }
         }
     }
@@ -616,16 +664,15 @@ fn number_adjust_interactions(
                 continue;
             }
             let next = match adjust.kind {
-                MenuNumberKind::I32 => input
-                    .value
-                    .parse::<i32>()
-                    .ok()
-                    .map(|value| value.saturating_add(adjust.delta as i32).to_string()),
+                MenuNumberKind::I32 => input.value.parse::<i32>().ok().map(|value| {
+                    let value = value.saturating_add(adjust.delta as i32);
+                    clamp_i32(value, adjust.range).to_string()
+                }),
                 MenuNumberKind::F32 => input
                     .value
                     .parse::<f64>()
                     .ok()
-                    .map(|value| format_float(value + adjust.delta)),
+                    .map(|value| format_float(clamp_f64(value + adjust.delta, adjust.range))),
             };
             let Some(next) = next else {
                 continue;
@@ -671,7 +718,7 @@ fn textbox_keyboard_input(
                 (_, Some(inserted)) if inserted.chars().all(is_printable_char) => {
                     let mut candidate = textbox.value.clone();
                     candidate.push_str(inserted);
-                    if accepts_candidate(textbox.kind, &candidate) {
+                    if accepts_candidate(textbox.kind, textbox.number_range, &candidate) {
                         textbox.value = candidate;
                         value_changed = true;
                     }
@@ -737,16 +784,49 @@ fn keybinding_keyboard_input(
     }
 }
 
-fn accepts_candidate(kind: MenuTextInputKind, candidate: &str) -> bool {
+fn accepts_candidate(
+    kind: MenuTextInputKind,
+    range: Option<MenuNumberRange>,
+    candidate: &str,
+) -> bool {
     match kind {
         MenuTextInputKind::String => candidate.chars().all(is_printable_char),
         MenuTextInputKind::I32 => {
-            candidate.is_empty() || candidate == "-" || candidate.parse::<i32>().is_ok()
+            candidate.is_empty()
+                || candidate == "-"
+                || candidate
+                    .parse::<i32>()
+                    .is_ok_and(|value| range.is_none_or(|range| value == clamp_i32(value, range)))
         }
         MenuTextInputKind::F32 => {
-            matches!(candidate, "" | "-" | "." | "-.") || candidate.parse::<f32>().is_ok()
+            matches!(candidate, "" | "-" | "." | "-.")
+                || candidate.parse::<f64>().is_ok_and(|value| {
+                    value.is_finite() && range.is_none_or(|range| value == clamp_f64(value, range))
+                })
         }
     }
+}
+
+fn clamp_i32(value: i32, range: MenuNumberRange) -> i32 {
+    let minimum = range
+        .min
+        .map(|minimum| minimum.ceil() as i32)
+        .unwrap_or(i32::MIN);
+    let maximum = range
+        .max
+        .map(|maximum| maximum.floor() as i32)
+        .unwrap_or(i32::MAX);
+    value.clamp(minimum, maximum)
+}
+
+fn clamp_f64(mut value: f64, range: MenuNumberRange) -> f64 {
+    if let Some(minimum) = range.min {
+        value = value.max(minimum);
+    }
+    if let Some(maximum) = range.max {
+        value = value.min(maximum);
+    }
+    value
 }
 
 fn is_committable(kind: MenuTextInputKind, value: &str) -> bool {
@@ -771,4 +851,39 @@ fn toggle_label(value: bool) -> &'static str {
 
 fn is_printable_char(chr: char) -> bool {
     !chr.is_ascii_control()
+}
+
+fn scroll_menu(
+    mut wheel: MessageReader<MouseWheel>,
+    mut menus: Query<(&mut ScrollPosition, &ComputedNode), With<MenuScroll>>,
+) {
+    let Ok((mut scroll, computed)) = menus.single_mut() else {
+        return;
+    };
+    let range =
+        (computed.content_size().y - computed.size().y).max(0.0) * computed.inverse_scale_factor();
+    for event in wheel.read() {
+        let delta = match event.unit {
+            MouseScrollUnit::Line => event.y * 28.0,
+            MouseScrollUnit::Pixel => event.y,
+        };
+        scroll.y = (scroll.y - delta).clamp(0.0, range);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn number_adjustments_stop_at_both_bounds() {
+        let range = MenuNumberRange {
+            min: Some(1.0),
+            max: Some(8.0),
+        };
+        assert_eq!(clamp_i32(-1, range), 1);
+        assert_eq!(clamp_i32(12, range), 8);
+        assert_eq!(clamp_f64(-4.0, range), 1.0);
+        assert_eq!(clamp_f64(12.0, range), 8.0);
+    }
 }

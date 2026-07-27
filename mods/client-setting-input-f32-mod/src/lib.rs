@@ -31,6 +31,8 @@ fn register_f32_input(registry: Res<SettingInputRegistryHandle>) {
             action: context.action,
             kind: MenuNumberKind::F32,
             step: 0.1,
+            min: context.min,
+            max: context.max,
         }
     });
 }

@@ -1,0 +1,27 @@
+[package]
+name = "client-setting-grass-blade-width"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientSettingGrassBladeWidthMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.setting]
+id = "grass.blade_width"
+label = "Blade width"
+type = "f32"
+input = "f32"
+default = 0.95
+min = 0.25
+max = 2.0
+section = "graphics/grass"
+section_label = "Grass"
+
+[dependencies]
+settings-schema-api = { path = "../settings-schema-api" }
+tokio = { version = "1.48.0", features = ["full"] }

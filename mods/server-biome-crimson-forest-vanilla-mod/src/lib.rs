@@ -9,6 +9,9 @@ use server_biome_feature_caves_vanilla_mod::{ServerBiomeFeatureCavesVanillaMod, 
 use server_biome_feature_glowstone_clusters_vanilla_mod::{
     ServerBiomeFeatureGlowstoneClustersVanillaMod, glowstone_clusters_feature_id,
 };
+use server_biome_feature_short_grass_vanilla_mod::{
+    ServerBiomeFeatureShortGrassVanillaMod, dense_short_grass_feature_id,
+};
 use tokio::task::JoinHandle;
 
 pub struct ServerBiomeCrimsonForestVanillaMod;
@@ -20,6 +23,7 @@ impl ServerBiomeCrimsonForestVanillaMod {
         _declaration: &mut biome_crimson_forest::BiomeCrimsonForestMod,
         _caves: &mut ServerBiomeFeatureCavesVanillaMod,
         _glowstone: &mut ServerBiomeFeatureGlowstoneClustersVanillaMod,
+        _short_grass: &mut ServerBiomeFeatureShortGrassVanillaMod,
     ) -> Self {
         bevy.app
             .world()
@@ -51,7 +55,11 @@ impl ServerBiomeCrimsonForestVanillaMod {
                     grass_tint: [0.48, 0.08, 0.12],
                     foliage_tint: [0.42, 0.04, 0.10],
                 },
-                features: vec![caves_feature_id(), glowstone_clusters_feature_id()],
+                features: vec![
+                    caves_feature_id(),
+                    glowstone_clusters_feature_id(),
+                    dense_short_grass_feature_id(),
+                ],
             })
             .expect("Crimson Forest biome definition must be unique");
         Self

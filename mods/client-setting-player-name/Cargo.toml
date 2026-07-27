@@ -17,6 +17,8 @@ label = "Player name"
 type = "string"
 input = "string"
 default = "Player"
+section = "network"
+section_label = "Network"
 
 [dependencies]
 client-config-api = { path = "../client-config-api" }

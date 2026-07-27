@@ -6,6 +6,9 @@ use server_biome_api::{
     ServerBiomeRegistry,
 };
 use server_biome_feature_caves_vanilla_mod::{ServerBiomeFeatureCavesVanillaMod, caves_feature_id};
+use server_biome_feature_short_grass_vanilla_mod::{
+    ServerBiomeFeatureShortGrassVanillaMod, sparse_short_grass_feature_id,
+};
 use tokio::task::JoinHandle;
 
 pub struct ServerBiomeSoulSandValleyVanillaMod;
@@ -16,6 +19,7 @@ impl ServerBiomeSoulSandValleyVanillaMod {
         _biomes: &mut B,
         _declaration: &mut biome_soul_sand_valley::BiomeSoulSandValleyMod,
         _caves: &mut ServerBiomeFeatureCavesVanillaMod,
+        _short_grass: &mut ServerBiomeFeatureShortGrassVanillaMod,
     ) -> Self {
         bevy.app
             .world()
@@ -47,7 +51,7 @@ impl ServerBiomeSoulSandValleyVanillaMod {
                     grass_tint: [0.38, 0.32, 0.28],
                     foliage_tint: [0.34, 0.30, 0.28],
                 },
-                features: vec![caves_feature_id()],
+                features: vec![caves_feature_id(), sparse_short_grass_feature_id()],
             })
             .expect("Soul Sand Valley biome definition must be unique");
         Self

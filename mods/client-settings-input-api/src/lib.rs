@@ -11,6 +11,8 @@ pub struct SettingInputContext {
     pub label: String,
     pub value: String,
     pub action: String,
+    pub min: Option<f64>,
+    pub max: Option<f64>,
 }
 
 pub type SettingInputFactory = fn(SettingInputContext) -> MenuWidget;

@@ -48,6 +48,8 @@ pub enum MenuWidget {
         action: String,
         kind: MenuNumberKind,
         step: f64,
+        min: Option<f64>,
+        max: Option<f64>,
     },
     KeybindingInput {
         id: String,
@@ -73,6 +75,8 @@ pub enum MenuNumberKind {
 pub enum MenuButtonAction {
     ChangeGameState(GameStateCommand),
     ChangeInGameOverlay(InGameOverlayCommand),
+    /// Replace the current menu while preserving its game/overlay state.
+    OpenScreen(&'static str),
 }
 
 #[derive(Message, Debug, Clone)]
@@ -98,6 +102,15 @@ impl MenuRegistryHandle {
             .expect("menu registry lock poisoned")
             .iter()
             .find(|screen| screen.target == target)
+            .cloned()
+    }
+
+    pub fn screen_by_id_for_target(&self, id: &str, target: MenuTarget) -> Option<MenuScreen> {
+        self.0
+            .lock()
+            .expect("menu registry lock poisoned")
+            .iter()
+            .find(|screen| screen.id == id && screen.target == target)
             .cloned()
     }
 

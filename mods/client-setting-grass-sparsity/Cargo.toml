@@ -1,0 +1,27 @@
+[package]
+name = "client-setting-grass-sparsity"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientSettingGrassSparsityMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.setting]
+id = "grass.sparsity"
+label = "Sparsity (0-1)"
+type = "f32"
+input = "f32"
+default = 0.1
+min = 0.0
+max = 0.95
+section = "graphics/grass"
+section_label = "Grass"
+
+[dependencies]
+settings-schema-api = { path = "../settings-schema-api" }
+tokio = { version = "1.48.0", features = ["full"] }

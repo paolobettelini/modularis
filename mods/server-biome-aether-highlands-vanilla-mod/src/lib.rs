@@ -8,6 +8,9 @@ use server_biome_api::{
 use server_biome_feature_oak_trees_vanilla_mod::{
     ServerBiomeFeatureOakTreesVanillaMod, sparse_oak_trees_feature_id,
 };
+use server_biome_feature_short_grass_vanilla_mod::{
+    ServerBiomeFeatureShortGrassVanillaMod, dense_short_grass_feature_id,
+};
 use tokio::task::JoinHandle;
 
 pub struct ServerBiomeAetherHighlandsVanillaMod;
@@ -18,6 +21,7 @@ impl ServerBiomeAetherHighlandsVanillaMod {
         _biomes: &mut B,
         _declaration: &mut biome_aether_highlands::BiomeAetherHighlandsMod,
         _oak_trees: &mut ServerBiomeFeatureOakTreesVanillaMod,
+        _short_grass: &mut ServerBiomeFeatureShortGrassVanillaMod,
     ) -> Self {
         bevy.app
             .world()
@@ -49,7 +53,10 @@ impl ServerBiomeAetherHighlandsVanillaMod {
                     grass_tint: [0.56, 0.80, 0.36],
                     foliage_tint: [0.48, 0.76, 0.34],
                 },
-                features: vec![sparse_oak_trees_feature_id()],
+                features: vec![
+                    sparse_oak_trees_feature_id(),
+                    dense_short_grass_feature_id(),
+                ],
             })
             .expect("Aether Highlands biome definition must be unique");
         Self

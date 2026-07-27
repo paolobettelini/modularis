@@ -9,6 +9,9 @@ use server_biome_feature_caves_vanilla_mod::{ServerBiomeFeatureCavesVanillaMod, 
 use server_biome_feature_glowstone_clusters_vanilla_mod::{
     ServerBiomeFeatureGlowstoneClustersVanillaMod, glowstone_clusters_feature_id,
 };
+use server_biome_feature_short_grass_vanilla_mod::{
+    ServerBiomeFeatureShortGrassVanillaMod, sparse_short_grass_feature_id,
+};
 use tokio::task::JoinHandle;
 
 pub struct ServerBiomeBasaltDeltasVanillaMod;
@@ -20,6 +23,7 @@ impl ServerBiomeBasaltDeltasVanillaMod {
         _declaration: &mut biome_basalt_deltas::BiomeBasaltDeltasMod,
         _caves: &mut ServerBiomeFeatureCavesVanillaMod,
         _glowstone: &mut ServerBiomeFeatureGlowstoneClustersVanillaMod,
+        _short_grass: &mut ServerBiomeFeatureShortGrassVanillaMod,
     ) -> Self {
         bevy.app
             .world()
@@ -51,7 +55,11 @@ impl ServerBiomeBasaltDeltasVanillaMod {
                     grass_tint: [0.28, 0.27, 0.28],
                     foliage_tint: [0.25, 0.24, 0.25],
                 },
-                features: vec![caves_feature_id(), glowstone_clusters_feature_id()],
+                features: vec![
+                    caves_feature_id(),
+                    glowstone_clusters_feature_id(),
+                    sparse_short_grass_feature_id(),
+                ],
             })
             .expect("Basalt Deltas biome definition must be unique");
         Self

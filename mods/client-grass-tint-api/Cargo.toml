@@ -1,0 +1,14 @@
+[package]
+name = "client-grass-tint-api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy = "0.17.3"
+client-dimension-api = { path = "../client-dimension-api" }
+generated-block-registry = "0.1.0"
+
+[patch.crates-io]
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }

@@ -32,6 +32,26 @@ pub struct SettingDefinition {
     /// Identifier of the independently provided UI editor for this setting.
     pub input: &'static str,
     pub default: SettingDefault,
+    /// Optional bounds for numeric settings. They are part of the setting
+    /// contract, not a detail of a particular UI provider.
+    pub number_range: Option<SettingNumberRange>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SettingNumberRange {
+    pub min: Option<f64>,
+    pub max: Option<f64>,
+}
+
+/// Optional menu grouping contributed alongside a setting.
+///
+/// Sections are presentation metadata: the setting store remains flat and
+/// consumers continue to address values only through generated setting keys.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SettingSection {
+    pub id: &'static str,
+    pub label: &'static str,
+    pub parent: Option<&'static str>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

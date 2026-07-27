@@ -14,6 +14,7 @@ init = [
     "server-biome-feature-caves-vanilla-mod",
     "server-biome-feature-ores-vanilla-mod",
     "server-biome-feature-birch-trees-vanilla-mod",
+    "server-biome-feature-short-grass-vanilla-mod",
 ]
 run = []
 ownership = []
@@ -27,6 +28,7 @@ server-biome-api = { path = "../server-biome-api" }
 server-biome-feature-caves-vanilla-mod = { path = "../server-biome-feature-caves-vanilla-mod" }
 server-biome-feature-ores-vanilla-mod = { path = "../server-biome-feature-ores-vanilla-mod" }
 server-biome-feature-birch-trees-vanilla-mod = { path = "../server-biome-feature-birch-trees-vanilla-mod" }
+server-biome-feature-short-grass-vanilla-mod = { path = "../server-biome-feature-short-grass-vanilla-mod" }
 tokio = { version = "1.48.0", features = ["full"] }
 
 [patch.crates-io]

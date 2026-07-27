@@ -113,7 +113,15 @@ features.
 
 `BiomeVisuals` records sky, fog, water, grass, and foliage colors. They are an
 extension point for client synchronization. The current chunk protocol does
-not transmit biome maps, so the renderer does not apply these values yet.
+not transmit biome maps, so the renderer does not apply the exact per-biome
+values yet.
+
+Animated short grass currently uses a separate replaceable
+`client-grass-tint-api`. Its vanilla provider chooses color from the current
+dimension and supporting block. This gives distinct Overworld, Nether, and
+Aether palettes without coupling world generation to rendering. A future
+biome-map packet can provide a more precise tint service without changing
+grass geometry.
 
 ### Feature list
 
@@ -243,9 +251,9 @@ not the same as merging their terrain policy.
 
 | Biome | Main layers | Main features |
 | --- | --- | --- |
-| Plains | grass, dirt, stone | caves, ores, sparse oak trees |
-| Oak Forest | grass, dirt, stone | caves, ores, dense oak trees |
-| Birch Forest | grass, dirt, stone | caves, ores, birch trees |
+| Plains | grass, dirt, stone | caves, ores, sparse oak trees, dense short grass |
+| Oak Forest | grass, dirt, stone | caves, ores, dense oak trees, sparse short grass |
+| Birch Forest | grass, dirt, stone | caves, ores, birch trees, sparse short grass |
 | Dry Desert | sand, stone | caves, ores, cacti |
 | Red Badlands | red sand, terracotta, stone | caves, ores, boulders |
 | Frozen Tundra | snow, dirt, stone | caves, ores, packed-ice patches |
@@ -255,19 +263,19 @@ not the same as merging their terrain policy.
 
 | Biome | Main layers | Main features |
 | --- | --- | --- |
-| Nether Wastes | netherrack | caves, glowstone clusters |
-| Soul Sand Valley | soul sand, soul soil, netherrack | caves |
-| Crimson Forest | crimson nylium, netherrack | caves, glowstone clusters |
-| Warped Forest | warped nylium, netherrack | caves, glowstone clusters |
-| Basalt Deltas | basalt, blackstone, netherrack | caves, glowstone clusters |
+| Nether Wastes | netherrack | caves, glowstone clusters, sparse short grass |
+| Soul Sand Valley | soul sand, soul soil, netherrack | caves, sparse short grass |
+| Crimson Forest | crimson nylium, netherrack | caves, glowstone clusters, dense short grass |
+| Warped Forest | warped nylium, netherrack | caves, glowstone clusters, dense short grass |
+| Basalt Deltas | basalt, blackstone, netherrack | caves, glowstone clusters, sparse short grass |
 
 ### Aether
 
 | Biome | Main layers | Main features |
 | --- | --- | --- |
-| Aether Highlands | grass, dirt, stone | sparse oak trees |
-| Golden Grove | moss, dirt, calcite | dense oak trees, glowstone clusters |
-| Crystal Peaks | calcite, stone | crystal spires |
+| Aether Highlands | grass, dirt, stone | sparse oak trees, dense short grass |
+| Golden Grove | moss, dirt, calcite | dense oak trees, glowstone clusters, dense short grass |
+| Crystal Peaks | calcite, stone | crystal spires, sparse short grass |
 
 Each definition is a separate mod. A server can omit or replace one without
 editing a central biome switch.
@@ -283,11 +291,14 @@ editing a central biome switch.
 | `server-biome-feature-cacti-vanilla-mod` | cacti | Decoration |
 | `server-biome-feature-ice-patches-vanilla-mod` | packed ice | Surface |
 | `server-biome-feature-boulders-vanilla-mod` | rock boulders | Decoration |
+| `server-biome-feature-short-grass-vanilla-mod` | sparse/dense short-grass plants | Decoration |
 | `server-biome-feature-glowstone-clusters-vanilla-mod` | glowstone clusters | Decoration |
 | `server-biome-feature-crystal-spires-vanilla-mod` | calcite/glowstone spires | Decoration |
 
 A feature mod may register multiple IDs when one algorithm supports several
-configurations.
+configurations. The short-grass placement feature is surface-agnostic: biome
+definitions decide whether to include it, and client presentation decides the
+color from dimension and supporting block.
 
 ## Adding a biome
 

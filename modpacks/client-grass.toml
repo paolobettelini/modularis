@@ -1,0 +1,30 @@
+name = "Minecraft demo animated grass client"
+description = "Optional GPU-animated short-grass rendering, wind policy, and grouped client settings."
+modpacks = []
+ignore = []
+
+mods = [
+    "client-setting-grass-enabled",
+    "client-setting-grass-blades-per-block",
+    "client-setting-grass-sparsity",
+    "client-setting-grass-blade-height",
+    "client-setting-grass-height-variation",
+    "client-setting-grass-blade-width",
+    "client-setting-grass-render-radius",
+    "client-setting-grass-render-lod",
+    "client-setting-grass-brightness",
+    "client-setting-grass-hue-jitter",
+    "client-setting-grass-wind-speed",
+    "client-setting-grass-wind-direction",
+    "client-setting-grass-dynamic-wind",
+    "client-setting-grass-dynamic-wind-strength",
+    "client-setting-grass-deformation-strength",
+    "client-grass-settings-generated-impl",
+    "client-wind-grass-settings-vanilla-mod",
+    "client-grass-tint-vanilla-mod",
+    "client-grass-interaction-state-mod",
+    "client-grass-mesh-fabric-style-impl",
+    "client-grass-render-bevy-impl",
+    "client-grass-player-contact-vanilla-mod",
+    "client-grass-network-player-contact-vanilla-mod",
+]

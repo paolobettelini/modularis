@@ -1,0 +1,28 @@
+[package]
+name = "client-grass-network-player-contact-vanilla-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientGrassNetworkPlayerContactVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-grass-interaction-api",
+    "client-player-render-api",
+    "client-player-gravity-map-api",
+    "client-player-scale-map-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-grass-interaction-api = { path = "../client-grass-interaction-api" }
+client-player-gravity-map-api = { path = "../client-player-gravity-map-api" }
+client-player-render-api = { path = "../client-player-render-api" }
+client-player-scale-map-api = { path = "../client-player-scale-map-api" }
+player-hitbox-api = { path = "../player-hitbox-api" }
+tokio = { version = "1.48.0", features = ["full"] }

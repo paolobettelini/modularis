@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::error::Error;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -11,7 +11,11 @@ struct Setting {
     kind: String,
     input: String,
     default: Value,
+    min: Option<f64>,
+    max: Option<f64>,
     variant: String,
+    section: Option<String>,
+    section_label: Option<String>,
 }
 
 fn main() {
@@ -76,6 +80,7 @@ fn collect_settings(project: &Path) -> Result<(Vec<Setting>, PathBuf), Box<dyn E
     let mut settings = Vec::new();
     let mut ids = HashSet::new();
     let mut variants = HashSet::new();
+    let mut section_labels = HashMap::<String, String>::new();
     let mut schema_path = None;
 
     for dependency in dependencies.values() {
@@ -103,11 +108,43 @@ fn collect_settings(project: &Path) -> Result<(Vec<Setting>, PathBuf), Box<dyn E
             .cloned()
             .ok_or_else(|| format!("setting '{id}' has no default"))?;
         validate_default(&id, &kind, &default)?;
+        let min = optional_numeric_bound(setting, "min", &id, &kind)?;
+        let max = optional_numeric_bound(setting, "max", &id, &kind)?;
+        validate_numeric_range(&id, &kind, &default, min, max)?;
         let input = setting
             .get("input")
             .and_then(Value::as_str)
             .map(str::to_string)
             .unwrap_or_else(|| kind.clone());
+        let section = setting
+            .get("section")
+            .and_then(Value::as_str)
+            .map(str::to_string);
+        let section_label = setting
+            .get("section_label")
+            .and_then(Value::as_str)
+            .map(str::to_string);
+        if section_label.is_some() && section.is_none() {
+            return Err(format!("setting '{id}' has section_label but no section").into());
+        }
+        if let Some(section) = &section {
+            validate_section_id(&id, section)?;
+            let label = section_label
+                .as_deref()
+                .map(str::to_string)
+                .unwrap_or_else(|| humanize_section_segment(section));
+            if label.is_empty() {
+                return Err(format!("setting '{id}' has an empty section label").into());
+            }
+            if let Some(previous) = section_labels.insert(section.clone(), label.clone()) {
+                if previous != label {
+                    return Err(format!(
+                        "settings section '{section}' has conflicting labels '{previous}' and '{label}'"
+                    )
+                    .into());
+                }
+            }
+        }
 
         if !ids.insert(id.clone()) {
             return Err(format!("duplicate setting id '{id}'").into());
@@ -127,7 +164,11 @@ fn collect_settings(project: &Path) -> Result<(Vec<Setting>, PathBuf), Box<dyn E
             kind,
             input,
             default,
+            min,
+            max,
             variant,
+            section,
+            section_label,
         });
     }
 
@@ -154,6 +195,61 @@ fn validate_default(id: &str, kind: &str, value: &Value) -> Result<(), Box<dyn E
     }
 }
 
+fn optional_numeric_bound(
+    setting: &toml::map::Map<String, Value>,
+    field: &str,
+    id: &str,
+    kind: &str,
+) -> Result<Option<f64>, Box<dyn Error>> {
+    let Some(value) = setting.get(field) else {
+        return Ok(None);
+    };
+    let bound = match kind {
+        "i32" => value
+            .as_integer()
+            .and_then(|value| i32::try_from(value).ok())
+            .map(|value| value as f64),
+        "f32" => value
+            .as_float()
+            .or_else(|| value.as_integer().map(|value| value as f64))
+            .filter(|value| value.is_finite()),
+        _ => {
+            return Err(format!(
+                "non-numeric setting '{id}' cannot declare numeric field '{field}'"
+            )
+            .into());
+        }
+    };
+    bound
+        .map(Some)
+        .ok_or_else(|| format!("setting '{id}' has an invalid '{field}' bound").into())
+}
+
+fn validate_numeric_range(
+    id: &str,
+    kind: &str,
+    default: &Value,
+    min: Option<f64>,
+    max: Option<f64>,
+) -> Result<(), Box<dyn Error>> {
+    if let (Some(min), Some(max)) = (min, max)
+        && min > max
+    {
+        return Err(format!("setting '{id}' has min {min} greater than max {max}").into());
+    }
+    if !matches!(kind, "i32" | "f32") {
+        return Ok(());
+    }
+    let value = default
+        .as_float()
+        .or_else(|| default.as_integer().map(|value| value as f64))
+        .expect("numeric defaults were validated before their ranges");
+    if min.is_some_and(|min| value < min) || max.is_some_and(|max| value > max) {
+        return Err(format!("setting '{id}' default {value} is outside its declared range").into());
+    }
+    Ok(())
+}
+
 fn write_registry(
     output: &Path,
     package: &str,
@@ -178,6 +274,7 @@ fn write_registry(
 }
 
 fn generate_source(settings: &[Setting]) -> Result<String, Box<dyn Error>> {
+    let section_descriptors = section_descriptors(settings);
     let variants = settings
         .iter()
         .map(|setting| format!("    {},", setting.variant))
@@ -192,13 +289,14 @@ fn generate_source(settings: &[Setting]) -> Result<String, Box<dyn Error>> {
         .iter()
         .map(|setting| {
             format!(
-                "const DEF_{}: SettingDefinition = SettingDefinition {{ id: {:?}, label: {:?}, kind: SettingType::{}, input: {:?}, default: {} }};",
+                "const DEF_{}: SettingDefinition = SettingDefinition {{ id: {:?}, label: {:?}, kind: SettingType::{}, input: {:?}, default: {}, number_range: {} }};",
                 setting.variant.to_uppercase(),
                 setting.id,
                 setting.label,
                 kind_variant(&setting.kind),
                 setting.input,
-                default_code(&setting.kind, &setting.default)
+                default_code(&setting.kind, &setting.default),
+                number_range_code(setting.min, setting.max),
             )
         })
         .collect::<Vec<_>>()
@@ -224,19 +322,111 @@ fn generate_source(settings: &[Setting]) -> Result<String, Box<dyn Error>> {
         })
         .collect::<Vec<_>>()
         .join("\n");
+    let sections = settings
+        .iter()
+        .map(|setting| {
+            let value = setting.section.as_ref().map_or_else(
+                || "None".to_string(),
+                |section| {
+                    let label = setting
+                        .section_label
+                        .clone()
+                        .unwrap_or_else(|| humanize_section_segment(section));
+                    let parent = section_parent(section)
+                        .map(|parent| format!("Some({parent:?})"))
+                        .unwrap_or_else(|| "None".to_string());
+                    format!(
+                        "Some(SettingSection {{ id: {:?}, label: {:?}, parent: {parent} }})",
+                        section, label,
+                    )
+                },
+            );
+            format!("        SettingKey::{} => {value},", setting.variant)
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    let all_sections = section_descriptors
+        .iter()
+        .map(|(id, label)| {
+            let parent = section_parent(id)
+                .map(|parent| format!("Some({parent:?})"))
+                .unwrap_or_else(|| "None".to_string());
+            format!("    SettingSection {{ id: {id:?}, label: {label:?}, parent: {parent} }},")
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
 
     Ok(format!(
-        "use settings_schema_api::{{SettingDefault, SettingDefinition, SettingType, SettingValue}};\n\n\
+        "use settings_schema_api::{{SettingDefault, SettingDefinition, SettingNumberRange, SettingSection, SettingType, SettingValue}};\n\n\
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]\n\
 pub enum SettingKey {{\n{variants}\n}}\n\n\
 pub const ALL_SETTINGS: &[SettingKey] = &[\n{all}\n];\n\n\
+pub const ALL_SETTING_SECTIONS: &[SettingSection] = &[\n{all_sections}\n];\n\n\
 {definitions}\n\n\
 pub fn all_settings() -> &'static [SettingKey] {{ ALL_SETTINGS }}\n\n\
+pub fn all_sections() -> &'static [SettingSection] {{ ALL_SETTING_SECTIONS }}\n\n\
 pub fn definition(key: SettingKey) -> &'static SettingDefinition {{\n    match key {{\n{definition_match}\n    }}\n}}\n\n\
 pub fn key_from_id(id: &str) -> Option<SettingKey> {{\n    match id {{\n{from_id}\n        _ => None,\n    }}\n}}\n\n\
+pub fn section(key: SettingKey) -> Option<SettingSection> {{\n    match key {{\n{sections}\n    }}\n}}\n\n\
 pub fn id(key: SettingKey) -> &'static str {{ definition(key).id }}\n\n\
 pub fn default_value(key: SettingKey) -> SettingValue {{ definition(key).default.to_value() }}\n"
     ))
+}
+
+fn validate_section_id(setting_id: &str, section: &str) -> Result<(), Box<dyn Error>> {
+    if section.is_empty()
+        || section.starts_with('/')
+        || section.ends_with('/')
+        || section.split('/').any(str::is_empty)
+        || section.split('/').any(|segment| {
+            segment.chars().any(|character| {
+                !character.is_ascii_alphanumeric() && character != '-' && character != '_'
+            })
+        })
+    {
+        return Err(format!("setting '{setting_id}' has invalid section path '{section}'").into());
+    }
+    Ok(())
+}
+
+fn section_descriptors(settings: &[Setting]) -> BTreeMap<String, String> {
+    let mut sections = BTreeMap::new();
+    for setting in settings {
+        let Some(section) = &setting.section else {
+            continue;
+        };
+        let segments = section.split('/').collect::<Vec<_>>();
+        for end in 1..=segments.len() {
+            let id = segments[..end].join("/");
+            sections
+                .entry(id)
+                .or_insert_with(|| humanize_identifier(segments[end - 1]));
+        }
+        if let Some(label) = &setting.section_label {
+            sections.insert(section.clone(), label.clone());
+        }
+    }
+    sections
+}
+
+fn section_parent(section: &str) -> Option<&str> {
+    section.rsplit_once('/').map(|(parent, _)| parent)
+}
+
+fn humanize_section_segment(section: &str) -> String {
+    humanize_identifier(section.rsplit('/').next().unwrap_or(section))
+}
+
+fn humanize_identifier(identifier: &str) -> String {
+    let words = identifier
+        .split(|character: char| character == '-' || character == '_')
+        .filter(|word| !word.is_empty())
+        .collect::<Vec<_>>();
+    let mut output = words.join(" ");
+    if let Some(first) = output.get_mut(0..1) {
+        first.make_ascii_uppercase();
+    }
+    output
 }
 
 fn kind_variant(kind: &str) -> &'static str {
@@ -262,6 +452,15 @@ fn default_code(kind: &str, value: &Value) -> String {
         "string" => format!("SettingDefault::String({:?})", value.as_str().unwrap()),
         _ => unreachable!(),
     }
+}
+
+fn number_range_code(min: Option<f64>, max: Option<f64>) -> String {
+    if min.is_none() && max.is_none() {
+        return "None".to_string();
+    }
+    let min = min.map_or_else(|| "None".to_string(), |value| format!("Some({value:?})"));
+    let max = max.map_or_else(|| "None".to_string(), |value| format!("Some({value:?})"));
+    format!("Some(SettingNumberRange {{ min: {min}, max: {max} }})")
 }
 
 fn required_string(

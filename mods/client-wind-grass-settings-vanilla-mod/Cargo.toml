@@ -1,0 +1,20 @@
+[package]
+name = "client-wind-grass-settings-vanilla-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientWindGrassSettingsVanillaMod"
+provides = "client-wind-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "client-grass-settings-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-grass-settings-api = { path = "../client-grass-settings-api" }
+client-wind-api = { path = "../client-wind-api" }
+tokio = { version = "1.48.0", features = ["full"] }

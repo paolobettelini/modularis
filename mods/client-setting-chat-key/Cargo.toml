@@ -17,6 +17,8 @@ label = "Chat key"
 type = "string"
 input = "keybinding"
 default = "T"
+section = "controls/keybinds"
+section_label = "Keybinds"
 
 [dependencies]
 settings-schema-api = { path = "../settings-schema-api" }

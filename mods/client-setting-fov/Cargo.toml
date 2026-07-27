@@ -17,6 +17,10 @@ label = "Field of view (degrees)"
 type = "f32"
 input = "f32"
 default = 75.0
+min = 30.0
+max = 120.0
+section = "graphics"
+section_label = "Graphics"
 
 [dependencies]
 settings-schema-api = { path = "../settings-schema-api" }

@@ -17,6 +17,10 @@ label = "Mouse sensitivity"
 type = "f32"
 input = "f32"
 default = 0.15
+min = 0.01
+max = 2.0
+section = "controls"
+section_label = "Controls"
 
 [dependencies]
 settings-schema-api = { path = "../settings-schema-api" }

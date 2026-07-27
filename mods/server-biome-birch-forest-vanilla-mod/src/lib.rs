@@ -10,6 +10,9 @@ use server_biome_feature_birch_trees_vanilla_mod::{
 };
 use server_biome_feature_caves_vanilla_mod::{ServerBiomeFeatureCavesVanillaMod, caves_feature_id};
 use server_biome_feature_ores_vanilla_mod::{ServerBiomeFeatureOresVanillaMod, ores_feature_id};
+use server_biome_feature_short_grass_vanilla_mod::{
+    ServerBiomeFeatureShortGrassVanillaMod, sparse_short_grass_feature_id,
+};
 use tokio::task::JoinHandle;
 
 pub struct ServerBiomeBirchForestVanillaMod;
@@ -22,6 +25,7 @@ impl ServerBiomeBirchForestVanillaMod {
         _caves: &mut ServerBiomeFeatureCavesVanillaMod,
         _ores: &mut ServerBiomeFeatureOresVanillaMod,
         _birch_trees: &mut ServerBiomeFeatureBirchTreesVanillaMod,
+        _short_grass: &mut ServerBiomeFeatureShortGrassVanillaMod,
     ) -> Self {
         bevy.app
             .world()
@@ -57,6 +61,7 @@ impl ServerBiomeBirchForestVanillaMod {
                     caves_feature_id(),
                     ores_feature_id(),
                     birch_trees_feature_id(),
+                    sparse_short_grass_feature_id(),
                 ],
             })
             .expect("Birch Forest biome definition must be unique");

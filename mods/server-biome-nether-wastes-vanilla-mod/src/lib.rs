@@ -9,6 +9,9 @@ use server_biome_feature_caves_vanilla_mod::{ServerBiomeFeatureCavesVanillaMod, 
 use server_biome_feature_glowstone_clusters_vanilla_mod::{
     ServerBiomeFeatureGlowstoneClustersVanillaMod, glowstone_clusters_feature_id,
 };
+use server_biome_feature_short_grass_vanilla_mod::{
+    ServerBiomeFeatureShortGrassVanillaMod, sparse_short_grass_feature_id,
+};
 use tokio::task::JoinHandle;
 
 pub struct ServerBiomeNetherWastesVanillaMod;
@@ -20,6 +23,7 @@ impl ServerBiomeNetherWastesVanillaMod {
         _declaration: &mut biome_nether_wastes::BiomeNetherWastesMod,
         _caves: &mut ServerBiomeFeatureCavesVanillaMod,
         _glowstone: &mut ServerBiomeFeatureGlowstoneClustersVanillaMod,
+        _short_grass: &mut ServerBiomeFeatureShortGrassVanillaMod,
     ) -> Self {
         bevy.app
             .world()
@@ -51,7 +55,11 @@ impl ServerBiomeNetherWastesVanillaMod {
                     grass_tint: [0.40, 0.12, 0.08],
                     foliage_tint: [0.36, 0.10, 0.08],
                 },
-                features: vec![caves_feature_id(), glowstone_clusters_feature_id()],
+                features: vec![
+                    caves_feature_id(),
+                    glowstone_clusters_feature_id(),
+                    sparse_short_grass_feature_id(),
+                ],
             })
             .expect("Nether Wastes biome definition must be unique");
         Self

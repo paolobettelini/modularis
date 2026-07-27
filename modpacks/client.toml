@@ -1,6 +1,6 @@
 name = "Minecraft demo client"
 description = "Multiplayer minecraft-style client using Bevy."
-modpacks = ["common", "client-vanilla", "client-graphics"]
+modpacks = ["common", "client-vanilla", "client-graphics", "client-grass"]
 #ignore = ["client-sun-shadows-vanilla-mod"]
 ignore = []
 mods = [

@@ -31,6 +31,8 @@ fn register_i32_input(registry: Res<SettingInputRegistryHandle>) {
             action: context.action,
             kind: MenuNumberKind::I32,
             step: 1.0,
+            min: context.min,
+            max: context.max,
         }
     });
 }

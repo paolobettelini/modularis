@@ -35,7 +35,7 @@ biome IDs.
 `client.toml` imports:
 
 ```toml
-modpacks = ["common", "client-vanilla", "client-graphics"]
+modpacks = ["common", "client-vanilla", "client-graphics", "client-grass"]
 ```
 
 The top-level client selects neutral state and concrete presentation:
@@ -73,6 +73,11 @@ The top-level client selects neutral state and concrete presentation:
 - ambient fill;
 - face-direction shading;
 - voxel ambient occlusion.
+
+`client-grass.toml` is another optional presentation pack. It selects grouped
+grass settings, the generated typed adapter, a wind provider, a replaceable
+Fabric-style blade mesher, and the Bevy shader renderer. The logical short-grass
+block remains in the shared block pack.
 
 This split lets a custom client keep the base protocol and chunk renderer while
 changing controls or graphics.

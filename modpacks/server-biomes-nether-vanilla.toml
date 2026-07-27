@@ -6,6 +6,7 @@ ignore = []
 mods = [
     "server-biome-feature-caves-vanilla-mod",
     "server-biome-feature-glowstone-clusters-vanilla-mod",
+    "server-biome-feature-short-grass-vanilla-mod",
     "server-biome-nether-wastes-vanilla-mod",
     "server-biome-soul-sand-valley-vanilla-mod",
     "server-biome-crimson-forest-vanilla-mod",

@@ -7,6 +7,7 @@ mods = [
     "server-biome-feature-oak-trees-vanilla-mod",
     "server-biome-feature-glowstone-clusters-vanilla-mod",
     "server-biome-feature-crystal-spires-vanilla-mod",
+    "server-biome-feature-short-grass-vanilla-mod",
     "server-biome-aether-highlands-vanilla-mod",
     "server-biome-aether-golden-grove-vanilla-mod",
     "server-biome-aether-crystal-peaks-vanilla-mod",

@@ -10,6 +10,9 @@ use server_biome_feature_oak_trees_vanilla_mod::{
     ServerBiomeFeatureOakTreesVanillaMod, dense_oak_trees_feature_id,
 };
 use server_biome_feature_ores_vanilla_mod::{ServerBiomeFeatureOresVanillaMod, ores_feature_id};
+use server_biome_feature_short_grass_vanilla_mod::{
+    ServerBiomeFeatureShortGrassVanillaMod, sparse_short_grass_feature_id,
+};
 use tokio::task::JoinHandle;
 
 pub struct ServerBiomeForestVanillaMod;
@@ -22,6 +25,7 @@ impl ServerBiomeForestVanillaMod {
         _caves: &mut ServerBiomeFeatureCavesVanillaMod,
         _ores: &mut ServerBiomeFeatureOresVanillaMod,
         _trees: &mut ServerBiomeFeatureOakTreesVanillaMod,
+        _short_grass: &mut ServerBiomeFeatureShortGrassVanillaMod,
     ) -> Self {
         bevy.app
             .world()
@@ -57,6 +61,7 @@ impl ServerBiomeForestVanillaMod {
                     caves_feature_id(),
                     ores_feature_id(),
                     dense_oak_trees_feature_id(),
+                    sparse_short_grass_feature_id(),
                 ],
             })
             .expect("the forest biome definition must be unique");

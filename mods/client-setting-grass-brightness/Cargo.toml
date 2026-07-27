@@ -1,0 +1,27 @@
+[package]
+name = "client-setting-grass-brightness"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientSettingGrassBrightnessMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.setting]
+id = "grass.brightness"
+label = "Brightness"
+type = "f32"
+input = "f32"
+default = 1.0
+min = 0.25
+max = 2.0
+section = "graphics/grass"
+section_label = "Grass"
+
+[dependencies]
+settings-schema-api = { path = "../settings-schema-api" }
+tokio = { version = "1.48.0", features = ["full"] }
