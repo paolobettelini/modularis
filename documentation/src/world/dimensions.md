@@ -150,15 +150,21 @@ Dimension::Overworld
 The current registry has one static instance per dimension, but chunk routing
 and cache keys already use `WorldInstanceId`.
 
+Durable identity is supplied separately by `server-world-catalog-api`. A
+catalog maps each persistent `WorldInstanceId` to a safe `WorldId` and root
+directory. This separation lets two Overworld instances have different save
+folders and seeds without inventing two semantic dimension variants.
+
 ## Adding a dimension
 
 1. Add a dimension contributor with a namespaced ID.
 2. Add it to `dimensions.toml`.
 3. Add or reuse a chunk provider.
 4. Add a server dimension registration mod.
-5. Select both in `server.toml`.
-6. Add travel or lifecycle behavior if players need to enter it.
-7. Recompose client and server so packets share the new enum variant.
+5. Register a durable world directory if the instance must persist.
+6. Select both in `server.toml`.
+7. Add travel or lifecycle behavior if players need to enter it.
+8. Recompose client and server so packets share the new enum variant.
 
 Example registration:
 

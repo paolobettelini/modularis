@@ -1,0 +1,29 @@
+[package]
+name = "server-chunk-storage-fs-impl"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerChunkStorageFsImpl"
+provides = "server-chunk-storage-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-world-catalog-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+block-instance-api = { path = "../block-instance-api" }
+chunk-api = { path = "../chunk-api" }
+chunk-storage-binary-format-lib = { path = "../chunk-storage-binary-format-lib" }
+server-chunk-storage-api = { path = "../server-chunk-storage-api" }
+server-world-catalog-api = { path = "../server-world-catalog-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { path = "../voxel-math-api" }
+world-instance-api = { path = "../world-instance-api" }
+
+[patch.crates-io]
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }

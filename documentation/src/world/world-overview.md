@@ -14,7 +14,15 @@ server provider registry
              │
 viewer-aware chunk router
              │
-resident cache + edit overlay
+resident cache lookup
+       │ miss
+       ▼
+durable chunk storage ◀── world catalog
+       │ miss
+       ▼
+selected generation provider
+       │
+buffer generated chunk + cache it
              │
 chunk request validation
              │
@@ -36,9 +44,11 @@ The server decides:
 - which provider answers a viewer's query;
 - which biome selector, definitions, and generation features shape terrain;
 - which world instance namespaces the data;
+- which world IDs and folders are durable;
 - which chunks may be requested;
 - which chunks stay in the resident cache;
-- how edits persist across cache eviction;
+- which storage backend buffers and persists chunks;
+- which provider generates a missing chunk;
 - which players receive changes.
 
 ## Client concerns

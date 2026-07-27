@@ -129,17 +129,22 @@ changing controls or graphics.
 
 `server.toml` selects the concrete world:
 
-- random-at-startup world seed provider;
+- demo world catalog rooted at `build-server/worlds`;
+- per-world seed files;
+- filesystem chunk storage;
+- periodic and shutdown flush policies;
 - chunk provider registry;
 - dimension registry;
 - Overworld, Nether, and Aether definitions;
 - dimension-aware chunk routing;
 - independent biome-driven Overworld, Nether, and Aether providers;
-- dynamic world cache and edit overlay.
+- dynamic resident world cache.
 
 The biome packs are separate from `server-base.toml`. A server can import only
 chosen dimension packs, omit them, or select the simple Perlin provider,
-checkerboard provider, a file-backed world, or a custom biome composition.
+checkerboard provider, or a custom biome composition.
+It can also replace filesystem persistence with an in-memory, database, remote,
+or application-specific storage provider without changing terrain generation.
 
 ## Why vanilla is not base
 

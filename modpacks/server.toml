@@ -4,8 +4,12 @@ modpacks = ["server-base", "server-vanilla"]
 ignore = []
 
 mods = [
-    "server-world-seed-random-impl",
+    "server-world-catalog-build-server-impl",
+    "server-world-seed-catalog-fs-impl",
     "server-chunk-provider-registry-mod",
+    "server-chunk-storage-fs-impl",
+    "server-chunk-storage-periodic-flush-mod",
+    "server-chunk-storage-shutdown-flush-mod",
     "server-dimension-registry-mod",
     "server-dimension-overworld-mod",
     "server-chunk-routing-dimensions-mod",

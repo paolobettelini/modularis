@@ -76,6 +76,17 @@ Start the server first:
 cargo run --manifest-path build-server/server/Cargo.toml
 ```
 
+On its first start, the selected demo catalog creates:
+
+```text
+build-server/worlds/{overworld,nether,aether}/
+```
+
+Each directory contains its persistent seed and binary chunk data. Stop the
+server normally, including with terminal Ctrl-C, to run the shutdown flush.
+Generated Cargo output can be recomposed; the sibling `build-server/worlds`
+directory is world data and must not be treated as disposable build output.
+
 Start one or more clients in other terminals:
 
 ```sh

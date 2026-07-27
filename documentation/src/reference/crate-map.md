@@ -164,16 +164,28 @@ Contracts:
 - `server-primary-chunk-provider-api`;
 - `server-chunk-routing-api`;
 - `server-chunk-residency-api`;
+- `server-chunk-storage-api`;
 - `server-chunk-world-api`;
+- `server-world-catalog-api`;
 - `server-world-seed-api`;
 - `world-instance-api`.
 
 Infrastructure:
 
+- `chunk-storage-binary-format-lib`;
 - `server-chunk-provider-registry-mod`;
+- `server-chunk-storage-fs-impl`;
+- `server-chunk-storage-periodic-flush-mod`;
+- `server-chunk-storage-shutdown-flush-mod`;
 - `server-chunk-world-dynamic-impl`;
-- `server-chunk-request-mod`.
-- `server-world-seed-random-impl`.
+- `server-chunk-request-mod`;
+- `server-world-catalog-build-server-impl`;
+- `server-world-seed-catalog-fs-impl`.
+
+Alternative infrastructure:
+
+- `server-world-seed-random-impl` for transient compositions;
+- `ServerChunkStorage::memory()` for tests or an in-memory provider.
 
 Providers:
 

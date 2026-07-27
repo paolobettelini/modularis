@@ -13,6 +13,7 @@ init = [
     "server-chunk-provider-registry-mod",
     "server-chunk-routing-api",
     "server-primary-chunk-provider-api",
+    "server-chunk-storage-api",
 ]
 run = []
 ownership = []
@@ -26,6 +27,7 @@ generated-block-registry = "0.1.0"
 server-chunk-provider-api = { path = "../server-chunk-provider-api" }
 server-chunk-provider-registry-mod = { path = "../server-chunk-provider-registry-mod" }
 server-chunk-routing-api = { path = "../server-chunk-routing-api" }
+server-chunk-storage-api = { path = "../server-chunk-storage-api" }
 server-chunk-world-api = { path = "../server-chunk-world-api" }
 server-primary-chunk-provider-api = { path = "../server-primary-chunk-provider-api" }
 tokio = { version = "1.48.0", features = ["full"] }

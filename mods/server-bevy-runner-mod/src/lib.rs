@@ -1,4 +1,7 @@
-use bevy::{app::ScheduleRunnerPlugin, prelude::*};
+use bevy::{
+    app::{ScheduleRunnerPlugin, TerminalCtrlCHandlerPlugin},
+    prelude::*,
+};
 use bevy_mod::BevyMod;
 use server_tick_api::ServerTickApi;
 use std::time::Duration;
@@ -13,6 +16,7 @@ impl ServerBevyRunnerMod {
             .add_plugins(MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(
                 Duration::from_secs_f64(1.0 / ticks_per_second),
             )))
+            .add_plugins(TerminalCtrlCHandlerPlugin)
             .insert_resource(Time::<Fixed>::from_hz(ticks_per_second));
         Self
     }

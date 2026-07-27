@@ -43,7 +43,7 @@ impl ServerChunkProviderNetherMod {
             .world()
             .resource::<ServerBiomeSelectorResource>()
             .clone();
-        let world_seed = *bevy.app.world().resource::<ServerWorldSeed>();
+        let world_seed = bevy.app.world().resource::<ServerWorldSeed>().clone();
         bevy.app
             .world()
             .resource::<ServerChunkProviderRegistry>()

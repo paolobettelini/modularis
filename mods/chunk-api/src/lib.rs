@@ -17,6 +17,10 @@ impl Chunk {
         }
     }
 
+    pub fn from_section(position: ChunkPos, section: ChunkSection) -> Self {
+        Self { position, section }
+    }
+
     pub fn position(&self) -> ChunkPos {
         self.position
     }

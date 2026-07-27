@@ -131,7 +131,7 @@ BlockId::Stone.into()
 
 - palette keys;
 - serialized in chunks;
-- stored in edit overlays;
+- stored in durable chunk local palettes;
 - sent in block update packets.
 
 Adding a metadata contributor later can distinguish two instances of the same

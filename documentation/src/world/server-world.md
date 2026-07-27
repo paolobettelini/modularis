@@ -1,11 +1,12 @@
-# Server world providers and residency
+# Server world providers, persistence, and residency
 
-The server world is split into four main contracts:
+The server world is split into five main contracts:
 
 1. providers generate base chunks;
 2. routing selects provider and instance for a viewer;
-3. the world backend caches chunks and stores edits;
-4. residency decides which requests and cached chunks are allowed.
+3. storage loads and buffers durable chunks;
+4. the world backend coordinates resident chunks, storage, and generation;
+5. residency decides which requests and cached chunks are allowed.
 
 ## Provider registry
 
@@ -63,10 +64,11 @@ Exact terrain policy belongs to each provider.
 ## World seeds
 
 Procedural generation depends on the replaceable `server-world-seed-api`.
-`ServerWorldSeed` owns one root `u64` and derives stable child seeds from:
+`ServerWorldSeed` can own a fallback root `u64` plus a seed for each registered
+world instance. Providers derive stable child streams from:
 
 ```text
-root seed + feature/provider namespace + WorldInstanceId
+world seed + feature/provider namespace
 ```
 
 The namespace keeps unrelated algorithms independent. Changing a biome
@@ -74,21 +76,28 @@ selector must not silently change a terrain provider's random stream, and two
 world instances must not accidentally generate the same terrain unless a
 custom seed provider chooses that behavior.
 
-The selected `server-world-seed-random-impl` creates a random root at server
-startup. For reproducible development or a fixed world, set:
+The selected `server-world-seed-catalog-fs-impl` reads each world's seed from
+`info.json`. It creates the file the first time that world is opened. A later
+restart reads the stored value, so procedural chunks remain reproducible. The
+initial seed can be made deterministic with:
 
 ```sh
 PATCHWORK_WORLD_SEED=123456
 ```
+
+The environment variable only affects worlds whose `info.json` does not exist
+yet. Editing or removing a world directory is an explicit data-management
+operation; changing the environment variable does not rewrite an existing
+world.
 
 The Overworld, Nether, Aether, alternate Perlin/checkerboard providers, and the
 vanilla biome selector all derive their values from this service. Local numeric
 constants in a noise expression are algorithm salts, not independent world
 seeds.
 
-A persistent server should replace the random provider with a mod that loads
-and saves the root seed next to the world data. Features should depend only on
-`server-world-seed-api`, never on that concrete implementation.
+`server-world-seed-random-impl` remains available for transient compositions.
+Features must depend only on `server-world-seed-api`, never on either concrete
+seed provider.
 
 Because chunk Y coordinates are unbounded, world Y zero is not a valid generic
 "bottom of the world". The Nether provider therefore uses biome strata at Y
@@ -182,36 +191,77 @@ ResidentChunkKey {
 Two viewers can query the same `ChunkPos` but receive different resident keys.
 This prevents edits in one instance from affecting another.
 
-## Dynamic world backend
+## World catalog
 
-`server-chunk-world-dynamic-impl` stores:
+`server-world-catalog-api` maps runtime instances to durable directories:
+
+```rust
+WorldDirectory {
+    id: WorldId,
+    instance: WorldInstanceId,
+    root: PathBuf,
+}
+```
+
+`WorldId` is the stable folder name. It is deliberately separate from
+`Dimension`: two worlds may use the same dimension and terrain provider while
+having different IDs, seeds, chunks, entities, and players.
+
+The catalog rejects duplicate world IDs, instances, and roots. It also limits
+world IDs to safe folder-name characters. A custom server can replace the
+catalog implementation without changing routing, generation, or storage.
+
+The demo selects `server-world-catalog-build-server-impl`, which registers:
 
 ```text
-chunks: ResidentChunkKey -> generated/resident Chunk
-edits:  ResidentChunkKey -> LocalBlockPos -> BlockInstance
+build-server/worlds/
+├── overworld/
+├── nether/
+└── aether/
+```
+
+These paths are a demo policy, not part of the catalog API. A production server
+can provide paths from settings, command-line arguments, a save selector, or a
+multi-tenant world service.
+
+## Dynamic world backend
+
+`server-chunk-world-dynamic-impl` owns only the resident chunk cache and
+coordinates the other contracts:
+
+```text
+chunks:      ResidentChunkKey -> Chunk
+unpersisted: ResidentChunkKey set
 ```
 
 On a query:
 
 1. route the viewer;
 2. return resident chunk if present;
-3. ask the selected provider to generate;
-4. apply sparse edits;
-5. cache and return the result.
+3. ask `ServerChunkStorage` for the exact instance/provider/position key;
+4. if storage misses, ask the selected provider to generate;
+5. queue a generated chunk for durable storage;
+6. cache and return the result.
 
 On mutation:
 
 1. resolve the same resident key;
 2. load the chunk if needed;
 3. mutate the resident chunk;
-4. store the new block in the sparse edit overlay;
+4. queue the complete compact chunk in storage's write-behind buffer;
 5. return `BlockMutation` with scope, previous, and current instance.
 
-Eviction removes base chunks but keeps sparse edits. Regeneration restores the
-same changed world.
+The storage backend is therefore a decorator between the resident cache and
+generation. Terrain providers do not perform file I/O and streaming code does
+not know whether a chunk came from disk or procedural generation.
 
-The overlay is in RAM and is not persistent storage. A file/database provider
-or persistence mod is required for durable worlds.
+If queueing a modified chunk fails, the world marks it as unpersisted and keeps
+it resident. Residency maintenance retries the write and refuses to evict that
+chunk until storage accepts it. This avoids silently losing an edit because of
+a temporary storage failure.
+
+The complete filesystem format and flush policy are documented in
+[Chunk coordinates and storage](chunk-storage.md).
 
 ## World operations
 
@@ -268,15 +318,22 @@ The current vanilla policy is intentionally simple.
 
 ## Synchronous generation limit
 
-Provider generation currently runs synchronously during world queries. A slow
-file or procedural provider can block the Bevy schedule.
+Storage reads, region flushes, and provider generation currently run
+synchronously. Opening a large region or writing many dirty regions can block a
+server tick.
 
 An asynchronous design should add a pipeline such as:
 
 ```text
-request -> queued generation task -> ready chunk -> resident insertion -> response
+request
+  -> resident lookup
+  -> queued storage read
+  -> queued generation on miss
+  -> ready chunk
+  -> resident insertion
+  -> response
 ```
 
-The public provider and world contracts may need an async-ready result type or a
-separate generation service. Do not hide a blocking file read inside the
-current synchronous `generate`.
+The public storage/provider and world contracts may need an async-ready result
+type or a separate generation service. Do not hide a blocking file read inside
+the current synchronous `generate`.

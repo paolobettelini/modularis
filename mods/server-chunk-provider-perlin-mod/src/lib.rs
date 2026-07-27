@@ -23,7 +23,7 @@ impl ServerChunkProviderPerlinMod {
         _blocks: &mut B,
         _world_seed: &mut W,
     ) -> Self {
-        let seed = *bevy.app.world().resource::<ServerWorldSeed>();
+        let seed = bevy.app.world().resource::<ServerWorldSeed>().clone();
         bevy.app
             .world()
             .resource::<ServerChunkProviderRegistry>()

@@ -25,7 +25,7 @@ impl ServerBiomeClimateSelectorVanillaMod {
         _plains: &mut ServerBiomePlainsVanillaMod,
         _world_seed: &mut W,
     ) -> Self {
-        let world_seed = *bevy.app.world().resource::<ServerWorldSeed>();
+        let world_seed = bevy.app.world().resource::<ServerWorldSeed>().clone();
         bevy.app.insert_resource(ServerBiomeSelectorResource::new(
             ClimateNoiseBiomeSelector { world_seed },
         ));

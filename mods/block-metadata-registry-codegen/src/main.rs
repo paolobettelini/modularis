@@ -148,6 +148,7 @@ fn write_registry(
         output.join("src/lib.rs"),
         format!(
             "#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, serde::Serialize, serde::Deserialize)]\n\
+#[serde(default)]\n\
 pub struct BlockMetaSet {{\n{fields}\n}}\n"
         ),
     )?;

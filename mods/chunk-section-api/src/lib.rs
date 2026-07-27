@@ -11,6 +11,14 @@ pub struct ChunkSection {
     entries: PackedBitArray,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ChunkSectionError {
+    EmptyPalette,
+    DuplicatePaletteEntry,
+    InvalidPackedData,
+    PaletteIndexOutOfBounds,
+}
+
 impl ChunkSection {
     pub fn filled(block: impl Into<BlockInstance>) -> Self {
         let block = block.into();
@@ -19,6 +27,37 @@ impl ChunkSection {
             reverse_map: HashMap::from([(block, 0)]),
             entries: PackedBitArray::filled(CHUNK_VOLUME, bits_required(1), 0),
         }
+    }
+
+    pub fn from_parts(
+        palette: Vec<BlockInstance>,
+        bits_per_entry: u8,
+        data: Vec<u64>,
+    ) -> Result<Self, ChunkSectionError> {
+        if palette.is_empty() {
+            return Err(ChunkSectionError::EmptyPalette);
+        }
+        if bits_per_entry < bits_required(palette.len()) {
+            return Err(ChunkSectionError::InvalidPackedData);
+        }
+        let entries = PackedBitArray::from_parts(CHUNK_VOLUME, bits_per_entry, data)
+            .map_err(|_| ChunkSectionError::InvalidPackedData)?;
+        for index in 0..entries.len() {
+            if entries.get(index) as usize >= palette.len() {
+                return Err(ChunkSectionError::PaletteIndexOutOfBounds);
+            }
+        }
+        let mut reverse_map = HashMap::with_capacity(palette.len());
+        for (index, block) in palette.iter().cloned().enumerate() {
+            if reverse_map.insert(block, index as u32).is_some() {
+                return Err(ChunkSectionError::DuplicatePaletteEntry);
+            }
+        }
+        Ok(Self {
+            palette,
+            reverse_map,
+            entries,
+        })
     }
 
     pub fn get(&self, local: LocalBlockPos) -> BlockInstance {
@@ -92,31 +131,12 @@ impl<'de> Deserialize<'de> for ChunkSection {
         D: Deserializer<'de>,
     {
         let wire = ChunkSectionWire::deserialize(deserializer)?;
-        if wire.palette.is_empty() {
-            return Err(serde::de::Error::custom("chunk palette cannot be empty"));
-        }
-        if wire.entries.len() != CHUNK_VOLUME {
-            return Err(serde::de::Error::custom("invalid chunk section length"));
-        }
-        for index in 0..wire.entries.len() {
-            if wire.entries.get(index) as usize >= wire.palette.len() {
-                return Err(serde::de::Error::custom(
-                    "packed palette index is out of bounds",
-                ));
-            }
-        }
-        let reverse_map = wire
-            .palette
-            .iter()
-            .cloned()
-            .enumerate()
-            .map(|(index, block)| (block, index as u32))
-            .collect();
-        Ok(Self {
-            palette: wire.palette,
-            reverse_map,
-            entries: wire.entries,
-        })
+        Self::from_parts(
+            wire.palette,
+            wire.entries.bits_per_entry(),
+            wire.entries.data().to_vec(),
+        )
+        .map_err(|error| serde::de::Error::custom(format!("{error:?}")))
     }
 }
 
@@ -153,5 +173,35 @@ mod tests {
             section.uniform_block().unwrap().block,
             block_instance_api::BlockId::Air
         );
+    }
+
+    #[test]
+    fn reconstructs_a_section_from_palette_and_words() {
+        let mut original = ChunkSection::filled(block_instance_api::BlockId::Air);
+        original.set(
+            LocalBlockPos::new(3, 4, 5).unwrap(),
+            block_instance_api::BlockId::Stone,
+        );
+        let restored = ChunkSection::from_parts(
+            original.palette().to_vec(),
+            original.bits_per_entry(),
+            original.data().to_vec(),
+        )
+        .unwrap();
+        assert_eq!(restored, original);
+    }
+
+    #[test]
+    fn rejects_too_few_bits_for_the_palette() {
+        let result = ChunkSection::from_parts(
+            vec![
+                block_instance_api::BlockId::Air.into(),
+                block_instance_api::BlockId::Stone.into(),
+                block_instance_api::BlockId::Dirt.into(),
+            ],
+            1,
+            vec![0; 64],
+        );
+        assert_eq!(result, Err(ChunkSectionError::InvalidPackedData));
     }
 }

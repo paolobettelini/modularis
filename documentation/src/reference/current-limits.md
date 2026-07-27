@@ -7,8 +7,10 @@ simple.
 
 Current limits:
 
-- chunk generation is synchronous;
-- edit overlays are in memory and not durable;
+- chunk generation and filesystem region I/O are synchronous;
+- the filesystem backend keeps opened encoded region maps in memory;
+- there is no save migration framework beyond explicit binary format versions
+  and serde defaults for added metadata;
 - one chunk is one `16x16x16` section;
 - no palette compaction;
 - no revision/version field in chunk responses;
@@ -19,8 +21,9 @@ Current limits:
 
 Design direction:
 
-- asynchronous provider pipeline;
-- persistent overlay/backend;
+- asynchronous storage/generation pipeline;
+- region-cache eviction and background atomic writes;
+- explicit save migrations and recovery tooling;
 - scoped/revisioned client chunks;
 - byte-budget or LRU residency;
 - client biome maps and visual synchronization;

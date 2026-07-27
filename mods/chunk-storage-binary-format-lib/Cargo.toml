@@ -1,0 +1,15 @@
+[package]
+name = "chunk-storage-binary-format-lib"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+block-instance-api = { path = "../block-instance-api" }
+chunk-api = { path = "../chunk-api" }
+chunk-section-api = { path = "../chunk-section-api" }
+serde_cbor = "0.11"
+voxel-math-api = { path = "../voxel-math-api" }
+
+[patch.crates-io]
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }

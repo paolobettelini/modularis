@@ -1,5 +1,7 @@
 pub use generated_block_metadata::BlockMetaSet;
-pub use generated_block_registry::{BlockId, all_blocks};
+pub use generated_block_registry::{
+    BlockId, all_blocks, from_str as block_id_from_str, id as block_id_as_str,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]

@@ -123,7 +123,9 @@ The demo currently includes:
   flight speed, FOV, mouse sensitivity, and inventory key;
 - vertically unbounded chunk coordinates with a moving client window;
 - pluggable biome-driven Overworld, Nether, and Aether terrain providers;
-- an explicit scoped world-seed service used by procedural providers;
+- an explicit per-world seed service used by procedural providers;
+- catalogued filesystem worlds with binary palette-based chunk persistence;
+- buffered periodic writes and shutdown flush;
 - generated biome IDs with code-side definitions and phased world features;
 - palette-compressed chunks carrying block instances and metadata;
 - block breaking, item-based placement, reach checks, and hitbox checks;
