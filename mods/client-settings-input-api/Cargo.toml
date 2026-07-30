@@ -3,6 +3,9 @@ name = "client-settings-input-api"
 version = "0.1.0"
 edition = "2024"
 
+[package.metadata.mod]
+support = true
+
 [dependencies]
 bevy = "0.17.3"
 client-menu-api = { path = "../client-menu-api" }

@@ -3,6 +3,9 @@ name = "item-manager-api"
 version = "0.1.0"
 edition = "2024"
 
+[package.metadata.mod]
+support = true
+
 [dependencies]
 generated-item-registry = "0.1.0"
 item-api = { path = "../item-api" }

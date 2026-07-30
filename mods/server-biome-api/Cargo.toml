@@ -3,6 +3,9 @@ name = "server-biome-api"
 version = "0.1.0"
 edition = "2024"
 
+[package.metadata.mod]
+support = true
+
 [dependencies]
 bevy = "0.17.3"
 block-instance-api = { path = "../block-instance-api" }

@@ -3,5 +3,8 @@ name = "server-inventory-layout-api"
 version = "0.1.0"
 edition = "2024"
 
+[package.metadata.mod]
+support = true
+
 [dependencies]
 inventory-core-api = { path = "../inventory-core-api" }
