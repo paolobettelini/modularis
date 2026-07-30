@@ -21,6 +21,17 @@ instances where:
 It also demonstrates that a custom server may keep one monolithic policy mod
 while reusing small Patchwork libraries.
 
+The mod is monolithic at the Patchwork boundary, not forced into one giant Rust
+file. Its internal modules are:
+
+- `lib.rs`: high-level Bevy wiring and instance-scoped chat policy;
+- `parkour.rs`: parkour runtime, assignment, progression, reset, block edits,
+  sound triggers, and instance cleanup;
+- `web.rs`: the development dashboard and its read-only runtime snapshot.
+
+This is ordinary Rust organization inside one mod. It does not create new
+Patchwork features or make the dashboard independently selectable.
+
 The composition starts from `server-core.toml`, not the larger
 `server-base.toml` umbrella. It then selects only the neutral chat, sound,
 outbound block-edit, chunk-request, flight, and sun pipelines it actually uses.
@@ -180,6 +191,31 @@ synchronized.
 
 This is the key architecture test: “same chat” does not imply “same world” or
 “same entity visibility.”
+
+## Development web dashboard
+
+TheCrown starts a local Actix Web server at
+`http://127.0.0.1:8080`. Pages are rendered on the server with Leptos:
+
+- `/` lists every active parkour instance and its connected players;
+- `/player/<name>` shows whether a known player is online and, when online,
+  their current parkour instance;
+- an offline player page retains the last instance observed since this server
+  process started.
+
+Player links percent-encode their names, so spaces and non-ASCII names remain
+valid route segments. Both pages refresh every two seconds.
+
+The HTTP worker never reads Bevy ECS data directly. A Bevy system builds a
+small snapshot after join assignment and player cleanup. That snapshot crosses
+the thread boundary through `Arc<RwLock<_>>`; Actix clones it briefly for each
+response and releases the lock before rendering. This avoids blocking the 20
+Hz game schedule on HTTP work and avoids sharing the Bevy `World` with another
+thread.
+
+The dashboard deliberately belongs to `thecrown-main-mod`. It is custom
+monolithic server infrastructure, not a reusable vanilla feature and not a
+separate Patchwork mod.
 
 ## Why blocks cannot be broken
 

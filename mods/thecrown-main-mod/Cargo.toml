@@ -23,6 +23,7 @@ run = []
 ownership = []
 
 [dependencies]
+actix-web = "4.13.0"
 audience-api = { path = "../audience-api" }
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
@@ -31,6 +32,7 @@ block-edit-events-mod = { path = "../block-edit-events-mod" }
 block-instance-api = { path = "../block-instance-api" }
 generated-block-registry = "0.1.0"
 generated-sound-registry = "0.1.0"
+leptos = { version = "0.8.20", default-features = false, features = ["ssr"] }
 parkour-gameplay-lib = { path = "../parkour-gameplay-lib" }
 player-network-message-types = { path = "../player-network-message-types" }
 server-chat-api = { path = "../server-chat-api" }
