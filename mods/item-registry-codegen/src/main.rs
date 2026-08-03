@@ -1,3 +1,4 @@
+use codegen_utils::{GeneratedDependency, generate_dependency_toml_line};
 use std::collections::HashSet;
 use std::error::Error;
 use std::fs;
@@ -44,14 +45,14 @@ fn run() -> Result<(), Box<dyn Error>> {
     }
     let project = project.ok_or("missing --project")?.canonicalize()?;
     let output = output.ok_or("missing --output-crate")?;
-    let (items, item_api_path, render_api_path) = collect_items(&project)?;
+    let (items, item_api_dependency, render_api_dependency) = collect_items(&project)?;
     write_registry(
         &output,
         &package,
         &version,
         &items,
-        &item_api_path,
-        &render_api_path,
+        &item_api_dependency,
+        &render_api_dependency,
     )?;
     if let Some(dev_crate) = dev_crate {
         write_registry(
@@ -59,8 +60,8 @@ fn run() -> Result<(), Box<dyn Error>> {
             &package,
             &version,
             &items,
-            &item_api_path,
-            &render_api_path,
+            &item_api_dependency,
+            &render_api_dependency,
         )?;
     }
     Ok(())
@@ -68,7 +69,14 @@ fn run() -> Result<(), Box<dyn Error>> {
 
 fn collect_items(
     project: &Path,
-) -> Result<(Vec<ItemDeclaration>, PathBuf, PathBuf), Box<dyn Error>> {
+) -> Result<
+    (
+        Vec<ItemDeclaration>,
+        GeneratedDependency,
+        GeneratedDependency,
+    ),
+    Box<dyn Error>,
+> {
     let manifest = read_toml(&project.join("Cargo.toml"))?;
     let dependencies = manifest
         .get("dependencies")
@@ -77,8 +85,8 @@ fn collect_items(
     let mut items = Vec::new();
     let mut ids = HashSet::new();
     let mut variants = HashSet::new();
-    let mut item_api_path = None;
-    let mut render_api_path = None;
+    let mut item_api_dependency = None;
+    let mut render_api_dependency = None;
     for (dependency_key, dependency) in dependencies {
         let Some(mod_dir) = dependency_path(project, dependency)? else {
             continue;
@@ -94,11 +102,11 @@ fn collect_items(
         };
         let id = required_string(item, "id")?;
         let _label = required_string(item, "label")?;
-        if item_api_path.is_none() {
-            item_api_path = find_path_dependency(&mod_manifest, &mod_dir, "item-api")?;
+        if item_api_dependency.is_none() {
+            item_api_dependency = find_dependency(&mod_manifest, &mod_dir, "item-api")?;
         }
-        if render_api_path.is_none() {
-            render_api_path = find_path_dependency(&mod_manifest, &mod_dir, "item-render-api")?;
+        if render_api_dependency.is_none() {
+            render_api_dependency = find_dependency(&mod_manifest, &mod_dir, "item-render-api")?;
         }
         if !ids.insert(id.clone()) {
             return Err(format!("duplicate item id '{id}'").into());
@@ -120,8 +128,8 @@ fn collect_items(
     }
     Ok((
         items,
-        item_api_path.ok_or("no item contributor exposed item-api")?,
-        render_api_path.ok_or("no item contributor exposed item-render-api")?,
+        item_api_dependency.ok_or("no item contributor exposed item-api")?,
+        render_api_dependency.ok_or("no item contributor exposed item-render-api")?,
     ))
 }
 
@@ -130,8 +138,8 @@ fn write_registry(
     package: &str,
     version: &str,
     items: &[ItemDeclaration],
-    item_api_path: &Path,
-    render_api_path: &Path,
+    item_api_dependency: &GeneratedDependency,
+    render_api_dependency: &GeneratedDependency,
 ) -> Result<(), Box<dyn Error>> {
     if output.exists() {
         fs::remove_dir_all(output)?;
@@ -140,19 +148,18 @@ fn write_registry(
     let dependencies = items
         .iter()
         .map(|item| {
-            format!(
-                "{} = {{ path = \"{}\" }}",
-                item.dependency_key,
-                toml_path(&relative_path(output, &item.dependency_path))
+            generate_dependency_toml_line(
+                output,
+                &GeneratedDependency::path(&item.dependency_key, &item.dependency_path),
             )
         })
-        .chain(std::iter::once(format!(
-            "item-api = {{ path = \"{}\" }}",
-            toml_path(&relative_path(output, item_api_path))
+        .chain(std::iter::once(generate_dependency_toml_line(
+            output,
+            item_api_dependency,
         )))
-        .chain(std::iter::once(format!(
-            "item-render-api = {{ path = \"{}\" }}",
-            toml_path(&relative_path(output, render_api_path))
+        .chain(std::iter::once(generate_dependency_toml_line(
+            output,
+            render_api_dependency,
         )))
         .chain(std::iter::once(
             "serde = { version = \"1.0\", features = [\"derive\"] }".to_string(),
@@ -259,11 +266,11 @@ fn dependency_path(base: &Path, value: &Value) -> Result<Option<PathBuf>, Box<dy
     ))
 }
 
-fn find_path_dependency(
+fn find_dependency(
     manifest: &Value,
     crate_dir: &Path,
     name: &str,
-) -> Result<Option<PathBuf>, Box<dyn Error>> {
+) -> Result<Option<GeneratedDependency>, Box<dyn Error>> {
     let Some(value) = manifest
         .get("dependencies")
         .and_then(Value::as_table)
@@ -271,7 +278,7 @@ fn find_path_dependency(
     else {
         return Ok(None);
     };
-    dependency_path(crate_dir, value)
+    GeneratedDependency::from_manifest(name, value, crate_dir).map(Some)
 }
 
 fn pascal_identifier(input: &str) -> String {
@@ -290,30 +297,4 @@ fn pascal_identifier(input: &str) -> String {
 
 fn read_toml(path: &Path) -> Result<Value, Box<dyn Error>> {
     Ok(toml::from_str(&fs::read_to_string(path)?)?)
-}
-
-fn relative_path(from: &Path, to: &Path) -> PathBuf {
-    let from = from.canonicalize().unwrap_or_else(|_| from.to_path_buf());
-    let to = to.canonicalize().unwrap_or_else(|_| to.to_path_buf());
-    let from_components = from.components().collect::<Vec<_>>();
-    let to_components = to.components().collect::<Vec<_>>();
-    let mut common = 0;
-    while common < from_components.len()
-        && common < to_components.len()
-        && from_components[common] == to_components[common]
-    {
-        common += 1;
-    }
-    let mut result = PathBuf::new();
-    for _ in common..from_components.len() {
-        result.push("..");
-    }
-    for component in &to_components[common..] {
-        result.push(component.as_os_str());
-    }
-    result
-}
-
-fn toml_path(path: &Path) -> String {
-    path.to_string_lossy().replace('\\', "/")
 }

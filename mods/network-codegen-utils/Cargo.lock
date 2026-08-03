@@ -5,6 +5,9 @@ version = 4
 [[package]]
 name = "codegen-utils"
 version = "0.1.0"
+dependencies = [
+ "toml",
+]
 
 [[package]]
 name = "equivalent"

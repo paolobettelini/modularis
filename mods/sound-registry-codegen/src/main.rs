@@ -1,3 +1,4 @@
+use codegen_utils::{GeneratedDependency, generate_dependency_toml_line};
 use std::collections::{BTreeMap, HashSet};
 use std::error::Error;
 use std::fs;
@@ -46,17 +47,17 @@ fn run() -> Result<(), Box<dyn Error>> {
 
     let project = project.ok_or("missing --project")?.canonicalize()?;
     let output = output.ok_or("missing --output-crate")?;
-    let (sounds, api_paths) = collect_sounds(&project)?;
-    write_registry(&output, &package, &version, &sounds, &api_paths)?;
+    let (sounds, api_dependencies) = collect_sounds(&project)?;
+    write_registry(&output, &package, &version, &sounds, &api_dependencies)?;
     if let Some(dev_crate) = dev_crate {
-        write_registry(&dev_crate, &package, &version, &sounds, &api_paths)?;
+        write_registry(&dev_crate, &package, &version, &sounds, &api_dependencies)?;
     }
     Ok(())
 }
 
 fn collect_sounds(
     project: &Path,
-) -> Result<(Vec<SoundDeclaration>, BTreeMap<String, PathBuf>), Box<dyn Error>> {
+) -> Result<(Vec<SoundDeclaration>, BTreeMap<String, GeneratedDependency>), Box<dyn Error>> {
     let manifest = read_toml(&project.join("Cargo.toml"))?;
     let dependencies = manifest
         .get("dependencies")
@@ -66,7 +67,7 @@ fn collect_sounds(
     let mut sounds = Vec::new();
     let mut ids = HashSet::new();
     let mut variants = HashSet::new();
-    let mut api_paths = BTreeMap::new();
+    let mut api_dependencies = BTreeMap::new();
 
     for (dependency_key, dependency) in dependencies {
         let Some(mod_dir) = dependency_path(project, dependency)? else {
@@ -94,10 +95,10 @@ fn collect_sounds(
             return Err(format!("duplicate generated sound variant '{variant}'").into());
         }
 
-        if !api_paths.contains_key("sound-api") {
-            let path = find_path_dependency(&mod_manifest, &mod_dir, "sound-api")?
+        if !api_dependencies.contains_key("sound-api") {
+            let dependency = find_dependency(&mod_manifest, &mod_dir, "sound-api")?
                 .ok_or_else(|| format!("sound contributor '{id}' does not depend on sound-api"))?;
-            api_paths.insert("sound-api".to_string(), path);
+            api_dependencies.insert("sound-api".to_string(), dependency);
         }
 
         sounds.push(SoundDeclaration {
@@ -112,7 +113,7 @@ fn collect_sounds(
     if sounds.is_empty() {
         return Err("sound registry requires at least one contributor".into());
     }
-    Ok((sounds, api_paths))
+    Ok((sounds, api_dependencies))
 }
 
 fn write_registry(
@@ -120,25 +121,22 @@ fn write_registry(
     package: &str,
     version: &str,
     sounds: &[SoundDeclaration],
-    api_paths: &BTreeMap<String, PathBuf>,
+    api_dependencies: &BTreeMap<String, GeneratedDependency>,
 ) -> Result<(), Box<dyn Error>> {
     if output.exists() {
         fs::remove_dir_all(output)?;
     }
     fs::create_dir_all(output.join("src"))?;
 
-    let mut dependencies = vec![
-        format!(
-            "sound-api = {{ path = \"{}\" }}",
-            toml_path(&relative_path(output, &api_paths["sound-api"]))
-        ),
-        "serde = { version = \"1.0\", features = [\"derive\"] }".to_string(),
-    ];
+    let mut dependencies = api_dependencies
+        .values()
+        .map(|dependency| generate_dependency_toml_line(output, dependency))
+        .collect::<Vec<_>>();
+    dependencies.push("serde = { version = \"1.0\", features = [\"derive\"] }".to_string());
     dependencies.extend(sounds.iter().map(|sound| {
-        format!(
-            "{} = {{ path = \"{}\" }}",
-            sound.dependency_key,
-            toml_path(&relative_path(output, &sound.dependency_path))
+        generate_dependency_toml_line(
+            output,
+            &GeneratedDependency::path(&sound.dependency_key, &sound.dependency_path),
         )
     }));
 
@@ -237,11 +235,11 @@ fn dependency_path(base: &Path, value: &Value) -> Result<Option<PathBuf>, Box<dy
     ))
 }
 
-fn find_path_dependency(
+fn find_dependency(
     manifest: &Value,
     crate_dir: &Path,
     name: &str,
-) -> Result<Option<PathBuf>, Box<dyn Error>> {
+) -> Result<Option<GeneratedDependency>, Box<dyn Error>> {
     let Some(value) = manifest
         .get("dependencies")
         .and_then(Value::as_table)
@@ -249,7 +247,7 @@ fn find_path_dependency(
     else {
         return Ok(None);
     };
-    dependency_path(crate_dir, value)
+    GeneratedDependency::from_manifest(name, value, crate_dir).map(Some)
 }
 
 fn pascal_identifier(input: &str) -> String {
@@ -268,30 +266,4 @@ fn pascal_identifier(input: &str) -> String {
 
 fn read_toml(path: &Path) -> Result<Value, Box<dyn Error>> {
     Ok(toml::from_str(&fs::read_to_string(path)?)?)
-}
-
-fn relative_path(from: &Path, to: &Path) -> PathBuf {
-    let from = from.canonicalize().unwrap_or_else(|_| from.to_path_buf());
-    let to = to.canonicalize().unwrap_or_else(|_| to.to_path_buf());
-    let from_components = from.components().collect::<Vec<_>>();
-    let to_components = to.components().collect::<Vec<_>>();
-    let mut common = 0;
-    while common < from_components.len()
-        && common < to_components.len()
-        && from_components[common] == to_components[common]
-    {
-        common += 1;
-    }
-    let mut result = PathBuf::new();
-    for _ in common..from_components.len() {
-        result.push("..");
-    }
-    for component in &to_components[common..] {
-        result.push(component.as_os_str());
-    }
-    result
-}
-
-fn toml_path(path: &Path) -> String {
-    path.to_string_lossy().replace('\\', "/")
 }

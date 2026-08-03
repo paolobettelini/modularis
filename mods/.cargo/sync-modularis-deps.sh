@@ -106,6 +106,14 @@ for manifest in "${manifests[@]}"; do
         continue
     fi
 
+    # Development copies of codegen outputs may appear under mods/ after a
+    # compose. They are ephemeral generated crates, not remote libraries and
+    # not Patchwork registry projects, so they must never enter the Git patch
+    # map or affect dependency classification.
+    if [[ "$package_name" == generated-* ]]; then
+        continue
+    fi
+
     if [[ "$folder" == *'"'* ]]; then
         echo "error: unsupported double quote in crate folder name: $folder" >&2
         exit 1

@@ -1,3 +1,4 @@
+use codegen_utils::{GeneratedDependency, generate_dependency_toml_line};
 use std::collections::{BTreeMap, HashSet};
 use std::error::Error;
 use std::fs;
@@ -53,14 +54,20 @@ fn run() -> Result<(), Box<dyn Error>> {
 
 fn collect_metadata(
     project: &Path,
-) -> Result<(Vec<MetadataDeclaration>, BTreeMap<String, PathBuf>), Box<dyn Error>> {
+) -> Result<
+    (
+        Vec<MetadataDeclaration>,
+        BTreeMap<String, GeneratedDependency>,
+    ),
+    Box<dyn Error>,
+> {
     let manifest = read_toml(&project.join("Cargo.toml"))?;
     let dependencies = manifest
         .get("dependencies")
         .and_then(Value::as_table)
         .ok_or("composed project has no dependencies")?;
     let mut declarations = Vec::new();
-    let mut dependency_paths = BTreeMap::new();
+    let mut generated_dependencies = BTreeMap::new();
     let mut ids = HashSet::new();
     let mut fields = HashSet::new();
     for dependency in dependencies.values() {
@@ -96,17 +103,18 @@ fn collect_metadata(
             .and_then(|value| value.get("name"))
             .and_then(Value::as_str)
             .ok_or("metadata contributor has no package name")?;
-        let path = if package_name.replace('-', "_") == crate_ident {
-            mod_dir.clone()
+        let generated_dependency = if package_name.replace('-', "_") == crate_ident {
+            GeneratedDependency::path(&crate_key, &mod_dir)
         } else {
-            find_path_dependency_by_ident(&mod_manifest, &mod_dir, crate_ident)?
-                .ok_or_else(|| format!("metadata type '{ty}' is not a path dependency"))?
+            find_dependency_by_ident(&mod_manifest, &mod_dir, crate_ident)?.ok_or_else(|| {
+                format!("metadata type '{ty}' is not a dependency of its contributor")
+            })?
         };
-        dependency_paths.insert(crate_key, path);
+        generated_dependencies.insert(crate_key, generated_dependency);
         declarations.push(MetadataDeclaration { id, field, ty });
     }
     declarations.sort_by(|left, right| left.id.cmp(&right.id));
-    Ok((declarations, dependency_paths))
+    Ok((declarations, generated_dependencies))
 }
 
 fn write_registry(
@@ -114,20 +122,15 @@ fn write_registry(
     package: &str,
     version: &str,
     metadata: &[MetadataDeclaration],
-    dependencies: &BTreeMap<String, PathBuf>,
+    dependencies: &BTreeMap<String, GeneratedDependency>,
 ) -> Result<(), Box<dyn Error>> {
     if output.exists() {
         fs::remove_dir_all(output)?;
     }
     fs::create_dir_all(output.join("src"))?;
     let dependency_lines = dependencies
-        .iter()
-        .map(|(key, path)| {
-            format!(
-                "{key} = {{ path = \"{}\" }}",
-                toml_path(&relative_path(output, path))
-            )
-        })
+        .values()
+        .map(|dependency| generate_dependency_toml_line(output, dependency))
         .chain(std::iter::once(
             "serde = { version = \"1.0\", features = [\"derive\"] }".to_string(),
         ))
@@ -205,17 +208,17 @@ fn dependency_path(base: &Path, value: &Value) -> Result<Option<PathBuf>, Box<dy
     ))
 }
 
-fn find_path_dependency_by_ident(
+fn find_dependency_by_ident(
     manifest: &Value,
     crate_dir: &Path,
     crate_ident: &str,
-) -> Result<Option<PathBuf>, Box<dyn Error>> {
+) -> Result<Option<GeneratedDependency>, Box<dyn Error>> {
     let Some(dependencies) = manifest.get("dependencies").and_then(Value::as_table) else {
         return Ok(None);
     };
     for (key, value) in dependencies {
         if key.replace('-', "_") == crate_ident {
-            return dependency_path(crate_dir, value);
+            return GeneratedDependency::from_manifest(key, value, crate_dir).map(Some);
         }
     }
     Ok(None)
@@ -223,30 +226,4 @@ fn find_path_dependency_by_ident(
 
 fn read_toml(path: &Path) -> Result<Value, Box<dyn Error>> {
     Ok(toml::from_str(&fs::read_to_string(path)?)?)
-}
-
-fn relative_path(from: &Path, to: &Path) -> PathBuf {
-    let from = from.canonicalize().unwrap_or_else(|_| from.to_path_buf());
-    let to = to.canonicalize().unwrap_or_else(|_| to.to_path_buf());
-    let from_components = from.components().collect::<Vec<_>>();
-    let to_components = to.components().collect::<Vec<_>>();
-    let mut common = 0;
-    while common < from_components.len()
-        && common < to_components.len()
-        && from_components[common] == to_components[common]
-    {
-        common += 1;
-    }
-    let mut result = PathBuf::new();
-    for _ in common..from_components.len() {
-        result.push("..");
-    }
-    for component in &to_components[common..] {
-        result.push(component.as_os_str());
-    }
-    result
-}
-
-fn toml_path(path: &Path) -> String {
-    path.to_string_lossy().replace('\\', "/")
 }

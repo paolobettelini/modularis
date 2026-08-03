@@ -1,3 +1,4 @@
+use codegen_utils::{GeneratedDependency, generate_dependency_toml_line};
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::error::Error;
 use std::fs;
@@ -54,10 +55,16 @@ fn run() -> Result<(), Box<dyn Error>> {
 
     let project = project.ok_or("missing --project")?.canonicalize()?;
     let output = output.ok_or("missing --output-crate")?;
-    let (settings, schema_path) = collect_settings(&project)?;
-    write_registry(&output, &package, &version, &settings, &schema_path)?;
+    let (settings, schema_dependency) = collect_settings(&project)?;
+    write_registry(&output, &package, &version, &settings, &schema_dependency)?;
     if let Some(dev_crate) = dev_crate {
-        write_registry(&dev_crate, &package, &version, &settings, &schema_path)?;
+        write_registry(
+            &dev_crate,
+            &package,
+            &version,
+            &settings,
+            &schema_dependency,
+        )?;
     }
     Ok(())
 }
@@ -70,7 +77,7 @@ fn next_value(
         .ok_or_else(|| format!("{flag} requires a value").into())
 }
 
-fn collect_settings(project: &Path) -> Result<(Vec<Setting>, PathBuf), Box<dyn Error>> {
+fn collect_settings(project: &Path) -> Result<(Vec<Setting>, GeneratedDependency), Box<dyn Error>> {
     let manifest = read_toml(&project.join("Cargo.toml"))?;
     let dependencies = manifest
         .get("dependencies")
@@ -81,7 +88,7 @@ fn collect_settings(project: &Path) -> Result<(Vec<Setting>, PathBuf), Box<dyn E
     let mut ids = HashSet::new();
     let mut variants = HashSet::new();
     let mut section_labels = HashMap::<String, String>::new();
-    let mut schema_path = None;
+    let mut schema_dependency = None;
 
     for dependency in dependencies.values() {
         let Some(mod_dir) = dependency_path(project, dependency)? else {
@@ -154,8 +161,8 @@ fn collect_settings(project: &Path) -> Result<(Vec<Setting>, PathBuf), Box<dyn E
             return Err(format!("duplicate generated setting variant '{variant}'").into());
         }
 
-        if schema_path.is_none() {
-            schema_path = find_path_dependency(&mod_manifest, &mod_dir, "settings-schema-api")?;
+        if schema_dependency.is_none() {
+            schema_dependency = find_dependency(&mod_manifest, &mod_dir, "settings-schema-api")?;
         }
 
         settings.push(Setting {
@@ -173,8 +180,9 @@ fn collect_settings(project: &Path) -> Result<(Vec<Setting>, PathBuf), Box<dyn E
     }
 
     settings.sort_by(|left, right| left.id.cmp(&right.id));
-    let schema_path = schema_path.ok_or("no setting contributor exposed settings-schema-api")?;
-    Ok((settings, schema_path))
+    let schema_dependency =
+        schema_dependency.ok_or("no setting contributor exposed settings-schema-api")?;
+    Ok((settings, schema_dependency))
 }
 
 fn validate_default(id: &str, kind: &str, value: &Value) -> Result<(), Box<dyn Error>> {
@@ -255,18 +263,17 @@ fn write_registry(
     package: &str,
     version: &str,
     settings: &[Setting],
-    schema_path: &Path,
+    schema_dependency: &GeneratedDependency,
 ) -> Result<(), Box<dyn Error>> {
     if output.exists() {
         fs::remove_dir_all(output)?;
     }
     fs::create_dir_all(output.join("src"))?;
-    let relative_schema = relative_path(output, schema_path);
     fs::write(
         output.join("Cargo.toml"),
         format!(
-            "[package]\nname = \"{package}\"\nversion = \"{version}\"\nedition = \"2024\"\n\n[dependencies]\nsettings-schema-api = {{ path = \"{}\" }}\n",
-            toml_path(&relative_schema)
+            "[package]\nname = \"{package}\"\nversion = \"{version}\"\nedition = \"2024\"\n\n[dependencies]\n{}\n",
+            generate_dependency_toml_line(output, schema_dependency)
         ),
     )?;
     fs::write(output.join("src/lib.rs"), generate_source(settings)?)?;
@@ -493,11 +500,11 @@ fn dependency_path(base: &Path, value: &Value) -> Result<Option<PathBuf>, Box<dy
     ))
 }
 
-fn find_path_dependency(
+fn find_dependency(
     manifest: &Value,
     crate_dir: &Path,
     name: &str,
-) -> Result<Option<PathBuf>, Box<dyn Error>> {
+) -> Result<Option<GeneratedDependency>, Box<dyn Error>> {
     let Some(value) = manifest
         .get("dependencies")
         .and_then(Value::as_table)
@@ -505,7 +512,7 @@ fn find_path_dependency(
     else {
         return Ok(None);
     };
-    dependency_path(crate_dir, value)
+    GeneratedDependency::from_manifest(name, value, crate_dir).map(Some)
 }
 
 fn pascal_identifier(input: &str) -> String {
@@ -524,30 +531,4 @@ fn pascal_identifier(input: &str) -> String {
 
 fn read_toml(path: &Path) -> Result<Value, Box<dyn Error>> {
     Ok(toml::from_str(&fs::read_to_string(path)?)?)
-}
-
-fn relative_path(from: &Path, to: &Path) -> PathBuf {
-    let from = from.canonicalize().unwrap_or_else(|_| from.to_path_buf());
-    let to = to.canonicalize().unwrap_or_else(|_| to.to_path_buf());
-    let from_components = from.components().collect::<Vec<_>>();
-    let to_components = to.components().collect::<Vec<_>>();
-    let mut common = 0;
-    while common < from_components.len()
-        && common < to_components.len()
-        && from_components[common] == to_components[common]
-    {
-        common += 1;
-    }
-    let mut result = PathBuf::new();
-    for _ in common..from_components.len() {
-        result.push("..");
-    }
-    for component in &to_components[common..] {
-        result.push(component.as_os_str());
-    }
-    result
-}
-
-fn toml_path(path: &Path) -> String {
-    path.to_string_lossy().replace('\\', "/")
 }

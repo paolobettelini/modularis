@@ -20,6 +20,12 @@ The current generated domains are:
 Codegen owner crates do not list every contributor as an initialization
 dependency. They scan the final composed Cargo project.
 
+Contributor mods are discovered through their local path dependencies. Normal
+libraries referenced by contributor types are not contributors and may remain
+Git dependencies. Generators preserve those Cargo sources in the generated
+manifest instead of requiring the libraries to exist in the Patchwork mod
+cache. See [Cargo dependency sources](./dependency-sources.md).
+
 For example, a block contributor declares:
 
 ```toml

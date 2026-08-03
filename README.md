@@ -60,6 +60,25 @@ cargo run --manifest-path build-thecrown/thecrown/Cargo.toml
 `thecrown` uses runtime scope nodes to host separate parkour chat groups and a
 private transient world for every player.
 
+## Local dependency maintenance
+
+Dependencies between Patchwork mods use sibling paths because Compose and
+codegen must inspect their local manifests. Plain Rust helper libraries use the
+repository Git URL so an installation that downloads only registry mods can
+still compile them through Cargo. Local development patches those Git sources
+back to the checkout through `mods/.cargo/config.toml`.
+
+Keep both sides synchronized with:
+
+```sh
+mods/.cargo/sync-modularis-deps.sh --dry-run
+mods/.cargo/sync-modularis-deps.sh
+```
+
+The config is generated and should not be edited manually. The full rationale,
+Cargo working-directory behavior, and codegen boundary are documented in
+[Cargo dependency sources](documentation/src/architecture/dependency-sources.md).
+
 ## Assets
 
 Some textures and character assets used in this project are taken from or based on the following freely licensed asset packs:

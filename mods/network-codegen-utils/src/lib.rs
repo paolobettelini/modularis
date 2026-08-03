@@ -4,8 +4,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use codegen_utils::{
-    GeneratedCrate, GeneratedDependency, GeneratedDependencySource, GeneratedFile,
-    crate_ident_for_type, normalize_crate_name, variant_name_for_type, write_generated_crate,
+    GeneratedCrate, GeneratedDependency, GeneratedFile, crate_ident_for_type, normalize_crate_name,
+    variant_name_for_type, write_generated_crate,
 };
 use toml::Value;
 
@@ -203,8 +203,8 @@ fn collect_type_dependency(
             if !same_dependency(existing, &generated_dependency) {
                 return Err(format!(
                     "network message dependency '{key}' resolves to both '{}' and '{}'",
-                    dependency_source_display(existing),
-                    dependency_source_display(&generated_dependency)
+                    existing.source_display(),
+                    generated_dependency.source_display()
                 )
                 .into());
             }
@@ -217,21 +217,13 @@ fn collect_type_dependency(
     }
 
     Err(format!(
-        "network message type '{ty}' uses crate '{crate_ident}', but that crate is not a path dependency of the declaring mod"
+        "network message type '{ty}' uses crate '{crate_ident}', but that crate is not a dependency of the declaring mod"
     )
     .into())
 }
 
 fn same_dependency(left: &GeneratedDependency, right: &GeneratedDependency) -> bool {
-    left.package == right.package
-        && dependency_source_display(left) == dependency_source_display(right)
-}
-
-fn dependency_source_display(dependency: &GeneratedDependency) -> String {
-    match &dependency.source {
-        GeneratedDependencySource::Version(version) => version.clone(),
-        GeneratedDependencySource::Path(path) => path.display().to_string(),
-    }
+    left == right
 }
 
 fn declaring_package_matches_crate(manifest: &Value, crate_ident: &str) -> bool {
@@ -250,32 +242,7 @@ fn generated_dependency(
     key: &str,
     dependency: &Value,
 ) -> Result<GeneratedDependency, Box<dyn Error>> {
-    let Some(table) = dependency.as_table() else {
-        return Err(format!("network message dependency '{key}' must be a path dependency").into());
-    };
-
-    let Some(path) = table.get("path").and_then(Value::as_str) else {
-        return Err(format!("network message dependency '{key}' must be a path dependency").into());
-    };
-
-    let package = table
-        .get("package")
-        .and_then(Value::as_str)
-        .map(str::to_string);
-
-    let path = PathBuf::from(path);
-    let path = if path.is_absolute() {
-        path
-    } else {
-        mod_dir.join(path)
-    };
-
-    let dependency = GeneratedDependency::path(key, path.canonicalize()?);
-    Ok(if let Some(package) = package {
-        dependency.with_package(package)
-    } else {
-        dependency
-    })
+    GeneratedDependency::from_manifest(key, dependency, mod_dir)
 }
 
 fn write_messages_crate(

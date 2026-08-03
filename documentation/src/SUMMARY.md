@@ -6,6 +6,7 @@
 - [Architecture foundations](./architecture/foundations.md)
   - [Patchwork composition](./architecture/patchwork-composition.md)
   - [Mod anatomy and lifecycle](./architecture/mod-anatomy.md)
+  - [Cargo dependency sources](./architecture/dependency-sources.md)
   - [APIs, providers, and ECS contracts](./architecture/apis-and-events.md)
   - [Runtime scope trees and facets](./architecture/runtime-scopes.md)
   - [Vanilla mechanics as reusable libraries](./architecture/vanilla-libraries.md)
