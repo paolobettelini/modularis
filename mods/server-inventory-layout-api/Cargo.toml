@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [package.metadata.mod]
-support = true
+api = true
 
 [dependencies]
 inventory-core-api = { git = "https://github.com/paolobettelini/modularis.git" }
