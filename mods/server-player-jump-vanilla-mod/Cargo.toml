@@ -31,7 +31,6 @@ player-gravity-api = { path = "../player-gravity-api" }
 server-player-gravity-api = { path = "../server-player-gravity-api" }
 server-player-hitbox-api = { path = "../server-player-hitbox-api" }
 server-player-jump-lib = { git = "https://github.com/paolobettelini/modularis.git" }
-player-hitbox-api = { path = "../player-hitbox-api" }
 player-jump-api = { path = "../player-jump-api" }
 player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
 server-chunk-world-api = { path = "../server-chunk-world-api" }
@@ -41,4 +40,10 @@ tokio = { version = "1.48.0", features = ["full"] }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }
+generated-item-metadata = { path = "../generated-item-metadata" }
+generated-item-registry = { path = "../generated-item-registry" }
 generated-network-messages = { path = "../generated-network-messages" }
+generated-sound-registry = { path = "../generated-sound-registry" }

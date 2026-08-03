@@ -71,13 +71,15 @@ fn validate_player_movement_collision<B: BlockManagerApi>(
         if flight_capabilities.enabled(movement.player_id) {
             allowed_speed = allowed_speed.max(flight_speeds.multiplier(movement.player_id));
         }
+        let hitbox = hitboxes.hitbox(movement.player_id);
         movement.accepted_position = resolve_server_player_movement::<B>(
             &world,
             &shapes,
             movement.player_id,
             movement.current_position,
             movement.accepted_position,
-            hitboxes.hitbox(movement.player_id),
+            hitbox.radius,
+            hitbox.height,
             allowed_speed,
             DEFAULT_MAX_PLAYER_MOVE_DELTA,
         );

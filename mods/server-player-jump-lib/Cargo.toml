@@ -9,7 +9,5 @@ block-manager-api = { path = "../block-manager-api" }
 block-shape-api = { path = "../block-shape-api" }
 player-block-collision-api = { git = "https://github.com/paolobettelini/modularis.git" }
 player-gravity-api = { path = "../player-gravity-api" }
-player-hitbox-api = { path = "../player-hitbox-api" }
-player-jump-api = { path = "../player-jump-api" }
 player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
 server-chunk-world-api = { path = "../server-chunk-world-api" }

@@ -64,9 +64,16 @@ fn handle_jump_requests<B: BlockManagerApi>(
         let gravity = gravities.gravity(player.id);
         let position = Vec3::from_array(player.position);
         let hitbox = hitboxes.hitbox(player.id);
-        let Some(validated) =
-            validate_server_jump::<B>(&world, &shapes, player.id, position, gravity, hitbox, *jump)
-        else {
+        let Some(validated) = validate_server_jump::<B>(
+            &world,
+            &shapes,
+            player.id,
+            position,
+            gravity,
+            hitbox.radius,
+            hitbox.height,
+            jump.speed,
+        ) else {
             debug!(
                 "ignored airborne jump request for player {} at {:?}",
                 player.id, position

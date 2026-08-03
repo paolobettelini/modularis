@@ -2,7 +2,6 @@ use bevy::prelude::*;
 use block_manager_api::BlockManagerApi;
 use block_shape_api::{BlockShape, BlockShapeService};
 use player_block_collision_api::resolve_player_collision;
-use player_hitbox_api::PlayerHitbox;
 use player_network_message_types::PlayerId;
 use server_chunk_world_api::ServerChunkWorld;
 use voxel_math_api::BlockPos;
@@ -20,14 +19,15 @@ pub fn resolve_server_player_movement<B: BlockManagerApi>(
     player_id: PlayerId,
     current: Vec3,
     requested: Vec3,
-    hitbox: PlayerHitbox,
+    hitbox_radius: f32,
+    hitbox_height: f32,
     speed_multiplier: f32,
     maximum_base_delta: f32,
 ) -> Vec3 {
     let requested =
         clamp_requested_movement(current, requested, speed_multiplier, maximum_base_delta);
     let delta = requested - current;
-    resolve_player_collision(current, delta, hitbox.radius, hitbox.height, &|position| {
+    resolve_player_collision(current, delta, hitbox_radius, hitbox_height, &|position| {
         collision_shape::<B>(world, shapes, player_id, position)
     })
     .position

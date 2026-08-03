@@ -3,8 +3,6 @@ use block_manager_api::BlockManagerApi;
 use block_shape_api::{BlockShape, BlockShapeService};
 use player_block_collision_api::collides_at;
 use player_gravity_api::{gravity_direction, gravity_up};
-use player_hitbox_api::PlayerHitbox;
-use player_jump_api::JumpConfig;
 use player_network_message_types::PlayerId;
 use server_chunk_world_api::ServerChunkWorld;
 
@@ -25,8 +23,9 @@ pub fn validate_server_jump<B: BlockManagerApi>(
     player_id: PlayerId,
     position: Vec3,
     gravity: Vec3,
-    hitbox: PlayerHitbox,
-    config: JumpConfig,
+    hitbox_radius: f32,
+    hitbox_height: f32,
+    jump_speed: f32,
 ) -> Option<ValidatedServerJump> {
     let up = gravity_up(gravity);
     let direction = gravity_direction(gravity);
@@ -37,15 +36,15 @@ pub fn validate_server_jump<B: BlockManagerApi>(
             player_id,
             position,
             direction,
-            hitbox.radius,
-            hitbox.height,
+            hitbox_radius,
+            hitbox_height,
         )
     {
         return None;
     }
     Some(ValidatedServerJump {
         direction: up,
-        speed: config.speed,
+        speed: jump_speed,
     })
 }
 

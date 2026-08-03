@@ -8,7 +8,6 @@ bevy = "0.17.3"
 block-manager-api = { path = "../block-manager-api" }
 block-shape-api = { path = "../block-shape-api" }
 player-block-collision-api = { git = "https://github.com/paolobettelini/modularis.git" }
-player-hitbox-api = { path = "../player-hitbox-api" }
 player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
 server-chunk-world-api = { path = "../server-chunk-world-api" }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
