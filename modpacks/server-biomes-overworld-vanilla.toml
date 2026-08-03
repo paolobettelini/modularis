@@ -1,4 +1,5 @@
 name = "Minecraft demo vanilla Overworld biomes"
+version = "0.0.1"
 description = "Vanilla-style Overworld biome definitions and their generation features."
 modpacks = ["biomes-overworld"]
 ignore = []

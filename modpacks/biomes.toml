@@ -1,4 +1,5 @@
 name = "Minecraft demo biome identities"
+version = "0.0.1"
 description = "Dimension-scoped biome ID contributors and the generated biome registry."
 modpacks = ["blocks", "dimensions", "biomes-overworld", "biomes-nether", "biomes-aether"]
 ignore = []

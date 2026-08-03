@@ -1,4 +1,5 @@
 name = "TheCrown"
+version = "0.0.1"
 description = "Scoped multi-instance parkour server demonstrating a custom monolithic orchestrator over reusable Patchwork libraries."
 color = "#7a5cff"
 modpacks = ["server-core"]

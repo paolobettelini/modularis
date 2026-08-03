@@ -1,4 +1,5 @@
 name = "Minecraft demo common core"
+version = "0.0.1"
 description = "Shared Bevy app, blocks, items, and network protocol used by both client and server."
 modpacks = ["blocks", "items", "network"]
 ignore = []

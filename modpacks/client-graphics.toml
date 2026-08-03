@@ -1,4 +1,5 @@
 name = "Minecraft demo client graphics"
+version = "0.0.1"
 description = "Optional lightweight lighting and mesh shading features for the demo client."
 modpacks = []
 ignore = []

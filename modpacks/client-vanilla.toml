@@ -1,4 +1,5 @@
 name = "Minecraft demo vanilla client features"
+version = "0.0.1"
 description = "Optional vanilla-style client controls and gameplay behavior."
 modpacks = []
 ignore = []

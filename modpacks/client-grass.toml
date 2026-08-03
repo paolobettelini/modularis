@@ -1,4 +1,5 @@
 name = "Minecraft demo animated grass client"
+version = "0.0.1"
 description = "Optional GPU-animated short-grass rendering, wind policy, and grouped client settings."
 modpacks = []
 ignore = []

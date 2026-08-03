@@ -1,4 +1,5 @@
 name = "Minecraft demo server core"
+version = "0.0.1"
 description = "Minimal headless process, transport, session lifecycle and cleanup infrastructure."
 modpacks = ["common"]
 ignore = []

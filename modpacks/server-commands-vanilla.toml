@@ -1,4 +1,5 @@
 name = "Minecraft demo vanilla server commands"
+version = "0.0.1"
 description = "Optional vanilla-style server commands registered through Brigadier."
 modpacks = []
 ignore = []

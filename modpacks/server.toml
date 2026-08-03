@@ -1,4 +1,5 @@
 name = "Minecraft demo server"
+version = "0.0.1"
 description = "Multiplayer minecraft-style server using Bevy."
 modpacks = ["server-base", "server-vanilla"]
 ignore = []

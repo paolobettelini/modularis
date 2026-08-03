@@ -1,4 +1,5 @@
 name = "Minecraft demo server foundation"
+version = "0.0.1"
 description = "Convenience umbrella for the core plus neutral chat, inventory, cell-menu, block-edit, flight and sun pipelines."
 modpacks = ["server-core"]
 ignore = []

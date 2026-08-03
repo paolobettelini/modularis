@@ -1,4 +1,5 @@
 name = "Minecraft demo vanilla Aether biomes"
+version = "0.0.1"
 description = "Vanilla-style Aether biome definitions and their generation features."
 modpacks = ["biomes-aether"]
 ignore = []

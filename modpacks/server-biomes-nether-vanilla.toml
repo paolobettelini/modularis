@@ -1,4 +1,5 @@
 name = "Minecraft demo vanilla Nether biomes"
+version = "0.0.1"
 description = "Vanilla-style Nether biome definitions and their generation features."
 modpacks = ["biomes-nether"]
 ignore = []

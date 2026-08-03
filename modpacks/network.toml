@@ -1,4 +1,5 @@
 name = "Minecraft demo network protocol"
+version = "0.0.1"
 description = "Common ECS event contracts, packet contributors, and the generated network protocol."
 modpacks = ["blocks", "dimensions", "sounds"]
 ignore = []

@@ -1,4 +1,5 @@
 name = "Minecraft demo dimensions"
+version = "0.0.1"
 description = "Dimension contributors and the generated dimension enum."
 modpacks = []
 ignore = []

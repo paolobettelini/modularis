@@ -1,4 +1,5 @@
 name = "Minecraft demo sounds"
+version = "0.0.1"
 description = "Sound declarations and the generated sound registry shared by client and server."
 modpacks = []
 ignore = []

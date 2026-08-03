@@ -1,4 +1,5 @@
 name = "Minecraft demo Overworld biome identities"
+version = "0.0.1"
 description = "Biome ID contributors for the Overworld."
 modpacks = []
 ignore = []

@@ -1,4 +1,5 @@
 name = "Minecraft demo vanilla biomes"
+version = "0.0.1"
 description = "Optional dimension-scoped vanilla biome definitions, selection, and world-generation features."
 modpacks = [
     "biomes",
