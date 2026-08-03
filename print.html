@@ -3195,7 +3195,7 @@ solidity, and presentation remain independently replaceable.</p>
 }
 <span class="boring">}
 </span></code></pre></pre>
-<p><code>block-manager-generated-impl</code> provides this API using the generated registry.</p>
+<p><code>block-manager-registry-impl</code> provides this API using the generated registry.</p>
 <p>Consumers should depend on <code>BlockManagerApi</code> when they only need general block
 properties. A feature that requires one exact block may depend on its
 contributor and generated variant.</p>
@@ -8259,9 +8259,9 @@ as families.</p>
 <li><code>block-edit-events-api</code>;</li>
 <li><code>block-edit-events-mod</code>.</li>
 </ul>
-<p>Generated manager:</p>
+<p>Registry-backed manager:</p>
 <ul>
-<li><code>block-manager-generated-impl</code>.</li>
+<li><code>block-manager-registry-impl</code>.</li>
 </ul>
 <p>Current block contributors:</p>
 <ul>
@@ -8310,9 +8310,9 @@ as families.</p>
 <li><code>item-manager-api</code>;</li>
 <li><code>item-use-api</code>.</li>
 </ul>
-<p>Generated manager:</p>
+<p>Registry-backed manager:</p>
 <ul>
-<li><code>item-manager-generated-impl</code>.</li>
+<li><code>item-manager-registry-impl</code>.</li>
 </ul>
 <p>Metadata:</p>
 <ul>
@@ -8489,7 +8489,7 @@ without inventory items or multiple items for one block.</p>
 </ul>
 <p>Providers and policy:</p>
 <ul>
-<li><code>client-grass-settings-generated-impl</code>;</li>
+<li><code>client-grass-settings-registry-impl</code>;</li>
 <li><code>client-grass-mesh-fabric-style-impl</code>;</li>
 <li><code>client-grass-render-bevy-impl</code>;</li>
 <li><code>client-grass-tint-vanilla-mod</code>;</li>
