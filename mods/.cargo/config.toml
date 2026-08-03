@@ -43,7 +43,7 @@ block-grass = { path = "block-grass" }
 block-gravel = { path = "block-gravel" }
 block-instance-api = { path = "block-instance-api" }
 block-manager-api = { path = "block-manager-api" }
-block-manager-generated-impl = { path = "block-manager-generated-impl" }
+block-manager-registry-impl = { path = "block-manager-registry-impl" }
 block-metadata-registry-codegen = { path = "block-metadata-registry-codegen" }
 block-moss = { path = "block-moss" }
 block-netherrack = { path = "block-netherrack" }
@@ -153,7 +153,7 @@ client-grass-player-contact-vanilla-mod = { path = "client-grass-player-contact-
 client-grass-render-api = { path = "client-grass-render-api" }
 client-grass-render-bevy-impl = { path = "client-grass-render-bevy-impl" }
 client-grass-settings-api = { path = "client-grass-settings-api" }
-client-grass-settings-generated-impl = { path = "client-grass-settings-generated-impl" }
+client-grass-settings-registry-impl = { path = "client-grass-settings-registry-impl" }
 client-grass-tint-api = { path = "client-grass-tint-api" }
 client-grass-tint-vanilla-mod = { path = "client-grass-tint-vanilla-mod" }
 client-hotbar-scroll-input-mod = { path = "client-hotbar-scroll-input-mod" }
@@ -298,15 +298,6 @@ dimension-network-messages-mod = { path = "dimension-network-messages-mod" }
 dimension-network-message-types = { path = "dimension-network-message-types" }
 dimension-overworld = { path = "dimension-overworld" }
 dimension-registry-codegen = { path = "dimension-registry-codegen" }
-generated-biome-registry = { path = "generated-biome-registry" }
-generated-block-metadata = { path = "generated-block-metadata" }
-generated-block-registry = { path = "generated-block-registry" }
-generated-client-settings-registry = { path = "generated-client-settings-registry" }
-generated-dimension-registry = { path = "generated-dimension-registry" }
-generated-item-metadata = { path = "generated-item-metadata" }
-generated-item-registry = { path = "generated-item-registry" }
-generated-network-messages = { path = "generated-network-messages" }
-generated-sound-registry = { path = "generated-sound-registry" }
 hotbar-network-messages-mod = { path = "hotbar-network-messages-mod" }
 inventory-core-api = { path = "inventory-core-api" }
 inventory-events-api = { path = "inventory-events-api" }
@@ -336,7 +327,7 @@ item-grass-block = { path = "item-grass-block" }
 item-gravel-block = { path = "item-gravel-block" }
 item-instance-api = { path = "item-instance-api" }
 item-manager-api = { path = "item-manager-api" }
-item-manager-generated-impl = { path = "item-manager-generated-impl" }
+item-manager-registry-impl = { path = "item-manager-registry-impl" }
 item-metadata-registry-codegen = { path = "item-metadata-registry-codegen" }
 item-moss-block = { path = "item-moss-block" }
 item-netherrack-block = { path = "item-netherrack-block" }

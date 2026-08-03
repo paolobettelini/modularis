@@ -98,7 +98,7 @@ pub trait BlockManagerApi {
 }
 ```
 
-`block-manager-generated-impl` provides this API using the generated registry.
+`block-manager-registry-impl` provides this API using the generated registry.
 
 Consumers should depend on `BlockManagerApi` when they only need general block
 properties. A feature that requires one exact block may depend on its

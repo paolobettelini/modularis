@@ -47,5 +47,5 @@ mods = [
     "item-portal-igniter-meta",
     "item-registry-codegen",
     "item-metadata-registry-codegen",
-    "item-manager-generated-impl",
+    "item-manager-registry-impl",
 ]

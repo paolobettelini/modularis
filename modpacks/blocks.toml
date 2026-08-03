@@ -44,5 +44,5 @@ mods = [
     "block-cauldron",
     "block-metadata-registry-codegen",
     "block-registry-codegen",
-    "block-manager-generated-impl",
+    "block-manager-registry-impl",
 ]

@@ -70,9 +70,9 @@ Contracts:
 - `block-edit-events-api`;
 - `block-edit-events-mod`.
 
-Generated manager:
+Registry-backed manager:
 
-- `block-manager-generated-impl`.
+- `block-manager-registry-impl`.
 
 Current block contributors:
 
@@ -122,9 +122,9 @@ Contracts:
 - `item-manager-api`;
 - `item-use-api`.
 
-Generated manager:
+Registry-backed manager:
 
-- `item-manager-generated-impl`.
+- `item-manager-registry-impl`.
 
 Metadata:
 
@@ -309,7 +309,7 @@ Contracts:
 
 Providers and policy:
 
-- `client-grass-settings-generated-impl`;
+- `client-grass-settings-registry-impl`;
 - `client-grass-mesh-fabric-style-impl`;
 - `client-grass-render-bevy-impl`;
 - `client-grass-tint-vanilla-mod`;

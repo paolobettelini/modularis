@@ -20,7 +20,7 @@ mods = [
     "client-setting-grass-dynamic-wind",
     "client-setting-grass-dynamic-wind-strength",
     "client-setting-grass-deformation-strength",
-    "client-grass-settings-generated-impl",
+    "client-grass-settings-registry-impl",
     "client-wind-grass-settings-vanilla-mod",
     "client-grass-tint-vanilla-mod",
     "client-grass-interaction-state-mod",
