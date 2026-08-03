@@ -26,11 +26,11 @@ pub const PLAYER_BLOCKY_VERTICAL_ANIMATION_LOCKED_NODES: &[&str] = &["Pelvis"];
 impl ClientPlayerBlockyModelPathsMod {
     pub fn init(bevy: &mut BevyMod) -> Self {
         bevy.app.insert_resource(ClientPlayerBlockyModelPaths {
-            model_path: "client-player-blocky-model-paths-mod/player.blockymodel",
-            texture_path: Some("client-player-blocky-model-paths-mod/Outlander_1.png"),
+            model_path: "client-player-blocky-model-paths-mod/ColorfulKobold.blockymodel",
+            texture_path: Some("client-player-blocky-model-paths-mod/ColorfulKoboldGreen.png"),
             texture_size: Some(UVec2::new(256, 128)),
-            idle_animation_path: "client-player-blocky-model-paths-mod/idle.blockyanim",
-            walk_animation_path: Some("client-player-blocky-model-paths-mod/walk.blockyanim"),
+            idle_animation_path: "client-player-blocky-model-paths-mod/Idle.blockyanim",
+            walk_animation_path: Some("client-player-blocky-model-paths-mod/Walk.blockyanim"),
             model_scale: PLAYER_BLOCKY_MODEL_SCALE,
             primitive_scale: PLAYER_BLOCKY_PRIMITIVE_SCALE,
             yaw_offset_radians: PLAYER_BLOCKY_YAW_OFFSET_RADIANS,

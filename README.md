@@ -59,3 +59,25 @@ cargo run --manifest-path build-thecrown/thecrown/Cargo.toml
 
 `thecrown` uses runtime scope nodes to host separate parkour chat groups and a
 private transient world for every player.
+
+## Assets
+
+Some textures and character assets used in this project are taken from or based on the following freely licensed asset packs:
+
+* [16x16 Block Texture Set](https://opengameart.org/content/16x16-block-texture-set) — **CC0 1.0**
+* [16x16 Block Textures](https://opengameart.org/content/1616-block-textures) — **CC0 1.0**
+* [Assorted Minecraft Style Textures](https://opengameart.org/content/assorted-minecraft-style-textures) by JoeEnderman — **CC0 1.0**
+* [Open Assets Lib](https://modrinth.com/resourcepack/nightml-open-assets-lib) by NightML / NightMareLore — **CC BY 4.0**
+* [Good Vibes](https://github.com/Phyronnaz/VoxelAssets/tree/master/GoodVibes) by Acaitart — **CC BY 4.0**
+* [Pixel Perfection Fidelity](https://modrinth.com/resourcepack/pixel-perfection-fidelity) by SourAlien, based on Pixel Perfection by XSSheep — **CC BY 4.0 / CC BY-SA 4.0 upstream**
+* [Colorful Kobolds](https://www.curseforge.com/hytale/mods/pastels-kobold) by PastelPaints and KukeiTheProtogen — **Creative Commons 4.0**, as listed on CurseForge
+
+Some of these assets may have been modified, renamed, or adapted for use in this project.
+
+CC0 assets are provided under the [Creative Commons CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) dedication.
+
+Open Assets Lib and Good Vibes are used under the [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) license. Their original authors are credited above.
+
+Pixel Perfection Fidelity is listed on Modrinth as CC BY 4.0. The project states that many of its textures are derived from XSSheep's Pixel Perfection, which is licensed under CC BY-SA 4.0. Pixel Perfection-derived assets used by this project are therefore attributed to XSSheep and treated under the applicable CC BY-SA 4.0 terms.
+
+Colorful Kobolds is listed by CurseForge under a Creative Commons 4.0 license. The project authors explicitly allow sharing, modification, reuploading, creation of assets/cosmetic packs, and derivative/offshoot projects. Assets credited by Colorful Kobolds to third-party projects are not used unless their respective licenses also permit such use.

@@ -6,19 +6,3 @@ target
 
 # Composer-generated development crates.
 mods/generated-*
-
-
-# Temp
-*.png
-!mods/block-sand/assets/*.png
-!mods/block-snow/assets/*.png
-!mods/block-gravel/assets/*.png
-!mods/block-packed-ice/assets/*.png
-!mods/block-oak-leaves/assets/*.png
-!mods/block-oak-log/assets/*.png
-!mods/block-cactus/assets/*.png
-*.ttf
-!media/preview.png
-grass-mod-minecraft
-*.ogg
-*.mp3
