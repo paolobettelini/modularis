@@ -14,5 +14,5 @@ label = "Soul Soil"
 [dependencies]
 item-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
-block-soul-soil = { git = "https://github.com/paolobettelini/modularis.git" }
+block-soul-soil = { path = "../block-soul-soil" }
 tokio = { version = "1.48.0", features = ["full"] }

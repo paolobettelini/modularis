@@ -8,4 +8,4 @@ api = true
 
 [dependencies]
 bevy = "0.17.3"
-client-menu-api = { git = "https://github.com/paolobettelini/modularis.git" }
+client-menu-api = { path = "../client-menu-api" }

@@ -6,8 +6,8 @@ edition = "2024"
 [dependencies]
 chunk-api = { git = "https://github.com/paolobettelini/modularis.git" }
 generated-biome-registry = "0.1.0"
-server-biome-api = { git = "https://github.com/paolobettelini/modularis.git" }
-server-biome-selection-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-biome-api = { path = "../server-biome-api" }
+server-biome-selection-api = { path = "../server-biome-selection-api" }
 server-chunk-provider-api = { git = "https://github.com/paolobettelini/modularis.git" }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
 

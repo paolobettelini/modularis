@@ -9,5 +9,5 @@ api = true
 [dependencies]
 bevy = "0.17.3"
 chunk-api = { git = "https://github.com/paolobettelini/modularis.git" }
-client-dimension-api = { git = "https://github.com/paolobettelini/modularis.git" }
-client-grass-settings-api = { git = "https://github.com/paolobettelini/modularis.git" }
+client-dimension-api = { path = "../client-dimension-api" }
+client-grass-settings-api = { path = "../client-grass-settings-api" }

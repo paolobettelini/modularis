@@ -14,5 +14,5 @@ ownership = []
 
 [dependencies]
 inventory-core-api = { git = "https://github.com/paolobettelini/modularis.git" }
-server-inventory-layout-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-inventory-layout-api = { path = "../server-inventory-layout-api" }
 tokio = { version = "1.48.0", features = ["full"] }

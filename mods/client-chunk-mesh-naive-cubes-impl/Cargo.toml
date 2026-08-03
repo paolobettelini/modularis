@@ -13,12 +13,12 @@ run = []
 ownership = []
 
 [dependencies]
-bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
-block-manager-api = { git = "https://github.com/paolobettelini/modularis.git" }
+bevy-mod = { path = "../bevy-mod" }
+block-manager-api = { path = "../block-manager-api" }
 block-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
 chunk-api = { git = "https://github.com/paolobettelini/modularis.git" }
-client-chunk-mesh-api = { git = "https://github.com/paolobettelini/modularis.git" }
-client-chunk-vertex-lighting-api = { git = "https://github.com/paolobettelini/modularis.git" }
+client-chunk-mesh-api = { path = "../client-chunk-mesh-api" }
+client-chunk-vertex-lighting-api = { path = "../client-chunk-vertex-lighting-api" }
 tokio = { version = "1.48.0", features = ["full"] }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
 

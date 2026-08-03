@@ -13,8 +13,8 @@ run = []
 ownership = []
 
 [dependencies]
-bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
-server-biome-api = { git = "https://github.com/paolobettelini/modularis.git" }
+bevy-mod = { path = "../bevy-mod" }
+server-biome-api = { path = "../server-biome-api" }
 tokio = { version = "1.48.0", features = ["full"] }
 
 [patch.crates-io]

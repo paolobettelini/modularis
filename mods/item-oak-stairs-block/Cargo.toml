@@ -16,7 +16,7 @@ id = "demo:oak_stairs_block"
 label = "Oak Stairs"
 
 [dependencies]
-block-oak-stairs = { git = "https://github.com/paolobettelini/modularis.git" }
+block-oak-stairs = { path = "../block-oak-stairs" }
 item-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

@@ -13,6 +13,6 @@ run = []
 ownership = []
 
 [dependencies]
-bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
-client-player-scale-map-api = { git = "https://github.com/paolobettelini/modularis.git" }
+bevy-mod = { path = "../bevy-mod" }
+client-player-scale-map-api = { path = "../client-player-scale-map-api" }
 tokio = { version = "1.48.0", features = ["full"] }

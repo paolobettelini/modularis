@@ -13,7 +13,7 @@ run = []
 ownership = []
 
 [dependencies]
-bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+bevy-mod = { path = "../bevy-mod" }
 tokio = { version = "1.48.0", features = ["full"] }
-voxel-model-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-model-api = { path = "../voxel-model-api" }
 voxel-models-lib = { git = "https://github.com/paolobettelini/modularis.git" }

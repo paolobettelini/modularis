@@ -24,18 +24,18 @@ ownership = []
 
 [dependencies]
 bevy = "0.17.3"
-bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
-blocky-animation-api = { git = "https://github.com/paolobettelini/modularis.git" }
-blocky-model-api = { git = "https://github.com/paolobettelini/modularis.git" }
-client-camera-api = { git = "https://github.com/paolobettelini/modularis.git" }
-client-game-state-api = { git = "https://github.com/paolobettelini/modularis.git" }
-client-player-gravity-map-api = { git = "https://github.com/paolobettelini/modularis.git" }
-client-player-blocky-model-paths-api = { git = "https://github.com/paolobettelini/modularis.git" }
-client-player-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
-client-player-scale-map-api = { git = "https://github.com/paolobettelini/modularis.git" }
+bevy-mod = { path = "../bevy-mod" }
+blocky-animation-api = { path = "../blocky-animation-api" }
+blocky-model-api = { path = "../blocky-model-api" }
+client-camera-api = { path = "../client-camera-api" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-player-gravity-map-api = { path = "../client-player-gravity-map-api" }
+client-player-blocky-model-paths-api = { path = "../client-player-blocky-model-paths-api" }
+client-player-render-api = { path = "../client-player-render-api" }
+client-player-scale-map-api = { path = "../client-player-scale-map-api" }
 generated-network-messages = "0.1.0"
-network-protocol-mod = { git = "https://github.com/paolobettelini/modularis.git" }
-player-gravity-api = { git = "https://github.com/paolobettelini/modularis.git" }
+network-protocol-mod = { path = "../network-protocol-mod" }
+player-gravity-api = { path = "../player-gravity-api" }
 player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }
 

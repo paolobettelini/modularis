@@ -14,5 +14,5 @@ label = "Packed Ice"
 [dependencies]
 item-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
-block-packed-ice = { git = "https://github.com/paolobettelini/modularis.git" }
+block-packed-ice = { path = "../block-packed-ice" }
 tokio = { version = "1.48.0", features = ["full"] }

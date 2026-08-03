@@ -18,12 +18,12 @@ run = []
 ownership = []
 
 [dependencies]
-bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
-dimension-aether = { git = "https://github.com/paolobettelini/modularis.git" }
-dimension-nether = { git = "https://github.com/paolobettelini/modularis.git" }
-dimension-overworld = { git = "https://github.com/paolobettelini/modularis.git" }
+bevy-mod = { path = "../bevy-mod" }
+dimension-aether = { path = "../dimension-aether" }
+dimension-nether = { path = "../dimension-nether" }
+dimension-overworld = { path = "../dimension-overworld" }
 generated-dimension-registry = "0.1.0"
-server-world-catalog-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-world-catalog-api = { path = "../server-world-catalog-api" }
 tokio = { version = "1.48.0", features = ["full"] }
 world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 

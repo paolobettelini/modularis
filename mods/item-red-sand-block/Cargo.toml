@@ -14,5 +14,5 @@ label = "Red Sand"
 [dependencies]
 item-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
-block-red-sand = { git = "https://github.com/paolobettelini/modularis.git" }
+block-red-sand = { path = "../block-red-sand" }
 tokio = { version = "1.48.0", features = ["full"] }

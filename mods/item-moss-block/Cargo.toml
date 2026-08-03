@@ -14,5 +14,5 @@ label = "Moss"
 [dependencies]
 item-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
-block-moss = { git = "https://github.com/paolobettelini/modularis.git" }
+block-moss = { path = "../block-moss" }
 tokio = { version = "1.48.0", features = ["full"] }

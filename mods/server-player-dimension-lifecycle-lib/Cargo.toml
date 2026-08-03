@@ -5,5 +5,5 @@ edition = "2024"
 
 [dependencies]
 player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
-server-dimension-api = { git = "https://github.com/paolobettelini/modularis.git" }
-server-player-registry-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-dimension-api = { path = "../server-dimension-api" }
+server-player-registry-api = { path = "../server-player-registry-api" }

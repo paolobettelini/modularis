@@ -8,5 +8,5 @@ api = true
 
 [dependencies]
 bevy = "0.17.3"
-player-hitbox-api = { git = "https://github.com/paolobettelini/modularis.git" }
+player-hitbox-api = { path = "../player-hitbox-api" }
 player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }

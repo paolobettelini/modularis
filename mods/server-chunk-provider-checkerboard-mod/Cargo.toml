@@ -18,14 +18,14 @@ run = []
 ownership = []
 
 [dependencies]
-bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
-block-manager-api = { git = "https://github.com/paolobettelini/modularis.git" }
+bevy-mod = { path = "../bevy-mod" }
+block-manager-api = { path = "../block-manager-api" }
 chunk-api = { git = "https://github.com/paolobettelini/modularis.git" }
 generated-block-registry = "0.1.0"
 server-chunk-provider-api = { git = "https://github.com/paolobettelini/modularis.git" }
-server-chunk-provider-registry-mod = { git = "https://github.com/paolobettelini/modularis.git" }
-server-primary-chunk-provider-api = { git = "https://github.com/paolobettelini/modularis.git" }
-server-world-seed-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-provider-registry-mod = { path = "../server-chunk-provider-registry-mod" }
+server-primary-chunk-provider-api = { path = "../server-primary-chunk-provider-api" }
+server-world-seed-api = { path = "../server-world-seed-api" }
 tokio = { version = "1.48.0", features = ["full"] }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
 world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }

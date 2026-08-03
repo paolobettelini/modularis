@@ -14,5 +14,5 @@ label = "Oak Leaves"
 [dependencies]
 item-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
-block-oak-leaves = { git = "https://github.com/paolobettelini/modularis.git" }
+block-oak-leaves = { path = "../block-oak-leaves" }
 tokio = { version = "1.48.0", features = ["full"] }

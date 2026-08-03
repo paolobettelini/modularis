@@ -7,10 +7,10 @@ edition = "2024"
 generated-block-registry = "0.1.0"
 player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
 portal-api = { git = "https://github.com/paolobettelini/modularis.git" }
-server-chunk-world-api = { git = "https://github.com/paolobettelini/modularis.git" }
-server-dimension-api = { git = "https://github.com/paolobettelini/modularis.git" }
-server-player-hitbox-api = { git = "https://github.com/paolobettelini/modularis.git" }
-server-portal-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }
+server-dimension-api = { path = "../server-dimension-api" }
+server-player-hitbox-api = { path = "../server-player-hitbox-api" }
+server-portal-api = { path = "../server-portal-api" }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
 world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 

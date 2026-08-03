@@ -5,4 +5,4 @@ edition = "2024"
 
 [dependencies]
 block-edit-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
-server-chunk-world-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }

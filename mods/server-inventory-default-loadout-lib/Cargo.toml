@@ -4,16 +4,16 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-block-manager-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-manager-api = { path = "../block-manager-api" }
 generated-item-metadata = "0.1.0"
 inventory-core-api = { git = "https://github.com/paolobettelini/modularis.git" }
 inventory-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
-item-manager-api = { git = "https://github.com/paolobettelini/modularis.git" }
-item-place-block-meta = { git = "https://github.com/paolobettelini/modularis.git" }
-item-portal-igniter-meta = { git = "https://github.com/paolobettelini/modularis.git" }
-item-quantity-meta = { git = "https://github.com/paolobettelini/modularis.git" }
-server-inventory-layout-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-manager-api = { path = "../item-manager-api" }
+item-place-block-meta = { path = "../item-place-block-meta" }
+item-portal-igniter-meta = { path = "../item-portal-igniter-meta" }
+item-quantity-meta = { path = "../item-quantity-meta" }
+server-inventory-layout-api = { path = "../server-inventory-layout-api" }
 
 [patch.crates-io]
 generated-block-metadata = { path = "../generated-block-metadata" }

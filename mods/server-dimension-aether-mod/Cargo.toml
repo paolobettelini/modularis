@@ -17,12 +17,12 @@ run = []
 ownership = []
 
 [dependencies]
-bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
-dimension-aether = { git = "https://github.com/paolobettelini/modularis.git" }
+bevy-mod = { path = "../bevy-mod" }
+dimension-aether = { path = "../dimension-aether" }
 generated-dimension-registry = "0.1.0"
-server-chunk-provider-aether-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-provider-aether-mod = { path = "../server-chunk-provider-aether-mod" }
 server-chunk-provider-api = { git = "https://github.com/paolobettelini/modularis.git" }
-server-dimension-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-dimension-api = { path = "../server-dimension-api" }
 tokio = { version = "1.48.0", features = ["full"] }
 world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 

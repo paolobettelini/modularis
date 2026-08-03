@@ -5,5 +5,5 @@ edition = "2024"
 
 [dependencies]
 bevy = "0.17.3"
-collision-api = { git = "https://github.com/paolobettelini/modularis.git" }
+collision-api = { path = "../collision-api" }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }

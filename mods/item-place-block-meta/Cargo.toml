@@ -17,7 +17,7 @@ field = "place_block"
 type = "item_place_block_meta::PlaceBlock"
 
 [dependencies]
-block-registry-codegen = { git = "https://github.com/paolobettelini/modularis.git" }
+block-registry-codegen = { path = "../block-registry-codegen" }
 generated-block-registry = "0.1.0"
 serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1.48.0", features = ["full"] }

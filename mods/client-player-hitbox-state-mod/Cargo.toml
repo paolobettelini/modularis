@@ -13,6 +13,6 @@ run = []
 ownership = []
 
 [dependencies]
-bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
-player-hitbox-api = { git = "https://github.com/paolobettelini/modularis.git" }
+bevy-mod = { path = "../bevy-mod" }
+player-hitbox-api = { path = "../player-hitbox-api" }
 tokio = { version = "1.48.0", features = ["full"] }

@@ -14,5 +14,5 @@ label = "Soul Sand"
 [dependencies]
 item-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
-block-soul-sand = { git = "https://github.com/paolobettelini/modularis.git" }
+block-soul-sand = { path = "../block-soul-sand" }
 tokio = { version = "1.48.0", features = ["full"] }

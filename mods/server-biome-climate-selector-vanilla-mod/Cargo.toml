@@ -18,13 +18,13 @@ run = []
 ownership = []
 
 [dependencies]
-bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+bevy-mod = { path = "../bevy-mod" }
 coherent-noise-api = { git = "https://github.com/paolobettelini/modularis.git" }
 generated-biome-registry = "0.1.0"
-server-biome-api = { git = "https://github.com/paolobettelini/modularis.git" }
-server-biome-plains-vanilla-mod = { git = "https://github.com/paolobettelini/modularis.git" }
-server-biome-selection-api = { git = "https://github.com/paolobettelini/modularis.git" }
-server-world-seed-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-biome-api = { path = "../server-biome-api" }
+server-biome-plains-vanilla-mod = { path = "../server-biome-plains-vanilla-mod" }
+server-biome-selection-api = { path = "../server-biome-selection-api" }
+server-world-seed-api = { path = "../server-world-seed-api" }
 tokio = { version = "1.48.0", features = ["full"] }
 world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 

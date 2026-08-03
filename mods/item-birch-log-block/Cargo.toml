@@ -14,5 +14,5 @@ label = "Birch Log"
 [dependencies]
 item-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
-block-birch-log = { git = "https://github.com/paolobettelini/modularis.git" }
+block-birch-log = { path = "../block-birch-log" }
 tokio = { version = "1.48.0", features = ["full"] }

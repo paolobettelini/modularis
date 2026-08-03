@@ -14,5 +14,5 @@ label = "Calcite"
 [dependencies]
 item-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
-block-calcite = { git = "https://github.com/paolobettelini/modularis.git" }
+block-calcite = { path = "../block-calcite" }
 tokio = { version = "1.48.0", features = ["full"] }

@@ -14,5 +14,5 @@ label = "Snow"
 [dependencies]
 item-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
-block-snow = { git = "https://github.com/paolobettelini/modularis.git" }
+block-snow = { path = "../block-snow" }
 tokio = { version = "1.48.0", features = ["full"] }

@@ -14,5 +14,5 @@ label = "Crimson Nylium"
 [dependencies]
 item-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
-block-crimson-nylium = { git = "https://github.com/paolobettelini/modularis.git" }
+block-crimson-nylium = { path = "../block-crimson-nylium" }
 tokio = { version = "1.48.0", features = ["full"] }

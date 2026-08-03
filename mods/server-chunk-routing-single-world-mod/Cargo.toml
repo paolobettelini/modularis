@@ -13,8 +13,8 @@ run = []
 ownership = []
 
 [dependencies]
-bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+bevy-mod = { path = "../bevy-mod" }
 server-chunk-provider-api = { git = "https://github.com/paolobettelini/modularis.git" }
-server-chunk-routing-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-routing-api = { path = "../server-chunk-routing-api" }
 tokio = { version = "1.48.0", features = ["full"] }
 world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }

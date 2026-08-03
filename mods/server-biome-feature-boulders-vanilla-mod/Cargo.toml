@@ -12,10 +12,10 @@ run = []
 ownership = []
 
 [dependencies]
-bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
-block-gravel = { git = "https://github.com/paolobettelini/modularis.git" }
+bevy-mod = { path = "../bevy-mod" }
+block-gravel = { path = "../block-gravel" }
 generated-block-registry = "0.1.0"
-server-biome-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-biome-api = { path = "../server-biome-api" }
 tokio = { version = "1.48.0", features = ["full"] }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
 

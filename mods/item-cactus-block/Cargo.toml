@@ -14,5 +14,5 @@ label = "Cactus"
 [dependencies]
 item-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
-block-cactus = { git = "https://github.com/paolobettelini/modularis.git" }
+block-cactus = { path = "../block-cactus" }
 tokio = { version = "1.48.0", features = ["full"] }

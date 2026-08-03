@@ -9,7 +9,7 @@ api = true
 [dependencies]
 bevy = "0.17.3"
 block-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
-block-manager-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-manager-api = { path = "../block-manager-api" }
 block-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
 chunk-api = { git = "https://github.com/paolobettelini/modularis.git" }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }

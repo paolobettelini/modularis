@@ -13,5 +13,5 @@ run = []
 ownership = []
 
 [dependencies]
-client-log-filter-api = { git = "https://github.com/paolobettelini/modularis.git" }
+client-log-filter-api = { path = "../client-log-filter-api" }
 tokio = { version = "1.48.0", features = ["full"] }

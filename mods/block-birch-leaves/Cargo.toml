@@ -17,5 +17,5 @@ id = "demo:birch-leaves"
 [dependencies]
 block-api = { git = "https://github.com/paolobettelini/modularis.git" }
 block-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
-voxel-model-block-templates-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-model-block-templates-mod = { path = "../voxel-model-block-templates-mod" }
 tokio = { version = "1.48.0", features = ["full"] }

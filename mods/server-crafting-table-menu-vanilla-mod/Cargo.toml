@@ -18,12 +18,12 @@ ownership = []
 [dependencies]
 audience-api = { git = "https://github.com/paolobettelini/modularis.git" }
 bevy = "0.17.3"
-bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+bevy-mod = { path = "../bevy-mod" }
 cell-menu-api = { git = "https://github.com/paolobettelini/modularis.git" }
-cell-menu-events-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+cell-menu-events-mod = { path = "../cell-menu-events-mod" }
 generated-block-registry = "0.1.0"
 inventory-core-api = { git = "https://github.com/paolobettelini/modularis.git" }
-server-chunk-world-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }
 server-crafting-table-menu-lib = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }

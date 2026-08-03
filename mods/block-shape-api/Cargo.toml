@@ -9,7 +9,7 @@ api = true
 [dependencies]
 bevy = "0.17.3"
 block-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
-collision-api = { git = "https://github.com/paolobettelini/modularis.git" }
+collision-api = { path = "../collision-api" }
 
 [patch.crates-io]
 generated-block-metadata = { path = "../generated-block-metadata" }

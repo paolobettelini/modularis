@@ -20,13 +20,13 @@ ownership = []
 
 [dependencies]
 bevy = "0.17.3"
-bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+bevy-mod = { path = "../bevy-mod" }
 chunk-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
-client-chunk-cache-api = { git = "https://github.com/paolobettelini/modularis.git" }
-client-chunk-work-priority-api = { git = "https://github.com/paolobettelini/modularis.git" }
-client-chunk-streaming-api = { git = "https://github.com/paolobettelini/modularis.git" }
-client-game-state-api = { git = "https://github.com/paolobettelini/modularis.git" }
-client-network-api = { git = "https://github.com/paolobettelini/modularis.git" }
+client-chunk-cache-api = { path = "../client-chunk-cache-api" }
+client-chunk-work-priority-api = { path = "../client-chunk-work-priority-api" }
+client-chunk-streaming-api = { path = "../client-chunk-streaming-api" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-network-api = { path = "../client-network-api" }
 generated-network-messages = "0.1.0"
 tokio = { version = "1.48.0", features = ["full"] }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }

@@ -14,5 +14,5 @@ label = "Terracotta"
 [dependencies]
 item-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
-block-terracotta = { git = "https://github.com/paolobettelini/modularis.git" }
+block-terracotta = { path = "../block-terracotta" }
 tokio = { version = "1.48.0", features = ["full"] }

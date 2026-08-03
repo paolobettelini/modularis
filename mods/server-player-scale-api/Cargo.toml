@@ -9,4 +9,4 @@ api = true
 [dependencies]
 bevy = "0.17.3"
 player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
-player-scale-api = { git = "https://github.com/paolobettelini/modularis.git" }
+player-scale-api = { path = "../player-scale-api" }

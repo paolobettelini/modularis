@@ -5,6 +5,6 @@ edition = "2024"
 
 [dependencies]
 player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
-server-chunk-residency-api = { git = "https://github.com/paolobettelini/modularis.git" }
-server-chunk-world-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-residency-api = { path = "../server-chunk-residency-api" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }

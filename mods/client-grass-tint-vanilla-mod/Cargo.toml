@@ -24,17 +24,17 @@ ownership = []
 
 [dependencies]
 bevy = "0.17.3"
-bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
-block-basalt = { git = "https://github.com/paolobettelini/modularis.git" }
-block-calcite = { git = "https://github.com/paolobettelini/modularis.git" }
-block-crimson-nylium = { git = "https://github.com/paolobettelini/modularis.git" }
-block-grass = { git = "https://github.com/paolobettelini/modularis.git" }
-block-moss = { git = "https://github.com/paolobettelini/modularis.git" }
-block-netherrack = { git = "https://github.com/paolobettelini/modularis.git" }
-block-soul-sand = { git = "https://github.com/paolobettelini/modularis.git" }
-block-warped-nylium = { git = "https://github.com/paolobettelini/modularis.git" }
-client-dimension-api = { git = "https://github.com/paolobettelini/modularis.git" }
-client-grass-tint-api = { git = "https://github.com/paolobettelini/modularis.git" }
+bevy-mod = { path = "../bevy-mod" }
+block-basalt = { path = "../block-basalt" }
+block-calcite = { path = "../block-calcite" }
+block-crimson-nylium = { path = "../block-crimson-nylium" }
+block-grass = { path = "../block-grass" }
+block-moss = { path = "../block-moss" }
+block-netherrack = { path = "../block-netherrack" }
+block-soul-sand = { path = "../block-soul-sand" }
+block-warped-nylium = { path = "../block-warped-nylium" }
+client-dimension-api = { path = "../client-dimension-api" }
+client-grass-tint-api = { path = "../client-grass-tint-api" }
 generated-block-registry = "0.1.0"
 tokio = { version = "1.48.0", features = ["full"] }
 

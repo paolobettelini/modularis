@@ -18,4 +18,4 @@ id = "demo:anvil"
 block-api = { git = "https://github.com/paolobettelini/modularis.git" }
 block-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }
-voxel-model-anvil-template-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-model-anvil-template-mod = { path = "../voxel-model-anvil-template-mod" }
