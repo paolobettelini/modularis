@@ -7,4 +7,4 @@ edition = "2024"
 support = true
 
 [dependencies]
-inventory-core-api = { path = "../inventory-core-api" }
+inventory-core-api = { git = "https://github.com/paolobettelini/modularis.git" }

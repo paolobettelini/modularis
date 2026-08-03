@@ -8,13 +8,13 @@ support = true
 
 [dependencies]
 bevy = "0.17.3"
-block-instance-api = { path = "../block-instance-api" }
-chunk-api = { path = "../chunk-api" }
+block-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
+chunk-api = { git = "https://github.com/paolobettelini/modularis.git" }
 generated-biome-registry = "0.1.0"
 generated-block-registry = "0.1.0"
 generated-dimension-registry = "0.1.0"
-server-chunk-provider-api = { path = "../server-chunk-provider-api" }
-voxel-math-api = { path = "../voxel-math-api" }
+server-chunk-provider-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-biome-registry = { path = "../generated-biome-registry" }

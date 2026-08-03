@@ -8,4 +8,4 @@ support = true
 
 [dependencies]
 bevy = "0.17.3"
-voxel-models-lib = { path = "../voxel-models-lib" }
+voxel-models-lib = { git = "https://github.com/paolobettelini/modularis.git" }

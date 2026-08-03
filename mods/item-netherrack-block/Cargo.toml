@@ -16,7 +16,7 @@ id = "demo:netherrack_block"
 label = "Netherrack"
 
 [dependencies]
-item-api = { path = "../item-api" }
-item-render-api = { path = "../item-render-api" }
-block-netherrack = { path = "../block-netherrack" }
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-netherrack = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

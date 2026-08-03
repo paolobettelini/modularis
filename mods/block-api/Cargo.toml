@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-voxel-math-api = { path = "../voxel-math-api" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }

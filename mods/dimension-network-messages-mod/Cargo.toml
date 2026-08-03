@@ -16,5 +16,5 @@ clientbound = ["dimension_network_message_types::PlayerDimensionChanged"]
 serverbound = []
 
 [dependencies]
-dimension-network-message-types = { path = "../dimension-network-message-types" }
+dimension-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

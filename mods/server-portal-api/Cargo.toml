@@ -10,9 +10,9 @@ support = true
 bevy = "0.17.3"
 generated-block-registry = "0.1.0"
 generated-dimension-registry = "0.1.0"
-player-network-message-types = { path = "../player-network-message-types" }
-portal-api = { path = "../portal-api" }
-world-instance-api = { path = "../world-instance-api" }
+player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+portal-api = { git = "https://github.com/paolobettelini/modularis.git" }
+world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-block-registry = { path = "../generated-block-registry" }

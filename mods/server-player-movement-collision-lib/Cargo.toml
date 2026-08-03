@@ -5,10 +5,10 @@ edition = "2024"
 
 [dependencies]
 bevy = "0.17.3"
-block-manager-api = { path = "../block-manager-api" }
-block-shape-api = { path = "../block-shape-api" }
-player-block-collision-api = { path = "../player-block-collision-api" }
-player-hitbox-api = { path = "../player-hitbox-api" }
-player-network-message-types = { path = "../player-network-message-types" }
-server-chunk-world-api = { path = "../server-chunk-world-api" }
-voxel-math-api = { path = "../voxel-math-api" }
+block-manager-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-shape-api = { git = "https://github.com/paolobettelini/modularis.git" }
+player-block-collision-api = { git = "https://github.com/paolobettelini/modularis.git" }
+player-hitbox-api = { git = "https://github.com/paolobettelini/modularis.git" }
+player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-world-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }

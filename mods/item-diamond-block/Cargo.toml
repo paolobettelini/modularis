@@ -16,7 +16,7 @@ id = "demo:diamond_block"
 label = "Diamond Block"
 
 [dependencies]
-item-api = { path = "../item-api" }
-item-render-api = { path = "../item-render-api" }
-block-diamond-block = { path = "../block-diamond-block" }
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-diamond-block = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

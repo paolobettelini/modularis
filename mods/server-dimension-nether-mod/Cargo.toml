@@ -17,14 +17,14 @@ run = []
 ownership = []
 
 [dependencies]
-bevy-mod = { path = "../bevy-mod" }
-dimension-nether = { path = "../dimension-nether" }
+bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+dimension-nether = { git = "https://github.com/paolobettelini/modularis.git" }
 generated-dimension-registry = "0.1.0"
-server-chunk-provider-api = { path = "../server-chunk-provider-api" }
-server-chunk-provider-nether-mod = { path = "../server-chunk-provider-nether-mod" }
-server-dimension-api = { path = "../server-dimension-api" }
+server-chunk-provider-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-provider-nether-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+server-dimension-api = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }
-world-instance-api = { path = "../world-instance-api" }
+world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-dimension-registry = { path = "../generated-dimension-registry" }

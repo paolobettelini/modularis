@@ -8,4 +8,4 @@ support = true
 
 [dependencies]
 bevy = "0.17.3"
-cell-menu-api = { path = "../cell-menu-api" }
+cell-menu-api = { git = "https://github.com/paolobettelini/modularis.git" }

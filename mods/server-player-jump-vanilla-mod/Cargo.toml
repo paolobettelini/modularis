@@ -22,23 +22,23 @@ ownership = []
 
 [dependencies]
 bevy = "0.17.3"
-bevy-mod = { path = "../bevy-mod" }
-block-manager-api = { path = "../block-manager-api" }
-block-shape-api = { path = "../block-shape-api" }
+bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+block-manager-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-shape-api = { git = "https://github.com/paolobettelini/modularis.git" }
 generated-network-messages = "0.1.0"
-player-block-collision-api = { path = "../player-block-collision-api" }
-player-gravity-api = { path = "../player-gravity-api" }
-server-player-gravity-api = { path = "../server-player-gravity-api" }
-server-player-hitbox-api = { path = "../server-player-hitbox-api" }
-server-player-jump-lib = { path = "../server-player-jump-lib" }
-player-hitbox-api = { path = "../player-hitbox-api" }
-player-jump-api = { path = "../player-jump-api" }
-player-network-message-types = { path = "../player-network-message-types" }
-server-chunk-world-api = { path = "../server-chunk-world-api" }
-server-player-registry-api = { path = "../server-player-registry-api" }
-network-protocol-mod = { path = "../network-protocol-mod" }
+player-block-collision-api = { git = "https://github.com/paolobettelini/modularis.git" }
+player-gravity-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-gravity-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-hitbox-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-jump-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+player-hitbox-api = { git = "https://github.com/paolobettelini/modularis.git" }
+player-jump-api = { git = "https://github.com/paolobettelini/modularis.git" }
+player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-world-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-registry-api = { git = "https://github.com/paolobettelini/modularis.git" }
+network-protocol-mod = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }
-voxel-math-api = { path = "../voxel-math-api" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-network-messages = { path = "../generated-network-messages" }

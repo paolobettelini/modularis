@@ -16,7 +16,7 @@ id = "demo:stick"
 label = "Stick"
 
 [dependencies]
-item-api = { path = "../item-api" }
-item-render-api = { path = "../item-render-api" }
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }
-voxel-model-item-templates-mod = { path = "../voxel-model-item-templates-mod" }
+voxel-model-item-templates-mod = { git = "https://github.com/paolobettelini/modularis.git" }

@@ -17,7 +17,7 @@ ownership = []
 
 [dependencies]
 bevy = "0.17.3"
-bevy-mod = { path = "../bevy-mod" }
-client-player-controller-api = { path = "../client-player-controller-api" }
-client-world-context-api = { path = "../client-world-context-api" }
+bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+client-player-controller-api = { git = "https://github.com/paolobettelini/modularis.git" }
+client-world-context-api = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

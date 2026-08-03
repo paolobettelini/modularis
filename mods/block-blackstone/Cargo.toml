@@ -15,7 +15,7 @@ ownership = []
 id = "demo:blackstone"
 
 [dependencies]
-block-api = { path = "../block-api" }
-block-render-api = { path = "../block-render-api" }
-voxel-model-block-templates-mod = { path = "../voxel-model-block-templates-mod" }
+block-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-model-block-templates-mod = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

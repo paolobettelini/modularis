@@ -8,4 +8,4 @@ support = true
 
 [dependencies]
 bevy = "0.17.3"
-client-game-state-api = { path = "../client-game-state-api" }
+client-game-state-api = { git = "https://github.com/paolobettelini/modularis.git" }

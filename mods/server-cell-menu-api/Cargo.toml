@@ -7,8 +7,8 @@ edition = "2024"
 support = true
 
 [dependencies]
-audience-api = { path = "../audience-api" }
+audience-api = { git = "https://github.com/paolobettelini/modularis.git" }
 bevy = "0.17.3"
-cell-menu-api = { path = "../cell-menu-api" }
-inventory-core-api = { path = "../inventory-core-api" }
-item-instance-api = { path = "../item-instance-api" }
+cell-menu-api = { git = "https://github.com/paolobettelini/modularis.git" }
+inventory-core-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }

@@ -9,9 +9,9 @@ support = true
 [dependencies]
 bevy = "0.17.3"
 generated-dimension-registry = "0.1.0"
-player-network-message-types = { path = "../player-network-message-types" }
-server-chunk-provider-api = { path = "../server-chunk-provider-api" }
-world-instance-api = { path = "../world-instance-api" }
+player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-provider-api = { git = "https://github.com/paolobettelini/modularis.git" }
+world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-dimension-registry = { path = "../generated-dimension-registry" }

@@ -14,15 +14,15 @@ ownership = []
 
 [dependencies]
 bevy = "0.17.3"
-bevy-mod = { path = "../bevy-mod" }
-block-instance-api = { path = "../block-instance-api" }
-chunk-api = { path = "../chunk-api" }
-chunk-storage-binary-format-lib = { path = "../chunk-storage-binary-format-lib" }
-server-chunk-storage-api = { path = "../server-chunk-storage-api" }
-server-world-catalog-api = { path = "../server-world-catalog-api" }
+bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+block-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
+chunk-api = { git = "https://github.com/paolobettelini/modularis.git" }
+chunk-storage-binary-format-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-storage-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-world-catalog-api = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }
-voxel-math-api = { path = "../voxel-math-api" }
-world-instance-api = { path = "../world-instance-api" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
+world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-block-metadata = { path = "../generated-block-metadata" }

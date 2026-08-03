@@ -13,4 +13,4 @@ ownership = []
 
 [dependencies]
 tokio = { version = "1.48.0", features = ["full"] }
-voxel-model-block-templates-mod = { path = "../voxel-model-block-templates-mod" }
+voxel-model-block-templates-mod = { git = "https://github.com/paolobettelini/modularis.git" }

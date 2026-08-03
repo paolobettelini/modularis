@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-block-instance-api = { path = "../block-instance-api" }
+block-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 serde = { version = "1.0", features = ["derive"] }
-voxel-math-api = { path = "../voxel-math-api" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-block-metadata = { path = "../generated-block-metadata" }

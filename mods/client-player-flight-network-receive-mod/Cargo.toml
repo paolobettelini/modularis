@@ -13,10 +13,10 @@ ownership = []
 
 [dependencies]
 bevy = "0.17.3"
-bevy-mod = { path = "../bevy-mod" }
+bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
 generated-network-messages = "0.1.0"
-network-protocol-mod = { path = "../network-protocol-mod" }
-player-flight-api = { path = "../player-flight-api" }
+network-protocol-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+player-flight-api = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }
 
 [patch.crates-io]

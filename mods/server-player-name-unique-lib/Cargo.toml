@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-player-network-message-types = { path = "../player-network-message-types" }
-server-player-admission-api = { path = "../server-player-admission-api" }
+player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-admission-api = { git = "https://github.com/paolobettelini/modularis.git" }

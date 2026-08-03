@@ -9,7 +9,7 @@ support = true
 [dependencies]
 bevy = "0.17.3"
 generated-client-settings-registry = "0.1.0"
-settings-schema-api = { path = "../settings-schema-api" }
+settings-schema-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-client-settings-registry = { path = "../generated-client-settings-registry" }

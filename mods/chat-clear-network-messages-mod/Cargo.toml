@@ -16,5 +16,5 @@ clientbound = ["chat_clear_network_message_types::ClearChat"]
 serverbound = []
 
 [dependencies]
-chat-clear-network-message-types = { path = "../chat-clear-network-message-types" }
+chat-clear-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

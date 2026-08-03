@@ -21,6 +21,6 @@ section = "network"
 section_label = "Network"
 
 [dependencies]
-client-config-api = { path = "../client-config-api" }
-settings-schema-api = { path = "../settings-schema-api" }
+client-config-api = { git = "https://github.com/paolobettelini/modularis.git" }
+settings-schema-api = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

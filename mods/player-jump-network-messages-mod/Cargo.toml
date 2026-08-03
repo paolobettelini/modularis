@@ -16,5 +16,5 @@ clientbound = []
 serverbound = ["player_jump_network_message_types::PlayerJumpRequest"]
 
 [dependencies]
-player-jump-network-message-types = { path = "../player-jump-network-message-types" }
+player-jump-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

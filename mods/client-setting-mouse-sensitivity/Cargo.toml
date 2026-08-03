@@ -23,5 +23,5 @@ section = "controls"
 section_label = "Controls"
 
 [dependencies]
-settings-schema-api = { path = "../settings-schema-api" }
+settings-schema-api = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

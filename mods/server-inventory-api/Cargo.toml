@@ -8,5 +8,5 @@ support = true
 
 [dependencies]
 bevy = "0.17.3"
-inventory-core-api = { path = "../inventory-core-api" }
-item-instance-api = { path = "../item-instance-api" }
+inventory-core-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }

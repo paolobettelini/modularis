@@ -20,16 +20,16 @@ ownership = []
 
 [dependencies]
 bevy = "0.17.3"
-bevy-mod = { path = "../bevy-mod" }
-chunk-network-message-types = { path = "../chunk-network-message-types" }
+bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+chunk-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
 generated-network-messages = "0.1.0"
-network-protocol-mod = { path = "../network-protocol-mod" }
-server-chunk-world-api = { path = "../server-chunk-world-api" }
-server-chunk-residency-api = { path = "../server-chunk-residency-api" }
-server-network-events-api = { path = "../server-network-events-api" }
-server-player-registry-api = { path = "../server-player-registry-api" }
+network-protocol-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-world-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-residency-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-network-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-registry-api = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }
-voxel-math-api = { path = "../voxel-math-api" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-network-messages = { path = "../generated-network-messages" }

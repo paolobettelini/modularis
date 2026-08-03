@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-player-network-message-types = { path = "../player-network-message-types" }
+player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
 serde = { version = "1.0.228", features = ["derive"] }

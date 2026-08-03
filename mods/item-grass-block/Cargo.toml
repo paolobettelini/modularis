@@ -16,9 +16,9 @@ id = "demo:grass_block"
 label = "Grass"
 
 [dependencies]
-item-api = { path = "../item-api" }
-item-render-api = { path = "../item-render-api" }
-block-grass = { path = "../block-grass" }
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-grass = { git = "https://github.com/paolobettelini/modularis.git" }
 
 
 

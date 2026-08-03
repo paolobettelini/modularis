@@ -4,13 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-block-manager-api = { path = "../block-manager-api" }
-inventory-events-api = { path = "../inventory-events-api" }
-item-use-api = { path = "../item-use-api" }
-portal-api = { path = "../portal-api" }
-server-chunk-world-api = { path = "../server-chunk-world-api" }
-server-dimension-api = { path = "../server-dimension-api" }
-server-portal-api = { path = "../server-portal-api" }
+block-manager-api = { git = "https://github.com/paolobettelini/modularis.git" }
+inventory-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-use-api = { git = "https://github.com/paolobettelini/modularis.git" }
+portal-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-world-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-dimension-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-portal-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-block-metadata = { path = "../generated-block-metadata" }

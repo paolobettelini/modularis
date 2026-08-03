@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-item-instance-api = { path = "../item-instance-api" }
-item-quantity-meta = { path = "../item-quantity-meta" }
+item-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-quantity-meta = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-item-metadata = { path = "../generated-item-metadata" }

@@ -8,9 +8,9 @@ support = true
 
 [dependencies]
 bevy = "0.17.3"
-block-instance-api = { path = "../block-instance-api" }
-chunk-api = { path = "../chunk-api" }
-voxel-math-api = { path = "../voxel-math-api" }
+block-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
+chunk-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-block-metadata = { path = "../generated-block-metadata" }

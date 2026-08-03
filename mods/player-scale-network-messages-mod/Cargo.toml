@@ -16,5 +16,5 @@ clientbound = ["player_scale_network_message_types::PlayerScaleChanged"]
 serverbound = []
 
 [dependencies]
-player-scale-network-message-types = { path = "../player-scale-network-message-types" }
+player-scale-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

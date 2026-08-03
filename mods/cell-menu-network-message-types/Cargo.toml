@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-cell-menu-api = { path = "../cell-menu-api" }
-inventory-core-api = { path = "../inventory-core-api" }
-item-instance-api = { path = "../item-instance-api" }
+cell-menu-api = { git = "https://github.com/paolobettelini/modularis.git" }
+inventory-core-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 serde = { version = "1.0", features = ["derive"] }
-voxel-math-api = { path = "../voxel-math-api" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }

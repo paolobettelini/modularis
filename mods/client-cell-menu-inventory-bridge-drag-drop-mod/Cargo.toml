@@ -18,9 +18,9 @@ ownership = []
 
 [dependencies]
 bevy = "0.17.3"
-bevy-mod = { path = "../bevy-mod" }
-cell-menu-api = { path = "../cell-menu-api" }
-cell-menu-events-mod = { path = "../cell-menu-events-mod" }
-client-cell-menu-ui-api = { path = "../client-cell-menu-ui-api" }
-client-inventory-ui-api = { path = "../client-inventory-ui-api" }
+bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+cell-menu-api = { git = "https://github.com/paolobettelini/modularis.git" }
+cell-menu-events-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+client-cell-menu-ui-api = { git = "https://github.com/paolobettelini/modularis.git" }
+client-inventory-ui-api = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

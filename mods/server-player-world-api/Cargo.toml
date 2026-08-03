@@ -8,5 +8,5 @@ support = true
 
 [dependencies]
 bevy = "0.17.3"
-player-network-message-types = { path = "../player-network-message-types" }
-world-instance-api = { path = "../world-instance-api" }
+player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }

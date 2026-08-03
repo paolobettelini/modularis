@@ -7,7 +7,7 @@ edition = "2024"
 support = true
 
 [dependencies]
-audience-api = { path = "../audience-api" }
+audience-api = { git = "https://github.com/paolobettelini/modularis.git" }
 bevy = "0.17.3"
 generated-sound-registry = "0.1.0"
 

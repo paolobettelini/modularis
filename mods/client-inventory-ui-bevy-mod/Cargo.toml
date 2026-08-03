@@ -20,12 +20,12 @@ ownership = []
 
 [dependencies]
 bevy = "0.17.3"
-bevy-mod = { path = "../bevy-mod" }
-client-game-state-api = { path = "../client-game-state-api" }
-client-inventory-cache-api = { path = "../client-inventory-cache-api" }
-client-inventory-ui-api = { path = "../client-inventory-ui-api" }
-inventory-core-api = { path = "../inventory-core-api" }
-inventory-events-api = { path = "../inventory-events-api" }
-inventory-events-mod = { path = "../inventory-events-mod" }
-item-manager-api = { path = "../item-manager-api" }
+bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+client-game-state-api = { git = "https://github.com/paolobettelini/modularis.git" }
+client-inventory-cache-api = { git = "https://github.com/paolobettelini/modularis.git" }
+client-inventory-ui-api = { git = "https://github.com/paolobettelini/modularis.git" }
+inventory-core-api = { git = "https://github.com/paolobettelini/modularis.git" }
+inventory-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
+inventory-events-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+item-manager-api = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

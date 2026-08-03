@@ -27,11 +27,11 @@ command = "generate"
 
 [dependencies]
 bevy = "0.17.3"
-bevy-mod = { path = "../bevy-mod" }
-block-registry-codegen = { path = "../block-registry-codegen" }
+bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+block-registry-codegen = { git = "https://github.com/paolobettelini/modularis.git" }
 generated-network-messages = "0.1.0"
-item-metadata-registry-codegen = { path = "../item-metadata-registry-codegen" }
-item-registry-codegen = { path = "../item-registry-codegen" }
+item-metadata-registry-codegen = { git = "https://github.com/paolobettelini/modularis.git" }
+item-registry-codegen = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }
 
 [patch.crates-io]

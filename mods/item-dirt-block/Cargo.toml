@@ -16,7 +16,7 @@ id = "demo:dirt_block"
 label = "Dirt"
 
 [dependencies]
-item-api = { path = "../item-api" }
-item-render-api = { path = "../item-render-api" }
-block-dirt = { path = "../block-dirt" }
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-dirt = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

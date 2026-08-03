@@ -12,6 +12,6 @@ run = []
 ownership = ["bevy-mod"]
 
 [dependencies]
-bevy-mod = { path = "../bevy-mod" }
-server-bevy-runner-mod = { path = "../server-bevy-runner-mod" }
+bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+server-bevy-runner-mod = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

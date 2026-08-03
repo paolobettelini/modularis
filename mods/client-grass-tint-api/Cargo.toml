@@ -8,7 +8,7 @@ support = true
 
 [dependencies]
 bevy = "0.17.3"
-client-dimension-api = { path = "../client-dimension-api" }
+client-dimension-api = { git = "https://github.com/paolobettelini/modularis.git" }
 generated-block-registry = "0.1.0"
 
 [patch.crates-io]

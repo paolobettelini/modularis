@@ -9,4 +9,4 @@ support = true
 [dependencies]
 azalea-brigadier = "=0.16.0"
 bevy = "0.17.3"
-player-network-message-types = { path = "../player-network-message-types" }
+player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }

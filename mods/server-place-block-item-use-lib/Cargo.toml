@@ -4,19 +4,19 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-block-edit-events-api = { path = "../block-edit-events-api" }
-block-instance-api = { path = "../block-instance-api" }
-block-manager-api = { path = "../block-manager-api" }
-block-shape-api = { path = "../block-shape-api" }
-inventory-events-api = { path = "../inventory-events-api" }
-item-use-api = { path = "../item-use-api" }
-player-gravity-api = { path = "../player-gravity-api" }
-player-hitbox-api = { path = "../player-hitbox-api" }
-server-block-interaction-rules-api = { path = "../server-block-interaction-rules-api" }
-server-chunk-world-api = { path = "../server-chunk-world-api" }
-server-player-gravity-api = { path = "../server-player-gravity-api" }
-server-player-hitbox-api = { path = "../server-player-hitbox-api" }
-server-player-registry-api = { path = "../server-player-registry-api" }
+block-edit-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-manager-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-shape-api = { git = "https://github.com/paolobettelini/modularis.git" }
+inventory-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-use-api = { git = "https://github.com/paolobettelini/modularis.git" }
+player-gravity-api = { git = "https://github.com/paolobettelini/modularis.git" }
+player-hitbox-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-block-interaction-rules-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-world-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-gravity-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-hitbox-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-registry-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-block-metadata = { path = "../generated-block-metadata" }

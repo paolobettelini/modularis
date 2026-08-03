@@ -8,5 +8,5 @@ support = true
 
 [dependencies]
 bevy = "0.17.3"
-block-shape-api = { path = "../block-shape-api" }
-voxel-math-api = { path = "../voxel-math-api" }
+block-shape-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }

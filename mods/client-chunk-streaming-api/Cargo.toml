@@ -8,5 +8,5 @@ support = true
 
 [dependencies]
 bevy = "0.17.3"
-chunk-api = { path = "../chunk-api" }
-voxel-math-api = { path = "../voxel-math-api" }
+chunk-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }

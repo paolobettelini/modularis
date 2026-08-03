@@ -24,31 +24,31 @@ ownership = []
 
 [dependencies]
 actix-web = "4.13.0"
-audience-api = { path = "../audience-api" }
+audience-api = { git = "https://github.com/paolobettelini/modularis.git" }
 bevy = "0.17.3"
-bevy-mod = { path = "../bevy-mod" }
-block-edit-events-api = { path = "../block-edit-events-api" }
-block-edit-events-mod = { path = "../block-edit-events-mod" }
-block-instance-api = { path = "../block-instance-api" }
+bevy-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+block-edit-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-edit-events-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+block-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 generated-block-registry = "0.1.0"
 generated-sound-registry = "0.1.0"
 leptos = { version = "0.8.20", default-features = false, features = ["ssr"] }
-parkour-gameplay-lib = { path = "../parkour-gameplay-lib" }
-player-network-message-types = { path = "../player-network-message-types" }
-server-chat-api = { path = "../server-chat-api" }
-server-chunk-provider-api = { path = "../server-chunk-provider-api" }
-server-chunk-routing-api = { path = "../server-chunk-routing-api" }
-server-chunk-world-api = { path = "../server-chunk-world-api" }
-server-player-chat-lib = { path = "../server-player-chat-lib" }
-server-player-lifecycle-events-api = { path = "../server-player-lifecycle-events-api" }
-server-player-lifecycle-events-mod = { path = "../server-player-lifecycle-events-mod" }
-server-player-registry-api = { path = "../server-player-registry-api" }
-server-player-world-api = { path = "../server-player-world-api" }
-server-scope-api = { path = "../server-scope-api" }
-server-scope-world-api = { path = "../server-scope-world-api" }
-server-sound-api = { path = "../server-sound-api" }
+parkour-gameplay-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chat-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-provider-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-routing-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-world-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-chat-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-lifecycle-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-lifecycle-events-mod = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-registry-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-world-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-scope-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-scope-world-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-sound-api = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }
-world-instance-api = { path = "../world-instance-api" }
+world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-block-metadata = { path = "../generated-block-metadata" }

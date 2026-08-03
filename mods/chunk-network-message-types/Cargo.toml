@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-chunk-api = { path = "../chunk-api" }
+chunk-api = { git = "https://github.com/paolobettelini/modularis.git" }
 serde = { version = "1.0", features = ["derive"] }
-voxel-math-api = { path = "../voxel-math-api" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }

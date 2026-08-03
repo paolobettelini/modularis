@@ -5,4 +5,4 @@ edition = "2024"
 
 [dependencies]
 bevy = "0.17.3"
-item-use-api = { path = "../item-use-api" }
+item-use-api = { git = "https://github.com/paolobettelini/modularis.git" }

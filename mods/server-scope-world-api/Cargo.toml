@@ -8,6 +8,6 @@ support = true
 
 [dependencies]
 bevy = "0.17.3"
-player-network-message-types = { path = "../player-network-message-types" }
-server-chunk-routing-api = { path = "../server-chunk-routing-api" }
-server-scope-api = { path = "../server-scope-api" }
+player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-routing-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-scope-api = { git = "https://github.com/paolobettelini/modularis.git" }

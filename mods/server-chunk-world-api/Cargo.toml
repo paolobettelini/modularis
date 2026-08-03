@@ -8,12 +8,12 @@ support = true
 
 [dependencies]
 bevy = "0.17.3"
-block-instance-api = { path = "../block-instance-api" }
-chunk-api = { path = "../chunk-api" }
-player-network-message-types = { path = "../player-network-message-types" }
-server-chunk-provider-api = { path = "../server-chunk-provider-api" }
-voxel-math-api = { path = "../voxel-math-api" }
-world-instance-api = { path = "../world-instance-api" }
+block-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
+chunk-api = { git = "https://github.com/paolobettelini/modularis.git" }
+player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-provider-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
+world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-block-metadata = { path = "../generated-block-metadata" }

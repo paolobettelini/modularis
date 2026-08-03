@@ -8,5 +8,5 @@ support = true
 
 [dependencies]
 bevy = "0.17.3"
-block-render-api = { path = "../block-render-api" }
+block-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
 

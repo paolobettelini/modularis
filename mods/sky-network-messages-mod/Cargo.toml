@@ -16,5 +16,5 @@ clientbound = ["sky_network_message_types::SkyColorChanged"]
 serverbound = []
 
 [dependencies]
-sky-network-message-types = { path = "../sky-network-message-types" }
+sky-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

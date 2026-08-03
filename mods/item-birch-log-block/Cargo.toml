@@ -12,7 +12,7 @@ ownership = []
 id = "demo:birch_log_block"
 label = "Birch Log"
 [dependencies]
-item-api = { path = "../item-api" }
-item-render-api = { path = "../item-render-api" }
-block-birch-log = { path = "../block-birch-log" }
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-birch-log = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

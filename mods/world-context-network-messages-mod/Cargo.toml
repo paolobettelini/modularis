@@ -17,4 +17,4 @@ serverbound = []
 
 [dependencies]
 tokio = { version = "1.48.0", features = ["full"] }
-world-context-network-message-types = { path = "../world-context-network-message-types" }
+world-context-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }

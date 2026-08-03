@@ -14,10 +14,10 @@ ownership = []
 
 [dependencies]
 generated-item-registry = "0.1.0"
-item-api = { path = "../item-api" }
-item-manager-api = { path = "../item-manager-api" }
-item-render-api = { path = "../item-render-api" }
-item-registry-codegen = { path = "../item-registry-codegen" }
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-manager-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-registry-codegen = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }
 
 [patch.crates-io]

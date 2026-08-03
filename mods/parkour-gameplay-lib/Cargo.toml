@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 bevy = "0.17.3"
 generated-block-registry = "0.1.0"
-voxel-math-api = { path = "../voxel-math-api" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-block-registry = { path = "../generated-block-registry" }
