@@ -26,5 +26,6 @@ mods = [
     "cell-menu-network-messages-mod",
     "chat-network-messages-mod",
     "chat-clear-network-messages-mod",
+    "network-codegen-utils",
     "network-protocol-mod",
 ]
