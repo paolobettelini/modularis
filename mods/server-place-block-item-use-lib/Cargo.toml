@@ -11,7 +11,6 @@ block-shape-api = { path = "../block-shape-api" }
 inventory-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-use-api = { git = "https://github.com/paolobettelini/modularis.git" }
 player-gravity-api = { path = "../player-gravity-api" }
-player-hitbox-api = { path = "../player-hitbox-api" }
 server-block-interaction-rules-api = { path = "../server-block-interaction-rules-api" }
 server-chunk-world-api = { path = "../server-chunk-world-api" }
 server-player-gravity-api = { path = "../server-player-gravity-api" }

@@ -34,7 +34,6 @@ inventory-events-api = { git = "https://github.com/paolobettelini/modularis.git"
 inventory-events-mod = { path = "../inventory-events-mod" }
 item-place-block-meta = { path = "../item-place-block-meta" }
 item-use-api = { git = "https://github.com/paolobettelini/modularis.git" }
-player-hitbox-api = { path = "../player-hitbox-api" }
 server-chunk-world-api = { path = "../server-chunk-world-api" }
 server-player-registry-api = { path = "../server-player-registry-api" }
 player-gravity-api = { path = "../player-gravity-api" }
