@@ -1,6 +1,11 @@
 {
-  "parent": "voxel-model-block-templates-mod:block/cube_all",
+  "parent": "voxel-model-block-templates-mod:block/cube",
   "textures": {
-    "all": "block-grass:block/grass"
+    "down": "block-grass:block/grass_bottom",
+    "up": "block-grass:block/grass_top",
+    "north": "block-grass:block/grass_side",
+    "south": "block-grass:block/grass_side",
+    "west": "block-grass:block/grass_side",
+    "east": "block-grass:block/grass_side"
   }
 }

@@ -6,3 +6,6 @@ target
 
 # Composer-generated development crates.
 mods/generated-*
+
+# Game files
+worlds

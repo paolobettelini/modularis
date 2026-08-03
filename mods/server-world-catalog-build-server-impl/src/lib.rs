@@ -17,7 +17,7 @@ impl ServerWorldCatalogBuildServerImpl {
         _aether: &mut dimension_aether::DimensionAetherMod,
     ) -> Self {
         let catalog = ServerWorldCatalog::default();
-        let worlds_root = demo_root().join("build-server").join("worlds");
+        let worlds_root = demo_root().join("worlds");
         register(&catalog, &worlds_root, "overworld", Dimension::Overworld);
         register(&catalog, &worlds_root, "nether", Dimension::Nether);
         register(&catalog, &worlds_root, "aether", Dimension::Aether);
