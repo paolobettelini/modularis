@@ -51,6 +51,3 @@ mods = [
 ]
 name = "TheCrown"
 version = "0.0.1"
-
-[options.build]
-args = ["--config /home/paolo/Desktop/videogames/minecraft_simple_demo/mods/.cargo/config.toml"]
