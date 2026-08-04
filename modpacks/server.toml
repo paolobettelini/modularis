@@ -1,9 +1,10 @@
-name = "Minecraft demo server"
-version = "0.0.1"
 description = "Multiplayer minecraft-style server using Bevy."
-modpacks = ["server-base", "server-vanilla"]
 ignore = []
-
+modpacks = [
+    "server-base",
+    "server-vanilla",
+    "server-patchwork-auth",
+]
 mods = [
     "server-world-catalog-build-server-impl",
     "server-world-seed-catalog-fs-impl",
@@ -20,3 +21,8 @@ mods = [
     "server-dimension-aether-mod",
     "server-chunk-world-dynamic-impl",
 ]
+name = "Minecraft demo server"
+version = "0.0.1"
+
+[options.build]
+args = ["--config /home/paolo/Desktop/videogames/minecraft_simple_demo/mods/.cargo/config.toml"]

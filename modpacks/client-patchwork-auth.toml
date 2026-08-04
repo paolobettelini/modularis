@@ -1,0 +1,10 @@
+name = "Patchwork authenticated game client"
+version = "0.0.1"
+description = "Consumes launcher tickets and authenticates each game-server connection."
+modpacks = []
+ignore = []
+
+mods = [
+    "client-patchwork-auth-bootstrap-mod",
+    "client-patchwork-auth-handshake-mod",
+]

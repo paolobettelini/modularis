@@ -7,6 +7,7 @@ ignore = []
 mods = [
     "server-config-local-impl",
     "server-tick-rate-20hz-default-impl",
+    "server-bevy-log-mod",
     "server-bevy-runner-mod",
     "server-tick-metrics-mod",
     "server-network-tcp-impl",

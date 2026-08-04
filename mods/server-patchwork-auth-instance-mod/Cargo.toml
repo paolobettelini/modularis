@@ -1,0 +1,19 @@
+[package]
+name = "server-patchwork-auth-instance-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerPatchworkAuthInstanceMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-bevy-runner-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+patchwork-game-auth-http-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+server-bevy-runner-mod = { path = "../server-bevy-runner-mod" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -1,0 +1,11 @@
+name = "Patchwork authenticated game server"
+version = "0.0.1"
+description = "Registers a server lease, redeems connection handshakes, and requires trusted Patchwork accounts for admission."
+modpacks = []
+ignore = []
+
+mods = [
+    "server-patchwork-auth-instance-mod",
+    "server-patchwork-auth-handshake-mod",
+    "server-patchwork-auth-admission-mod",
+]

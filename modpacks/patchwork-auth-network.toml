@@ -1,0 +1,14 @@
+name = "Patchwork game authentication protocol"
+version = "0.0.1"
+description = "Shared handshake packets, frame-security state, transport events, and account authentication contracts."
+modpacks = []
+ignore = []
+
+mods = [
+    "network-frame-security-api",
+    "patchwork-game-auth-api",
+    "network-frame-security-state-mod",
+    "network-transport-events-mod",
+    "patchwork-game-auth-events-mod",
+    "patchwork-auth-network-messages-mod",
+]

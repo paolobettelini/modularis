@@ -16,6 +16,7 @@
 - [Runtime and networking](./runtime/runtime-overview.md)
   - [Bevy application lifecycle](./runtime/bevy-lifecycle.md)
   - [Protocol, transport, and framing](./runtime/networking.md)
+  - [Patchwork account authentication](./runtime/patchwork-authentication.md)
   - [Sessions, routing, and visibility](./runtime/sessions-and-visibility.md)
   - [Chat, commands, and completion](./runtime/chat-and-commands.md)
   - [Sounds, audiences, and spatial playback](./runtime/sounds.md)

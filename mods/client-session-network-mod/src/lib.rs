@@ -7,6 +7,7 @@ use client_settings_api::{SettingsApi, SettingsStore};
 use generated_client_settings_registry::SettingKey;
 use generated_network_messages::{JoinAcceptedReceived, NetworkMessageSet, ServerBoundMessage};
 use network_protocol_mod::NetworkProtocolMod;
+use patchwork_game_auth_api::ClientPatchworkJoinGate;
 use session_network_message_types::{JoinRequest, LeaveRequest};
 use tokio::task::JoinHandle;
 
@@ -55,6 +56,7 @@ fn begin_join(mut pending: ResMut<PendingJoin>, mut session: ResMut<ClientSessio
 fn send_pending_join(
     sender: Option<Res<ClientNetworkSender>>,
     settings: Res<SettingsStore>,
+    auth_gate: Option<Res<ClientPatchworkJoinGate>>,
     mut pending: ResMut<PendingJoin>,
 ) {
     if !pending.0 {
@@ -63,10 +65,18 @@ fn send_pending_join(
     let Some(sender) = sender else {
         return;
     };
-    let name = settings
-        .get_string(SettingKey::NetworkPlayerName)
-        .unwrap_or("Player")
-        .to_string();
+    if auth_gate.as_ref().is_some_and(|gate| !gate.may_join()) {
+        return;
+    }
+    let name = auth_gate
+        .as_ref()
+        .and_then(|gate| gate.nickname())
+        .unwrap_or_else(|| {
+            settings
+                .get_string(SettingKey::NetworkPlayerName)
+                .unwrap_or("Player")
+                .to_string()
+        });
     if sender
         .send(&ServerBoundMessage::JoinRequest(JoinRequest { name }))
         .is_ok()

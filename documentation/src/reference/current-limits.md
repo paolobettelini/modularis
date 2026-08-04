@@ -87,7 +87,10 @@ Current limits:
 - generated client/server builds must match;
 - no version handshake;
 - in-memory unbounded outboxes;
-- no authentication or encryption;
+- Patchwork authentication currently supports direct joins but not
+  cross-server transfer tickets;
+- an authenticated launch does not negotiate a downgrade to an anonymous
+  server;
 - no bandwidth metrics;
 - CBOR/framing work occurs on update thread;
 - maximum frame size is global.
@@ -97,7 +100,7 @@ Design direction:
 - protocol version and capability negotiation;
 - bounded queues/backpressure;
 - optional compression;
-- connection authentication;
+- transfer routing with fresh destination handshakes;
 - task-based serialization where useful.
 
 ## Inventory and menus

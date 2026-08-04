@@ -36,6 +36,13 @@ The composition starts from `server-core.toml`, not the larger
 `server-base.toml` umbrella. It then selects only the neutral chat, sound,
 outbound block-edit, chunk-request, flight, and sun pipelines it actually uses.
 
+TheCrown also imports `server-patchwork-auth`. Every player must complete the
+Patchwork account handshake before the normal session join is admitted. The
+custom server can use `ServerPatchworkPlayerJoined` when it needs persistent
+account identity; ordinary parkour assignment remains based on the generic
+player lifecycle because the mechanic itself does not require account data.
+See [Patchwork account authentication](../runtime/patchwork-authentication.md).
+
 ## Runtime topology
 
 At startup, `thecrown-main-mod` creates:

@@ -7,7 +7,11 @@ use server_chunk_residency_api::{ServerChunkResidencyApi, ServerChunkResidencyCo
 use server_chunk_world_api::{ServerChunkWorld, ServerChunkWorldApi};
 use server_network_events_api::{ServerAudience, ServerNetworkEventsApi, ServerPacketOut};
 use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
+use std::{collections::HashSet, net::SocketAddr};
 use tokio::task::JoinHandle;
+
+#[derive(Resource, Default)]
+struct ChunkStreamingLogState(HashSet<SocketAddr>);
 
 pub struct ServerChunkRequestMod;
 
@@ -25,10 +29,12 @@ impl ServerChunkRequestMod {
         _residency: &mut R,
         _protocol: &mut NetworkProtocolMod,
     ) -> Self {
-        bevy.app.add_systems(
-            Update,
-            answer_chunk_requests.after(NetworkMessageSet::DispatchPackets),
-        );
+        bevy.app
+            .init_resource::<ChunkStreamingLogState>()
+            .add_systems(
+                Update,
+                answer_chunk_requests.after(NetworkMessageSet::DispatchPackets),
+            );
         Self
     }
 
@@ -42,6 +48,7 @@ fn answer_chunk_requests(
     world: Res<ServerChunkWorld>,
     players: Res<ServerPlayerRegistry>,
     residency: Res<ServerChunkResidencyConfig>,
+    mut logged_streams: ResMut<ChunkStreamingLogState>,
     mut packets: MessageWriter<ServerPacketOut>,
 ) {
     for request in requests.read() {
@@ -54,6 +61,12 @@ fn answer_chunk_requests(
             player.position[2].floor() as i32,
         )
         .chunk();
+        if logged_streams.0.insert(request.source) {
+            info!(
+                "player {} started chunk streaming from center {:?}; first request {:?}",
+                player.id, center, request.message.position
+            );
+        }
         if !residency.contains(center, request.message.position) {
             debug!(
                 "ignored out-of-interest chunk request {:?} from player {}",

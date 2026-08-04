@@ -32,6 +32,13 @@ player, `server-player-session-mod` builds a `ServerJoinCandidate` and asks all
 rules in `ServerPlayerAdmissionRules` to validate it. A rule can reject a join
 without modifying the session implementation.
 
+TheCrown adds an authenticated-account admission rule. It maps the socket to a
+backend-redeemed Patchwork account, requires the join nickname to equal the
+trusted backend nickname, and then binds the created `PlayerId` to the
+persistent account UUID. Other servers can omit this rule or install a
+different policy over the same authentication events. See
+[Patchwork account authentication](./patchwork-authentication.md).
+
 The selected `server-player-name-unique-vanilla-mod` rejects duplicate names
 case-insensitively. A rejected admission emits
 `ServerKickRequested::Address` because no `PlayerId` exists yet. The generic
@@ -41,10 +48,12 @@ drops its TCP connection as it exits the in-game state. The user explicitly
 returns home with the `Back to home` button. The same packet and client behavior
 are used for an admitted player kicked later by another server rule.
 
-The client setting still owns the chosen name. The optional
+On an unauthenticated server, the client setting still owns the chosen name. The optional
 `client-player-name-random-default-mod` changes only the untouched default
 `Player` to `Player0` through `Player100` at startup. It does not overwrite a
 name saved by the user, and uniqueness is still authoritative on the server.
+On an authenticated server, the client join gate replaces this value with the
+backend nickname and the server verifies it against the redeemed account.
 
 ## Lifecycle messages
 

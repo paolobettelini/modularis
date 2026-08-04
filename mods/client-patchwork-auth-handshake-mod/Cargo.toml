@@ -1,0 +1,44 @@
+[package]
+name = "client-patchwork-auth-handshake-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientPatchworkAuthHandshakeMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-network-api",
+    "client-session-api",
+    "client-game-state-api",
+    "network-protocol-mod",
+    "network-frame-security-state-mod",
+    "network-transport-events-mod",
+    "patchwork-game-auth-events-mod",
+    "client-patchwork-auth-bootstrap-mod",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-network-api = { path = "../client-network-api" }
+client-patchwork-auth-bootstrap-mod = { path = "../client-patchwork-auth-bootstrap-mod" }
+client-session-api = { path = "../client-session-api" }
+generated-network-messages = "0.1.0"
+network-frame-security-api = { path = "../network-frame-security-api" }
+network-frame-security-state-mod = { path = "../network-frame-security-state-mod" }
+network-protocol-mod = { path = "../network-protocol-mod" }
+network-transport-events-mod = { path = "../network-transport-events-mod" }
+patchwork-auth-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+patchwork-game-auth-api = { path = "../patchwork-game-auth-api" }
+patchwork-game-auth-crypto-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+patchwork-game-auth-events-mod = { path = "../patchwork-game-auth-events-mod" }
+patchwork-game-auth-http-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-network-messages = { path = "../generated-network-messages" }

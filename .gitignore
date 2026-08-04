@@ -4,6 +4,8 @@ build-thecrown
 build
 target
 
+config.toml
+
 # Composer-generated development crates.
 mods/generated-*
 

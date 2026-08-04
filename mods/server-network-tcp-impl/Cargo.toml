@@ -13,6 +13,8 @@ init = [
     "server-config-api",
     "network-protocol-mod",
     "server-bevy-runner-mod",
+    "network-frame-security-state-mod",
+    "network-transport-events-mod",
 ]
 run = []
 ownership = []
@@ -22,7 +24,10 @@ bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 generated-network-messages = "0.1.0"
 network-framing-api = { git = "https://github.com/paolobettelini/modularis.git" }
+network-frame-security-api = { path = "../network-frame-security-api" }
+network-frame-security-state-mod = { path = "../network-frame-security-state-mod" }
 network-protocol-mod = { path = "../network-protocol-mod" }
+network-transport-events-mod = { path = "../network-transport-events-mod" }
 server-bevy-runner-mod = { path = "../server-bevy-runner-mod" }
 server-config-api = { path = "../server-config-api" }
 server-network-api = { path = "../server-network-api" }

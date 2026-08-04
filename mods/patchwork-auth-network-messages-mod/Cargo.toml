@@ -1,0 +1,27 @@
+[package]
+name = "patchwork-auth-network-messages-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "PatchworkAuthNetworkMessagesMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.network.messages]
+clientbound = [
+    "patchwork_auth_network_message_types::KeyExchangeRequest",
+    "patchwork_auth_network_message_types::LoginSuccess",
+    "patchwork_auth_network_message_types::AuthenticationFailed",
+]
+serverbound = [
+    "patchwork_auth_network_message_types::KeyExchangeResponse",
+    "patchwork_auth_network_message_types::ClientFinish",
+]
+
+[dependencies]
+patchwork-auth-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+tokio = { version = "1.48.0", features = ["full"] }

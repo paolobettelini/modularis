@@ -1,0 +1,14 @@
+[package]
+name = "patchwork-game-auth-api"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+support = true
+
+[dependencies]
+bevy = "0.17.3"
+network-frame-security-api = { path = "../network-frame-security-api" }
+patchwork-game-auth-crypto-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+patchwork-game-auth-http-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }

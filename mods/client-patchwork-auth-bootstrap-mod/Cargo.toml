@@ -1,0 +1,28 @@
+[package]
+name = "client-patchwork-auth-bootstrap-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientPatchworkAuthBootstrapMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-session-api",
+    "client-game-state-api",
+    "patchwork-game-auth-events-mod",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-session-api = { path = "../client-session-api" }
+patchwork-game-auth-api = { path = "../patchwork-game-auth-api" }
+patchwork-game-auth-events-mod = { path = "../patchwork-game-auth-events-mod" }
+patchwork-game-auth-http-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+patchwork-game-auth-pipe-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -1,0 +1,8 @@
+[package]
+name = "patchwork-game-auth-pipe-lib"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+patchwork-game-auth-http-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+thiserror = "2"

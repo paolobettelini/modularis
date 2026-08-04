@@ -1,9 +1,12 @@
-name = "Minecraft demo client"
-version = "0.0.1"
 description = "Multiplayer minecraft-style client using Bevy."
-modpacks = ["common", "client-vanilla", "client-graphics", "client-grass"]
-#ignore = ["client-sun-shadows-vanilla-mod"]
 ignore = []
+modpacks = [
+    "common",
+    "client-vanilla",
+    "client-graphics",
+    "client-grass",
+    "client-patchwork-auth",
+]
 mods = [
     "client-config-default-impl",
     "client-log-filter-default-impl",
@@ -108,3 +111,8 @@ mods = [
     "client-sun-disc-bevy-mod",
     "client-block-outline-bevy-mod",
 ]
+name = "Minecraft demo client"
+version = "0.0.1"
+
+[options.build]
+args = ["--config /home/paolo/Desktop/videogames/minecraft_simple_demo/mods/.cargo/config.toml"]

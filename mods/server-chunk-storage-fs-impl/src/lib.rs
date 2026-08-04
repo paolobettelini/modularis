@@ -70,9 +70,16 @@ impl FilesystemChunkStorage {
         };
         for directory in worlds {
             let chunk_root = directory.root.join("data/chunk");
+            info!(
+                "opening chunk storage for world '{}' ({}) at {}",
+                directory.id.as_str(),
+                directory.instance,
+                chunk_root.display()
+            );
             fs::create_dir_all(chunk_root.join("regions")).map_err(io_error)?;
             let index_path = chunk_root.join("index.bin");
-            let mut index = if index_path.exists() {
+            let index_existed = index_path.exists();
+            let mut index = if index_existed {
                 GlobalBlockIndex::decode(&fs::read(&index_path).map_err(io_error)?)
                     .map_err(format_error)?
             } else {
@@ -82,6 +89,12 @@ impl FilesystemChunkStorage {
             if changed || !index_path.exists() {
                 atomic_write(&index_path, &index.encode().map_err(format_error)?)?;
             }
+            info!(
+                "chunk storage for world '{}' is ready ({} block IDs, index {})",
+                directory.id.as_str(),
+                index.ids().count(),
+                if index_existed { "loaded" } else { "created" }
+            );
             state.worlds.insert(
                 directory.instance.clone(),
                 FilesystemWorldState {

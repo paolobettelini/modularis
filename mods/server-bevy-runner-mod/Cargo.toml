@@ -7,7 +7,7 @@ edition = "2024"
 entry = "ServerBevyRunnerMod"
 
 [package.metadata.mod.dependencies]
-init = ["bevy-mod", "server-tick-api"]
+init = ["bevy-mod", "server-tick-api", "server-bevy-log-mod"]
 run = []
 ownership = []
 
@@ -15,4 +15,5 @@ ownership = []
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 server-tick-api = { path = "../server-tick-api" }
+server-bevy-log-mod = { path = "../server-bevy-log-mod" }
 tokio = { version = "1.48.0", features = ["full"] }

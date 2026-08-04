@@ -153,3 +153,299 @@ name = "winnow"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0592e1c9d151f854e6fd382574c3a0855250e1d9b2f99d9281c6e6391af352f1"
+
+[[patch.unused]]
+name = "audience-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "block-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "block-edit-events-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "block-edit-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "block-instance-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "block-render-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "blocky_formats"
+version = "0.1.3"
+
+[[patch.unused]]
+name = "cell-menu-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "cell-menu-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "chat-clear-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "chat-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "chunk-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "chunk-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "chunk-section-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "chunk-storage-binary-format-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "client-block-interaction-events-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "client-keybinding-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "coherent-noise-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "dimension-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "inventory-core-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "inventory-events-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "inventory-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "inventory-quantity-operations-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "item-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "item-instance-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "item-render-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "item-use-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "kick-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "network-framing-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "packed-bit-array-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "parkour-gameplay-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "patchwork-auth-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "patchwork-game-auth-crypto-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "patchwork-game-auth-http-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "patchwork-game-auth-pipe-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "player-block-collision-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "player-flight-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "player-flight-speed-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "player-gravity-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "player-jump-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "player-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "player-scale-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "player-speed-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "portal-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "portal-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-biome-sampling-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-block-break-reach-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-block-edit-world-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-chunk-provider-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-chunk-residency-player-interest-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-crafting-table-menu-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-inventory-default-loadout-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-place-block-item-use-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-player-admission-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-player-chat-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-player-dimension-lifecycle-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-player-jump-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-player-lifecycle-events-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-player-movement-collision-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-player-name-unique-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-portal-ignite-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "server-portal-travel-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "session-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "settings-schema-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "sky-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "sound-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "sound-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "sun-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "sun-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "voxel-math-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "voxel-models-lib"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "voxel-raycast-api"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "world-context-network-message-types"
+version = "0.1.0"
+
+[[patch.unused]]
+name = "world-instance-api"
+version = "0.1.0"

@@ -16,6 +16,8 @@ CBOR serialization
         │
 length-prefixed framing
         │
+optional per-connection frame security
+        │
 TCP client/server implementations
 ```
 
@@ -118,6 +120,10 @@ During `NetworkMessageSet::ReceivePackets`, the transport:
 - decodes client-bound messages;
 - emits `ClientPacketReceived`.
 
+The selected client transport also publishes connection and disconnection
+messages. Optional authentication mods use these contracts without being
+hardcoded into TCP.
+
 Leaving `InGame` removes the sender and connection.
 
 ## Server TCP implementation
@@ -140,6 +146,10 @@ Every receive stage:
 5. emits `ServerPacketReceived { source, message }`;
 6. removes disconnected clients.
 
+`ServerTransportDisconnectRequested` supports disconnect-after-flush. This is
+important for authentication and other pre-session failures: a typed reason can
+be queued before the socket is closed.
+
 The socket source address is not trusted as a player ID. Session systems map it
 through `ServerPlayerRegistry`.
 
@@ -158,6 +168,16 @@ To add another transport:
 6. select the new provider in the modpack.
 
 Gameplay mods should require no changes.
+
+## Optional secure frames
+
+`network-frame-security-api` sits between CBOR and length framing. A connection
+can be plaintext, temporarily paused during a handshake, AES-GCM protected, or
+failed. Servers that do not select an authentication policy stay in plaintext
+mode; TheCrown switches every accepted connection to a fresh secure channel.
+
+See [Patchwork account authentication](./patchwork-authentication.md) for the
+handshake, key derivation, account binding, and composition boundaries.
 
 ## Backpressure and current limits
 

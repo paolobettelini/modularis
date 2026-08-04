@@ -31,17 +31,19 @@ impl ServerWorldSeedCatalogFsImpl {
         let root_seed = configured_seed().unwrap_or_else(random_seed);
         let mut instance_seeds = HashMap::new();
         for world in worlds {
+            info!(
+                "loading world '{}' ({}) from {}",
+                world.id.as_str(),
+                world.instance,
+                world.root.display()
+            );
             let seed = load_or_create_world_info(&world, root_seed).unwrap_or_else(|error| {
                 panic!(
                     "failed to initialize world '{}': {error}",
                     world.id.as_str()
                 )
             });
-            info!(
-                "world '{}' ({}) seed: {seed}",
-                world.id.as_str(),
-                world.instance
-            );
+            info!("world '{}' is ready with seed {seed}", world.id.as_str());
             instance_seeds.insert(world.instance, seed);
         }
         bevy.app

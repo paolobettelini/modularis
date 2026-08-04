@@ -13,17 +13,20 @@ init = [
     "dimension-overworld",
     "dimension-nether",
     "dimension-aether",
+    "server-bevy-log-mod",
 ]
 run = []
 ownership = []
 
 [dependencies]
+bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 dimension-aether = { path = "../dimension-aether" }
 dimension-nether = { path = "../dimension-nether" }
 dimension-overworld = { path = "../dimension-overworld" }
 generated-dimension-registry = "0.1.0"
 server-world-catalog-api = { path = "../server-world-catalog-api" }
+server-bevy-log-mod = { path = "../server-bevy-log-mod" }
 tokio = { version = "1.48.0", features = ["full"] }
 world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 

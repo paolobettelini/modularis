@@ -5,8 +5,14 @@ use client_network_api::{ClientNetworkApi, ClientNetworkSender};
 use client_settings_api::{SettingsApi, SettingsStore};
 use generated_client_settings_registry::SettingKey;
 use generated_network_messages::{ClientBoundMessage, ClientPacketReceived, NetworkMessageSet};
-use network_framing_api::{drain_frames, encode_frame, flush_queued_frames, read_available};
+use network_frame_security_api::ClientFrameSecurity;
+use network_frame_security_state_mod::NetworkFrameSecurityStateMod;
+use network_framing_api::{drain_next_frame, encode_frame, flush_queued_frames, read_available};
 use network_protocol_mod::NetworkProtocolMod;
+use network_transport_events_mod::{
+    ClientTransportConnected, ClientTransportDisconnectRequested, ClientTransportDisconnected,
+    NetworkTransportEventsMod,
+};
 use std::{
     collections::VecDeque,
     net::{SocketAddr, TcpStream},
@@ -33,6 +39,8 @@ impl ClientTcpNetwork {
         _settings: &mut S,
         _game_state: &mut G,
         _protocol: &mut NetworkProtocolMod,
+        _security: &mut NetworkFrameSecurityStateMod,
+        _transport_events: &mut NetworkTransportEventsMod,
     ) -> Self {
         bevy.app
             .add_systems(OnEnter(GameState::InGame), connect)
@@ -53,7 +61,12 @@ impl ClientTcpNetwork {
 
 impl ClientNetworkApi for ClientTcpNetwork {}
 
-fn connect(mut commands: Commands, settings: Res<SettingsStore>) {
+fn connect(
+    mut commands: Commands,
+    settings: Res<SettingsStore>,
+    security: Res<ClientFrameSecurity>,
+    mut connected: MessageWriter<ClientTransportConnected>,
+) {
     let address = settings
         .get_string(SettingKey::NetworkServerAddress)
         .unwrap_or("127.0.0.1:9999");
@@ -73,10 +86,13 @@ fn connect(mut commands: Commands, settings: Res<SettingsStore>) {
         .expect("failed to clone client TCP stream writer");
     let outbox = Arc::new(Mutex::new(VecDeque::new()));
     let sender_outbox = outbox.clone();
+    security.reset_plaintext();
+    let sender_security = security.clone();
     commands.insert_resource(ClientNetworkSender::new(move |message| {
         let bytes = message
             .encode_cbor()
             .map_err(|error| std::io::Error::new(std::io::ErrorKind::InvalidData, error))?;
+        let bytes = sender_security.encode(&bytes)?;
         let frame = encode_frame(&bytes)?;
         sender_outbox
             .lock()
@@ -93,10 +109,22 @@ fn connect(mut commands: Commands, settings: Res<SettingsStore>) {
         pending_offset: 0,
         server,
     });
+    connected.write(ClientTransportConnected { server });
     info!("client TCP connected to {server}");
 }
 
-fn disconnect(mut commands: Commands) {
+fn disconnect(
+    mut commands: Commands,
+    connection: Option<Res<ClientTcpConnection>>,
+    security: Res<ClientFrameSecurity>,
+    mut disconnected: MessageWriter<ClientTransportDisconnected>,
+) {
+    if let Some(connection) = connection {
+        disconnected.write(ClientTransportDisconnected {
+            server: connection.server,
+        });
+    }
+    security.reset_plaintext();
     commands.remove_resource::<ClientNetworkSender>();
     commands.remove_resource::<ClientTcpConnection>();
 }
@@ -104,12 +132,25 @@ fn disconnect(mut commands: Commands) {
 fn receive_packets(
     mut commands: Commands,
     connection: Option<ResMut<ClientTcpConnection>>,
+    security: Res<ClientFrameSecurity>,
+    mut disconnect_requests: MessageReader<ClientTransportDisconnectRequested>,
+    mut disconnected: MessageWriter<ClientTransportDisconnected>,
     mut received: MessageWriter<ClientPacketReceived>,
 ) {
     let Some(mut connection) = connection else {
         return;
     };
     let connection = &mut *connection;
+
+    if disconnect_requests.read().next().is_some() {
+        disconnected.write(ClientTransportDisconnected {
+            server: connection.server,
+        });
+        security.fail();
+        commands.remove_resource::<ClientNetworkSender>();
+        commands.remove_resource::<ClientTcpConnection>();
+        return;
+    }
 
     let flush_result = {
         let outbox = connection.outbox.clone();
@@ -123,6 +164,10 @@ fn receive_packets(
     };
     if let Err(error) = flush_result {
         warn!("client TCP send failed: {error}");
+        disconnected.write(ClientTransportDisconnected {
+            server: connection.server,
+        });
+        security.fail();
         commands.remove_resource::<ClientNetworkSender>();
         commands.remove_resource::<ClientTcpConnection>();
         return;
@@ -132,36 +177,85 @@ fn receive_packets(
         Ok(true) => {}
         Ok(false) => {
             warn!("server {} closed TCP connection", connection.server);
+            disconnected.write(ClientTransportDisconnected {
+                server: connection.server,
+            });
+            security.fail();
             commands.remove_resource::<ClientNetworkSender>();
             commands.remove_resource::<ClientTcpConnection>();
             return;
         }
         Err(error) => {
             warn!("client TCP receive failed: {error}");
+            disconnected.write(ClientTransportDisconnected {
+                server: connection.server,
+            });
+            security.fail();
             commands.remove_resource::<ClientNetworkSender>();
             commands.remove_resource::<ClientTcpConnection>();
             return;
         }
     }
 
-    let frames = match drain_frames(&mut connection.read_buffer) {
-        Ok(frames) => frames,
-        Err(error) => {
-            warn!("client TCP framing error: {error}");
-            commands.remove_resource::<ClientNetworkSender>();
-            commands.remove_resource::<ClientTcpConnection>();
-            return;
-        }
-    };
-    for frame in frames {
-        match ClientBoundMessage::decode_cbor(&frame) {
+    while security.can_decode() {
+        let plaintext_mode = security.is_plaintext();
+        let frame = match drain_next_frame(&mut connection.read_buffer) {
+            Ok(Some(frame)) => frame,
+            Ok(None) => break,
+            Err(error) => {
+                warn!("client TCP framing error: {error}");
+                disconnected.write(ClientTransportDisconnected {
+                    server: connection.server,
+                });
+                security.fail();
+                commands.remove_resource::<ClientNetworkSender>();
+                commands.remove_resource::<ClientTcpConnection>();
+                return;
+            }
+        };
+        let decoded = match security.decode_candidate(&frame) {
+            Ok(Some(decoded)) => decoded,
+            Ok(None) => break,
+            Err(error) => {
+                warn!("client secure frame rejected: {error}");
+                disconnected.write(ClientTransportDisconnected {
+                    server: connection.server,
+                });
+                security.fail();
+                commands.remove_resource::<ClientNetworkSender>();
+                commands.remove_resource::<ClientTcpConnection>();
+                return;
+            }
+        };
+        match ClientBoundMessage::decode_cbor(&decoded) {
             Ok(message) => {
+                if let Err(error) = security.commit_inbound() {
+                    warn!("client secure sequence failed: {error}");
+                    disconnected.write(ClientTransportDisconnected {
+                        server: connection.server,
+                    });
+                    security.fail();
+                    commands.remove_resource::<ClientNetworkSender>();
+                    commands.remove_resource::<ClientTcpConnection>();
+                    return;
+                }
                 received.write(ClientPacketReceived(message));
             }
-            Err(error) => warn!(
-                "discarding invalid TCP packet from {}: {error}",
-                connection.server
-            ),
+            Err(error) => {
+                warn!("invalid TCP packet from {}: {error}", connection.server);
+                if !plaintext_mode {
+                    disconnected.write(ClientTransportDisconnected {
+                        server: connection.server,
+                    });
+                    security.fail();
+                    commands.remove_resource::<ClientNetworkSender>();
+                    commands.remove_resource::<ClientTcpConnection>();
+                    return;
+                }
+            }
+        }
+        if plaintext_mode {
+            break;
         }
     }
 }

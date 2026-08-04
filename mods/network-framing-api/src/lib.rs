@@ -101,3 +101,31 @@ pub fn drain_frames(buffer: &mut Vec<u8>) -> io::Result<Vec<Vec<u8>>> {
     }
     Ok(frames)
 }
+
+/// Removes at most one complete frame, leaving later frames buffered. Secure
+/// transports use this during the plaintext handshake so ECS authentication
+/// systems can switch the connection codec before the following encrypted
+/// frame is decoded.
+pub fn drain_next_frame(buffer: &mut Vec<u8>) -> io::Result<Option<Vec<u8>>> {
+    if buffer.len() < HEADER_BYTES {
+        return Ok(None);
+    }
+    let length = u32::from_be_bytes(
+        buffer[..HEADER_BYTES]
+            .try_into()
+            .expect("header slice length is fixed"),
+    ) as usize;
+    if length > MAX_FRAME_BYTES {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!("network frame too large: {length} bytes"),
+        ));
+    }
+    let frame_end = HEADER_BYTES + length;
+    if buffer.len() < frame_end {
+        return Ok(None);
+    }
+    let frame = buffer[HEADER_BYTES..frame_end].to_vec();
+    buffer.drain(..frame_end);
+    Ok(Some(frame))
+}

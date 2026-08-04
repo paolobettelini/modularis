@@ -223,15 +223,18 @@ catalog implementation without changing routing, generation, or storage.
 The demo selects `server-world-catalog-build-server-impl`, which registers:
 
 ```text
-build-server/worlds/
-├── overworld/
-├── nether/
-└── aether/
+<server-executable-directory>/data/
+└── worlds/
+    ├── overworld/
+    ├── nether/
+    └── aether/
 ```
 
-These paths are a demo policy, not part of the catalog API. A production server
-can provide paths from settings, command-line arguments, a save selector, or a
-multi-tenant world service.
+The selected provider creates `data/worlds` beside the running executable, so
+world files do not depend on the process working directory or on the source
+repository layout. These paths are a demo policy, not part of the catalog API.
+A production server can provide paths from settings, command-line arguments, a
+save selector, or a multi-tenant world service.
 
 ## Dynamic world backend
 
