@@ -1,0 +1,412 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Patchwork account authentication - Minecraft Simple Demo Architecture</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting-started/project-overview.html"><strong aria-hidden="true">1.1.</strong> Project overview</a></li><li class="chapter-item expanded "><a href="../getting-started/build-and-run.html"><strong aria-hidden="true">1.2.</strong> Build and run</a></li></ol></li><li class="chapter-item expanded "><a href="../architecture/foundations.html"><strong aria-hidden="true">2.</strong> Architecture foundations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../architecture/patchwork-composition.html"><strong aria-hidden="true">2.1.</strong> Patchwork composition</a></li><li class="chapter-item expanded "><a href="../architecture/mod-anatomy.html"><strong aria-hidden="true">2.2.</strong> Mod anatomy and lifecycle</a></li><li class="chapter-item expanded "><a href="../architecture/dependency-sources.html"><strong aria-hidden="true">2.3.</strong> Cargo dependency sources</a></li><li class="chapter-item expanded "><a href="../architecture/apis-and-events.html"><strong aria-hidden="true">2.4.</strong> APIs, providers, and ECS contracts</a></li><li class="chapter-item expanded "><a href="../architecture/runtime-scopes.html"><strong aria-hidden="true">2.5.</strong> Runtime scope trees and facets</a></li><li class="chapter-item expanded "><a href="../architecture/vanilla-libraries.html"><strong aria-hidden="true">2.6.</strong> Vanilla mechanics as reusable libraries</a></li><li class="chapter-item expanded "><a href="../architecture/code-generation.html"><strong aria-hidden="true">2.7.</strong> Code generation and registries</a></li><li class="chapter-item expanded "><a href="../architecture/modpacks.html"><strong aria-hidden="true">2.8.</strong> Modpacks and feature boundaries</a></li><li class="chapter-item expanded "><a href="../architecture/assets-and-output.html"><strong aria-hidden="true">2.9.</strong> Assets and generated output</a></li></ol></li><li class="chapter-item expanded "><a href="../runtime/runtime-overview.html"><strong aria-hidden="true">3.</strong> Runtime and networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../runtime/bevy-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Bevy application lifecycle</a></li><li class="chapter-item expanded "><a href="../runtime/networking.html"><strong aria-hidden="true">3.2.</strong> Protocol, transport, and framing</a></li><li class="chapter-item expanded "><a href="../runtime/patchwork-authentication.html" class="active"><strong aria-hidden="true">3.3.</strong> Patchwork account authentication</a></li><li class="chapter-item expanded "><a href="../runtime/sessions-and-visibility.html"><strong aria-hidden="true">3.4.</strong> Sessions, routing, and visibility</a></li><li class="chapter-item expanded "><a href="../runtime/chat-and-commands.html"><strong aria-hidden="true">3.5.</strong> Chat, commands, and completion</a></li><li class="chapter-item expanded "><a href="../runtime/sounds.html"><strong aria-hidden="true">3.6.</strong> Sounds, audiences, and spatial playback</a></li></ol></li><li class="chapter-item expanded "><a href="../world/world-overview.html"><strong aria-hidden="true">4.</strong> World architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../world/blocks-and-items.html"><strong aria-hidden="true">4.1.</strong> Blocks, items, and metadata</a></li><li class="chapter-item expanded "><a href="../world/voxel-models.html"><strong aria-hidden="true">4.2.</strong> JSON voxel models and textures</a></li><li class="chapter-item expanded "><a href="../world/chunk-storage.html"><strong aria-hidden="true">4.3.</strong> Chunk coordinates and storage</a></li><li class="chapter-item expanded "><a href="../world/server-world.html"><strong aria-hidden="true">4.4.</strong> Server world providers and residency</a></li><li class="chapter-item expanded "><a href="../world/biomes.html"><strong aria-hidden="true">4.5.</strong> Biomes and world-generation features</a></li><li class="chapter-item expanded "><a href="../world/client-chunks.html"><strong aria-hidden="true">4.6.</strong> Client streaming, meshing, and rendering</a></li><li class="chapter-item expanded "><a href="../world/dimensions.html"><strong aria-hidden="true">4.7.</strong> Dimensions and world scopes</a></li><li class="chapter-item expanded "><a href="../world/portals.html"><strong aria-hidden="true">4.8.</strong> Portals</a></li></ol></li><li class="chapter-item expanded "><a href="../gameplay/gameplay-overview.html"><strong aria-hidden="true">5.</strong> Gameplay systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../gameplay/movement.html"><strong aria-hidden="true">5.1.</strong> Player movement and prediction</a></li><li class="chapter-item expanded "><a href="../gameplay/movement-features.html"><strong aria-hidden="true">5.2.</strong> Gravity, jump, sprint, and flight</a></li><li class="chapter-item expanded "><a href="../gameplay/block-interaction.html"><strong aria-hidden="true">5.3.</strong> Block interaction and world edits</a></li><li class="chapter-item expanded "><a href="../gameplay/inventory.html"><strong aria-hidden="true">5.4.</strong> Inventory, hotbar, and item use</a></li><li class="chapter-item expanded "><a href="../gameplay/cell-menus.html"><strong aria-hidden="true">5.5.</strong> Cell menus, audiences, and crafting tables</a></li></ol></li><li class="chapter-item expanded "><a href="../client/client-overview.html"><strong aria-hidden="true">6.</strong> Client systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../client/input-settings-menus.html"><strong aria-hidden="true">6.1.</strong> Input, settings, menus, and game state</a></li><li class="chapter-item expanded "><a href="../client/graphics.html"><strong aria-hidden="true">6.2.</strong> Graphics, lighting, sky, and outlines</a></li><li class="chapter-item expanded "><a href="../client/animated-grass.html"><strong aria-hidden="true">6.3.</strong> Animated grass and wind</a></li><li class="chapter-item expanded "><a href="../client/blocky-models.html"><strong aria-hidden="true">6.4.</strong> Blocky models and animation</a></li></ol></li><li class="chapter-item expanded "><a href="../development/developer-guide.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../development/extension-cookbook.html"><strong aria-hidden="true">7.1.</strong> Extension cookbook</a></li><li class="chapter-item expanded "><a href="../development/thecrown-parkour.html"><strong aria-hidden="true">7.2.</strong> TheCrown multi-instance parkour server</a></li><li class="chapter-item expanded "><a href="../development/testing-and-performance.html"><strong aria-hidden="true">7.3.</strong> Testing, debugging, and performance</a></li><li class="chapter-item expanded "><a href="../reference/crate-map.html"><strong aria-hidden="true">7.4.</strong> Crate map</a></li><li class="chapter-item expanded "><a href="../reference/current-limits.html"><strong aria-hidden="true">7.5.</strong> Current limits and design direction</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Minecraft Simple Demo Architecture</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="patchwork-account-authentication"><a class="header" href="#patchwork-account-authentication">Patchwork account authentication</a></h1>
+<p>The demo can authenticate a game connection with the same Patchwork account
+used by the desktop launcher. A player does not create a separate account for
+every server, and an authenticated server does not trust a nickname chosen in
+the client settings.</p>
+<p>Authentication is optional at composition time. The shared protocol contains
+the packet contracts, while separate client and server modpacks install the
+actual policy. The vanilla server profile and TheCrown require authentication;
+a custom server composition that does not import the server auth modpack
+remains a normal unauthenticated server.</p>
+<h2 id="composition"><a class="header" href="#composition">Composition</a></h2>
+<p>The feature is split into three modpacks:</p>
+<table><thead><tr><th>Modpack</th><th>Responsibility</th></tr></thead><tbody>
+<tr><td><code>patchwork-auth-network</code></td><td>Shared packets, transport lifecycle messages, frame-security state, and ECS account contracts</td></tr>
+<tr><td><code>client-patchwork-auth</code></td><td>Launcher-pipe bootstrap, process session, game-server handshake, and client join gate</td></tr>
+<tr><td><code>server-patchwork-auth</code></td><td>Server lease, handshake registration/redeem, and authenticated admission rule</td></tr>
+</tbody></table>
+<p><code>network.toml</code> imports the shared protocol modpack. <code>client.toml</code> imports the
+client behavior. <code>server.toml</code> and <code>thecrown.toml</code> import the server behavior.
+Keeping these choices separate means another server can reuse the protocol but
+provide a different admission policy, or omit account authentication
+completely.</p>
+<p>The implementation also keeps ordinary Rust libraries separate from runtime
+mods:</p>
+<ul>
+<li><code>patchwork-game-auth-crypto-lib</code> implements the protocol's pure
+cryptographic operations;</li>
+<li><code>patchwork-game-auth-http-lib</code> contains blocking backend calls and redacted
+secret wrappers;</li>
+<li><code>patchwork-game-auth-pipe-lib</code> consumes the inherited anonymous pipe;</li>
+<li><code>patchwork-game-auth-api</code> defines shared resources and ECS messages;</li>
+<li><code>network-frame-security-api</code> defines the transport-facing plaintext,
+paused, secure, and failed states.</li>
+</ul>
+<p>The blocking HTTP calls run on named worker threads. Bevy systems poll channels
+for results, so a slow backend does not block the game update schedule.</p>
+<h2 id="required-environment"><a class="header" href="#required-environment">Required environment</a></h2>
+<p>An authenticated launcher process starts the client with:</p>
+<pre><code class="language-text">BACKEND_ADDR=https://backend.example
+PATCHWORK_AUTH_FD=3
+PATCHWORK_AUTH_PIPE_VERSION=1
+</code></pre>
+<p>The inherited file descriptor contains exactly:</p>
+<pre><code class="language-text">u32 ticket length, big-endian
+ticket-length bytes of UTF-8 launch ticket
+</code></pre>
+<p>The client reads the descriptor once, takes ownership of it, and closes it. A
+ticket larger than 4 KiB, an invalid descriptor, an unsupported pipe version,
+or invalid UTF-8 fails the authenticated bootstrap.</p>
+<p>If <code>PATCHWORK_AUTH_FD</code> is absent, the client is in anonymous mode. It can use a
+server composition that does not require Patchwork authentication. If the
+descriptor is present, the current client deliberately waits for the server
+authentication challenge before sending <code>JoinRequest</code>; it does not silently
+downgrade an authenticated launch to an unauthenticated join.</p>
+<p>The authenticated server needs:</p>
+<pre><code class="language-text">BACKEND_ADDR=https://backend.example
+</code></pre>
+<p>The backend address must use <code>http://</code> or <code>https://</code>. Production deployments
+should use HTTPS. HTTP is useful only for trusted local development.</p>
+<h2 id="client-process-bootstrap"><a class="header" href="#client-process-bootstrap">Client process bootstrap</a></h2>
+<p>Before a game-server identity is trusted, the client exchanges its one-use
+launcher ticket for a process session:</p>
+<pre><code class="language-text">anonymous pipe
+    -&gt; POST /game/process-sessions
+    -&gt; process_token + process_session_id + account UUID + nickname
+</code></pre>
+<p>The <code>process_token</code> remains private to the client process and is never sent to
+the game server. The token and launch ticket use secret wrapper types whose
+<code>Debug</code> output is always <code>[REDACTED]</code>.</p>
+<p><code>ClientProcessAuthState</code> exposes the lifecycle without exposing the token:</p>
+<pre><code class="language-text">Anonymous | Starting | Ready | Failed
+</code></pre>
+<p>When the backend accepts the process session, the client publishes:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>ClientPatchworkProcessAuthenticated {
+    account_uuid,
+    nickname,
+    process_session_id,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Other client features may observe this event, but they must not treat it as
+proof that a particular game server accepted the account.</p>
+<h2 id="server-instance-lifecycle"><a class="header" href="#server-instance-lifecycle">Server instance lifecycle</a></h2>
+<p><code>server-patchwork-auth-instance-mod</code> owns one ephemeral backend lease:</p>
+<pre><code class="language-text">startup       -&gt; POST /server/instances
+every 2 min   -&gt; POST /server/instances/{server_id}/heartbeat
+clean stop    -&gt; DELETE /server/instances/{server_id}
+</code></pre>
+<p>The returned <code>server_secret</code> exists only in RAM and is never logged or sent to
+a client. If a heartbeat fails, the server stops using those credentials and
+registers a new instance. New connections wait briefly for valid credentials;
+they are rejected if the service remains unavailable.</p>
+<p>The lease worker is infrastructure, not admission policy. The separate
+admission mod decides that every normal player join must already have a
+redeemed Patchwork account.</p>
+<h2 id="direct-join-flow"><a class="header" href="#direct-join-flow">Direct join flow</a></h2>
+<p>Each TCP connection gets fresh X25519 keys, fresh nonces, and a fresh
+handshake ID:</p>
+<pre><code class="language-text">Client                         Game server                    Backend
+  |                                 |                            |
+  | TCP connect                     |                            |
+  |--------------------------------&gt;|                            |
+  |                                 | register handshake         |
+  |                                 |---------------------------&gt;|
+  | KeyExchangeRequest              |                            |
+  |&lt;--------------------------------|                            |
+  | authorize transcript with process_token                     |
+  |-------------------------------------------------------------&gt;|
+  | KeyExchangeResponse             |                            |
+  |--------------------------------&gt;| redeem transcript           |
+  |                                 |---------------------------&gt;|
+  |              AES-256-GCM starts in both directions           |
+  | encrypted ClientFinish          |                            |
+  |--------------------------------&gt;|                            |
+  | encrypted LoginSuccess          |                            |
+  |&lt;--------------------------------|                            |
+  | JoinRequest with trusted nickname                            |
+  |--------------------------------&gt;| authenticated admission    |
+</code></pre>
+<p>The backend is the authority that binds the process account to the concrete
+server instance and concrete key exchange. The server trusts UUID and nickname
+only after <code>/redeem</code> returns <code>accepted: true</code>.</p>
+<p>The canonical transcript includes:</p>
+<ul>
+<li>protocol version;</li>
+<li>raw handshake UUID;</li>
+<li>server ID;</li>
+<li>both X25519 public keys;</li>
+<li>both 32-byte nonces.</li>
+</ul>
+<p>Both sides hash the exact binary transcript with SHA-256. A mismatched hash,
+expired handshake, all-zero X25519 result, backend rejection, or unexpected
+packet order closes the connection.</p>
+<h2 id="encrypted-frame-layer"><a class="header" href="#encrypted-frame-layer">Encrypted frame layer</a></h2>
+<p>After authorization, both directions use keys and IVs derived with
+HKDF-SHA256. Client-to-server and server-to-client have different key material
+and independent sequence counters.</p>
+<p>The transport pipeline becomes:</p>
+<pre><code class="language-text">typed packet
+  -&gt; CBOR
+  -&gt; AES-256-GCM using direction + sequence AAD
+  -&gt; 4-byte length-prefixed TCP frame
+</code></pre>
+<p>The initial challenge and response are plaintext framed packets. The transport
+enters a temporary <code>Paused</code> state while the server waits for backend redeem, so
+it cannot accidentally decode an encrypted packet as plaintext. The first
+encrypted packets are <code>ClientFinish</code> and <code>LoginSuccess</code>; all later gameplay
+packets use the same per-connection channel.</p>
+<p>An inbound sequence number advances only after both GCM authentication and
+CBOR packet decoding succeed. Invalid tags, malformed secure packets, or
+counter exhaustion fail closed. The key, IV, and sequence state is never reused
+for another connection.</p>
+<p><code>network-frame-security-api</code> contains this neutral frame transform. The TCP
+mods call it without knowing what a Patchwork account means. A different
+transport can preserve the auth protocol by providing the same frame-security
+integration and transport lifecycle events.</p>
+<h2 id="trusted-identity-and-admission"><a class="header" href="#trusted-identity-and-admission">Trusted identity and admission</a></h2>
+<p>The server stores authenticated records in <code>ServerAuthenticatedAccounts</code>:</p>
+<pre><code class="language-text">socket address -&gt; AuthenticatedAccount
+PlayerId       -&gt; AuthenticatedAccount
+</code></pre>
+<p>The address mapping exists after <code>ClientFinish</code>. The player mapping is created
+only after the ordinary session system admits the join.</p>
+<p><code>server-patchwork-auth-admission-mod</code> registers a composable
+<code>ServerPlayerAdmissionRule</code>. It requires:</p>
+<ol>
+<li>a redeemed account for the source address;</li>
+<li>a <code>JoinRequest</code> nickname equal to the backend nickname.</li>
+</ol>
+<p>The client join gate supplies that trusted nickname instead of the editable
+player-name setting. Persistent server data must use <code>account_uuid</code>, never the
+nickname, because display names can change.</p>
+<p>Two server events expose the two useful boundaries:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>ServerPatchworkAccountAuthenticated { address, account }
+ServerPatchworkPlayerJoined { player_id, account }
+<span class="boring">}
+</span></code></pre></pre>
+<p>Use the first for pre-session policy or auditing. Use the second for gameplay
+state that needs a stable <code>PlayerId</code>, such as loading persistent progress. The
+normal <code>ServerPlayerJoined</code> lifecycle event still exists for features that do
+not care about account identity.</p>
+<p>The client publishes <code>ClientPatchworkGameAuthenticated</code> after validating
+<code>LoginSuccess</code> against its process account.</p>
+<h2 id="logging-and-failure-handling"><a class="header" href="#logging-and-failure-handling">Logging and failure handling</a></h2>
+<p>The auth mods use Bevy's normal <code>info!</code> and <code>warn!</code> logging pipeline. Logs
+include state transitions, public server IDs, account UUIDs, handshake IDs, and
+network addresses where useful. They never include:</p>
+<ul>
+<li>launch tickets;</li>
+<li>process tokens;</li>
+<li>server secrets;</li>
+<li>private X25519 keys;</li>
+<li>AES keys or IVs.</li>
+</ul>
+<p>Client failures set the normal disconnect reason and open the existing
+disconnect screen. Server failures queue <code>AuthenticationFailed</code> when a safe
+channel exists, flush it, and then close the socket. Secrets are not included
+in user-facing backend errors.</p>
+<h2 id="extending-the-system"><a class="header" href="#extending-the-system">Extending the system</a></h2>
+<p>A custom server can depend on the auth API and events without selecting the
+blanket admission mod. For example, it can authenticate every connection but
+route accounts into different runtime scopes based on subscription, ban state,
+party, or persisted profile. The cryptographic handshake should remain a
+neutral identity mechanism; lobby and gameplay policy belong in separate mods
+or in a custom server orchestrator.</p>
+<p>Transfer tickets are not wired into the game yet. A future transfer feature
+should add separate packet and routing mods, keep the old server authoritative
+until handoff succeeds, and perform a completely fresh handshake with the
+destination. It must not reuse X25519 keys, AES material, IVs, or sequence
+counters from the previous connection.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../runtime/networking.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../runtime/sessions-and-visibility.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../runtime/networking.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../runtime/sessions-and-visibility.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>
