@@ -6,3 +6,10 @@ edition = "2024"
 [dependencies]
 patchwork-game-auth-http-lib = { git = "https://github.com/paolobettelini/modularis.git" }
 thiserror = "2"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Storage_FileSystem",
+] }

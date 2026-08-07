@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
-use client_game_state_api::{GameState, GameStateApi};
+use client_game_state_api::{GameState, GameStateApi, GameStateCommand};
 use client_network_api::{ClientNetworkApi, ClientNetworkSender};
 use client_settings_api::{SettingsApi, SettingsStore};
 use generated_client_settings_registry::SettingKey;
@@ -66,6 +66,7 @@ fn connect(
     settings: Res<SettingsStore>,
     security: Res<ClientFrameSecurity>,
     mut connected: MessageWriter<ClientTransportConnected>,
+    mut game_state: MessageWriter<GameStateCommand>,
 ) {
     let address = settings
         .get_string(SettingKey::NetworkServerAddress)
@@ -73,8 +74,14 @@ fn connect(
     let server: SocketAddr = address
         .parse()
         .unwrap_or_else(|error| panic!("invalid server address '{address}': {error}"));
-    let stream = TcpStream::connect(server)
-        .unwrap_or_else(|error| panic!("failed to connect TCP socket to {server}: {error}"));
+    let stream = match TcpStream::connect(server) {
+        Ok(stream) => stream,
+        Err(error) => {
+            error!("failed to connect TCP socket to {server}: {error}");
+            game_state.write(GameStateCommand::ShowDisconnect);
+            return;
+        }
+    };
     stream
         .set_nonblocking(true)
         .expect("failed to make client TCP socket nonblocking");
