@@ -39,7 +39,6 @@ mods = [
     "client-setting-fov",
     "client-setting-inventory-key",
     "client-setting-player-name",
-    "client-player-name-random-default-mod",
     "client-setting-server-address",
     "client-settings-registry-codegen",
     "client-settings-bevy-menu-impl",
@@ -111,5 +110,5 @@ mods = [
     "client-sun-disc-bevy-mod",
     "client-block-outline-bevy-mod",
 ]
-name = "Minecraft demo client"
-version = "0.0.1"
+name = "Modularis client"
+version = "0.0.2"
