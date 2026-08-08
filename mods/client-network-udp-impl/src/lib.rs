@@ -1,9 +1,8 @@
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
-use client_game_state_api::{GameState, GameStateApi};
-use client_network_api::{ClientNetworkApi, ClientNetworkSender};
-use client_settings_api::{SettingsApi, SettingsStore};
-use generated_client_settings_registry::SettingKey;
+use client_config_api::ClientConfigApi;
+use client_game_state_api::{GameState, GameStateApi, GameStateCommand};
+use client_network_api::{ClientConnectionTarget, ClientNetworkApi, ClientNetworkSender};
 use generated_network_messages::{ClientBoundMessage, ClientPacketReceived, NetworkMessageSet};
 use network_protocol_mod::NetworkProtocolMod;
 use std::{
@@ -21,13 +20,14 @@ struct ClientUdpConnection {
 pub struct ClientUdpNetwork;
 
 impl ClientUdpNetwork {
-    pub fn init<S: SettingsApi, G: GameStateApi>(
+    pub fn init<C: ClientConfigApi, G: GameStateApi>(
         bevy: &mut BevyMod,
-        _settings: &mut S,
+        _config: &mut C,
         _game_state: &mut G,
         _protocol: &mut NetworkProtocolMod,
     ) -> Self {
         bevy.app
+            .insert_resource(ClientConnectionTarget::new(C::default_server_address()))
             .add_systems(OnEnter(GameState::InGame), connect)
             .add_systems(
                 Update,
@@ -46,21 +46,43 @@ impl ClientUdpNetwork {
 
 impl ClientNetworkApi for ClientUdpNetwork {}
 
-fn connect(mut commands: Commands, settings: Res<SettingsStore>) {
-    let address = settings
-        .get_string(SettingKey::NetworkServerAddress)
-        .unwrap_or("127.0.0.1:9999");
-    let server: SocketAddr = address
-        .parse()
-        .unwrap_or_else(|error| panic!("invalid server address '{address}': {error}"));
-    let socket = UdpSocket::bind("0.0.0.0:0")
-        .unwrap_or_else(|error| panic!("failed to bind client UDP socket: {error}"));
-    socket
-        .connect(server)
-        .unwrap_or_else(|error| panic!("failed to connect UDP socket to {server}: {error}"));
-    socket
-        .set_nonblocking(true)
-        .expect("failed to make client UDP socket nonblocking");
+fn connect(
+    mut commands: Commands,
+    target: Res<ClientConnectionTarget>,
+    mut game_state: MessageWriter<GameStateCommand>,
+) {
+    let address = target.address().trim();
+    if address.is_empty() {
+        error!("cannot connect: server address is empty");
+        game_state.write(GameStateCommand::ShowDisconnect);
+        return;
+    }
+    let socket = match UdpSocket::bind("0.0.0.0:0") {
+        Ok(socket) => socket,
+        Err(error) => {
+            error!("failed to bind client UDP socket: {error}");
+            game_state.write(GameStateCommand::ShowDisconnect);
+            return;
+        }
+    };
+    if let Err(error) = socket.connect(address) {
+        error!("failed to connect UDP socket to '{address}': {error}");
+        game_state.write(GameStateCommand::ShowDisconnect);
+        return;
+    }
+    let server = match socket.peer_addr() {
+        Ok(server) => server,
+        Err(error) => {
+            error!("failed to read resolved UDP peer address for '{address}': {error}");
+            game_state.write(GameStateCommand::ShowDisconnect);
+            return;
+        }
+    };
+    if let Err(error) = socket.set_nonblocking(true) {
+        error!("failed to make client UDP socket nonblocking: {error}");
+        game_state.write(GameStateCommand::ShowDisconnect);
+        return;
+    }
     let socket = Arc::new(socket);
     let sender_socket = socket.clone();
     commands.insert_resource(ClientNetworkSender::new(move |message| {

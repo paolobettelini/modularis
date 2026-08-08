@@ -1,6 +1,6 @@
 [package]
 name = "client-session-network-mod"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
@@ -11,7 +11,6 @@ provides = "client-session-api"
 init = [
     "bevy-mod",
     "client-network-api",
-    "client-settings-api",
     "client-game-state-api",
     "network-protocol-mod",
 ]
@@ -24,8 +23,6 @@ bevy-mod = { path = "../bevy-mod" }
 client-game-state-api = { path = "../client-game-state-api" }
 client-network-api = { path = "../client-network-api" }
 client-session-api = { path = "../client-session-api" }
-client-settings-api = { path = "../client-settings-api" }
-generated-client-settings-registry = "0.1.0"
 generated-network-messages = "0.1.0"
 network-protocol-mod = { path = "../network-protocol-mod" }
 patchwork-game-auth-api = { path = "../patchwork-game-auth-api" }
@@ -33,5 +30,4 @@ session-network-message-types = { git = "https://github.com/paolobettelini/modul
 tokio = { version = "1.48.0", features = ["full"] }
 
 [patch.crates-io]
-generated-client-settings-registry = { path = "../generated-client-settings-registry" }
 generated-network-messages = { path = "../generated-network-messages" }

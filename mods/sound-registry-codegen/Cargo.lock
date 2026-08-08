@@ -477,7 +477,7 @@ version = "0.1.0"
 
 [[patch.unused]]
 name = "patchwork-game-auth-pipe-lib"
-version = "0.1.0"
+version = "0.1.2"
 
 [[patch.unused]]
 name = "player-block-collision-api"

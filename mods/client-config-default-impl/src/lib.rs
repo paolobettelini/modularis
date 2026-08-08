@@ -18,10 +18,6 @@ impl ClientConfigApi for DefaultClientConfig {
         "Patchwork"
     }
 
-    fn default_player_name() -> &'static str {
-        "Player"
-    }
-
     fn default_server_address() -> &'static str {
         "127.0.0.1:9999"
     }

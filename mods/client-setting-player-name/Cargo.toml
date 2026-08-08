@@ -1,26 +1,15 @@
 [package]
 name = "client-setting-player-name"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
 entry = "ClientSettingPlayerNameMod"
 
 [package.metadata.mod.dependencies]
-init = ["client-config-api"]
+init = []
 run = []
 ownership = []
 
-[package.metadata.setting]
-id = "network.player_name"
-label = "Player name"
-type = "string"
-input = "string"
-default = "Player"
-section = "network"
-section_label = "Network"
-
 [dependencies]
-client-config-api = { path = "../client-config-api" }
-settings-schema-api = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }

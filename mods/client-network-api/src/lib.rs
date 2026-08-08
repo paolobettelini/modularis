@@ -2,6 +2,27 @@ use bevy::prelude::*;
 use generated_network_messages::ServerBoundMessage;
 use std::{io, sync::Arc};
 
+#[derive(Resource, Debug, Clone)]
+pub struct ClientConnectionTarget {
+    address: String,
+}
+
+impl ClientConnectionTarget {
+    pub fn new(address: impl Into<String>) -> Self {
+        Self {
+            address: address.into(),
+        }
+    }
+
+    pub fn address(&self) -> &str {
+        &self.address
+    }
+
+    pub fn set_address(&mut self, address: impl Into<String>) {
+        self.address = address.into();
+    }
+}
+
 #[derive(Resource, Clone)]
 pub struct ClientNetworkSender {
     send: Arc<dyn Fn(&ServerBoundMessage) -> io::Result<()> + Send + Sync>,

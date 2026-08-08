@@ -102,12 +102,20 @@ This handles:
 
 On entering `GameState::InGame`, the client:
 
-1. reads the configured server address;
-2. opens a TCP connection;
-3. enables nonblocking mode and `TCP_NODELAY`;
-4. clones the stream for the writer;
-5. inserts `ClientNetworkSender`;
-6. inserts connection buffers and outbox state.
+1. reads `ClientConnectionTarget`, normally edited by the main-menu server
+   address field;
+2. passes its trimmed `host:port` value to `TcpStream::connect`;
+3. records the resolved peer address with `peer_addr`;
+4. enables nonblocking mode and `TCP_NODELAY`;
+5. clones the stream for the writer;
+6. inserts `ClientNetworkSender`;
+7. inserts connection buffers and outbox state.
+
+The target is stored as a string rather than eagerly parsed as `SocketAddr`.
+This deliberately lets the standard library resolve DNS names as well as
+numeric IPv4/IPv6 endpoints. An empty target, malformed endpoint, failed DNS
+lookup, or refused connection emits the normal disconnect-state transition and
+returns from the connect system; it does not panic because parsing failed.
 
 `ClientNetworkSender::send` serializes and queues a frame. It does not block
 until the complete frame reaches the socket.
@@ -125,6 +133,12 @@ messages. Optional authentication mods use these contracts without being
 hardcoded into TCP.
 
 Leaving `InGame` removes the sender and connection.
+
+The alternate UDP client follows the same connection-target contract:
+`UdpSocket::connect` receives the `host:port` string and `peer_addr` records the
+resolved socket address used by runtime network events. A replacement transport
+should preserve this behavior if it wants the main-menu address field to remain
+transport independent.
 
 ## Server TCP implementation
 

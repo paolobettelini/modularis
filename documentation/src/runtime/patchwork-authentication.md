@@ -2,8 +2,9 @@
 
 The demo can authenticate a game connection with the same Patchwork account
 used by the desktop launcher. A player does not create a separate account for
-every server, and an authenticated server does not trust a nickname chosen in
-the client settings.
+every server, and the game client does not send a player nickname in
+`JoinRequest`. On an authenticated server, the backend-redeemed Patchwork
+account is the authority for both the display nickname and stable account UUID.
 
 Authentication is optional at composition time. The shared protocol contains
 the packet contracts, while separate client and server modpacks install the
@@ -155,7 +156,7 @@ Client                         Game server                    Backend
   |-------------------------------->|                            |
   | encrypted LoginSuccess          |                            |
   |<--------------------------------|                            |
-  | JoinRequest with trusted nickname                            |
+  | JoinRequest (no player name)                                 |
   |-------------------------------->| authenticated admission    |
 ```
 
@@ -216,17 +217,22 @@ PlayerId       -> AuthenticatedAccount
 ```
 
 The address mapping exists after `ClientFinish`. The player mapping is created
-only after the ordinary session system admits the join.
+only after the ordinary session system admits the join. Both mappings store the
+complete `AuthenticatedAccount`, so code keyed by `PlayerId` can retrieve the
+backend nickname and the stable `account_uuid` without consulting client data.
 
 `server-patchwork-auth-admission-mod` registers a composable
-`ServerPlayerAdmissionRule`. It requires:
+`ServerPlayerAdmissionRule`. Its `prepare` phase requires a redeemed account for
+the source address and writes the backend nickname into the mutable
+`ServerJoinCandidate`. The admission framework completes every rule's prepare
+phase before any validation rule runs, so duplicate-name and other policies see
+the authenticated identity rather than a client value or anonymous fallback.
 
-1. a redeemed account for the source address;
-2. a `JoinRequest` nickname equal to the backend nickname.
-
-The client join gate supplies that trusted nickname instead of the editable
-player-name setting. Persistent server data must use `account_uuid`, never the
-nickname, because display names can change.
+`JoinRequest` itself is a unit packet and contains no nickname. The client join
+gate retains the complete `AuthenticatedAccount` received in `LoginSuccess` and
+only releases the pending join after authentication succeeds; it does not copy
+the nickname into the join packet. Persistent server data must use
+`account_uuid`, never the nickname, because display names can change.
 
 Two server events expose the two useful boundaries:
 

@@ -318,6 +318,90 @@ fn spawn_menu<S: States>(commands: &mut Commands, screen: MenuScreen, despawn: D
                                     number_range: None,
                                 });
                         }
+                        MenuWidget::TextboxButton {
+                            label,
+                            value,
+                            action,
+                            button_label,
+                            button_action,
+                            ..
+                        } => {
+                            column.spawn((
+                                Text::new(label),
+                                TextFont {
+                                    font_size: 18.0,
+                                    ..default()
+                                },
+                                TextColor(Color::srgb(0.72, 0.78, 0.86)),
+                            ));
+
+                            column
+                                .spawn(Node {
+                                    width: percent(100),
+                                    height: px(48),
+                                    column_gap: px(8),
+                                    align_items: AlignItems::Stretch,
+                                    ..default()
+                                })
+                                .with_children(|row| {
+                                    let mut value_text = None;
+                                    row.spawn((
+                                        Button,
+                                        Node {
+                                            flex_grow: 1.0,
+                                            padding: UiRect::horizontal(px(14)),
+                                            align_items: AlignItems::Center,
+                                            ..default()
+                                        },
+                                        BackgroundColor(Color::srgb(0.05, 0.06, 0.08)),
+                                        BorderRadius::all(px(6)),
+                                    ))
+                                    .with_children(|textbox| {
+                                        value_text = Some(
+                                            textbox
+                                                .spawn((
+                                                    Text::new(value.clone()),
+                                                    TextFont {
+                                                        font_size: 21.0,
+                                                        ..default()
+                                                    },
+                                                    TextColor(Color::WHITE),
+                                                ))
+                                                .id(),
+                                        );
+                                    })
+                                    .insert(MenuTextbox {
+                                        action,
+                                        value,
+                                        value_text: value_text
+                                            .expect("textbox text entity should be created"),
+                                        kind: MenuTextInputKind::String,
+                                        number_range: None,
+                                    });
+
+                                    row.spawn((
+                                        Button,
+                                        MenuButton(button_action),
+                                        Node {
+                                            width: px(120),
+                                            height: px(48),
+                                            align_items: AlignItems::Center,
+                                            justify_content: JustifyContent::Center,
+                                            ..default()
+                                        },
+                                        BackgroundColor(NORMAL_BUTTON),
+                                        BorderRadius::all(px(6)),
+                                    ))
+                                    .with_child((
+                                        Text::new(button_label),
+                                        TextFont {
+                                            font_size: 22.0,
+                                            ..default()
+                                        },
+                                        TextColor(Color::WHITE),
+                                    ));
+                                });
+                        }
                         MenuWidget::NumberInput {
                             label,
                             value,

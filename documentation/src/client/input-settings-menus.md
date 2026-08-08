@@ -53,8 +53,6 @@ Current setting contributors:
 | `controls.sneak_key` | string | keybinding | `ShiftLeft` |
 | `controls.inventory_key` | string | keybinding | `E` |
 | `controls.chat_key` | string | keybinding | `T` |
-| `network.player_name` | string | string | `Player` |
-| `network.server_address` | string | string | `127.0.0.1:9999` |
 
 Storage type and input provider are independent.
 
@@ -76,10 +74,11 @@ clamp at each endpoint, direct text input cannot commit an out-of-range value,
 and programmatic writes through `SettingsStore::set` are normalized as well.
 
 Consumers still validate semantic constraints that cannot be expressed by a
-simple range:
+simple range. For example, invalid key strings fall back to defaults.
 
-- invalid key strings fall back to defaults;
-- invalid server addresses fail during connection.
+The server connection target is no longer a generated setting. It is owned by
+the networking layer and edited directly from the main menu, so it does not
+participate in `SettingsStore` validation or persistence.
 
 Codegen rejects bounds on nonnumeric settings, inverted ranges, and defaults
 outside their declared range.
@@ -104,13 +103,10 @@ Settings
 │  ├─ Render distance
 │  └─ Grass
 │     └─ grass settings
-├─ Controls
-│  ├─ Mouse sensitivity
-│  └─ Keybinds
-│     └─ feature keys
-└─ Network
-   ├─ Player name
-   └─ Server address
+└─ Controls
+   ├─ Mouse sensitivity
+   └─ Keybinds
+      └─ feature keys
 ```
 
 Every page uses the generic vertically scrollable menu container. A feature
@@ -240,6 +236,37 @@ The state provider applies commands.
 
 UI code emits state or setting actions rather than directly mutating unrelated
 systems.
+
+The menu API also exposes `MenuWidget::TextboxButton` for a text field and a
+related action button on one row. The main menu uses this widget for the server
+connection target and `Play`; this is ordinary menu state, not a generated
+setting.
+
+## Server connection target
+
+`client-network-api` owns `ClientConnectionTarget`. The selected client
+transport initializes it from `ClientConfigApi::default_server_address()`, and
+the main menu edits the resource directly. The default remains
+`127.0.0.1:9999`.
+
+The field accepts a socket endpoint in `host:port` form. `host` may be an IP
+address or a DNS name, for example:
+
+```text
+127.0.0.1:9999
+play.example.net:9999
+[::1]:9999
+```
+
+Pressing `Play` enters the in-game state and the selected transport resolves
+and connects to the current target. Empty addresses, DNS failures, malformed
+endpoints, and connection failures return through the normal disconnected UI
+instead of panicking. URL schemes such as `https://` are not part of the socket
+address.
+
+There is intentionally no Network page in Settings and no player-name textbox.
+Player identity is a server-side admission concern; authenticated compositions
+use the Patchwork account returned by the backend.
 
 ## Input focus
 

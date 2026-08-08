@@ -417,7 +417,7 @@ fn receive_login_success(
             admission: login.0.admission.clone(),
             source_server_id: login.0.source_server_id.clone(),
         };
-        gate.authorize(account.nickname.clone());
+        gate.authorize(account.clone());
         authenticated.write(ClientPatchworkGameAuthenticated {
             account: account.clone(),
         });

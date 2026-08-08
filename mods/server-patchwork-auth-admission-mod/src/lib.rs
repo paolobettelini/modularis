@@ -17,6 +17,15 @@ struct PatchworkAccountAdmissionRule {
 }
 
 impl ServerPlayerAdmissionRule for PatchworkAccountAdmissionRule {
+    fn prepare(&self, candidate: &mut ServerJoinCandidate) -> Result<(), String> {
+        let account = self
+            .accounts
+            .account_for_address(candidate.address)
+            .ok_or_else(|| "Patchwork account authentication is required".to_owned())?;
+        candidate.name = account.nickname;
+        Ok(())
+    }
+
     fn validate(
         &self,
         candidate: &ServerJoinCandidate,
@@ -28,7 +37,7 @@ impl ServerPlayerAdmissionRule for PatchworkAccountAdmissionRule {
             .ok_or_else(|| "Patchwork account authentication is required".to_owned())?;
         if candidate.name != account.nickname {
             return Err(
-                "join nickname does not match the authenticated Patchwork account".to_owned(),
+                "player identity does not match the authenticated Patchwork account".to_owned(),
             );
         }
         Ok(())

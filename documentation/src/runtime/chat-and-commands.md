@@ -224,9 +224,10 @@ not part of the player registry. It rejects case-insensitive duplicates by
 emitting the same generic kick request used by `/kick`; the client displays the
 server-provided reason.
 
-The random `Player0` through `Player100` client default reduces accidental
-collisions during local testing, but it is not a security or uniqueness
-mechanism. Only server admission is authoritative.
+The client no longer supplies the player name. The session layer starts with a
+server-side fallback name, and an identity admission rule such as Patchwork can
+replace it before duplicate-name validation runs. Only the final server-admitted
+name is visible to commands and completion.
 
 ## Adding a command
 

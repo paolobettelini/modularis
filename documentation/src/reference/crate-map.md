@@ -328,7 +328,8 @@ Server placement:
 Contracts:
 
 - `network-framing-api`;
-- `client-network-api`;
+- `client-network-api` (including the string-backed `ClientConnectionTarget`
+  used by the main-menu `host:port` field);
 - `server-network-api`;
 - `server-network-events-api`;
 - `server-player-registry-api`;
@@ -607,13 +608,14 @@ Game/menu contracts:
 Providers/features:
 
 - game state Bevy implementation;
-- menu Bevy implementation;
-- main and pause menus;
+- menu Bevy implementation, including the combined textbox/button widget;
+- main menu with server connection target plus `Play`, and the pause menu;
 - pause/inventory input mods;
 - settings menu;
 - settings input registry;
 - string, integer, float, bool, keybinding editors;
-- generated setting contributor crates;
+- generated setting contributor crates (graphics and controls; the server
+  address and player identity are intentionally not settings);
 - DejaVu font provider;
 - crosshair;
 - optional block outline API/renderer/looked-block policy.

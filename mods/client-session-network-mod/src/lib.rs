@@ -3,8 +3,6 @@ use bevy_mod::BevyMod;
 use client_game_state_api::{GameState, GameStateApi};
 use client_network_api::{ClientNetworkApi, ClientNetworkSender};
 use client_session_api::{ClientSession, ClientSessionApi};
-use client_settings_api::{SettingsApi, SettingsStore};
-use generated_client_settings_registry::SettingKey;
 use generated_network_messages::{JoinAcceptedReceived, NetworkMessageSet, ServerBoundMessage};
 use network_protocol_mod::NetworkProtocolMod;
 use patchwork_game_auth_api::ClientPatchworkJoinGate;
@@ -17,10 +15,9 @@ struct PendingJoin(bool);
 pub struct ClientSessionNetworkMod;
 
 impl ClientSessionNetworkMod {
-    pub fn init<N: ClientNetworkApi, S: SettingsApi, G: GameStateApi>(
+    pub fn init<N: ClientNetworkApi, G: GameStateApi>(
         bevy: &mut BevyMod,
         _network: &mut N,
-        _settings: &mut S,
         _game_state: &mut G,
         _protocol: &mut NetworkProtocolMod,
     ) -> Self {
@@ -55,7 +52,6 @@ fn begin_join(mut pending: ResMut<PendingJoin>, mut session: ResMut<ClientSessio
 
 fn send_pending_join(
     sender: Option<Res<ClientNetworkSender>>,
-    settings: Res<SettingsStore>,
     auth_gate: Option<Res<ClientPatchworkJoinGate>>,
     mut pending: ResMut<PendingJoin>,
 ) {
@@ -68,17 +64,8 @@ fn send_pending_join(
     if auth_gate.as_ref().is_some_and(|gate| !gate.may_join()) {
         return;
     }
-    let name = auth_gate
-        .as_ref()
-        .and_then(|gate| gate.nickname())
-        .unwrap_or_else(|| {
-            settings
-                .get_string(SettingKey::NetworkPlayerName)
-                .unwrap_or("Player")
-                .to_string()
-        });
     if sender
-        .send(&ServerBoundMessage::JoinRequest(JoinRequest { name }))
+        .send(&ServerBoundMessage::JoinRequest(JoinRequest))
         .is_ok()
     {
         pending.0 = false;

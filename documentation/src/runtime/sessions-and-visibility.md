@@ -24,19 +24,26 @@ NetworkPlayer {
 }
 ```
 
-The server sanitizes names by trimming, falling back to `Player`, and limiting
-the name to 32 characters.
+`JoinRequest` carries no player name. When a request arrives,
+`server-player-session-mod` creates a temporary server-side fallback name such
+as `Player1`, `Player2`, and so on. The fallback exists only so compositions
+without an identity provider still have a usable display name; the client never
+chooses or transmits it.
 
 Admission policy is separate from registry storage. Before creating a new
-player, `server-player-session-mod` builds a `ServerJoinCandidate` and asks all
-rules in `ServerPlayerAdmissionRules` to validate it. A rule can reject a join
-without modifying the session implementation.
+player, `server-player-session-mod` builds a mutable `ServerJoinCandidate`.
+`ServerPlayerAdmissionRules` first runs the `prepare` phase of every rule, then
+runs the `validate` phase of every rule. Identity providers can therefore
+replace the fallback before uniqueness, bans, or other validators inspect the
+candidate. The final prepared name is what the registry stores in
+`NetworkPlayer`.
 
-TheCrown adds an authenticated-account admission rule. It maps the socket to a
-backend-redeemed Patchwork account, requires the join nickname to equal the
-trusted backend nickname, and then binds the created `PlayerId` to the
-persistent account UUID. Other servers can omit this rule or install a
-different policy over the same authentication events. See
+TheCrown adds the Patchwork authenticated-account admission rule. Its prepare
+phase maps the socket to a backend-redeemed account and replaces the candidate
+name with the backend nickname. After the session is admitted, the created
+`PlayerId` is bound to the complete authenticated account, including the stable
+account UUID. Other servers can omit this rule or install a different identity
+policy over the same admission seam. See
 [Patchwork account authentication](./patchwork-authentication.md).
 
 The selected `server-player-name-unique-vanilla-mod` rejects duplicate names
@@ -48,12 +55,11 @@ drops its TCP connection as it exits the in-game state. The user explicitly
 returns home with the `Back to home` button. The same packet and client behavior
 are used for an admitted player kicked later by another server rule.
 
-On an unauthenticated server, the client setting still owns the chosen name. The optional
-`client-player-name-random-default-mod` changes only the untouched default
-`Player` to `Player0` through `Player100` at startup. It does not overwrite a
-name saved by the user, and uniqueness is still authoritative on the server.
-On an authenticated server, the client join gate replaces this value with the
-backend nickname and the server verifies it against the redeemed account.
+On a server without an identity provider, the session fallback remains the
+player's display name. On an authenticated Patchwork server, the backend
+nickname replaces that fallback before validation. In both cases uniqueness is
+still authoritative on the server, and no client-supplied nickname participates
+in admission.
 
 ## Lifecycle messages
 
@@ -84,8 +90,9 @@ welcome messages and state that should follow the accepted packet.
 
 ```text
 JoinRequestReceived
-  -> sanitize candidate
-  -> composable admission rules
+  -> create server-side fallback candidate
+  -> prepare all admission rules (identity may replace the name)
+  -> validate all admission rules
   -> reject through generic kick, or register address/player
   -> ServerPlayerJoined
   -> Initialize: scope/world/game state assignment

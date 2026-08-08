@@ -41,6 +41,15 @@ pub enum MenuWidget {
         value: String,
         action: String,
     },
+    TextboxButton {
+        id: String,
+        label: String,
+        value: String,
+        action: String,
+        button_id: &'static str,
+        button_label: String,
+        button_action: MenuButtonAction,
+    },
     NumberInput {
         id: String,
         label: String,
@@ -120,6 +129,11 @@ impl MenuRegistryHandle {
             for widget in screen.widgets.iter_mut() {
                 match widget {
                     MenuWidget::Textbox {
+                        action: widget_action,
+                        value: widget_value,
+                        ..
+                    }
+                    | MenuWidget::TextboxButton {
                         action: widget_action,
                         value: widget_value,
                         ..

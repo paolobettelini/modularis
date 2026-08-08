@@ -1,9 +1,8 @@
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
+use client_config_api::ClientConfigApi;
 use client_game_state_api::{GameState, GameStateApi, GameStateCommand};
-use client_network_api::{ClientNetworkApi, ClientNetworkSender};
-use client_settings_api::{SettingsApi, SettingsStore};
-use generated_client_settings_registry::SettingKey;
+use client_network_api::{ClientConnectionTarget, ClientNetworkApi, ClientNetworkSender};
 use generated_network_messages::{ClientBoundMessage, ClientPacketReceived, NetworkMessageSet};
 use network_frame_security_api::ClientFrameSecurity;
 use network_frame_security_state_mod::NetworkFrameSecurityStateMod;
@@ -34,15 +33,16 @@ struct ClientTcpConnection {
 pub struct ClientTcpNetwork;
 
 impl ClientTcpNetwork {
-    pub fn init<S: SettingsApi, G: GameStateApi>(
+    pub fn init<C: ClientConfigApi, G: GameStateApi>(
         bevy: &mut BevyMod,
-        _settings: &mut S,
+        _config: &mut C,
         _game_state: &mut G,
         _protocol: &mut NetworkProtocolMod,
         _security: &mut NetworkFrameSecurityStateMod,
         _transport_events: &mut NetworkTransportEventsMod,
     ) -> Self {
         bevy.app
+            .insert_resource(ClientConnectionTarget::new(C::default_server_address()))
             .add_systems(OnEnter(GameState::InGame), connect)
             .add_systems(
                 Update,
@@ -63,21 +63,29 @@ impl ClientNetworkApi for ClientTcpNetwork {}
 
 fn connect(
     mut commands: Commands,
-    settings: Res<SettingsStore>,
+    target: Res<ClientConnectionTarget>,
     security: Res<ClientFrameSecurity>,
     mut connected: MessageWriter<ClientTransportConnected>,
     mut game_state: MessageWriter<GameStateCommand>,
 ) {
-    let address = settings
-        .get_string(SettingKey::NetworkServerAddress)
-        .unwrap_or("127.0.0.1:9999");
-    let server: SocketAddr = address
-        .parse()
-        .unwrap_or_else(|error| panic!("invalid server address '{address}': {error}"));
-    let stream = match TcpStream::connect(server) {
+    let address = target.address().trim();
+    if address.is_empty() {
+        error!("cannot connect: server address is empty");
+        game_state.write(GameStateCommand::ShowDisconnect);
+        return;
+    }
+    let stream = match TcpStream::connect(address) {
         Ok(stream) => stream,
         Err(error) => {
-            error!("failed to connect TCP socket to {server}: {error}");
+            error!("failed to connect TCP socket to '{address}': {error}");
+            game_state.write(GameStateCommand::ShowDisconnect);
+            return;
+        }
+    };
+    let server = match stream.peer_addr() {
+        Ok(server) => server,
+        Err(error) => {
+            error!("failed to read resolved TCP peer address for '{address}': {error}");
             game_state.write(GameStateCommand::ShowDisconnect);
             return;
         }

@@ -34,6 +34,9 @@ struct PendingServerJoin {
 #[derive(Resource, Default)]
 struct PendingServerJoins(Vec<PendingServerJoin>);
 
+#[derive(Resource, Default)]
+struct AnonymousPlayerNameSequence(u64);
+
 pub struct ServerPlayerSessionMod;
 
 impl ServerPlayerSessionMod {
@@ -56,6 +59,7 @@ impl ServerPlayerSessionMod {
             .init_resource::<ServerPlayerAdmissionRules>()
             .init_resource::<PendingServerPlayerMoves>()
             .init_resource::<PendingServerJoins>()
+            .init_resource::<AnonymousPlayerNameSequence>()
             .add_message::<ServerPlayerMovementApplied>()
             .configure_sets(
                 Update,
@@ -118,19 +122,13 @@ impl ServerPlayerRegistryApi for ServerPlayerSessionMod {}
 fn collect_join_requests(
     mut joins: MessageReader<JoinRequestReceived>,
     mut pending: ResMut<PendingServerJoins>,
+    mut anonymous_names: ResMut<AnonymousPlayerNameSequence>,
 ) {
     for join in joins.read() {
-        let name = {
-            let trimmed = join.message.name.trim();
-            if trimmed.is_empty() {
-                "Player".to_string()
-            } else {
-                trimmed.chars().take(32).collect()
-            }
-        };
+        anonymous_names.0 = anonymous_names.0.wrapping_add(1);
         pending.0.push(PendingServerJoin {
             source: join.source,
-            name,
+            name: format!("Player{}", anonymous_names.0),
             rejection: None,
             player: None,
             newly_joined: false,
@@ -145,12 +143,13 @@ fn validate_join_requests(
 ) {
     for join in &mut pending.0 {
         if registry.player_for_address(join.source).is_none() {
-            let candidate = ServerJoinCandidate {
+            let mut candidate = ServerJoinCandidate {
                 address: join.source,
                 name: join.name.clone(),
             };
-            if let Err(reason) = admission.validate(&candidate, &registry.players()) {
-                join.rejection = Some(reason);
+            match admission.validate(&mut candidate, &registry.players()) {
+                Ok(()) => join.name = candidate.name,
+                Err(reason) => join.rejection = Some(reason),
             }
         }
     }

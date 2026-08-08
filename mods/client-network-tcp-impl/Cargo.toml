@@ -1,6 +1,6 @@
 [package]
 name = "client-network-tcp-impl"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 
 [package.metadata.mod]
@@ -10,7 +10,7 @@ provides = "client-network-api"
 [package.metadata.mod.dependencies]
 init = [
     "bevy-mod",
-    "client-settings-api",
+    "client-config-api",
     "client-game-state-api",
     "network-protocol-mod",
     "network-frame-security-state-mod",
@@ -22,10 +22,9 @@ ownership = []
 [dependencies]
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
+client-config-api = { path = "../client-config-api" }
 client-game-state-api = { path = "../client-game-state-api" }
 client-network-api = { path = "../client-network-api" }
-client-settings-api = { path = "../client-settings-api" }
-generated-client-settings-registry = "0.1.0"
 generated-network-messages = "0.1.0"
 network-framing-api = { git = "https://github.com/paolobettelini/modularis.git" }
 network-frame-security-api = { path = "../network-frame-security-api" }
@@ -35,5 +34,4 @@ network-transport-events-mod = { path = "../network-transport-events-mod" }
 tokio = { version = "1.48.0", features = ["full"] }
 
 [patch.crates-io]
-generated-client-settings-registry = { path = "../generated-client-settings-registry" }
 generated-network-messages = { path = "../generated-network-messages" }

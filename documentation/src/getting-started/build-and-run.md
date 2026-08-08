@@ -112,6 +112,16 @@ Start one or more clients in other terminals:
 cargo run --manifest-path build-client/client/Cargo.toml
 ```
 
+The main menu contains a `Server address` field next to `Play`. It defaults to
+`127.0.0.1:9999` and accepts `host:port`, including DNS names such as
+`play.example.net:9999`. The address is connection state rather than a Settings
+entry, so there is no Network settings page. Connection and DNS failures open
+the normal disconnected screen instead of crashing the client.
+
+The client also has no player-name field. On Patchwork-authenticated server
+compositions, the backend nickname and account UUID obtained through the
+launcher authentication flow become the authoritative player identity.
+
 To run TheCrown instead of the vanilla server:
 
 ```sh

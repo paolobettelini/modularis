@@ -9,6 +9,10 @@ pub struct ServerJoinCandidate {
 }
 
 pub trait ServerPlayerAdmissionRule: Send + Sync + 'static {
+    fn prepare(&self, _candidate: &mut ServerJoinCandidate) -> Result<(), String> {
+        Ok(())
+    }
+
     fn validate(
         &self,
         candidate: &ServerJoinCandidate,
@@ -26,12 +30,65 @@ impl ServerPlayerAdmissionRules {
 
     pub fn validate(
         &self,
-        candidate: &ServerJoinCandidate,
+        candidate: &mut ServerJoinCandidate,
         online: &[NetworkPlayer],
     ) -> Result<(), String> {
+        for rule in &self.0 {
+            rule.prepare(candidate)?;
+        }
         for rule in &self.0 {
             rule.validate(candidate, online)?;
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    struct RequiresPreparedName;
+
+    impl ServerPlayerAdmissionRule for RequiresPreparedName {
+        fn validate(
+            &self,
+            candidate: &ServerJoinCandidate,
+            _online: &[NetworkPlayer],
+        ) -> Result<(), String> {
+            (candidate.name == "BackendName")
+                .then_some(())
+                .ok_or_else(|| "identity was not prepared".to_owned())
+        }
+    }
+
+    struct BackendIdentity;
+
+    impl ServerPlayerAdmissionRule for BackendIdentity {
+        fn prepare(&self, candidate: &mut ServerJoinCandidate) -> Result<(), String> {
+            candidate.name = "BackendName".to_owned();
+            Ok(())
+        }
+
+        fn validate(
+            &self,
+            _candidate: &ServerJoinCandidate,
+            _online: &[NetworkPlayer],
+        ) -> Result<(), String> {
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn prepares_identity_before_any_validation_rule_runs() {
+        let mut rules = ServerPlayerAdmissionRules::default();
+        rules.register(RequiresPreparedName);
+        rules.register(BackendIdentity);
+        let mut candidate = ServerJoinCandidate {
+            address: "127.0.0.1:9999".parse().unwrap(),
+            name: "Anonymous".to_owned(),
+        };
+
+        assert!(rules.validate(&mut candidate, &[]).is_ok());
+        assert_eq!(candidate.name, "BackendName");
     }
 }

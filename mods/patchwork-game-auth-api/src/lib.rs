@@ -88,7 +88,7 @@ impl ClientProcessAuthState {
 struct ClientJoinGateState {
     required: bool,
     ready: bool,
-    nickname: Option<String>,
+    account: Option<AuthenticatedAccount>,
 }
 
 #[derive(Resource, Clone, Default)]
@@ -99,20 +99,20 @@ impl ClientPatchworkJoinGate {
         let mut state = self.0.write().expect("client join gate poisoned");
         state.required = true;
         state.ready = false;
-        state.nickname = None;
+        state.account = None;
     }
 
-    pub fn authorize(&self, nickname: String) {
+    pub fn authorize(&self, account: AuthenticatedAccount) {
         let mut state = self.0.write().expect("client join gate poisoned");
         state.required = true;
         state.ready = true;
-        state.nickname = Some(nickname);
+        state.account = Some(account);
     }
 
     pub fn reset(&self) {
         let mut state = self.0.write().expect("client join gate poisoned");
         state.ready = false;
-        state.nickname = None;
+        state.account = None;
     }
 
     pub fn may_join(&self) -> bool {
@@ -120,11 +120,11 @@ impl ClientPatchworkJoinGate {
         !state.required || state.ready
     }
 
-    pub fn nickname(&self) -> Option<String> {
+    pub fn account(&self) -> Option<AuthenticatedAccount> {
         self.0
             .read()
             .expect("client join gate poisoned")
-            .nickname
+            .account
             .clone()
     }
 }
@@ -208,4 +208,43 @@ pub struct ServerPatchworkAccountAuthenticated {
 pub struct ServerPatchworkPlayerJoined {
     pub player_id: PlayerId,
     pub account: AuthenticatedAccount,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn account() -> AuthenticatedAccount {
+        AuthenticatedAccount {
+            account_uuid: "account-uuid".to_owned(),
+            nickname: "BackendName".to_owned(),
+            player_session_id: "player-session".to_owned(),
+            admission: "accepted".to_owned(),
+            source_server_id: Some("server-id".to_owned()),
+        }
+    }
+
+    #[test]
+    fn client_join_gate_keeps_the_authenticated_account() {
+        let gate = ClientPatchworkJoinGate::default();
+        gate.require_authentication();
+        assert!(!gate.may_join());
+
+        let account = account();
+        gate.authorize(account.clone());
+
+        assert!(gate.may_join());
+        assert_eq!(gate.account(), Some(account));
+    }
+
+    #[test]
+    fn server_account_binding_keeps_uuid_for_player() {
+        let accounts = ServerAuthenticatedAccounts::default();
+        let address: SocketAddr = "127.0.0.1:9999".parse().unwrap();
+        let account = account();
+        accounts.authenticate(address, account.clone());
+
+        assert_eq!(accounts.bind_player(address, 7), Some(account.clone()));
+        assert_eq!(accounts.account_for_player(7), Some(account));
+    }
 }

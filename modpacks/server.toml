@@ -23,3 +23,13 @@ mods = [
 ]
 name = "Minecraft demo server"
 version = "0.0.1"
+
+[options.build]
+args = ["--config /home/paolo/Desktop/videogames/minecraft_simple_demo/mods/.cargo/config.toml"]
+
+[options.build.env]
+CARGO_NET_GIT_FETCH_WITH_CLI = "true"
+GIT_SSH_COMMAND = "ssh -i ~/.ssh/id_ed25519_github -o IdentitiesOnly=yes"
+GIT_CONFIG_COUNT = "1"
+GIT_CONFIG_KEY_0 = "url.git@github.com:.insteadOf"
+GIT_CONFIG_VALUE_0 = "https://github.com/"
