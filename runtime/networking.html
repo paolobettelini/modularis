@@ -227,13 +227,20 @@ CBOR payload bytes
 <h2 id="client-tcp-implementation"><a class="header" href="#client-tcp-implementation">Client TCP implementation</a></h2>
 <p>On entering <code>GameState::InGame</code>, the client:</p>
 <ol>
-<li>reads the configured server address;</li>
-<li>opens a TCP connection;</li>
+<li>reads <code>ClientConnectionTarget</code>, normally edited by the main-menu server
+address field;</li>
+<li>passes its trimmed <code>host:port</code> value to <code>TcpStream::connect</code>;</li>
+<li>records the resolved peer address with <code>peer_addr</code>;</li>
 <li>enables nonblocking mode and <code>TCP_NODELAY</code>;</li>
 <li>clones the stream for the writer;</li>
 <li>inserts <code>ClientNetworkSender</code>;</li>
 <li>inserts connection buffers and outbox state.</li>
 </ol>
+<p>The target is stored as a string rather than eagerly parsed as <code>SocketAddr</code>.
+This deliberately lets the standard library resolve DNS names as well as
+numeric IPv4/IPv6 endpoints. An empty target, malformed endpoint, failed DNS
+lookup, or refused connection emits the normal disconnect-state transition and
+returns from the connect system; it does not panic because parsing failed.</p>
 <p><code>ClientNetworkSender::send</code> serializes and queues a frame. It does not block
 until the complete frame reaches the socket.</p>
 <p>During <code>NetworkMessageSet::ReceivePackets</code>, the transport:</p>
@@ -248,6 +255,11 @@ until the complete frame reaches the socket.</p>
 messages. Optional authentication mods use these contracts without being
 hardcoded into TCP.</p>
 <p>Leaving <code>InGame</code> removes the sender and connection.</p>
+<p>The alternate UDP client follows the same connection-target contract:
+<code>UdpSocket::connect</code> receives the <code>host:port</code> string and <code>peer_addr</code> records the
+resolved socket address used by runtime network events. A replacement transport
+should preserve this behavior if it wants the main-menu address field to remain
+transport independent.</p>
 <h2 id="server-tcp-implementation"><a class="header" href="#server-tcp-implementation">Server TCP implementation</a></h2>
 <p>The server binds the configured address and uses a nonblocking listener.</p>
 <p>Per connected address it stores:</p>

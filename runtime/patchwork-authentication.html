@@ -146,8 +146,9 @@
                         <h1 id="patchwork-account-authentication"><a class="header" href="#patchwork-account-authentication">Patchwork account authentication</a></h1>
 <p>The demo can authenticate a game connection with the same Patchwork account
 used by the desktop launcher. A player does not create a separate account for
-every server, and an authenticated server does not trust a nickname chosen in
-the client settings.</p>
+every server, and the game client does not send a player nickname in
+<code>JoinRequest</code>. On an authenticated server, the backend-redeemed Patchwork
+account is the authority for both the display nickname and stable account UUID.</p>
 <p>Authentication is optional at composition time. The shared protocol contains
 the packet contracts, while separate client and server modpacks install the
 actual policy. The vanilla server profile and TheCrown require authentication;
@@ -262,7 +263,7 @@ handshake ID:</p>
   |--------------------------------&gt;|                            |
   | encrypted LoginSuccess          |                            |
   |&lt;--------------------------------|                            |
-  | JoinRequest with trusted nickname                            |
+  | JoinRequest (no player name)                                 |
   |--------------------------------&gt;| authenticated admission    |
 </code></pre>
 <p>The backend is the authority that binds the process account to the concrete
@@ -308,16 +309,20 @@ integration and transport lifecycle events.</p>
 PlayerId       -&gt; AuthenticatedAccount
 </code></pre>
 <p>The address mapping exists after <code>ClientFinish</code>. The player mapping is created
-only after the ordinary session system admits the join.</p>
+only after the ordinary session system admits the join. Both mappings store the
+complete <code>AuthenticatedAccount</code>, so code keyed by <code>PlayerId</code> can retrieve the
+backend nickname and the stable <code>account_uuid</code> without consulting client data.</p>
 <p><code>server-patchwork-auth-admission-mod</code> registers a composable
-<code>ServerPlayerAdmissionRule</code>. It requires:</p>
-<ol>
-<li>a redeemed account for the source address;</li>
-<li>a <code>JoinRequest</code> nickname equal to the backend nickname.</li>
-</ol>
-<p>The client join gate supplies that trusted nickname instead of the editable
-player-name setting. Persistent server data must use <code>account_uuid</code>, never the
-nickname, because display names can change.</p>
+<code>ServerPlayerAdmissionRule</code>. Its <code>prepare</code> phase requires a redeemed account for
+the source address and writes the backend nickname into the mutable
+<code>ServerJoinCandidate</code>. The admission framework completes every rule's prepare
+phase before any validation rule runs, so duplicate-name and other policies see
+the authenticated identity rather than a client value or anonymous fallback.</p>
+<p><code>JoinRequest</code> itself is a unit packet and contains no nickname. The client join
+gate retains the complete <code>AuthenticatedAccount</code> received in <code>LoginSuccess</code> and
+only releases the pending join after authentication succeeds; it does not copy
+the nickname into the join packet. Persistent server data must use
+<code>account_uuid</code>, never the nickname, because display names can change.</p>
 <p>Two server events expose the two useful boundaries:</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]

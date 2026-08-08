@@ -454,7 +454,8 @@ without inventory items or multiple items for one block.</p>
 <p>Contracts:</p>
 <ul>
 <li><code>network-framing-api</code>;</li>
-<li><code>client-network-api</code>;</li>
+<li><code>client-network-api</code> (including the string-backed <code>ClientConnectionTarget</code>
+used by the main-menu <code>host:port</code> field);</li>
 <li><code>server-network-api</code>;</li>
 <li><code>server-network-events-api</code>;</li>
 <li><code>server-player-registry-api</code>;</li>
@@ -725,13 +726,14 @@ routing mods;</li>
 <p>Providers/features:</p>
 <ul>
 <li>game state Bevy implementation;</li>
-<li>menu Bevy implementation;</li>
-<li>main and pause menus;</li>
+<li>menu Bevy implementation, including the combined textbox/button widget;</li>
+<li>main menu with server connection target plus <code>Play</code>, and the pause menu;</li>
 <li>pause/inventory input mods;</li>
 <li>settings menu;</li>
 <li>settings input registry;</li>
 <li>string, integer, float, bool, keybinding editors;</li>
-<li>generated setting contributor crates;</li>
+<li>generated setting contributor crates (graphics and controls; the server
+address and player identity are intentionally not settings);</li>
 <li>DejaVu font provider;</li>
 <li>crosshair;</li>
 <li>optional block outline API/renderer/looked-block policy.</li>

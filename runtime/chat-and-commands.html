@@ -330,9 +330,10 @@ session creation. <code>server-player-name-unique-vanilla-mod</code> is one poli
 not part of the player registry. It rejects case-insensitive duplicates by
 emitting the same generic kick request used by <code>/kick</code>; the client displays the
 server-provided reason.</p>
-<p>The random <code>Player0</code> through <code>Player100</code> client default reduces accidental
-collisions during local testing, but it is not a security or uniqueness
-mechanism. Only server admission is authoritative.</p>
+<p>The client no longer supplies the player name. The session layer starts with a
+server-side fallback name, and an identity admission rule such as Patchwork can
+replace it before duplicate-name validation runs. Only the final server-admitted
+name is visible to commands and completion.</p>
 <h2 id="adding-a-command"><a class="header" href="#adding-a-command">Adding a command</a></h2>
 <ol>
 <li>Create a feature mod that depends on <code>server-command-api</code> and the narrow

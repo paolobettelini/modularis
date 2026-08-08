@@ -186,8 +186,6 @@ systems can read Bevy keyboard state and generated settings directly.</p>
 <tr><td><code>controls.sneak_key</code></td><td>string</td><td>keybinding</td><td><code>ShiftLeft</code></td></tr>
 <tr><td><code>controls.inventory_key</code></td><td>string</td><td>keybinding</td><td><code>E</code></td></tr>
 <tr><td><code>controls.chat_key</code></td><td>string</td><td>keybinding</td><td><code>T</code></td></tr>
-<tr><td><code>network.player_name</code></td><td>string</td><td>string</td><td><code>Player</code></td></tr>
-<tr><td><code>network.server_address</code></td><td>string</td><td>string</td><td><code>127.0.0.1:9999</code></td></tr>
 </tbody></table>
 <p>Storage type and input provider are independent.</p>
 <h2 id="setting-store"><a class="header" href="#setting-store">Setting store</a></h2>
@@ -206,11 +204,10 @@ The generated schema carries those bounds into the store and UI. Step buttons
 clamp at each endpoint, direct text input cannot commit an out-of-range value,
 and programmatic writes through <code>SettingsStore::set</code> are normalized as well.</p>
 <p>Consumers still validate semantic constraints that cannot be expressed by a
-simple range:</p>
-<ul>
-<li>invalid key strings fall back to defaults;</li>
-<li>invalid server addresses fail during connection.</li>
-</ul>
+simple range. For example, invalid key strings fall back to defaults.</p>
+<p>The server connection target is no longer a generated setting. It is owned by
+the networking layer and edited directly from the main menu, so it does not
+participate in <code>SettingsStore</code> validation or persistence.</p>
 <p>Codegen rejects bounds on nonnumeric settings, inverted ranges, and defaults
 outside their declared range.</p>
 <h3 id="grouped-setting-sections"><a class="header" href="#grouped-setting-sections">Grouped setting sections</a></h3>
@@ -227,13 +224,10 @@ generic settings menu creates the resulting navigation tree. For example:</p>
 │  ├─ Render distance
 │  └─ Grass
 │     └─ grass settings
-├─ Controls
-│  ├─ Mouse sensitivity
-│  └─ Keybinds
-│     └─ feature keys
-└─ Network
-   ├─ Player name
-   └─ Server address
+└─ Controls
+   ├─ Mouse sensitivity
+   └─ Keybinds
+      └─ feature keys
 </code></pre>
 <p>Every page uses the generic vertically scrollable menu container. A feature
 does not need to modify the menu provider to gain its own inner page.</p>
@@ -334,6 +328,29 @@ Chat
 </ul>
 <p>UI code emits state or setting actions rather than directly mutating unrelated
 systems.</p>
+<p>The menu API also exposes <code>MenuWidget::TextboxButton</code> for a text field and a
+related action button on one row. The main menu uses this widget for the server
+connection target and <code>Play</code>; this is ordinary menu state, not a generated
+setting.</p>
+<h2 id="server-connection-target"><a class="header" href="#server-connection-target">Server connection target</a></h2>
+<p><code>client-network-api</code> owns <code>ClientConnectionTarget</code>. The selected client
+transport initializes it from <code>ClientConfigApi::default_server_address()</code>, and
+the main menu edits the resource directly. The default remains
+<code>127.0.0.1:9999</code>.</p>
+<p>The field accepts a socket endpoint in <code>host:port</code> form. <code>host</code> may be an IP
+address or a DNS name, for example:</p>
+<pre><code class="language-text">127.0.0.1:9999
+play.example.net:9999
+[::1]:9999
+</code></pre>
+<p>Pressing <code>Play</code> enters the in-game state and the selected transport resolves
+and connects to the current target. Empty addresses, DNS failures, malformed
+endpoints, and connection failures return through the normal disconnected UI
+instead of panicking. URL schemes such as <code>https://</code> are not part of the socket
+address.</p>
+<p>There is intentionally no Network page in Settings and no player-name textbox.
+Player identity is a server-side admission concern; authenticated compositions
+use the Patchwork account returned by the backend.</p>
 <h2 id="input-focus"><a class="header" href="#input-focus">Input focus</a></h2>
 <p>Text and keybinding inputs must have one active field at a time. When focus
 changes, the old field must stop receiving characters even if its value was not

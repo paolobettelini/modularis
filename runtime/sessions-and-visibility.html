@@ -167,17 +167,24 @@ are separate concepts.</p>
 }
 <span class="boring">}
 </span></code></pre></pre>
-<p>The server sanitizes names by trimming, falling back to <code>Player</code>, and limiting
-the name to 32 characters.</p>
+<p><code>JoinRequest</code> carries no player name. When a request arrives,
+<code>server-player-session-mod</code> creates a temporary server-side fallback name such
+as <code>Player1</code>, <code>Player2</code>, and so on. The fallback exists only so compositions
+without an identity provider still have a usable display name; the client never
+chooses or transmits it.</p>
 <p>Admission policy is separate from registry storage. Before creating a new
-player, <code>server-player-session-mod</code> builds a <code>ServerJoinCandidate</code> and asks all
-rules in <code>ServerPlayerAdmissionRules</code> to validate it. A rule can reject a join
-without modifying the session implementation.</p>
-<p>TheCrown adds an authenticated-account admission rule. It maps the socket to a
-backend-redeemed Patchwork account, requires the join nickname to equal the
-trusted backend nickname, and then binds the created <code>PlayerId</code> to the
-persistent account UUID. Other servers can omit this rule or install a
-different policy over the same authentication events. See
+player, <code>server-player-session-mod</code> builds a mutable <code>ServerJoinCandidate</code>.
+<code>ServerPlayerAdmissionRules</code> first runs the <code>prepare</code> phase of every rule, then
+runs the <code>validate</code> phase of every rule. Identity providers can therefore
+replace the fallback before uniqueness, bans, or other validators inspect the
+candidate. The final prepared name is what the registry stores in
+<code>NetworkPlayer</code>.</p>
+<p>TheCrown adds the Patchwork authenticated-account admission rule. Its prepare
+phase maps the socket to a backend-redeemed account and replaces the candidate
+name with the backend nickname. After the session is admitted, the created
+<code>PlayerId</code> is bound to the complete authenticated account, including the stable
+account UUID. Other servers can omit this rule or install a different identity
+policy over the same admission seam. See
 <a href="./patchwork-authentication.html">Patchwork account authentication</a>.</p>
 <p>The selected <code>server-player-name-unique-vanilla-mod</code> rejects duplicate names
 case-insensitively. A rejected admission emits
@@ -187,12 +194,11 @@ disconnected screen, displays the reason in the center, and
 drops its TCP connection as it exits the in-game state. The user explicitly
 returns home with the <code>Back to home</code> button. The same packet and client behavior
 are used for an admitted player kicked later by another server rule.</p>
-<p>On an unauthenticated server, the client setting still owns the chosen name. The optional
-<code>client-player-name-random-default-mod</code> changes only the untouched default
-<code>Player</code> to <code>Player0</code> through <code>Player100</code> at startup. It does not overwrite a
-name saved by the user, and uniqueness is still authoritative on the server.
-On an authenticated server, the client join gate replaces this value with the
-backend nickname and the server verifies it against the redeemed account.</p>
+<p>On a server without an identity provider, the session fallback remains the
+player's display name. On an authenticated Patchwork server, the backend
+nickname replaces that fallback before validation. In both cases uniqueness is
+still authoritative on the server, and no client-supplied nickname participates
+in admission.</p>
 <h2 id="lifecycle-messages"><a class="header" href="#lifecycle-messages">Lifecycle messages</a></h2>
 <p><code>server-player-lifecycle-events-mod</code> exposes:</p>
 <ul>
@@ -216,8 +222,9 @@ and capabilities before the initial snapshot is built.</p>
 welcome messages and state that should follow the accepted packet.</p>
 <h2 id="join-flow"><a class="header" href="#join-flow">Join flow</a></h2>
 <pre><code class="language-text">JoinRequestReceived
-  -&gt; sanitize candidate
-  -&gt; composable admission rules
+  -&gt; create server-side fallback candidate
+  -&gt; prepare all admission rules (identity may replace the name)
+  -&gt; validate all admission rules
   -&gt; reject through generic kick, or register address/player
   -&gt; ServerPlayerJoined
   -&gt; Initialize: scope/world/game state assignment

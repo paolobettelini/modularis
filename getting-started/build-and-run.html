@@ -218,6 +218,14 @@ retain the same worlds.</p>
 <p>Start one or more clients in other terminals:</p>
 <pre><code class="language-sh">cargo run --manifest-path build-client/client/Cargo.toml
 </code></pre>
+<p>The main menu contains a <code>Server address</code> field next to <code>Play</code>. It defaults to
+<code>127.0.0.1:9999</code> and accepts <code>host:port</code>, including DNS names such as
+<code>play.example.net:9999</code>. The address is connection state rather than a Settings
+entry, so there is no Network settings page. Connection and DNS failures open
+the normal disconnected screen instead of crashing the client.</p>
+<p>The client also has no player-name field. On Patchwork-authenticated server
+compositions, the backend nickname and account UUID obtained through the
+launcher authentication flow become the authoritative player identity.</p>
 <p>To run TheCrown instead of the vanilla server:</p>
 <pre><code class="language-sh">cargo run --manifest-path build-thecrown/thecrown/Cargo.toml
 </code></pre>

@@ -448,6 +448,14 @@ retain the same worlds.</p>
 <p>Start one or more clients in other terminals:</p>
 <pre><code class="language-sh">cargo run --manifest-path build-client/client/Cargo.toml
 </code></pre>
+<p>The main menu contains a <code>Server address</code> field next to <code>Play</code>. It defaults to
+<code>127.0.0.1:9999</code> and accepts <code>host:port</code>, including DNS names such as
+<code>play.example.net:9999</code>. The address is connection state rather than a Settings
+entry, so there is no Network settings page. Connection and DNS failures open
+the normal disconnected screen instead of crashing the client.</p>
+<p>The client also has no player-name field. On Patchwork-authenticated server
+compositions, the backend nickname and account UUID obtained through the
+launcher authentication flow become the authoritative player identity.</p>
 <p>To run TheCrown instead of the vanilla server:</p>
 <pre><code class="language-sh">cargo run --manifest-path build-thecrown/thecrown/Cargo.toml
 </code></pre>
@@ -2573,13 +2581,20 @@ CBOR payload bytes
 <h2 id="client-tcp-implementation"><a class="header" href="#client-tcp-implementation">Client TCP implementation</a></h2>
 <p>On entering <code>GameState::InGame</code>, the client:</p>
 <ol>
-<li>reads the configured server address;</li>
-<li>opens a TCP connection;</li>
+<li>reads <code>ClientConnectionTarget</code>, normally edited by the main-menu server
+address field;</li>
+<li>passes its trimmed <code>host:port</code> value to <code>TcpStream::connect</code>;</li>
+<li>records the resolved peer address with <code>peer_addr</code>;</li>
 <li>enables nonblocking mode and <code>TCP_NODELAY</code>;</li>
 <li>clones the stream for the writer;</li>
 <li>inserts <code>ClientNetworkSender</code>;</li>
 <li>inserts connection buffers and outbox state.</li>
 </ol>
+<p>The target is stored as a string rather than eagerly parsed as <code>SocketAddr</code>.
+This deliberately lets the standard library resolve DNS names as well as
+numeric IPv4/IPv6 endpoints. An empty target, malformed endpoint, failed DNS
+lookup, or refused connection emits the normal disconnect-state transition and
+returns from the connect system; it does not panic because parsing failed.</p>
 <p><code>ClientNetworkSender::send</code> serializes and queues a frame. It does not block
 until the complete frame reaches the socket.</p>
 <p>During <code>NetworkMessageSet::ReceivePackets</code>, the transport:</p>
@@ -2594,6 +2609,11 @@ until the complete frame reaches the socket.</p>
 messages. Optional authentication mods use these contracts without being
 hardcoded into TCP.</p>
 <p>Leaving <code>InGame</code> removes the sender and connection.</p>
+<p>The alternate UDP client follows the same connection-target contract:
+<code>UdpSocket::connect</code> receives the <code>host:port</code> string and <code>peer_addr</code> records the
+resolved socket address used by runtime network events. A replacement transport
+should preserve this behavior if it wants the main-menu address field to remain
+transport independent.</p>
 <h2 id="server-tcp-implementation"><a class="header" href="#server-tcp-implementation">Server TCP implementation</a></h2>
 <p>The server binds the configured address and uses a nonblocking listener.</p>
 <p>Per connected address it stores:</p>
@@ -2654,8 +2674,9 @@ handlers.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="patchwork-account-authentication"><a class="header" href="#patchwork-account-authentication">Patchwork account authentication</a></h1>
 <p>The demo can authenticate a game connection with the same Patchwork account
 used by the desktop launcher. A player does not create a separate account for
-every server, and an authenticated server does not trust a nickname chosen in
-the client settings.</p>
+every server, and the game client does not send a player nickname in
+<code>JoinRequest</code>. On an authenticated server, the backend-redeemed Patchwork
+account is the authority for both the display nickname and stable account UUID.</p>
 <p>Authentication is optional at composition time. The shared protocol contains
 the packet contracts, while separate client and server modpacks install the
 actual policy. The vanilla server profile and TheCrown require authentication;
@@ -2770,7 +2791,7 @@ handshake ID:</p>
   |--------------------------------&gt;|                            |
   | encrypted LoginSuccess          |                            |
   |&lt;--------------------------------|                            |
-  | JoinRequest with trusted nickname                            |
+  | JoinRequest (no player name)                                 |
   |--------------------------------&gt;| authenticated admission    |
 </code></pre>
 <p>The backend is the authority that binds the process account to the concrete
@@ -2816,16 +2837,20 @@ integration and transport lifecycle events.</p>
 PlayerId       -&gt; AuthenticatedAccount
 </code></pre>
 <p>The address mapping exists after <code>ClientFinish</code>. The player mapping is created
-only after the ordinary session system admits the join.</p>
+only after the ordinary session system admits the join. Both mappings store the
+complete <code>AuthenticatedAccount</code>, so code keyed by <code>PlayerId</code> can retrieve the
+backend nickname and the stable <code>account_uuid</code> without consulting client data.</p>
 <p><code>server-patchwork-auth-admission-mod</code> registers a composable
-<code>ServerPlayerAdmissionRule</code>. It requires:</p>
-<ol>
-<li>a redeemed account for the source address;</li>
-<li>a <code>JoinRequest</code> nickname equal to the backend nickname.</li>
-</ol>
-<p>The client join gate supplies that trusted nickname instead of the editable
-player-name setting. Persistent server data must use <code>account_uuid</code>, never the
-nickname, because display names can change.</p>
+<code>ServerPlayerAdmissionRule</code>. Its <code>prepare</code> phase requires a redeemed account for
+the source address and writes the backend nickname into the mutable
+<code>ServerJoinCandidate</code>. The admission framework completes every rule's prepare
+phase before any validation rule runs, so duplicate-name and other policies see
+the authenticated identity rather than a client value or anonymous fallback.</p>
+<p><code>JoinRequest</code> itself is a unit packet and contains no nickname. The client join
+gate retains the complete <code>AuthenticatedAccount</code> received in <code>LoginSuccess</code> and
+only releases the pending join after authentication succeeds; it does not copy
+the nickname into the join packet. Persistent server data must use
+<code>account_uuid</code>, never the nickname, because display names can change.</p>
 <p>Two server events expose the two useful boundaries:</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
@@ -2891,17 +2916,24 @@ are separate concepts.</p>
 }
 <span class="boring">}
 </span></code></pre></pre>
-<p>The server sanitizes names by trimming, falling back to <code>Player</code>, and limiting
-the name to 32 characters.</p>
+<p><code>JoinRequest</code> carries no player name. When a request arrives,
+<code>server-player-session-mod</code> creates a temporary server-side fallback name such
+as <code>Player1</code>, <code>Player2</code>, and so on. The fallback exists only so compositions
+without an identity provider still have a usable display name; the client never
+chooses or transmits it.</p>
 <p>Admission policy is separate from registry storage. Before creating a new
-player, <code>server-player-session-mod</code> builds a <code>ServerJoinCandidate</code> and asks all
-rules in <code>ServerPlayerAdmissionRules</code> to validate it. A rule can reject a join
-without modifying the session implementation.</p>
-<p>TheCrown adds an authenticated-account admission rule. It maps the socket to a
-backend-redeemed Patchwork account, requires the join nickname to equal the
-trusted backend nickname, and then binds the created <code>PlayerId</code> to the
-persistent account UUID. Other servers can omit this rule or install a
-different policy over the same authentication events. See
+player, <code>server-player-session-mod</code> builds a mutable <code>ServerJoinCandidate</code>.
+<code>ServerPlayerAdmissionRules</code> first runs the <code>prepare</code> phase of every rule, then
+runs the <code>validate</code> phase of every rule. Identity providers can therefore
+replace the fallback before uniqueness, bans, or other validators inspect the
+candidate. The final prepared name is what the registry stores in
+<code>NetworkPlayer</code>.</p>
+<p>TheCrown adds the Patchwork authenticated-account admission rule. Its prepare
+phase maps the socket to a backend-redeemed account and replaces the candidate
+name with the backend nickname. After the session is admitted, the created
+<code>PlayerId</code> is bound to the complete authenticated account, including the stable
+account UUID. Other servers can omit this rule or install a different identity
+policy over the same admission seam. See
 <a href="runtime/./patchwork-authentication.html">Patchwork account authentication</a>.</p>
 <p>The selected <code>server-player-name-unique-vanilla-mod</code> rejects duplicate names
 case-insensitively. A rejected admission emits
@@ -2911,12 +2943,11 @@ disconnected screen, displays the reason in the center, and
 drops its TCP connection as it exits the in-game state. The user explicitly
 returns home with the <code>Back to home</code> button. The same packet and client behavior
 are used for an admitted player kicked later by another server rule.</p>
-<p>On an unauthenticated server, the client setting still owns the chosen name. The optional
-<code>client-player-name-random-default-mod</code> changes only the untouched default
-<code>Player</code> to <code>Player0</code> through <code>Player100</code> at startup. It does not overwrite a
-name saved by the user, and uniqueness is still authoritative on the server.
-On an authenticated server, the client join gate replaces this value with the
-backend nickname and the server verifies it against the redeemed account.</p>
+<p>On a server without an identity provider, the session fallback remains the
+player's display name. On an authenticated Patchwork server, the backend
+nickname replaces that fallback before validation. In both cases uniqueness is
+still authoritative on the server, and no client-supplied nickname participates
+in admission.</p>
 <h2 id="lifecycle-messages"><a class="header" href="#lifecycle-messages">Lifecycle messages</a></h2>
 <p><code>server-player-lifecycle-events-mod</code> exposes:</p>
 <ul>
@@ -2940,8 +2971,9 @@ and capabilities before the initial snapshot is built.</p>
 welcome messages and state that should follow the accepted packet.</p>
 <h2 id="join-flow"><a class="header" href="#join-flow">Join flow</a></h2>
 <pre><code class="language-text">JoinRequestReceived
-  -&gt; sanitize candidate
-  -&gt; composable admission rules
+  -&gt; create server-side fallback candidate
+  -&gt; prepare all admission rules (identity may replace the name)
+  -&gt; validate all admission rules
   -&gt; reject through generic kick, or register address/player
   -&gt; ServerPlayerJoined
   -&gt; Initialize: scope/world/game state assignment
@@ -3247,9 +3279,10 @@ session creation. <code>server-player-name-unique-vanilla-mod</code> is one poli
 not part of the player registry. It rejects case-insensitive duplicates by
 emitting the same generic kick request used by <code>/kick</code>; the client displays the
 server-provided reason.</p>
-<p>The random <code>Player0</code> through <code>Player100</code> client default reduces accidental
-collisions during local testing, but it is not a security or uniqueness
-mechanism. Only server admission is authoritative.</p>
+<p>The client no longer supplies the player name. The session layer starts with a
+server-side fallback name, and an identity admission rule such as Patchwork can
+replace it before duplicate-name validation runs. Only the final server-admitted
+name is visible to commands and completion.</p>
 <h2 id="adding-a-command"><a class="header" href="#adding-a-command">Adding a command</a></h2>
 <ol>
 <li>Create a feature mod that depends on <code>server-command-api</code> and the narrow
@@ -6640,8 +6673,6 @@ systems can read Bevy keyboard state and generated settings directly.</p>
 <tr><td><code>controls.sneak_key</code></td><td>string</td><td>keybinding</td><td><code>ShiftLeft</code></td></tr>
 <tr><td><code>controls.inventory_key</code></td><td>string</td><td>keybinding</td><td><code>E</code></td></tr>
 <tr><td><code>controls.chat_key</code></td><td>string</td><td>keybinding</td><td><code>T</code></td></tr>
-<tr><td><code>network.player_name</code></td><td>string</td><td>string</td><td><code>Player</code></td></tr>
-<tr><td><code>network.server_address</code></td><td>string</td><td>string</td><td><code>127.0.0.1:9999</code></td></tr>
 </tbody></table>
 <p>Storage type and input provider are independent.</p>
 <h2 id="setting-store"><a class="header" href="#setting-store">Setting store</a></h2>
@@ -6660,11 +6691,10 @@ The generated schema carries those bounds into the store and UI. Step buttons
 clamp at each endpoint, direct text input cannot commit an out-of-range value,
 and programmatic writes through <code>SettingsStore::set</code> are normalized as well.</p>
 <p>Consumers still validate semantic constraints that cannot be expressed by a
-simple range:</p>
-<ul>
-<li>invalid key strings fall back to defaults;</li>
-<li>invalid server addresses fail during connection.</li>
-</ul>
+simple range. For example, invalid key strings fall back to defaults.</p>
+<p>The server connection target is no longer a generated setting. It is owned by
+the networking layer and edited directly from the main menu, so it does not
+participate in <code>SettingsStore</code> validation or persistence.</p>
 <p>Codegen rejects bounds on nonnumeric settings, inverted ranges, and defaults
 outside their declared range.</p>
 <h3 id="grouped-setting-sections"><a class="header" href="#grouped-setting-sections">Grouped setting sections</a></h3>
@@ -6681,13 +6711,10 @@ generic settings menu creates the resulting navigation tree. For example:</p>
 │  ├─ Render distance
 │  └─ Grass
 │     └─ grass settings
-├─ Controls
-│  ├─ Mouse sensitivity
-│  └─ Keybinds
-│     └─ feature keys
-└─ Network
-   ├─ Player name
-   └─ Server address
+└─ Controls
+   ├─ Mouse sensitivity
+   └─ Keybinds
+      └─ feature keys
 </code></pre>
 <p>Every page uses the generic vertically scrollable menu container. A feature
 does not need to modify the menu provider to gain its own inner page.</p>
@@ -6788,6 +6815,29 @@ Chat
 </ul>
 <p>UI code emits state or setting actions rather than directly mutating unrelated
 systems.</p>
+<p>The menu API also exposes <code>MenuWidget::TextboxButton</code> for a text field and a
+related action button on one row. The main menu uses this widget for the server
+connection target and <code>Play</code>; this is ordinary menu state, not a generated
+setting.</p>
+<h2 id="server-connection-target"><a class="header" href="#server-connection-target">Server connection target</a></h2>
+<p><code>client-network-api</code> owns <code>ClientConnectionTarget</code>. The selected client
+transport initializes it from <code>ClientConfigApi::default_server_address()</code>, and
+the main menu edits the resource directly. The default remains
+<code>127.0.0.1:9999</code>.</p>
+<p>The field accepts a socket endpoint in <code>host:port</code> form. <code>host</code> may be an IP
+address or a DNS name, for example:</p>
+<pre><code class="language-text">127.0.0.1:9999
+play.example.net:9999
+[::1]:9999
+</code></pre>
+<p>Pressing <code>Play</code> enters the in-game state and the selected transport resolves
+and connects to the current target. Empty addresses, DNS failures, malformed
+endpoints, and connection failures return through the normal disconnected UI
+instead of panicking. URL schemes such as <code>https://</code> are not part of the socket
+address.</p>
+<p>There is intentionally no Network page in Settings and no player-name textbox.
+Player identity is a server-side admission concern; authenticated compositions
+use the Patchwork account returned by the backend.</p>
 <h2 id="input-focus"><a class="header" href="#input-focus">Input focus</a></h2>
 <p>Text and keybinding inputs must have one active field at a time. When focus
 changes, the old field must stop receiving characters even if its value was not
@@ -8871,7 +8921,8 @@ without inventory items or multiple items for one block.</p>
 <p>Contracts:</p>
 <ul>
 <li><code>network-framing-api</code>;</li>
-<li><code>client-network-api</code>;</li>
+<li><code>client-network-api</code> (including the string-backed <code>ClientConnectionTarget</code>
+used by the main-menu <code>host:port</code> field);</li>
 <li><code>server-network-api</code>;</li>
 <li><code>server-network-events-api</code>;</li>
 <li><code>server-player-registry-api</code>;</li>
@@ -9142,13 +9193,14 @@ routing mods;</li>
 <p>Providers/features:</p>
 <ul>
 <li>game state Bevy implementation;</li>
-<li>menu Bevy implementation;</li>
-<li>main and pause menus;</li>
+<li>menu Bevy implementation, including the combined textbox/button widget;</li>
+<li>main menu with server connection target plus <code>Play</code>, and the pause menu;</li>
 <li>pause/inventory input mods;</li>
 <li>settings menu;</li>
 <li>settings input registry;</li>
 <li>string, integer, float, bool, keybinding editors;</li>
-<li>generated setting contributor crates;</li>
+<li>generated setting contributor crates (graphics and controls; the server
+address and player identity are intentionally not settings);</li>
 <li>DejaVu font provider;</li>
 <li>crosshair;</li>
 <li>optional block outline API/renderer/looked-block policy.</li>
