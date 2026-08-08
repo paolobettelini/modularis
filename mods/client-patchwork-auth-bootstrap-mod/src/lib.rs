@@ -27,6 +27,14 @@ impl ClientPatchworkAuthBootstrapMod {
         _game_state: &mut G,
         _events: &mut PatchworkGameAuthEventsMod,
     ) -> Self {
+        eprintln!(
+            "[patchwork-auth] bootstrap reached: fd={:?}, pipe={:?}, version={:?}, backend={:?}",
+            std::env::var_os("PATCHWORK_AUTH_FD"),
+            std::env::var_os("PATCHWORK_AUTH_PIPE"),
+            std::env::var_os("PATCHWORK_AUTH_PIPE_VERSION"),
+            std::env::var_os("BACKEND_ADDR"),
+        );
+
         match read_auth_pipe_from_environment() {
             Ok(AuthPipeBootstrap::Anonymous) => {
                 bevy.app.insert_resource(ClientProcessAuthState::new(

@@ -106,8 +106,29 @@ fn read_unix_auth_pipe_from_environment() -> Result<AuthPipeBootstrap, AuthPipeE
 
     // Ownership is intentionally taken so dropping `pipe` closes the inherited
     // descriptor immediately after this one read.
+    eprintln!(
+        "[patchwork-auth] opening Unix auth fd: {descriptor}"
+    );
+
     let pipe = unsafe { std::fs::File::from_raw_fd(descriptor) };
-    read_authenticated_ticket(backend_address, pipe)
+
+    eprintln!(
+        "[patchwork-auth] Unix auth fd opened; waiting for ticket frame"
+    );
+
+    let result = read_authenticated_ticket(backend_address, pipe);
+
+    match &result {
+        Ok(AuthPipeBootstrap::Authenticated { .. }) => {
+            eprintln!("[patchwork-auth] launch ticket received successfully");
+        }
+        Ok(AuthPipeBootstrap::Anonymous) => {}
+        Err(error) => {
+            eprintln!("[patchwork-auth] failed while reading ticket: {error}");
+        }
+    }
+
+    result
 }
 
 #[cfg(windows)]
@@ -128,6 +149,11 @@ fn read_windows_auth_pipe_from_environment() -> Result<AuthPipeBootstrap, AuthPi
         .encode_wide()
         .chain(std::iter::once(0))
         .collect::<Vec<_>>();
+
+    eprintln!(
+        "[patchwork-auth] connecting to Windows auth pipe: {}",
+        pipe_name.to_string_lossy()
+    );
     let handle = unsafe {
         CreateFileW(
             wide_name.as_ptr(),
@@ -140,13 +166,34 @@ fn read_windows_auth_pipe_from_environment() -> Result<AuthPipeBootstrap, AuthPi
         )
     };
     if handle == INVALID_HANDLE_VALUE {
-        return Err(AuthPipeError::Read(std::io::Error::last_os_error()));
+        let error = std::io::Error::last_os_error();
+        eprintln!(
+            "[patchwork-auth] CreateFileW failed for {}: {error}",
+            pipe_name.to_string_lossy()
+        );
+        return Err(AuthPipeError::Read(error));
     }
+
+    eprintln!(
+        "[patchwork-auth] connected to Windows auth pipe; waiting for ticket frame"
+    );
 
     // `CreateFileW` returned an owned kernel handle. `File` takes ownership so
     // it is closed even when framing or UTF-8 validation fails.
     let pipe = unsafe { std::fs::File::from_raw_handle(handle) };
-    read_authenticated_ticket(backend_address, pipe)
+    let result = read_authenticated_ticket(backend_address, pipe);
+
+    match &result {
+        Ok(AuthPipeBootstrap::Authenticated { .. }) => {
+            eprintln!("[patchwork-auth] launch ticket received successfully");
+        }
+        Ok(AuthPipeBootstrap::Anonymous) => {}
+        Err(error) => {
+            eprintln!("[patchwork-auth] failed while reading ticket: {error}");
+        }
+    }
+
+    result
 }
 
 #[cfg(windows)]
