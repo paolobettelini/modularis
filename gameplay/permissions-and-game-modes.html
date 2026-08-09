@@ -1,0 +1,367 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Permissions and server game modes - Minecraft Simple Demo Architecture</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting-started/project-overview.html"><strong aria-hidden="true">1.1.</strong> Project overview</a></li><li class="chapter-item expanded "><a href="../getting-started/build-and-run.html"><strong aria-hidden="true">1.2.</strong> Build and run</a></li></ol></li><li class="chapter-item expanded "><a href="../architecture/foundations.html"><strong aria-hidden="true">2.</strong> Architecture foundations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../architecture/patchwork-composition.html"><strong aria-hidden="true">2.1.</strong> Patchwork composition</a></li><li class="chapter-item expanded "><a href="../architecture/mod-anatomy.html"><strong aria-hidden="true">2.2.</strong> Mod anatomy and lifecycle</a></li><li class="chapter-item expanded "><a href="../architecture/dependency-sources.html"><strong aria-hidden="true">2.3.</strong> Cargo dependency sources</a></li><li class="chapter-item expanded "><a href="../architecture/apis-and-events.html"><strong aria-hidden="true">2.4.</strong> APIs, providers, and ECS contracts</a></li><li class="chapter-item expanded "><a href="../architecture/runtime-scopes.html"><strong aria-hidden="true">2.5.</strong> Runtime scope trees and facets</a></li><li class="chapter-item expanded "><a href="../architecture/vanilla-libraries.html"><strong aria-hidden="true">2.6.</strong> Vanilla mechanics as reusable libraries</a></li><li class="chapter-item expanded "><a href="../architecture/code-generation.html"><strong aria-hidden="true">2.7.</strong> Code generation and registries</a></li><li class="chapter-item expanded "><a href="../architecture/modpacks.html"><strong aria-hidden="true">2.8.</strong> Modpacks and feature boundaries</a></li><li class="chapter-item expanded "><a href="../architecture/assets-and-output.html"><strong aria-hidden="true">2.9.</strong> Assets and generated output</a></li></ol></li><li class="chapter-item expanded "><a href="../runtime/runtime-overview.html"><strong aria-hidden="true">3.</strong> Runtime and networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../runtime/bevy-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Bevy application lifecycle</a></li><li class="chapter-item expanded "><a href="../runtime/networking.html"><strong aria-hidden="true">3.2.</strong> Protocol, transport, and framing</a></li><li class="chapter-item expanded "><a href="../runtime/patchwork-authentication.html"><strong aria-hidden="true">3.3.</strong> Patchwork account authentication</a></li><li class="chapter-item expanded "><a href="../runtime/sessions-and-visibility.html"><strong aria-hidden="true">3.4.</strong> Sessions, routing, and visibility</a></li><li class="chapter-item expanded "><a href="../runtime/chat-and-commands.html"><strong aria-hidden="true">3.5.</strong> Chat, commands, and completion</a></li><li class="chapter-item expanded "><a href="../runtime/sounds.html"><strong aria-hidden="true">3.6.</strong> Sounds, audiences, and spatial playback</a></li></ol></li><li class="chapter-item expanded "><a href="../world/world-overview.html"><strong aria-hidden="true">4.</strong> World architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../world/blocks-and-items.html"><strong aria-hidden="true">4.1.</strong> Blocks, items, and metadata</a></li><li class="chapter-item expanded "><a href="../world/voxel-models.html"><strong aria-hidden="true">4.2.</strong> JSON voxel models and textures</a></li><li class="chapter-item expanded "><a href="../world/chunk-storage.html"><strong aria-hidden="true">4.3.</strong> Chunk coordinates and storage</a></li><li class="chapter-item expanded "><a href="../world/server-world.html"><strong aria-hidden="true">4.4.</strong> Server world providers and residency</a></li><li class="chapter-item expanded "><a href="../world/biomes.html"><strong aria-hidden="true">4.5.</strong> Biomes and world-generation features</a></li><li class="chapter-item expanded "><a href="../world/client-chunks.html"><strong aria-hidden="true">4.6.</strong> Client streaming, meshing, and rendering</a></li><li class="chapter-item expanded "><a href="../world/dimensions.html"><strong aria-hidden="true">4.7.</strong> Dimensions and world scopes</a></li><li class="chapter-item expanded "><a href="../world/portals.html"><strong aria-hidden="true">4.8.</strong> Portals</a></li></ol></li><li class="chapter-item expanded "><a href="../gameplay/gameplay-overview.html"><strong aria-hidden="true">5.</strong> Gameplay systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../gameplay/permissions-and-game-modes.html" class="active"><strong aria-hidden="true">5.1.</strong> Permissions and server game modes</a></li><li class="chapter-item expanded "><a href="../gameplay/movement.html"><strong aria-hidden="true">5.2.</strong> Player movement and prediction</a></li><li class="chapter-item expanded "><a href="../gameplay/movement-features.html"><strong aria-hidden="true">5.3.</strong> Gravity, jump, sprint, and flight</a></li><li class="chapter-item expanded "><a href="../gameplay/block-interaction.html"><strong aria-hidden="true">5.4.</strong> Block interaction and world edits</a></li><li class="chapter-item expanded "><a href="../gameplay/inventory.html"><strong aria-hidden="true">5.5.</strong> Inventory, hotbar, and item use</a></li><li class="chapter-item expanded "><a href="../gameplay/cell-menus.html"><strong aria-hidden="true">5.6.</strong> Cell menus, audiences, and crafting tables</a></li></ol></li><li class="chapter-item expanded "><a href="../client/client-overview.html"><strong aria-hidden="true">6.</strong> Client systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../client/input-settings-menus.html"><strong aria-hidden="true">6.1.</strong> Input, settings, menus, and game state</a></li><li class="chapter-item expanded "><a href="../client/graphics.html"><strong aria-hidden="true">6.2.</strong> Graphics, lighting, sky, and outlines</a></li><li class="chapter-item expanded "><a href="../client/animated-grass.html"><strong aria-hidden="true">6.3.</strong> Animated grass and wind</a></li><li class="chapter-item expanded "><a href="../client/blocky-models.html"><strong aria-hidden="true">6.4.</strong> Blocky models and animation</a></li></ol></li><li class="chapter-item expanded "><a href="../development/developer-guide.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../development/extension-cookbook.html"><strong aria-hidden="true">7.1.</strong> Extension cookbook</a></li><li class="chapter-item expanded "><a href="../development/thecrown-parkour.html"><strong aria-hidden="true">7.2.</strong> TheCrown multi-instance parkour server</a></li><li class="chapter-item expanded "><a href="../development/testing-and-performance.html"><strong aria-hidden="true">7.3.</strong> Testing, debugging, and performance</a></li><li class="chapter-item expanded "><a href="../reference/crate-map.html"><strong aria-hidden="true">7.4.</strong> Crate map</a></li><li class="chapter-item expanded "><a href="../reference/current-limits.html"><strong aria-hidden="true">7.5.</strong> Current limits and design direction</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Minecraft Simple Demo Architecture</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="permissions-and-server-game-modes"><a class="header" href="#permissions-and-server-game-modes">Permissions and server game modes</a></h1>
+<p>The client does not implement Creative, Survival, or Adventure as hardcoded
+runtime modes. A game mode is server state plus a replaceable policy that
+changes smaller capabilities. This keeps every consequence independently
+usable by a custom server.</p>
+<pre><code class="language-text">SetPlayerGameMode
+        │
+        ▼
+ServerPlayerGameModeChanged
+        │
+        ▼ vanilla policy adapter
+permission changes + outline change
+        │                    │
+        ▼                    ▼
+capability adapters       SetOutline packet
+</code></pre>
+<p>The generic game-mode state does not know what Creative means. The vanilla
+library defines the current meaning, and its glue mod applies that meaning to
+every player on the vanilla server.</p>
+<h2 id="generated-permission-ids"><a class="header" href="#generated-permission-ids">Generated permission IDs</a></h2>
+<p>Permissions are typed generated values, not strings passed around gameplay
+systems. A small support mod contributes one declaration:</p>
+<pre><code class="language-toml">[package.metadata.mod]
+support = true
+
+[package.metadata.permission]
+id = &quot;example:moderator&quot;
+implies = [&quot;vanilla:can-flight&quot;]
+</code></pre>
+<p><code>permission-registry-codegen</code> scans the composed permission contributors and
+generates:</p>
+<ul>
+<li><code>PermissionId</code>;</li>
+<li><code>all_permissions()</code>;</li>
+<li>namespaced string conversion;</li>
+<li>direct and transitive implication checks.</li>
+</ul>
+<p>Composition fails for duplicate IDs, duplicate generated Rust variants,
+missing implication targets, or cycles. The current vanilla hierarchy is:</p>
+<pre><code class="language-text">Privileged
+  ├─ CanFlight
+  ├─ CanInteract
+  └─ CanChangeOwnGameMode
+</code></pre>
+<p>A new permission belongs in its own contributor mod and in the permission
+feature pack. Do not add it to a central handwritten enum.</p>
+<h2 id="owner-scoped-grants"><a class="header" href="#owner-scoped-grants">Owner-scoped grants</a></h2>
+<p><code>ServerPlayerPermissions</code> stores explicit grants by player, permission, and
+owner. Systems change them through:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>SetPlayerPermission {
+    player_id,
+    owner: &quot;my-mod:role&quot;.to_string(),
+    permission: PermissionId::CanInteract,
+    enabled: true,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>The owner is important. Removing <code>my-mod:role</code> does not revoke the same
+permission when a game mode, rank, temporary effect, or another mod still
+grants it. Effective permissions include every permission implied transitively
+by any explicit grant.</p>
+<p>Administrative policy can deliberately revoke every owner through
+<code>ClearPlayerPermissionGrants</code>. This is stronger than normal feature cleanup and
+is used only when the requested operation means &quot;remove this authority&quot;,
+regardless of where it came from. Game-mode downgrades and <code>/privilege</code> use this
+contract; independent feature mods should continue to remove only their own
+owner-scoped grants.</p>
+<p>The ordered server pipeline is:</p>
+<pre><code class="language-text">Apply -&gt; DeriveCapabilities -&gt; Sync
+</code></pre>
+<p><code>ServerPlayerPermissionsChanged</code> carries the complete effective set plus added
+and removed differences. Capability adapters belong in <code>DeriveCapabilities</code>.
+For example, the vanilla flight adapter maps <code>CanFlight</code> to the generic flight
+capability API. Network sync then sends only the effective typed set to the
+affected client.</p>
+<p>The client cache is for presentation and intention availability only. The
+server always validates the permission again before applying an operation.</p>
+<h2 id="vanilla-game-mode-policy"><a class="header" href="#vanilla-game-mode-policy">Vanilla game-mode policy</a></h2>
+<p><code>server-player-game-mode-api</code> owns neutral per-player state and change events.
+<code>server-player-game-mode-vanilla-lib</code> is a pure reusable policy function, while
+<code>server-player-game-mode-vanilla-mod</code> is the blanket ECS glue selected by the
+vanilla modpack.</p>
+<p>The current policies are deliberately small:</p>
+<table><thead><tr><th>Mode</th><th>Permission policy</th><th>Outline</th></tr></thead><tbody>
+<tr><td>Creative</td><td>grants <code>Privileged</code></td><td>enabled</td></tr>
+<tr><td>Survival</td><td>clears every <code>Privileged</code> grant and grants <code>CanInteract</code></td><td>enabled</td></tr>
+<tr><td>Adventure</td><td>clears every <code>Privileged</code> and <code>CanInteract</code> grant</td><td>disabled</td></tr>
+</tbody></table>
+<p>The strong clears make an explicit mode downgrade authoritative: a stale rank
+or default grant cannot leave administrative commands enabled. A later server
+rule may still grant a capability again after the mode policy has run, or a
+custom composition may use a weaker owner-scoped policy.</p>
+<p><code>server-player-default-creative-vanilla-mod</code> is a separate join policy. It puts
+new players in Creative and grants <code>Privileged</code>; the hierarchy then supplies
+flight, interaction, and game-mode command capabilities. The generic state
+provider does not choose a default. A scoped or minigame server should omit the
+join policy and blanket game-mode glue, call <code>vanilla_game_mode_policy</code> only
+where desired, or define a different policy over the same contracts.</p>
+<h2 id="commands-and-authorization"><a class="header" href="#commands-and-authorization">Commands and authorization</a></h2>
+<p><code>ServerCommandSource</code> includes the caller's effective permission set.
+<code>ServerCommandRegistry::register_restricted</code> applies the same permission to
+Brigadier availability and direct execution:</p>
+<ul>
+<li>unavailable roots are absent from autocomplete;</li>
+<li>manually entering a restricted command returns <code>This command is not available</code>;</li>
+<li>gameplay handlers still recheck authority for stronger forms such as
+targeting another player.</li>
+</ul>
+<p>The vanilla <code>/gamemode</code> command supports:</p>
+<pre><code class="language-text">/gamemode &lt;creative|survival|adventure&gt;
+/gamemode &lt;player&gt; &lt;creative|survival|adventure&gt;
+</code></pre>
+<p>The first form needs <code>CanChangeOwnGameMode</code>, which <code>Privileged</code> implies. The
+player-targeted form also needs <code>Privileged</code>. Switching to Survival or
+Adventure removes that authority, so the player cannot switch itself back.</p>
+<p>The vanilla administration pack also contributes:</p>
+<pre><code class="language-text">/privilege &lt;player&gt;
+</code></pre>
+<p>Only a currently privileged source can see or execute it. It toggles the
+target's explicit <code>Privileged</code> authority. Revocation clears every owner so the
+restricted command roots disappear from subsequent server completions and
+manual execution is rejected. Public policy commands such as <code>/clear</code> and
+<code>/tps</code> remain available by design.</p>
+<p>Administrative vanilla commands such as teleport, give, kick, speed, flight
+speed, scale, and gravity require <code>Privileged</code>. <code>/flight</code> requires
+<code>CanFlight</code>, while its other-player form additionally requires <code>Privileged</code>.
+Personal <code>/clear</code> and read-only <code>/tps</code> remain public policy choices.</p>
+<h2 id="interaction-authorization"><a class="header" href="#interaction-authorization">Interaction authorization</a></h2>
+<p>The vanilla block-breaking, item-placement, crafting-table, and portal-ignite
+glue checks effective <code>CanInteract</code> on the server. The reusable mechanic
+libraries remain permission-free: a custom orchestrator can apply its own
+scope, team, region, or minigame rule before calling them.</p>
+<p>This distinction is intentional:</p>
+<ul>
+<li>a library provides a mechanic;</li>
+<li>a vanilla glue mod decides when it always applies;</li>
+<li>permission state represents reusable facts;</li>
+<li>the final server policy may combine permissions with arbitrary ECS state.</li>
+</ul>
+<p>Do not put a permission check inside a generic world, transport, or storage
+provider.</p>
+<h2 id="outline-capability"><a class="header" href="#outline-capability">Outline capability</a></h2>
+<p>Outline visibility has a separate state and packet family:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>SetPlayerOutline { player_id, enabled }
+SetOutline(bool)
+<span class="boring">}
+</span></code></pre></pre>
+<p>The client receiver updates <code>ClientBlockOutlineEnabled</code>. The renderer hides or
+restores existing owner-keyed outline roots without deleting their logical
+state. This lets Adventure mode disable looked-block presentation while other
+modes restore it immediately, and lets custom server rules use the same
+capability without introducing a game-mode packet.</p>
+<h2 id="adding-a-permission-driven-capability"><a class="header" href="#adding-a-permission-driven-capability">Adding a permission-driven capability</a></h2>
+<ol>
+<li>Contribute a typed permission in a support mod.</li>
+<li>Add the contributor to a feature pack imported by both protocol sides.</li>
+<li>Keep authoritative grants in <code>ServerPlayerPermissions</code> with a stable owner.</li>
+<li>Listen to <code>ServerPlayerPermissionsChanged</code> in
+<code>ServerPlayerPermissionSet::DeriveCapabilities</code>.</li>
+<li>Change a narrow capability API or emit a domain event.</li>
+<li>Synchronize only the client state required for presentation or prediction.</li>
+<li>Recheck the permission at the authoritative gameplay boundary.</li>
+</ol>
+<p>This supports roles, temporary effects, world-specific policies, and custom
+servers without turning game modes into a central switch statement.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../gameplay/gameplay-overview.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../gameplay/movement.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../gameplay/gameplay-overview.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../gameplay/movement.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>
