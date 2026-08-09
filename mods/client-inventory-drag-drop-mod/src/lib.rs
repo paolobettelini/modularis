@@ -1,7 +1,9 @@
 use bevy::picking::pointer::PointerId;
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
-use client_inventory_ui_api::{ClientInventoryUiApi, InventoryItemVisual, InventorySlotVisual};
+use client_inventory_ui_api::{
+    ClientInventoryUiApi, InventoryItemVisual, InventoryOperationSequence, InventorySlotVisual,
+};
 use inventory_events_api::LocalInventoryMoveIntent;
 use inventory_events_mod::InventoryEventsMod;
 use std::collections::HashSet;
@@ -16,7 +18,6 @@ impl ClientInventoryDragDropMod {
         _events: &mut InventoryEventsMod,
     ) -> Self {
         bevy.app
-            .init_resource::<InventoryOperationCounter>()
             .init_resource::<HandledInventoryDrops>()
             .add_observer(move_dragged_item)
             .add_observer(reset_dragged_item)
@@ -28,9 +29,6 @@ impl ClientInventoryDragDropMod {
         None
     }
 }
-
-#[derive(Resource, Default)]
-struct InventoryOperationCounter(u64);
 
 #[derive(Resource, Default)]
 struct HandledInventoryDrops {
@@ -95,7 +93,7 @@ fn drop_inventory_item(
     slots: Query<&InventorySlotVisual>,
     items: Query<&InventoryItemVisual>,
     parents: Query<&ChildOf>,
-    mut counter: ResMut<InventoryOperationCounter>,
+    mut counter: ResMut<InventoryOperationSequence>,
     mut handled: ResMut<HandledInventoryDrops>,
     mut intents: MessageWriter<LocalInventoryMoveIntent>,
 ) {
@@ -125,9 +123,8 @@ fn drop_inventory_item(
         return;
     }
     handled.drops.insert(drop_key);
-    counter.0 = counter.0.wrapping_add(1);
     intents.write(LocalInventoryMoveIntent {
-        operation_id: counter.0,
+        operation_id: counter.next(),
         from: source.cell.clone(),
         to: target.cell.clone(),
     });

@@ -30,10 +30,43 @@ as families.
 | `dimension-registry-codegen` | `generated-dimension-registry` | `dimension-*` |
 | `biome-registry-codegen` | `generated-biome-registry` | `biome-*` identity contributors |
 | `sound-registry-codegen` | `generated-sound-registry` | `sound-*` contributors |
+| `permission-registry-codegen` | `generated-permission-registry` | `permission-*` contributors |
 | `client-settings-registry-codegen` | `generated-client-settings-registry` | `client-setting-*` |
 | `network-protocol-mod` / `network-codegen-utils` | `generated-network-messages` | `*-network-messages-mod` |
 
 Support generators use `codegen-utils` and `network-codegen-utils`.
+
+## Permissions and game modes
+
+Generated identity and declarations:
+
+- `permission-registry-codegen`;
+- `generated-permission-registry`;
+- `permission-can-flight`;
+- `permission-can-interact`;
+- `permission-can-change-own-game-mode`;
+- `permission-privileged`.
+
+Server state and policy:
+
+- `server-player-permission-api` and `server-player-permission-state-mod`;
+- `server-player-permission-network-sync-mod`;
+- `server-player-game-mode-api` and `server-player-game-mode-state-mod`;
+- `server-player-game-mode-vanilla-lib` and its blanket vanilla glue mod;
+- `server-player-default-creative-vanilla-mod`;
+- `server-player-flight-permission-vanilla-mod`;
+- `server-command-game-mode-vanilla-mod`;
+- `server-command-privilege-vanilla-mod`.
+
+Client presentation cache:
+
+- `client-player-permission-api`;
+- `client-player-permission-state-mod`;
+- `client-player-permission-network-receive-mod`.
+
+Protocol contributors are split into
+`player-permission-network-messages-mod` and
+`outline-network-messages-mod`; neither is centralized in the protocol owner.
 
 ## Sound domain
 

@@ -59,12 +59,14 @@ The top-level client selects neutral state and concrete presentation:
 - crosshair;
 - number-key and wheel hotbar selection;
 - pause and inventory input;
+- inventory number-key move/swap behavior;
 - configurable chat-key input;
 - client gravity prediction;
 - fixed-rate movement, inertia, jump, sprint-jump, sprint, sneak, and flight controls;
 - independent sneak state, speed, edge-protection, camera, and block-use routing policies;
 - held-item fallback;
 - crafting-table interaction;
+- permission-gated creative catalog item picking;
 - layered chunk priority.
 
 `client-graphics.toml` adds:
@@ -94,6 +96,7 @@ changing controls or graphics.
 - lifecycle messages;
 - sessions and timeout;
 - player admission contracts;
+- generated, owner-scoped player permission state and synchronization;
 - generic kick contracts and authoritative cleanup;
 - bootstrap.
 
@@ -106,6 +109,7 @@ adds neutral, but optional, feature pipelines:
 - chunk request handling;
 - chat ECS contracts, network bridges, and the Brigadier command provider;
 - flight capability state and synchronization;
+- per-player outline capability state and synchronization;
 - sun state and synchronization.
 
 `server-vanilla.toml` imports `server-biomes-vanilla.toml` and the independent
@@ -116,11 +120,15 @@ adds neutral, but optional, feature pipelines:
 - the biome runtime registry, vanilla selector, and shared biome sampler;
 - global-chat audience policy and case-insensitive unique player names;
 - chat command routing and optional clear-chat, flight, flight-speed, kick,
-  teleport, speed, gravity, and TPS commands;
+  teleport, speed, scale, gravity, give, game-mode, privilege, and TPS commands;
 - player-interest chunk residency;
 - world-scope player visibility;
 - default dimension lifecycle;
-- grant-all flight;
+- typed vanilla permissions and the permission-to-flight-capability adapter;
+- neutral game-mode state plus vanilla Creative, Survival, and Adventure
+  policy;
+- a separate default join policy that starts players Creative and Privileged;
+- server-driven outline policy;
 - default sun;
 - Nether and Aether portal rules;
 - portal ignition and travel;
@@ -130,7 +138,8 @@ adds neutral, but optional, feature pipelines:
 - quantity stacking and consumption;
 - reach validation;
 - block breaking and `PlaceBlock` item behavior;
-- crafting-table menus.
+- crafting-table menus;
+- privileged creative catalog item creation.
 
 `server.toml` selects the concrete world:
 

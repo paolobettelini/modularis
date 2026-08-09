@@ -18,6 +18,7 @@ use server_player_gravity_api::{
     ServerPlayerGravityApi, ServerPlayerGravitySet, SetServerPlayerGravity,
 };
 use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
+use generated_permission_registry::PermissionId;
 use std::sync::{Arc, Mutex};
 use tokio::task::JoinHandle;
 
@@ -84,7 +85,7 @@ fn register_command(commands: &ServerCommandRegistry, queue: &GravityCommandQueu
         1
     });
     let command: ArgumentBuilder<ServerCommandSource> = literal("setgravity").then(arguments);
-    commands.register(command);
+    commands.register_restricted("setgravity", PermissionId::Privileged, command);
 }
 
 fn apply_gravity_commands(

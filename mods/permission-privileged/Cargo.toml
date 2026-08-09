@@ -1,0 +1,11 @@
+[package]
+name = "permission-privileged"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+support = true
+
+[package.metadata.permission]
+id = "vanilla:privileged"
+implies = ["vanilla:can-flight", "vanilla:can-interact", "vanilla:can-change-own-game-mode"]

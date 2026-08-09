@@ -6,7 +6,8 @@ use bevy_mod::BevyMod;
 use block_shape_api::BlockShape;
 use client_bevy_default_plugins_mod::ClientBevyDefaultPluginsMod;
 use client_block_outline_api::{
-    BlockOutlineStyle, ClientBlockOutlineApi, ClientBlockOutlineSet, SetClientBlockOutline,
+    BlockOutlineStyle, ClientBlockOutlineApi, ClientBlockOutlineEnabled, ClientBlockOutlineSet,
+    SetClientBlockOutline, SetClientBlockOutlineEnabled,
 };
 use client_game_state_api::{GameState, GameStateApi};
 use std::collections::HashMap;
@@ -47,7 +48,9 @@ impl ClientBlockOutlineBevyMod {
         bevy.app
             .init_resource::<BlockOutlineMesh>()
             .init_resource::<ActiveBlockOutlines>()
+            .init_resource::<ClientBlockOutlineEnabled>()
             .add_message::<SetClientBlockOutline>()
+            .add_message::<SetClientBlockOutlineEnabled>()
             .configure_sets(
                 Update,
                 (
@@ -59,7 +62,9 @@ impl ClientBlockOutlineBevyMod {
             )
             .add_systems(
                 Update,
-                apply_block_outline_commands.in_set(ClientBlockOutlineSet::Apply),
+                (apply_outline_visibility, apply_block_outline_commands)
+                    .chain()
+                    .in_set(ClientBlockOutlineSet::Apply),
             )
             .add_systems(OnExit(GameState::InGame), clear_block_outlines);
         Self
@@ -78,6 +83,7 @@ fn apply_block_outline_commands(
     mesh: Res<BlockOutlineMesh>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut active: ResMut<ActiveBlockOutlines>,
+    enabled: Res<ClientBlockOutlineEnabled>,
 ) {
     for command in commands.read() {
         remove_outline(
@@ -96,6 +102,7 @@ fn apply_block_outline_commands(
             block,
             &command.shape,
             command.style,
+            enabled.0,
         );
         active.0.insert(command.owner.clone(), outline);
     }
@@ -108,6 +115,7 @@ fn spawn_outline(
     block: BlockPos,
     shape: &BlockShape,
     style: BlockOutlineStyle,
+    enabled: bool,
 ) -> ActiveBlockOutline {
     let color = Color::srgba(
         style.color[0],
@@ -129,7 +137,10 @@ fn spawn_outline(
     let expansion = style.expansion.max(0.0);
     let origin = Vec3::new(block.x as f32, block.y as f32, block.z as f32);
     let entity = commands
-        .spawn((Transform::from_translation(origin), Visibility::default()))
+        .spawn((
+            Transform::from_translation(origin),
+            if enabled { Visibility::Inherited } else { Visibility::Hidden },
+        ))
         .with_children(|parent| {
             for edge in shape.boundary_edges() {
                 let axis_direction = (edge.end - edge.start).normalize_or_zero();
@@ -160,6 +171,22 @@ fn spawn_outline(
         })
         .id();
     ActiveBlockOutline { entity, material }
+}
+
+fn apply_outline_visibility(
+    mut requests: MessageReader<SetClientBlockOutlineEnabled>,
+    mut enabled: ResMut<ClientBlockOutlineEnabled>,
+    active: Res<ActiveBlockOutlines>,
+    mut visibility: Query<&mut Visibility>,
+) {
+    for request in requests.read() {
+        enabled.0 = request.0;
+        for outline in active.0.values() {
+            if let Ok(mut value) = visibility.get_mut(outline.entity) {
+                *value = if request.0 { Visibility::Inherited } else { Visibility::Hidden };
+            }
+        }
+    }
 }
 
 fn remove_outline(

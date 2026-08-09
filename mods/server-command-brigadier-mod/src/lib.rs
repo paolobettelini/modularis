@@ -9,15 +9,17 @@ use server_command_api::{
     CommandPlayer, ServerCommandApi, ServerCommandRegistry, ServerCommandSource,
 };
 use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
+use server_player_permission_api::{ServerPlayerPermissionApi, ServerPlayerPermissions};
 use tokio::task::JoinHandle;
 
 pub struct ServerCommandBrigadierMod;
 
 impl ServerCommandBrigadierMod {
-    pub fn init<C: ServerChatApi, P: ServerPlayerRegistryApi>(
+    pub fn init<C: ServerChatApi, P: ServerPlayerRegistryApi, R: ServerPlayerPermissionApi>(
         bevy: &mut BevyMod,
         _chat: &mut C,
         _players: &mut P,
+        _permissions: &mut R,
     ) -> Self {
         bevy.app
             .init_resource::<ServerCommandRegistry>()
@@ -39,10 +41,11 @@ fn execute_commands(
     mut requests: MessageReader<ServerCommandRequested>,
     commands: Res<ServerCommandRegistry>,
     players: Res<ServerPlayerRegistry>,
+    permissions: Res<ServerPlayerPermissions>,
     mut output: MessageWriter<PublishServerChatMessage>,
 ) {
     for request in requests.read() {
-        let Some(source) = command_source(request.player_id, &players) else {
+        let Some(source) = command_source(request.player_id, &players, &permissions) else {
             continue;
         };
         if let Err(error) = commands.execute(&request.input, source) {
@@ -58,10 +61,11 @@ fn complete_commands(
     mut requests: MessageReader<ServerCommandSuggestionsRequested>,
     commands: Res<ServerCommandRegistry>,
     players: Res<ServerPlayerRegistry>,
+    permissions: Res<ServerPlayerPermissions>,
     mut ready: MessageWriter<ServerCommandSuggestionsReady>,
 ) {
     for request in requests.read() {
-        let Some(source) = command_source(request.player_id, &players) else {
+        let Some(source) = command_source(request.player_id, &players, &permissions) else {
             continue;
         };
         ready.write(ServerCommandSuggestionsReady {
@@ -75,6 +79,7 @@ fn complete_commands(
 fn command_source(
     player_id: player_network_message_types::PlayerId,
     registry: &ServerPlayerRegistry,
+    permissions: &ServerPlayerPermissions,
 ) -> Option<ServerCommandSource> {
     let player = registry.player(player_id)?;
     let online_players = registry
@@ -89,5 +94,6 @@ fn command_source(
         player_id,
         player_name: player.name.clone(),
         online_players,
+        effective_permissions: permissions.effective(player_id).into_iter().collect(),
     })
 }

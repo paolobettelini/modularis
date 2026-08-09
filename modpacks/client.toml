@@ -15,6 +15,7 @@ mods = [
     "client-sound-events-mod",
     "client-game-state-bevy-impl",
     "client-player-flight-state-mod",
+    "client-player-permission-state-mod",
     "client-player-flight-speed-state-mod",
     "client-player-speed-state-mod",
     "client-player-scale-state-mod",
@@ -53,6 +54,8 @@ mods = [
     "client-inventory-ui-bevy-mod",
     "client-item-catalog-ui-mod",
     "client-inventory-drag-drop-mod",
+    "client-inventory-number-swap-mod",
+    "client-creative-inventory-network-send-mod",
     "client-cell-menu-cache-mod",
     "client-cell-menu-optimistic-move-mod",
     "client-cell-menu-network-receive-mod",
@@ -73,6 +76,7 @@ mods = [
     "client-chat-network-send-mod",
     "client-chat-ui-bevy-mod",
     "client-player-flight-network-receive-mod",
+    "client-player-permission-network-receive-mod",
     "client-player-flight-speed-network-receive-mod",
     "client-player-speed-network-receive-mod",
     "client-player-scale-network-receive-mod",
@@ -110,6 +114,7 @@ mods = [
     "client-sun-network-receive-mod",
     "client-sun-disc-bevy-mod",
     "client-block-outline-bevy-mod",
+    "client-block-outline-network-receive-mod",
 ]
 name = "Modularis client"
-version = "0.0.3"
+version = "0.0.4"

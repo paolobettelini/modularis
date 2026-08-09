@@ -1,0 +1,27 @@
+[package]
+name = "server-player-permission-state-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerPlayerPermissionStateMod"
+provides = "server-player-permission-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "permission-registry-codegen", "server-player-lifecycle-events-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+generated-permission-registry = "0.1.0"
+permission-registry-codegen = { path = "../permission-registry-codegen" }
+server-player-lifecycle-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-lifecycle-events-mod = { path = "../server-player-lifecycle-events-mod" }
+server-player-permission-api = { path = "../server-player-permission-api" }
+server-player-registry-api = { path = "../server-player-registry-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-permission-registry = { path = "../generated-permission-registry" }

@@ -16,6 +16,7 @@ use server_command_api::{
 };
 use server_kick_api::{ServerKickApi, ServerKickRequested, ServerKickSet, ServerKickTarget};
 use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
+use generated_permission_registry::PermissionId;
 use std::sync::{Arc, Mutex};
 use tokio::task::JoinHandle;
 
@@ -82,7 +83,7 @@ fn register_command(commands: &ServerCommandRegistry, queue: &KickCommandQueue) 
         1
     });
     let command: ArgumentBuilder<ServerCommandSource> = literal("kick").then(arguments);
-    commands.register(command);
+    commands.register_restricted("kick", PermissionId::Privileged, command);
 }
 
 fn apply_kick_commands(

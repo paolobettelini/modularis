@@ -159,6 +159,19 @@ Input
 A new mod can insert a system into the correct stage without editing the
 existing implementation.
 
+The permission pipeline is:
+
+```text
+Apply -> DeriveCapabilities -> Sync
+```
+
+Permission IDs come from codegen and may imply other IDs transitively. Explicit
+grants are owner-scoped, so two independent mods can grant the same permission
+without one revoking the other's contribution. Capability adapters run after
+the effective set changes and before it is synchronized. This is useful when a
+permission should drive a narrower API such as flight while remaining
+independent from the transport and client controls.
+
 ## Claim-and-fallback behavior
 
 Some interactions have several possible handlers. Right-clicking a block may

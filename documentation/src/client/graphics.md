@@ -184,6 +184,17 @@ looked-block policy in `client-vanilla.toml`. Both are required: the provider
 draws owner-keyed outline state, while the policy performs the raycast and
 publishes `vanilla:looked-block` updates.
 
+Visibility is independently server-driven. The packet contributor owns the
+small client-bound contract `SetOutline(bool)`. Server state accepts
+`SetPlayerOutline`, synchronizes only the affected player, and the client
+receiver updates `ClientBlockOutlineEnabled`. Disabling it hides the existing
+outline roots instead of deleting owner state, so re-enabling restores the
+current looked-block outline immediately.
+
+This contract intentionally contains no game-mode enum. Adventure mode is one
+policy that disables outlines, but a minigame, spectator rule, accessibility
+rule, or scoped server feature can use the same capability directly.
+
 ## Adding a lighting stage
 
 Create a mod that depends on `ClientChunkVertexLightingApi` and registers a pure

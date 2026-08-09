@@ -15,6 +15,7 @@ use server_command_api::{
     split_player_prefix,
 };
 use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
+use generated_permission_registry::PermissionId;
 use server_player_speed_api::{ServerPlayerSpeedApi, ServerPlayerSpeedSet, SetServerPlayerSpeed};
 use std::sync::{Arc, Mutex};
 use tokio::task::JoinHandle;
@@ -82,7 +83,7 @@ fn register_command(commands: &ServerCommandRegistry, queue: &SpeedCommandQueue)
         1
     });
     let command: ArgumentBuilder<ServerCommandSource> = literal("speed").then(arguments);
-    commands.register(command);
+    commands.register_restricted("speed", PermissionId::Privileged, command);
 }
 
 fn apply_speed_commands(

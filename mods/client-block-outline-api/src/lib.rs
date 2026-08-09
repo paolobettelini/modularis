@@ -29,6 +29,16 @@ pub struct SetClientBlockOutline {
     pub style: BlockOutlineStyle,
 }
 
+#[derive(Resource, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ClientBlockOutlineEnabled(pub bool);
+
+impl Default for ClientBlockOutlineEnabled {
+    fn default() -> Self { Self(true) }
+}
+
+#[derive(Message, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SetClientBlockOutlineEnabled(pub bool);
+
 #[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ClientBlockOutlineSet {
     Collect,

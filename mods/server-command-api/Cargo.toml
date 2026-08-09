@@ -1,6 +1,6 @@
 [package]
 name = "server-command-api"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
@@ -9,4 +9,8 @@ api = true
 [dependencies]
 azalea-brigadier = "=0.16.0"
 bevy = "0.17.3"
+generated-permission-registry = "0.1.0"
 player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+
+[patch.crates-io]
+generated-permission-registry = { path = "../generated-permission-registry" }

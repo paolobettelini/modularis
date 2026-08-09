@@ -1,0 +1,23 @@
+[package]
+name = "server-player-flight-permission-vanilla-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerPlayerFlightPermissionVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-player-permission-api", "server-player-flight-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+generated-permission-registry = "0.1.0"
+server-player-flight-api = { path = "../server-player-flight-api" }
+server-player-permission-api = { path = "../server-player-permission-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-permission-registry = { path = "../generated-permission-registry" }

@@ -1,0 +1,23 @@
+[package]
+name = "client-inventory-number-swap-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientInventoryNumberSwapMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "client-inventory-ui-api", "client-inventory-cache-api", "inventory-events-mod", "client-game-state-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-inventory-cache-api = { path = "../client-inventory-cache-api" }
+client-inventory-ui-api = { path = "../client-inventory-ui-api" }
+inventory-core-api = { git = "https://github.com/paolobettelini/modularis.git" }
+inventory-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
+inventory-events-mod = { path = "../inventory-events-mod" }
+tokio = { version = "1.48.0", features = ["full"] }

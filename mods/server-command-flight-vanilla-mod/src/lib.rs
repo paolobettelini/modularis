@@ -18,6 +18,8 @@ use server_player_flight_api::{
     SetPlayerFlightCapability,
 };
 use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
+use generated_permission_registry::PermissionId;
+use server_player_permission_api::{ServerPlayerPermissionApi, ServerPlayerPermissions};
 use std::sync::{Arc, Mutex};
 use tokio::task::JoinHandle;
 
@@ -38,12 +40,14 @@ impl ServerCommandFlightVanillaMod {
         H: ServerChatApi,
         P: ServerPlayerRegistryApi,
         F: ServerPlayerFlightApi,
+        R: ServerPlayerPermissionApi,
     >(
         bevy: &mut BevyMod,
         _commands: &mut C,
         _chat: &mut H,
         _players: &mut P,
         _flight: &mut F,
+        _permissions: &mut R,
     ) -> Self {
         let queue = FlightCommandQueue::default();
         register_command(bevy.app.world().resource::<ServerCommandRegistry>(), &queue);
@@ -72,6 +76,7 @@ fn register_command(commands: &ServerCommandRegistry, queue: &FlightCommandQueue
         )
         .into(),
     )
+    .requires(|source| source.has_permission(PermissionId::Privileged))
     .executes(move |context: &CommandContext<ServerCommandSource>| {
         target_queue
             .lock()
@@ -94,19 +99,29 @@ fn register_command(commands: &ServerCommandRegistry, queue: &FlightCommandQueue
             1
         })
         .then(player_argument);
-    commands.register(command);
+    commands.register_restricted("flight", PermissionId::CanFlight, command);
 }
 
 fn apply_flight_commands(
     queue: Res<FlightCommandQueue>,
     players: Res<ServerPlayerRegistry>,
     capabilities: Res<ServerPlayerFlightCapabilities>,
+    permissions: Res<ServerPlayerPermissions>,
     mut changes: MessageWriter<SetPlayerFlightCapability>,
     mut chat: MessageWriter<PublishServerChatMessage>,
 ) {
     let invocations =
         std::mem::take(&mut *queue.0.lock().expect("flight command queue lock poisoned"));
     for invocation in invocations {
+        if invocation.target_name.is_some()
+            && !permissions.has(invocation.source, PermissionId::Privileged)
+        {
+            chat.write(PublishServerChatMessage {
+                audience: Audience::personal(invocation.source),
+                text: "This command is not available".to_string(),
+            });
+            continue;
+        }
         let target = match &invocation.target_name {
             Some(name) => players
                 .players()

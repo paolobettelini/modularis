@@ -11,9 +11,9 @@ use server_world_seed_api::{ServerWorldSeed, ServerWorldSeedApi};
 use tokio::task::JoinHandle;
 
 const CLIMATE_SEED_NAMESPACE: &str = "demo:biome-climate";
-// Spatial frequency, not visual size. Dividing the previous value by three
-// makes coherent biome regions three times wider in X/Z.
-const BIOME_SCALE_MULTIPLIER: f32 = 4.0 / 3.0;
+// Spatial frequency, not visual size. The current tuning is three times wider
+// than the previous 4/3 multiplier in both X and Z.
+const BIOME_SCALE_MULTIPLIER: f32 = 4.0 / 9.0;
 const SPAWN_PLAINS_RADIUS: i64 = 8;
 const REGION_DETAIL_STRENGTH: f32 = 0.18;
 const CLIMATE_INFLUENCE: f32 = 0.10;

@@ -38,6 +38,14 @@ pub fn vanilla_granted_item<I: ItemManagerApi, B: BlockManagerApi>(
     ItemInstance::with_metadata(item, metadata)
 }
 
+/// Builds the inexhaustible vanilla item representation used when a
+/// privileged player takes an entry from the client item catalog.
+pub fn vanilla_creative_item<I: ItemManagerApi, B: BlockManagerApi>(item: ItemId) -> ItemInstance {
+    let mut item = vanilla_granted_item::<I, B>(item, 1);
+    item.metadata.quantity = Some(Quantity::Infinite);
+    item
+}
+
 /// Plans one atomic cell update, preferring an existing compatible stack and
 /// then an empty storage cell before the hotbar.
 pub fn plan_give_item(

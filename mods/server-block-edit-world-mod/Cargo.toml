@@ -1,6 +1,6 @@
 [package]
 name = "server-block-edit-world-mod"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
@@ -11,6 +11,7 @@ init = [
     "bevy-mod",
     "block-edit-events-mod",
     "server-chunk-world-api",
+    "server-player-permission-api",
 ]
 run = []
 ownership = []
@@ -18,8 +19,13 @@ ownership = []
 [dependencies]
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
+generated-permission-registry = "0.1.0"
 block-edit-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
 block-edit-events-mod = { path = "../block-edit-events-mod" }
 server-chunk-world-api = { path = "../server-chunk-world-api" }
+server-player-permission-api = { path = "../server-player-permission-api" }
 server-block-edit-world-lib = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-permission-registry = { path = "../generated-permission-registry" }

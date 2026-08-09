@@ -91,9 +91,9 @@ The vanilla selector combines two signals:
   character without letting central climate points dominate the map.
 
 The region frequency is intentionally broad enough for readable areas while
-still showing several biomes during local flight. The current multiplier is
-`4.0`, half the previous test value, so regions are about twice as wide along
-each horizontal axis.
+still showing several biomes during local flight. The current selector uses a
+`4.0 / 9.0` coordinate multiplier. This makes regions about three times wider
+along each horizontal axis than the immediately preceding tuning value.
 
 A replacement selector may use ranges, latitude, Voronoi regions, player
 state, saved maps, or no climate data.

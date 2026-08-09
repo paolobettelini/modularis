@@ -1,0 +1,21 @@
+[package]
+name = "client-player-permission-state-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientPlayerPermissionStateMod"
+provides = "client-player-permission-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "permission-registry-codegen", "client-game-state-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-player-permission-api = { path = "../client-player-permission-api" }
+permission-registry-codegen = { path = "../permission-registry-codegen" }
+tokio = { version = "1.48.0", features = ["full"] }

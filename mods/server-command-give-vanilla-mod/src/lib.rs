@@ -8,6 +8,7 @@ use inventory_events_api::{
 };
 use inventory_events_mod::InventoryEventsMod;
 use item_manager_api::ItemManagerApi;
+use generated_permission_registry::PermissionId;
 use server_chat_api::{PublishServerChatMessage, ServerChatApi, ServerChatSet};
 use server_command_api::{
     CommandPlayer, ServerCommandApi, ServerCommandRegistry, ServerCommandSource,
@@ -94,7 +95,7 @@ fn register_command<I: ItemManagerApi>(commands: &ServerCommandRegistry, queue: 
         1
     });
     let command: ArgumentBuilder<ServerCommandSource> = literal("give").then(arguments);
-    commands.register(command);
+    commands.register_restricted("give", PermissionId::Privileged, command);
 }
 
 struct GiveSuggestions<I>(PhantomData<I>);

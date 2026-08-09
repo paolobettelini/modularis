@@ -1,5 +1,5 @@
 name = "Minecraft demo server foundation"
-version = "0.0.1"
+version = "0.0.2"
 description = "Convenience umbrella for the core plus neutral chat, inventory, cell-menu, block-edit, flight and sun pipelines."
 modpacks = ["server-core"]
 ignore = []
@@ -24,6 +24,8 @@ mods = [
     "server-chunk-request-mod",
     "server-player-flight-capability-mod",
     "server-player-flight-network-sync-mod",
+    "server-player-outline-state-mod",
+    "server-player-outline-network-sync-mod",
     "server-sun-state-mod",
     "server-sun-network-sync-mod",
 ]

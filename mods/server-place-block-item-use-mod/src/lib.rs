@@ -16,6 +16,8 @@ use server_player_hitbox_api::{
     ServerPlayerHitboxApi, ServerPlayerHitboxSet, ServerPlayerHitboxes,
 };
 use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
+use generated_permission_registry::PermissionId;
+use server_player_permission_api::{ServerPlayerPermissionApi, ServerPlayerPermissions};
 use std::marker::PhantomData;
 use tokio::task::JoinHandle;
 
@@ -29,6 +31,7 @@ impl<B: BlockManagerApi> ServerPlaceBlockItemUseMod<B> {
         HB: ServerPlayerHitboxApi,
         R: ServerBlockInteractionRulesApi,
         H: BlockShapeApi,
+        PM: ServerPlayerPermissionApi,
     >(
         bevy: &mut BevyMod,
         _inventory_events: &mut InventoryEventsMod,
@@ -40,6 +43,7 @@ impl<B: BlockManagerApi> ServerPlaceBlockItemUseMod<B> {
         _rules: &mut R,
         _blocks: &mut B,
         _shapes: &mut H,
+        _permissions: &mut PM,
     ) -> Self {
         bevy.app.add_systems(
             Update,
@@ -62,11 +66,13 @@ fn apply_place_block_item<B: BlockManagerApi>(
     hitboxes: Res<ServerPlayerHitboxes>,
     rules: Res<ServerBlockInteractionRules>,
     shapes: Res<BlockShapeService>,
+    permissions: Res<ServerPlayerPermissions>,
     mut uses: MessageReader<HeldItemUseDispatched>,
     mut placed: MessageWriter<ServerBlockPlaced>,
     mut succeeded: MessageWriter<ItemUseSucceeded>,
 ) {
     for item_use in uses.read() {
+        if !permissions.has(item_use.player_id, PermissionId::CanInteract) { continue; }
         match try_place_block_item::<B>(
             &world, &players, &gravities, &hitboxes, &rules, &shapes, item_use,
         ) {

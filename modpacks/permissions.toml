@@ -1,0 +1,13 @@
+name = "Minecraft demo permissions"
+version = "0.0.2"
+description = "Generated typed permission IDs and vanilla hierarchy declarations."
+modpacks = []
+ignore = []
+
+mods = [
+    "permission-registry-codegen",
+    "permission-can-flight",
+    "permission-can-interact",
+    "permission-can-change-own-game-mode",
+    "permission-privileged",
+]

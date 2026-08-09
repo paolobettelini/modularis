@@ -235,3 +235,14 @@ generic outline provider available for other features; omitting the provider
 leaves outline commands without a renderer.
 
 Crosshair and outline do not own, spawn, or reposition each other.
+
+The server may independently enable or disable the whole outline capability per
+player through `SetPlayerOutline`. Its network adapter sends
+`SetOutline(bool)`; the client keeps owner-keyed outline state but hides all
+roots while disabled. Adventure mode uses this policy, but the packet and state
+APIs do not depend on game modes.
+
+The selected vanilla break, placement, crafting-table, and portal-ignite glue
+also requires effective `CanInteract` on the server. The pure mechanic
+libraries do not: custom orchestration may substitute a scoped or
+application-specific authorization rule before calling them.

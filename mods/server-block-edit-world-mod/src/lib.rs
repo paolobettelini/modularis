@@ -6,15 +6,18 @@ use block_edit_events_api::{
 use block_edit_events_mod::BlockEditEventsMod;
 use server_block_edit_world_lib::{allow_block_break, apply_block_break};
 use server_chunk_world_api::{ServerChunkWorld, ServerChunkWorldApi};
+use generated_permission_registry::PermissionId;
+use server_player_permission_api::{ServerPlayerPermissionApi, ServerPlayerPermissions};
 use tokio::task::JoinHandle;
 
 pub struct ServerBlockEditWorldMod;
 
 impl ServerBlockEditWorldMod {
-    pub fn init<W: ServerChunkWorldApi>(
+    pub fn init<W: ServerChunkWorldApi, P: ServerPlayerPermissionApi>(
         bevy: &mut BevyMod,
         _events: &mut BlockEditEventsMod,
         _world: &mut W,
+        _permissions: &mut P,
     ) -> Self {
         bevy.app
             .add_systems(
@@ -31,10 +34,12 @@ impl ServerBlockEditWorldMod {
 }
 
 fn collect_break_requests(
+    permissions: Res<ServerPlayerPermissions>,
     mut requests: MessageReader<ServerBlockBreakRequested>,
     mut pending: ResMut<PendingBlockBreaks>,
 ) {
     for request in requests.read() {
+        if !permissions.has(request.player_id, PermissionId::CanInteract) { continue; }
         pending.breaks.push(allow_block_break(request));
     }
 }

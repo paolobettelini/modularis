@@ -219,8 +219,10 @@ Client layers:
 - optimistic move preview;
 - network send/receive;
 - inventory UI;
-- optional read-only item catalog;
+- optional item-catalog presentation;
 - drag/drop behavior;
+- number-key swap behavior;
+- optional permission-gated creative item-pick behavior;
 - hotbar UI;
 - quantity decoration;
 - favicon decoration.
@@ -230,6 +232,14 @@ authoritative and corrects rejected or transformed operations.
 
 Operation IDs let server-side specialized handlers and client-side pending state
 refer to one move.
+
+`InventoryOperationSequence` is shared by drag/drop and number-key behavior.
+While the inventory is open, `client-inventory-number-swap-mod` maps keys 1–9
+to the corresponding server-defined hotbar cells and emits the normal
+`LocalInventoryMoveIntent` for the item below the cursor. The server therefore
+performs the same authoritative move-or-swap validation as it does for drag and
+drop. This input policy is independent from both inventory rendering and the
+always-visible hotbar selector.
 
 ## Item rendering
 
@@ -254,12 +264,37 @@ ID or display label. The list is scrollable and emits the same
 `InventorySlotVisualCreated` contract as real slots, so favicon/model decorator
 mods render catalog entries without catalog-specific branches.
 
-Catalog entries are deliberately not `InventoryItemVisual` entities. They are
-read-only registry views, not authoritative cells and not drag sources. The
-search field uses the shared `InventoryUiInputCapture` resource so the
-inventory key cannot close the screen while the user is typing. A creative
-inventory or item-pick behavior should be a separate policy mod layered on top
-of this presentation contract.
+Wheel input changes the catalog only while the cursor is inside its viewport.
+The panel includes a draggable scrollbar and uses a slightly larger wheel step
+than the surrounding UI. Its scroll offset lives in catalog state rather than
+in the spawned node, so an authoritative inventory update may rebuild the root
+without snapping the item list back to the first row. Changing the search query
+intentionally resets the offset because it creates a different result set.
+
+Catalog entries are deliberately not `InventoryItemVisual` entities. They use
+the separate `ItemCatalogVisual` contract because they are registry views, not
+authoritative cells. The search field uses the shared
+`InventoryUiInputCapture` resource so the inventory key cannot close the screen
+while the user is typing.
+
+`client-item-catalog-creative-mod` is a separate vanilla policy layered on top
+of that presentation. When the synchronized local permission set contains
+`Privileged`, it permits dragging a catalog item to a real slot or pressing a
+number key while hovering a catalog entry. Both actions emit a
+`LocalCreativeItemTakeIntent`; they never mutate the client cache directly.
+While an icon is dragged, `OverrideClip` and a global UI z-index lift it above
+both the catalog viewport and inventory panel; drag completion restores normal
+clipping and stacking.
+
+The dedicated network bridge sends only item ID, operation ID, and destination
+cell. `server-creative-inventory-vanilla-mod` validates `Privileged`, validates
+the cell against the authoritative layout, constructs vanilla metadata through
+`server-give-item-lib`, and requests an infinite-quantity authoritative cell
+update. A forged packet from an unprivileged client is ignored.
+
+A server can keep the searchable catalog read-only by omitting the creative
+client/server policy mods, or install a different rule that charges currency,
+checks a runtime scope, limits item IDs, or creates finite quantities.
 
 ## Extending inventory
 

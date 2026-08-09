@@ -9,13 +9,15 @@ use server_portal_api::{
     ServerPortalApi, ServerPortalOpened, ServerPortalRules, ServerPortalSet, ServerPortals,
 };
 use server_portal_ignite_lib::evaluate_portal_ignition;
+use generated_permission_registry::PermissionId;
+use server_player_permission_api::{ServerPlayerPermissionApi, ServerPlayerPermissions};
 use std::marker::PhantomData;
 use tokio::task::JoinHandle;
 
 pub struct ServerPortalIgniteVanillaMod<B>(PhantomData<B>);
 
 impl<B: BlockManagerApi> ServerPortalIgniteVanillaMod<B> {
-    pub fn init<P: ServerPortalApi, W: ServerChunkWorldApi, D: ServerDimensionApi>(
+    pub fn init<P: ServerPortalApi, W: ServerChunkWorldApi, D: ServerDimensionApi, PM: ServerPlayerPermissionApi>(
         bevy: &mut BevyMod,
         _inventory: &mut InventoryEventsMod,
         _portals: &mut P,
@@ -23,6 +25,7 @@ impl<B: BlockManagerApi> ServerPortalIgniteVanillaMod<B> {
         _dimensions: &mut D,
         _blocks: &mut B,
         _igniter: &mut item_portal_igniter_meta::ItemPortalIgniterMetaMod,
+        _permissions: &mut PM,
     ) -> Self {
         bevy.app.add_systems(
             Update,
@@ -44,10 +47,12 @@ fn ignite_portals<B: BlockManagerApi>(
     rules: Res<ServerPortalRules>,
     mut portals: ResMut<ServerPortals>,
     mut uses: MessageReader<HeldItemUseDispatched>,
+    permissions: Res<ServerPlayerPermissions>,
     mut opened: MessageWriter<ServerPortalOpened>,
     mut succeeded: MessageWriter<ItemUseSucceeded>,
 ) {
     for item_use in uses.read() {
+        if !permissions.has(item_use.player_id, PermissionId::CanInteract) { continue; }
         let Some(ignition) = evaluate_portal_ignition::<B>(&world, &dimensions, &rules, item_use)
         else {
             continue;

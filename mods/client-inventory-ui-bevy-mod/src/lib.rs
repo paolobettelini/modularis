@@ -5,6 +5,7 @@ use client_inventory_cache_api::{ClientInventoryCache, ClientInventoryCacheApi};
 use client_inventory_ui_api::{
     ClientInventoryUiApi, ClientInventoryUiSet, InventoryItemNameVisual, InventoryItemVisual,
     InventoryMainPanel, InventorySlotVisual, InventoryUiInputCapture, InventoryUiRoot,
+    InventoryOperationSequence,
 };
 use inventory_core_api::{InventoryCell, InventorySectionLayout};
 use inventory_events_api::{InventoryClientRenderSet, InventorySlotVisualCreated};
@@ -28,6 +29,7 @@ impl<I: ItemManagerApi> ClientInventoryUiBevyMod<I> {
         bevy.app
             .init_resource::<RenderedInventoryRevision>()
             .init_resource::<InventoryUiInputCapture>()
+            .init_resource::<InventoryOperationSequence>()
             .configure_sets(
                 Update,
                 (ClientInventoryUiSet::Base, ClientInventoryUiSet::Extensions).chain(),

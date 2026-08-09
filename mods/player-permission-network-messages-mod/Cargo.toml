@@ -1,0 +1,20 @@
+[package]
+name = "player-permission-network-messages-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "PlayerPermissionNetworkMessagesMod"
+
+[package.metadata.mod.dependencies]
+init = ["permission-registry-codegen"]
+run = []
+ownership = []
+
+[package.metadata.network.messages]
+clientbound = ["player_permission_network_message_types::SetPlayerPermissions"]
+
+[dependencies]
+player-permission-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+permission-registry-codegen = { path = "../permission-registry-codegen" }
+tokio = { version = "1.48.0", features = ["full"] }

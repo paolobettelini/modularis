@@ -1,6 +1,6 @@
 [package]
 name = "client-inventory-ui-api"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 
 [package.metadata.mod]
@@ -9,3 +9,8 @@ api = true
 [dependencies]
 bevy = "0.17.3"
 inventory-core-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
+
+[patch.crates-io]
+generated-item-metadata = { path = "../generated-item-metadata" }
+generated-item-registry = { path = "../generated-item-registry" }

@@ -1,0 +1,49 @@
+[package]
+name = "server-creative-inventory-vanilla-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerCreativeInventoryVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "creative-inventory-events-mod",
+    "server-inventory-api",
+    "server-player-permission-api",
+    "inventory-events-mod",
+    "item-manager-api",
+    "block-manager-api",
+    "item-metadata-registry-codegen",
+    "item-quantity-meta",
+    "item-place-block-meta",
+    "item-portal-igniter-meta",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+block-manager-api = { path = "../block-manager-api" }
+creative-inventory-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
+creative-inventory-events-mod = { path = "../creative-inventory-events-mod" }
+generated-permission-registry = "0.1.0"
+inventory-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
+inventory-events-mod = { path = "../inventory-events-mod" }
+item-manager-api = { path = "../item-manager-api" }
+item-metadata-registry-codegen = { path = "../item-metadata-registry-codegen" }
+item-place-block-meta = { path = "../item-place-block-meta" }
+item-portal-igniter-meta = { path = "../item-portal-igniter-meta" }
+item-quantity-meta = { path = "../item-quantity-meta" }
+server-give-item-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+server-inventory-api = { path = "../server-inventory-api" }
+server-player-permission-api = { path = "../server-player-permission-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-block-registry = { path = "../generated-block-registry" }
+generated-item-metadata = { path = "../generated-item-metadata" }
+generated-item-registry = { path = "../generated-item-registry" }
+generated-permission-registry = { path = "../generated-permission-registry" }

@@ -1,0 +1,23 @@
+[package]
+name = "client-player-permission-network-receive-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientPlayerPermissionNetworkReceiveMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "client-player-permission-api", "network-protocol-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-player-permission-api = { path = "../client-player-permission-api" }
+generated-network-messages = "0.1.0"
+network-protocol-mod = { path = "../network-protocol-mod" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-network-messages = { path = "../generated-network-messages" }

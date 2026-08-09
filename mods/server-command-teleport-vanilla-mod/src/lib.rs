@@ -19,6 +19,7 @@ use server_dimension_api::{
     RequestPlayerDimensionChange, ServerDimensionApi, ServerDimensionSet, ServerDimensions,
 };
 use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
+use generated_permission_registry::PermissionId;
 use std::sync::{Arc, Mutex};
 use tokio::task::JoinHandle;
 
@@ -97,7 +98,7 @@ fn register_command(commands: &ServerCommandRegistry, queue: &TeleportCommandQue
         1
     });
     let command: ArgumentBuilder<ServerCommandSource> = literal("teleport").then(arguments);
-    commands.register(command);
+    commands.register_restricted("teleport", PermissionId::Privileged, command);
 }
 
 struct TeleportPlayerSuggestions;

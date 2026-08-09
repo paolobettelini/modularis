@@ -70,7 +70,8 @@ The split between `server-core.toml`, `server-base.toml`, and
 transport, sessions, lifecycle, and cleanup. The base umbrella adds neutral
 inventory, cell-menu, chat, block-edit, chunk-request, flight, and sun
 pipelines. The vanilla pack adds rules such as default loadouts, collision
-validation, block placement, portal behavior, and grant-all flight.
+validation, block placement, portal behavior, and the default
+Creative/Privileged join policy.
 
 `thecrown.toml` proves that the split is real. It imports only the core, chooses
 the few neutral feature pipelines it needs, then selects scope-aware providers

@@ -104,6 +104,21 @@ Design direction:
 - transfer routing with fresh destination handshakes;
 - task-based serialization where useful.
 
+## Permissions and game modes
+
+Current limits:
+
+- permission grants and game-mode state are not persistent;
+- permissions are global per player rather than scoped to a runtime node;
+- the demo has only an in-memory `/privilege` assignment policy; it is not tied
+  to persistent account roles yet.
+
+Design direction:
+
+- persistent account or role grants with owner identity preserved;
+- optional scope-keyed permission facets;
+- administrative assignment through a dedicated trusted surface.
+
 ## Inventory and menus
 
 Current limits:

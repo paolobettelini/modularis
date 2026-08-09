@@ -1,0 +1,15 @@
+[package]
+name = "server-player-permission-api"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+api = true
+
+[dependencies]
+bevy = "0.17.3"
+generated-permission-registry = "0.1.0"
+player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+
+[patch.crates-io]
+generated-permission-registry = { path = "../generated-permission-registry" }

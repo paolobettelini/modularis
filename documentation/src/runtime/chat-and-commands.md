@@ -139,6 +139,7 @@ pub struct ServerCommandSource {
     pub player_id: PlayerId,
     pub player_name: String,
     pub online_players: Vec<CommandPlayer>,
+    pub effective_permissions: HashSet<PermissionId>,
 }
 ```
 
@@ -163,13 +164,19 @@ registry.register(command);
 
 A system drains that queue in `ServerChatSet::ApplyGameplay`, validates the
 request against current ECS state, emits domain events, and publishes feedback.
-Permissions should be another rule/mod in that stage rather than hardcoded in
-the generic dispatcher.
+
+The command registry offers `register_restricted(name, permission, tree)`.
+Brigadier uses the requirement to omit unavailable roots from autocomplete,
+and direct execution of a known restricted root returns `This command is not
+available`. Targeted forms still perform a second gameplay-stage check when
+they require stronger authority than the root. Permission declarations and
+effective grants are documented in
+[Permissions and server game modes](../gameplay/permissions-and-game-modes.md).
 
 ## Vanilla command feature pack
 
 `server-commands-vanilla.toml` is an optional policy pack. It currently selects
-ten independent command mods:
+twelve independent command mods:
 
 | Mod | Syntax | Domain intention |
 | --- | --- | --- |
@@ -182,6 +189,8 @@ ten independent command mods:
 | `server-command-scale-vanilla-mod` | `/setscale <scale>`, `/setscale <player> <scale>` | changes authoritative model scale through the scale state contract |
 | `server-command-gravity-vanilla-mod` | `/setgravity <g>`, `/setgravity <x> <y> <z>`, and both forms prefixed by a player | changes that player's gravity vector |
 | `server-command-give-vanilla-mod` | `/give [player] <item-id> [amount]` | plans an authoritative inventory insertion and emits a cell update |
+| `server-command-game-mode-vanilla-mod` | `/gamemode <mode>`, `/gamemode <player> <mode>` | changes neutral game-mode state, which selected policy mods translate into capabilities |
+| `server-command-privilege-vanilla-mod` | `/privilege <player>` | toggles the target's explicit administrative authority |
 | `server-command-tps-vanilla-mod` | `/tps` | reports measured and target server tick rate to the caller |
 
 Speed `1` is the normal base speed. Flight speed is an independent multiplier
@@ -215,6 +224,18 @@ Teleport-to-player reads the destination player's dimension as well as their
 position. Teleport-to-coordinates keeps the subject in their current dimension.
 The dimension sync pipeline then updates visibility, local position and remote
 player replication.
+
+Administrative commands for kick, teleport, give, speed, flight speed, scale,
+gravity, and privilege assignment require `Privileged`. `/flight` requires `CanFlight`; selecting
+another player additionally requires `Privileged`. `/gamemode` requires
+`CanChangeOwnGameMode`, and its player-targeted form also requires
+`Privileged`. Personal `/clear` and read-only `/tps` remain public in the
+current policy pack. These requirements affect both suggestions and execution.
+
+Permission state is read afresh for every execution and completion request.
+After `/privilege` removes authority, restricted roots are absent from the next
+autocomplete response and typing one manually returns `This command is not
+available`.
 
 Servers can import the whole command pack, select only individual commands, or
 replace any command while keeping the underlying gameplay APIs.
@@ -254,7 +275,8 @@ the appropriate registry snapshots.
 
 ## Current limits
 
-- there is no permission or authentication model;
+- permission grants are process-local and are not persisted yet;
+- permissions are global per player rather than keyed by runtime scope;
 - chat text is plain text with no structured style spans;
 - suggestions are full replacement strings rather than editable completion
   ranges, and the UI displays only a small moving window;

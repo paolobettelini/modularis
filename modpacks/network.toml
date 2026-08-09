@@ -1,7 +1,7 @@
 name = "Minecraft demo network protocol"
-version = "0.0.1"
+version = "0.0.2"
 description = "Common ECS event contracts, packet contributors, and the generated network protocol."
-modpacks = ["blocks", "dimensions", "sounds", "patchwork-auth-network"]
+modpacks = ["blocks", "dimensions", "sounds", "permissions", "patchwork-auth-network"]
 ignore = []
 
 mods = [
@@ -14,6 +14,7 @@ mods = [
     "player-network-messages-mod",
     "player-flight-network-messages-mod",
     "player-flight-speed-network-messages-mod",
+    "player-permission-network-messages-mod",
     "player-speed-network-messages-mod",
     "player-scale-network-messages-mod",
     "chunk-network-messages-mod",
@@ -23,6 +24,9 @@ mods = [
     "sun-network-messages-mod",
     "sound-network-messages-mod",
     "portal-network-messages-mod",
+    "outline-network-messages-mod",
+    "creative-inventory-events-mod",
+    "creative-inventory-network-messages-mod",
     "cell-menu-network-messages-mod",
     "chat-network-messages-mod",
     "chat-clear-network-messages-mod",

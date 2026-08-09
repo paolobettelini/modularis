@@ -8,7 +8,8 @@ use azalea_brigadier::{
 };
 use bevy::prelude::*;
 use player_network_message_types::PlayerId;
-use std::sync::{Arc, RwLock};
+use generated_permission_registry::PermissionId;
+use std::{collections::{HashMap, HashSet}, sync::{Arc, RwLock}};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CommandPlayer {
@@ -21,6 +22,13 @@ pub struct ServerCommandSource {
     pub player_id: PlayerId,
     pub player_name: String,
     pub online_players: Vec<CommandPlayer>,
+    pub effective_permissions: HashSet<PermissionId>,
+}
+
+impl ServerCommandSource {
+    pub fn has_permission(&self, permission: PermissionId) -> bool {
+        self.effective_permissions.contains(&permission)
+    }
 }
 
 pub fn player_with_name(players: &[CommandPlayer], name: &str) -> Option<CommandPlayer> {
@@ -72,12 +80,14 @@ impl SuggestionProvider<ServerCommandSource> for OnlinePlayerSuggestions {
 #[derive(Resource, Clone)]
 pub struct ServerCommandRegistry {
     dispatcher: Arc<RwLock<CommandDispatcher<ServerCommandSource>>>,
+    requirements: Arc<RwLock<HashMap<String, PermissionId>>>,
 }
 
 impl Default for ServerCommandRegistry {
     fn default() -> Self {
         Self {
             dispatcher: Arc::new(RwLock::new(CommandDispatcher::new())),
+            requirements: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 }
@@ -90,7 +100,31 @@ impl ServerCommandRegistry {
             .register(command);
     }
 
+    pub fn register_restricted(
+        &self,
+        name: impl Into<String>,
+        permission: PermissionId,
+        command: ArgumentBuilder<ServerCommandSource>,
+    ) {
+        let name = name.into();
+        self.requirements
+            .write()
+            .expect("server command requirement registry lock poisoned")
+            .insert(name, permission);
+        self.register(command.requires(move |source| source.has_permission(permission)));
+    }
+
     pub fn execute(&self, input: &str, source: ServerCommandSource) -> Result<i32, String> {
+        let command_name = input.split_whitespace().next().unwrap_or_default();
+        if self
+            .requirements
+            .read()
+            .expect("server command requirement registry lock poisoned")
+            .get(command_name)
+            .is_some_and(|permission| !source.has_permission(*permission))
+        {
+            return Err("This command is not available".to_string());
+        }
         self.dispatcher
             .read()
             .expect("server command registry lock poisoned")
@@ -136,6 +170,7 @@ mod tests {
             player_id: 7,
             player_name: "Player7".to_string(),
             online_players: Vec::new(),
+            effective_permissions: HashSet::new(),
         }
     }
 

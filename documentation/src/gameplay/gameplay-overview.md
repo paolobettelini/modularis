@@ -22,6 +22,7 @@ The demo predicts:
 The server remains authoritative for:
 
 - accepted player position;
+- effective permissions and game-mode policy;
 - block edits;
 - inventory contents;
 - cell-menu contents;
@@ -36,10 +37,11 @@ of truth.
 
 Examples of optional vanilla behavior:
 
+- Creative, Survival, and Adventure capability policy;
 - collision validation;
 - jump acceptance;
 - sprint multiplier;
-- grant-all flight;
+- default Creative/Privileged assignment and permission-derived flight;
 - global chat and each individual vanilla command;
 - block reach;
 - block placement from item metadata;
@@ -61,5 +63,5 @@ Authoritative gameplay events usually carry:
 
 This gives unrelated mods enough context to validate or react.
 
-The following chapters cover movement, block interactions, inventory, and cell
-menus.
+The following chapters cover permissions, game modes, movement, block
+interactions, inventory, and cell menus.

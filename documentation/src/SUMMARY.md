@@ -30,6 +30,7 @@
   - [Dimensions and world scopes](./world/dimensions.md)
   - [Portals](./world/portals.md)
 - [Gameplay systems](./gameplay/gameplay-overview.md)
+  - [Permissions and server game modes](./gameplay/permissions-and-game-modes.md)
   - [Player movement and prediction](./gameplay/movement.md)
   - [Gravity, jump, sprint, and flight](./gameplay/movement-features.md)
   - [Block interaction and world edits](./gameplay/block-interaction.md)

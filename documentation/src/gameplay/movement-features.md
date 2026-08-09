@@ -243,19 +243,29 @@ player.
 
 ### Grant policy
 
-`server-player-flight-grant-all-vanilla-mod` listens to join events and writes:
+The vanilla composition separates the role fact from the runtime capability:
 
-```rust
-SetPlayerFlightCapability {
-    player_id,
-    enabled: true,
-}
-```
+- `server-player-default-creative-vanilla-mod` starts new players with
+  `Privileged`, which implies the typed `CanFlight` permission;
+- `server-player-flight-permission-vanilla-mod` listens to effective permission
+  changes in `ServerPlayerPermissionSet::DeriveCapabilities` and updates the
+  generic flight capability.
 
-Only this policy is vanilla. A custom server can:
+`server-player-flight-grant-all-vanilla-mod` still exists as a separate
+optional policy for compositions that want flight without administrative
+authority, but the standard vanilla profile no longer selects it.
+
+`Privileged` also implies `CanFlight` through the generated permission
+hierarchy. The `/flight` command requires effective `CanFlight`, but still
+toggles the separate capability value. Permission means the player is allowed
+to fly; capability state means flight controls are currently available, and
+the client can still enter or leave active flight by double-tapping jump.
+
+Only these adapters are vanilla. A custom server can:
 
 - omit it;
-- grant by permission;
+- grant the permission through another owner or hierarchy;
+- drive capability directly from custom scope state;
 - grant by level;
 - revoke in a region;
 - change capability at runtime.
@@ -285,27 +295,32 @@ can remain enabled.
 
 ## Adding a capability policy
 
-Create a server feature mod that emits `SetPlayerFlightCapability`.
+Create a server feature mod that either grants `CanFlight` or emits
+`SetPlayerFlightCapability` directly. Use a permission when several unrelated
+features need the same authorization fact; use direct capability state when the
+rule is local to one custom orchestrator.
 
 Example:
 
 ```rust
 fn grant_admin_flight(
     mut joined: MessageReader<ServerPlayerJoined>,
-    permissions: Res<Permissions>,
-    mut changes: MessageWriter<SetPlayerFlightCapability>,
+    roles: Res<Roles>,
+    mut changes: MessageWriter<SetPlayerPermission>,
 ) {
     for event in joined.read() {
-        changes.write(SetPlayerFlightCapability {
+        changes.write(SetPlayerPermission {
             player_id: event.player_id,
-            enabled: permissions.is_admin(event.player_id),
+            owner: "example:admin-role".to_string(),
+            permission: PermissionId::CanFlight,
+            enabled: roles.is_admin(event.player_id),
         });
     }
 }
 ```
 
-The policy does not send packets directly. The existing sync mod observes the
-applied change.
+The policy does not send packets directly. The permission adapter derives the
+capability and the existing capability sync mod observes the applied change.
 
 ## Adding a gravity, scale, or speed policy
 
