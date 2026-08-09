@@ -1,6 +1,6 @@
 [package]
 name = "client-inventory-toggle-input-mod"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
@@ -20,6 +20,7 @@ ownership = []
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 client-game-state-api = { path = "../client-game-state-api" }
+client-inventory-ui-api = { path = "../client-inventory-ui-api" }
 client-keybinding-api = { git = "https://github.com/paolobettelini/modularis.git" }
 client-settings-api = { path = "../client-settings-api" }
 client-settings-registry-codegen = { path = "../client-settings-registry-codegen" }

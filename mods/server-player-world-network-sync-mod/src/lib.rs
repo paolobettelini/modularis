@@ -3,7 +3,9 @@ use bevy_mod::BevyMod;
 use generated_network_messages::ClientBoundMessage;
 use network_protocol_mod::NetworkProtocolMod;
 use server_network_events_api::{ServerAudience, ServerNetworkEventsApi, ServerPacketOut};
-use server_player_registry_api::{ServerPlayerRegistryApi, ServerPlayerSessionSet};
+use server_player_registry_api::{
+    ServerPlayerRegistryApi, ServerPlayerRelocationSet, ServerPlayerSessionSet,
+};
 use server_player_world_api::{
     ServerPlayerWorldApi, ServerPlayerWorldChanged, ServerPlayerWorldSet,
 };
@@ -24,6 +26,7 @@ impl ServerPlayerWorldNetworkSyncMod {
             Update,
             sync_world_changes
                 .in_set(ServerPlayerWorldSet::Sync)
+                .in_set(ServerPlayerRelocationSet::Sync)
                 .after(ServerPlayerSessionSet::Sync),
         );
         Self
@@ -43,6 +46,7 @@ fn sync_world_changes(
             audience: ServerAudience::Player(change.player_id),
             message: ClientBoundMessage::PlayerWorldChanged(PlayerWorldChanged {
                 world_id: change.current.to_string(),
+                movement_epoch: change.movement_epoch,
                 position: change.position,
             }),
         });

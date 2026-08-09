@@ -1,11 +1,23 @@
 use bevy::prelude::*;
-use player_network_message_types::{NetworkPlayer, PlayerId, PlayerMove};
+use player_network_message_types::{
+    MovementEpoch, MovementSequence, NetworkPlayer, PlayerId, PlayerMove,
+};
 use std::{collections::HashMap, net::SocketAddr, sync::Arc};
 
 #[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ServerPlayerMovementSet {
     Receive,
     Validate,
+    Apply,
+    Sync,
+}
+
+/// Shared ordering boundary for every authoritative relocation mechanism.
+///
+/// Teleports, respawns, dimension transitions and scoped-world changes must
+/// apply after movement for the current update and before movement sync.
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ServerPlayerRelocationSet {
     Apply,
     Sync,
 }
@@ -28,6 +40,8 @@ pub enum ServerPlayerSessionSet {
 pub struct PendingServerPlayerMove {
     pub source: SocketAddr,
     pub player_id: PlayerId,
+    pub movement_epoch: MovementEpoch,
+    pub sequence: MovementSequence,
     pub current_position: Vec3,
     pub requested_position: Vec3,
     pub accepted_position: Vec3,
@@ -44,11 +58,20 @@ pub struct PendingServerPlayerMoves {
 #[derive(Message, Debug, Clone, Copy, PartialEq)]
 pub struct ServerPlayerMovementApplied {
     pub player_id: PlayerId,
+    pub movement_epoch: MovementEpoch,
+    pub sequence: MovementSequence,
     pub previous_position: Vec3,
     pub position: Vec3,
     pub yaw: f32,
     pub pitch: f32,
     pub corrected: bool,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct ServerPlayerMovementStream {
+    pub epoch: MovementEpoch,
+    pub last_received_sequence: Option<MovementSequence>,
+    pub last_applied_sequence: Option<MovementSequence>,
 }
 
 #[derive(Resource, Clone)]
@@ -76,6 +99,7 @@ pub struct ServerPlayerRegistry {
     next_id: PlayerId,
     by_address: HashMap<SocketAddr, PlayerId>,
     players: HashMap<PlayerId, NetworkPlayer>,
+    movement_streams: HashMap<PlayerId, ServerPlayerMovementStream>,
     last_seen_at: HashMap<SocketAddr, f64>,
 }
 
@@ -95,12 +119,15 @@ impl ServerPlayerRegistry {
         self.by_address.insert(address, player.id);
         self.last_seen_at.insert(address, now);
         self.players.insert(player.id, player.clone());
+        self.movement_streams
+            .insert(player.id, ServerPlayerMovementStream::default());
         player
     }
 
     pub fn leave(&mut self, address: SocketAddr) -> Option<NetworkPlayer> {
         let id = self.by_address.remove(&address)?;
         self.last_seen_at.remove(&address);
+        self.movement_streams.remove(&id);
         self.players.remove(&id)
     }
 
@@ -132,6 +159,9 @@ impl ServerPlayerRegistry {
         validator: Option<&ServerPlayerMovementValidator>,
     ) -> Option<NetworkPlayer> {
         let id = *self.by_address.get(&address)?;
+        if !self.accept_movement_packet(id, movement.movement_epoch, movement.sequence) {
+            return None;
+        }
         let player = self.players.get_mut(&id)?;
         let current = Vec3::from_array(player.position);
         let requested = Vec3::from_array(movement.position);
@@ -147,6 +177,9 @@ impl ServerPlayerRegistry {
         player.position = projected_position.to_array();
         player.yaw = movement.yaw;
         player.pitch = movement.pitch;
+        if let Some(stream) = self.movement_streams.get_mut(&id) {
+            stream.last_applied_sequence = Some(movement.sequence);
+        }
         self.last_seen_at.insert(address, now);
         Some(player.clone())
     }
@@ -177,9 +210,51 @@ impl ServerPlayerRegistry {
         player_id: PlayerId,
         position: [f32; 3],
     ) -> Option<NetworkPlayer> {
+        self.relocate_player(player_id, position)
+            .map(|(player, _)| player)
+    }
+
+    /// Relocates a player and invalidates every movement packet produced from
+    /// the previous authoritative position.
+    pub fn relocate_player(
+        &mut self,
+        player_id: PlayerId,
+        position: [f32; 3],
+    ) -> Option<(NetworkPlayer, MovementEpoch)> {
         let player = self.players.get_mut(&player_id)?;
         player.position = position;
-        Some(player.clone())
+        let player = player.clone();
+        let stream = self.movement_streams.entry(player_id).or_default();
+        stream.epoch = stream.epoch.wrapping_add(1);
+        stream.last_received_sequence = None;
+        stream.last_applied_sequence = None;
+        Some((player, stream.epoch))
+    }
+
+    pub fn movement_epoch(&self, player_id: PlayerId) -> Option<MovementEpoch> {
+        self.movement_streams.get(&player_id).map(|stream| stream.epoch)
+    }
+
+    /// Accepts a packet header once. Replayed, reordered and pre-relocation
+    /// packets are rejected before they can enter gameplay validation.
+    pub fn accept_movement_packet(
+        &mut self,
+        player_id: PlayerId,
+        movement_epoch: MovementEpoch,
+        sequence: MovementSequence,
+    ) -> bool {
+        let Some(stream) = self.movement_streams.get_mut(&player_id) else {
+            return false;
+        };
+        if stream.epoch != movement_epoch
+            || stream
+                .last_received_sequence
+                .is_some_and(|received| sequence <= received)
+        {
+            return false;
+        }
+        stream.last_received_sequence = Some(sequence);
+        true
     }
 
     pub fn set_player_rotation(
@@ -198,6 +273,8 @@ impl ServerPlayerRegistry {
         &mut self,
         address: SocketAddr,
         player_id: PlayerId,
+        movement_epoch: MovementEpoch,
+        sequence: MovementSequence,
         position: Vec3,
         yaw: f32,
         pitch: f32,
@@ -206,6 +283,18 @@ impl ServerPlayerRegistry {
         if self.by_address.get(&address).copied() != Some(player_id) {
             return None;
         }
+        let stream = self.movement_streams.get_mut(&player_id)?;
+        if stream.epoch != movement_epoch
+            || stream
+                .last_applied_sequence
+                .is_some_and(|applied| sequence <= applied)
+            || stream
+                .last_received_sequence
+                .is_none_or(|received| sequence > received)
+        {
+            return None;
+        }
+        stream.last_applied_sequence = Some(sequence);
         let player = self.players.get_mut(&player_id)?;
         player.position = position.to_array();
         player.yaw = yaw;

@@ -1,6 +1,6 @@
 [package]
 name = "client-player-network-sync-mod"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
@@ -24,6 +24,7 @@ ownership = []
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 client-camera-api = { path = "../client-camera-api" }
+client-dimension-api = { path = "../client-dimension-api" }
 client-game-state-api = { path = "../client-game-state-api" }
 client-network-api = { path = "../client-network-api" }
 client-player-controller-api = { path = "../client-player-controller-api" }

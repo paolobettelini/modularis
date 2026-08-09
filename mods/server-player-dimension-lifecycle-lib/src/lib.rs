@@ -13,9 +13,10 @@ pub fn initialize_default_dimension(
     let previous = dimensions
         .set_player(player_id, definition.id)
         .unwrap_or(definition.id);
-    registry.set_player_position(player_id, definition.spawn)?;
+    let (_, movement_epoch) = registry.relocate_player(player_id, definition.spawn)?;
     Some(ServerPlayerDimensionChanged {
         player_id,
+        movement_epoch,
         previous,
         current: definition.clone(),
         position: definition.spawn,
@@ -30,9 +31,10 @@ pub fn apply_dimension_change(
     let definition = dimensions.definition(request.target)?;
     let previous = dimensions.set_player(request.player_id, request.target)?;
     let position = request.position.unwrap_or(definition.spawn);
-    registry.set_player_position(request.player_id, position)?;
+    let (_, movement_epoch) = registry.relocate_player(request.player_id, position)?;
     Some(ServerPlayerDimensionChanged {
         player_id: request.player_id,
+        movement_epoch,
         previous,
         current: definition,
         position,

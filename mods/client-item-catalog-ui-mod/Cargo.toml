@@ -1,17 +1,17 @@
 [package]
-name = "client-inventory-ui-bevy-mod"
+name = "client-item-catalog-ui-mod"
 version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
-entry = "ClientInventoryUiBevyMod"
-provides = "client-inventory-ui-api"
+entry = "ClientItemCatalogUiMod"
 
 [package.metadata.mod.dependencies]
 init = [
     "bevy-mod",
+    "client-inventory-ui-api",
     "client-game-state-api",
-    "client-inventory-cache-api",
+    "client-ui-font-api",
     "inventory-events-mod",
     "item-manager-api",
 ]
@@ -22,10 +22,15 @@ ownership = []
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 client-game-state-api = { path = "../client-game-state-api" }
-client-inventory-cache-api = { path = "../client-inventory-cache-api" }
 client-inventory-ui-api = { path = "../client-inventory-ui-api" }
-inventory-core-api = { git = "https://github.com/paolobettelini/modularis.git" }
+client-ui-font-api = { path = "../client-ui-font-api" }
 inventory-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
 inventory-events-mod = { path = "../inventory-events-mod" }
+item-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-manager-api = { path = "../item-manager-api" }
 tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-block-registry = { path = "../generated-block-registry" }
+generated-item-metadata = { path = "../generated-item-metadata" }
+generated-item-registry = { path = "../generated-item-registry" }

@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use client_camera_api::{CameraAngles, CameraApi, PlayerCamera};
+use client_dimension_api::ClientDimensionSet;
 use client_game_state_api::{GameState, GameStateApi, InGameOverlayState};
 use client_network_api::{ClientNetworkApi, ClientNetworkSender};
 use client_player_controller_api::{
@@ -60,7 +61,10 @@ impl ClientPlayerNetworkSyncMod {
                         .after(apply_authoritative_player_updates)
                         .after(ClientWorldContextSet::ApplyPlayer)
                         .before(PlayerControllerSet::CameraSync),
-                    send_player_movement.after(PlayerControllerSet::CameraSync),
+                    send_player_movement
+                        .after(PlayerControllerSet::CameraSync)
+                        .after(ClientDimensionSet::ApplyPlayer)
+                        .after(ClientWorldContextSet::ApplyPlayer),
                 )
                     .run_if(in_state(GameState::InGame)),
             );
@@ -73,7 +77,7 @@ impl ClientPlayerNetworkSyncMod {
 }
 
 fn apply_authoritative_player_updates(
-    session: Res<ClientSession>,
+    mut session: ResMut<ClientSession>,
     mut moved: MessageReader<PlayerMovedReceived>,
     mut rotated: MessageReader<PlayerRotationChangedReceived>,
     mut target: ResMut<AuthoritativePlayerTarget>,
@@ -86,7 +90,23 @@ fn apply_authoritative_player_updates(
         if moved.0.player_id != local_id {
             continue;
         }
-        target.position = Some(Vec3::from_array(moved.0.position));
+        let previous_epoch = session.movement_epoch;
+        if !session.accept_movement_epoch(moved.0.movement_epoch) {
+            continue;
+        }
+        let epoch_changed = moved.0.movement_epoch > previous_epoch;
+        if let Some(sequence) = moved.0.acknowledged_sequence
+            && !session.acknowledge_movement(moved.0.movement_epoch, sequence)
+            && !epoch_changed
+        {
+            continue;
+        }
+        // Normal local movement packets are acknowledgements only. Position
+        // reconciliation is reserved for rejected/clamped movement and for a
+        // relocation into a new movement epoch.
+        if moved.0.correction || epoch_changed {
+            target.position = Some(Vec3::from_array(moved.0.position));
+        }
     }
 
     for rotated in rotated.read() {
@@ -155,7 +175,7 @@ fn send_player_movement(
     time: Res<Time>,
     mut timer: ResMut<MovementSendTimer>,
     sender: Option<Res<ClientNetworkSender>>,
-    session: Res<ClientSession>,
+    mut session: ResMut<ClientSession>,
     player: Query<&Transform, With<Player>>,
     camera: Query<&CameraAngles, With<PlayerCamera>>,
 ) {
@@ -165,7 +185,10 @@ fn send_player_movement(
     let (Some(sender), Ok(player), Ok(camera)) = (sender, player.single(), camera.single()) else {
         return;
     };
+    let (movement_epoch, sequence) = session.begin_next_movement();
     let _ = sender.send(&ServerBoundMessage::PlayerMove(PlayerMove {
+        movement_epoch,
+        sequence,
         position: player.translation.to_array(),
         yaw: camera.yaw,
         pitch: camera.pitch,

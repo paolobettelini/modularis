@@ -3,6 +3,7 @@ use bevy_mod::BevyMod;
 use client_world_context_api::{
     ClientWorldChanged, ClientWorldContext, ClientWorldContextApi, ClientWorldContextSet,
 };
+use client_session_api::{ClientSession, ClientSessionApi};
 use generated_network_messages::{NetworkMessageSet, PlayerWorldChangedReceived};
 use network_protocol_mod::NetworkProtocolMod;
 use tokio::task::JoinHandle;
@@ -10,9 +11,10 @@ use tokio::task::JoinHandle;
 pub struct ClientWorldContextNetworkReceiveMod;
 
 impl ClientWorldContextNetworkReceiveMod {
-    pub fn init<W: ClientWorldContextApi>(
+    pub fn init<W: ClientWorldContextApi, S: ClientSessionApi>(
         bevy: &mut BevyMod,
         _world: &mut W,
+        _session: &mut S,
         _protocol: &mut NetworkProtocolMod,
     ) -> Self {
         bevy.app.add_systems(
@@ -31,10 +33,14 @@ impl ClientWorldContextNetworkReceiveMod {
 
 fn receive_world_changes(
     mut packets: MessageReader<PlayerWorldChangedReceived>,
+    mut session: ResMut<ClientSession>,
     mut context: ResMut<ClientWorldContext>,
     mut changed: MessageWriter<ClientWorldChanged>,
 ) {
     for packet in packets.read() {
+        if !session.accept_movement_epoch(packet.0.movement_epoch) {
+            continue;
+        }
         if let Some(change) =
             context.apply_authoritative_update(packet.0.world_id.clone(), packet.0.position)
         {

@@ -198,10 +198,19 @@ real upward or falling velocity.
 The client sends a `PlayerMove` about every `0.05` seconds:
 
 ```text
+movement_epoch
+sequence
 position
 yaw
 pitch
 ```
+
+`sequence` is strictly increasing inside one movement epoch. The server rejects
+duplicate and reordered sequences before gameplay validation. If one server
+update drains several TCP frames for the same player, the session policy keeps
+only the newest valid sequence. It therefore validates one coherent
+displacement from the current authoritative registry position instead of
+validating every queued packet from the same stale origin.
 
 The server collects:
 
@@ -209,6 +218,8 @@ The server collects:
 PendingServerPlayerMove {
     source,
     player_id,
+    movement_epoch,
+    sequence,
     current_position,
     requested_position,
     accepted_position,
@@ -233,10 +244,40 @@ that blanket validator and call the same resolver only for selected players.
 
 The apply stage updates the registry and synchronizes visible remote players.
 
+## Relocation and movement epochs
+
+A teleport, respawn, dimension change, or world-instance change is not an
+ordinary movement. It calls `ServerPlayerRegistry::relocate_player`, which
+updates the authoritative position, increments that player's `movement_epoch`,
+and clears sequence state. Packets produced before the relocation retain the
+old epoch and are discarded even if TCP buffering makes them reach gameplay
+systems later.
+
+All relocation policies use the public `ServerPlayerRelocationSet` boundary:
+
+```text
+ServerPlayerMovementSet::Apply
+  -> ServerPlayerRelocationSet::Apply
+  -> ServerPlayerRelocationSet::Sync
+```
+
+Portal and command mods emit relocation intentions before this boundary. The
+dimension/world state mods own the authoritative mutation and include the new
+epoch in their client-bound update. A custom server must use this contract for
+every discontinuous position change; writing `NetworkPlayer.position`
+directly would bypass stale-packet invalidation.
+
+The client resets its outgoing sequence when it accepts a newer epoch. Older
+movement acknowledgements and older dimension/world updates are ignored.
+
 ## Corrections
 
-The server sends the local player a correction only when rejected or when the
-accepted position differs from requested position by more than `0.15`.
+The server acknowledges the newest applied sequence to the local player. The
+same packet carries a `correction` flag. Normal acknowledgements advance
+client bookkeeping without replacing the predicted position; `correction` is
+set only when the move was rejected or when accepted and requested positions
+differ by more than `0.15`. A relocation always carries a corrective position
+in its new epoch.
 
 The client treats each correction as a one-shot sample:
 

@@ -219,6 +219,7 @@ Client layers:
 - optimistic move preview;
 - network send/receive;
 - inventory UI;
+- optional read-only item catalog;
 - drag/drop behavior;
 - hotbar UI;
 - quantity decoration;
@@ -243,6 +244,22 @@ Decoration mods add:
 When favicon metadata exists, the fallback item name is hidden.
 
 The quantity visual must have a higher UI z-index than the favicon.
+
+## Item catalog extension
+
+`client-item-catalog-ui-mod` extends the inventory through the public
+`ClientInventoryUiSet::Extensions` phase. It adds a collapsible panel on the
+left, lists every ID contributed to the generated item registry, and filters by
+ID or display label. The list is scrollable and emits the same
+`InventorySlotVisualCreated` contract as real slots, so favicon/model decorator
+mods render catalog entries without catalog-specific branches.
+
+Catalog entries are deliberately not `InventoryItemVisual` entities. They are
+read-only registry views, not authoritative cells and not drag sources. The
+search field uses the shared `InventoryUiInputCapture` resource so the
+inventory key cannot close the screen while the user is typing. A creative
+inventory or item-pick behavior should be a separate policy mod layered on top
+of this presentation contract.
 
 ## Extending inventory
 

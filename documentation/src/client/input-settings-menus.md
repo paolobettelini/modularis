@@ -231,11 +231,20 @@ The state provider applies commands.
 
 - main menu;
 - pause menu;
+- optional pause-menu extensions;
 - settings screen;
 - inventory UI.
 
 UI code emits state or setting actions rather than directly mutating unrelated
 systems.
+
+`client-menu-api::append_widget` lets one feature extend a registered screen
+without owning or replacing it. The vanilla
+`client-pause-disconnect-menu-mod` uses this seam to append `Disconnect` to the
+pause screen. The button emits `GameStateCommand::BackToMainMenu`; the existing
+session and transport cleanup systems send `LeaveRequest` and close the
+connection when `InGame` exits. Omitting this extension leaves the base pause
+menu unchanged.
 
 The menu API also exposes `MenuWidget::TextboxButton` for a text field and a
 related action button on one row. The main menu uses this widget for the server

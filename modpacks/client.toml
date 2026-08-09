@@ -51,6 +51,7 @@ mods = [
     "client-inventory-network-receive-mod",
     "client-inventory-network-send-mod",
     "client-inventory-ui-bevy-mod",
+    "client-item-catalog-ui-mod",
     "client-inventory-drag-drop-mod",
     "client-cell-menu-cache-mod",
     "client-cell-menu-optimistic-move-mod",
@@ -111,4 +112,4 @@ mods = [
     "client-block-outline-bevy-mod",
 ]
 name = "Modularis client"
-version = "0.0.2"
+version = "0.0.3"

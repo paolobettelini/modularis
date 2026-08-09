@@ -12,6 +12,7 @@ use server_dimension_api::{
 use server_player_hitbox_api::{ServerPlayerHitboxApi, ServerPlayerHitboxes};
 use server_player_registry_api::{
     ServerPlayerMovementSet, ServerPlayerRegistry, ServerPlayerRegistryApi,
+    ServerPlayerRelocationSet,
 };
 use server_portal_api::{
     ActivePortal, ServerPortalApi, ServerPortalOpened, ServerPortalSet, ServerPortals,
@@ -51,7 +52,9 @@ impl ServerPortalTravelVanillaMod {
         bevy.app.init_resource::<PortalTravelState>().add_systems(
             Update,
             (
-                detect_portal_travel.after(ServerPlayerMovementSet::Apply),
+                detect_portal_travel
+                    .after(ServerPlayerMovementSet::Apply)
+                    .before(ServerPlayerRelocationSet::Apply),
                 create_return_portals.after(ServerDimensionSet::Apply),
             )
                 .in_set(ServerPortalSet::Travel),

@@ -3,7 +3,8 @@ use bevy_mod::BevyMod;
 use client_game_state_api::{GameStateApi, InGameOverlayState};
 use client_inventory_cache_api::{ClientInventoryCache, ClientInventoryCacheApi};
 use client_inventory_ui_api::{
-    ClientInventoryUiApi, InventoryItemNameVisual, InventoryItemVisual, InventorySlotVisual,
+    ClientInventoryUiApi, ClientInventoryUiSet, InventoryItemNameVisual, InventoryItemVisual,
+    InventoryMainPanel, InventorySlotVisual, InventoryUiInputCapture, InventoryUiRoot,
 };
 use inventory_core_api::{InventoryCell, InventorySectionLayout};
 use inventory_events_api::{InventoryClientRenderSet, InventorySlotVisualCreated};
@@ -26,6 +27,11 @@ impl<I: ItemManagerApi> ClientInventoryUiBevyMod<I> {
     ) -> Self {
         bevy.app
             .init_resource::<RenderedInventoryRevision>()
+            .init_resource::<InventoryUiInputCapture>()
+            .configure_sets(
+                Update,
+                (ClientInventoryUiSet::Base, ClientInventoryUiSet::Extensions).chain(),
+            )
             .add_systems(
                 OnEnter(InGameOverlayState::Inventory),
                 mark_inventory_ui_dirty,
@@ -34,7 +40,8 @@ impl<I: ItemManagerApi> ClientInventoryUiBevyMod<I> {
                 Update,
                 rebuild_inventory::<I>
                     .run_if(in_state(InGameOverlayState::Inventory))
-                    .in_set(InventoryClientRenderSet::Layout),
+                    .in_set(InventoryClientRenderSet::Layout)
+                    .in_set(ClientInventoryUiSet::Base),
             );
         Self(PhantomData)
     }
@@ -45,9 +52,6 @@ impl<I: ItemManagerApi> ClientInventoryUiBevyMod<I> {
 }
 
 impl<I: ItemManagerApi> ClientInventoryUiApi for ClientInventoryUiBevyMod<I> {}
-
-#[derive(Component)]
-struct InventoryUiRoot;
 
 #[derive(Resource)]
 struct RenderedInventoryRevision(u64);
@@ -85,6 +89,8 @@ fn rebuild_inventory<I: ItemManagerApi>(
                 height: percent(100),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
+                flex_direction: FlexDirection::RowReverse,
+                column_gap: px(16),
                 ..default()
             },
             BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.42)),
@@ -93,6 +99,7 @@ fn rebuild_inventory<I: ItemManagerApi>(
         .id();
     commands.entity(root).with_children(|root| {
         root.spawn((
+            InventoryMainPanel,
             Node {
                 max_width: px(760),
                 padding: UiRect::all(px(24)),

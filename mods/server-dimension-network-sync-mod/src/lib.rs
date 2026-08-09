@@ -8,7 +8,9 @@ use server_dimension_api::{
     ServerDimensionApi, ServerDimensionSet, ServerDimensions, ServerPlayerDimensionChanged,
 };
 use server_network_events_api::{ServerAudience, ServerNetworkEventsApi, ServerPacketOut};
-use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
+use server_player_registry_api::{
+    ServerPlayerRegistry, ServerPlayerRegistryApi, ServerPlayerRelocationSet,
+};
 use sky_network_message_types::SkyColorChanged;
 use tokio::task::JoinHandle;
 
@@ -24,7 +26,9 @@ impl ServerDimensionNetworkSyncMod {
     ) -> Self {
         bevy.app.add_systems(
             Update,
-            sync_dimension_changes.in_set(ServerDimensionSet::Sync),
+            sync_dimension_changes
+                .in_set(ServerDimensionSet::Sync)
+                .in_set(ServerPlayerRelocationSet::Sync),
         );
         Self
     }
@@ -48,6 +52,7 @@ fn sync_dimension_changes(
             audience: ServerAudience::Player(change.player_id),
             message: ClientBoundMessage::PlayerDimensionChanged(PlayerDimensionChanged {
                 dimension: change.current.id,
+                movement_epoch: change.movement_epoch,
                 position: change.position,
             }),
         });
@@ -59,6 +64,9 @@ fn sync_dimension_changes(
         });
         let moved = ClientBoundMessage::PlayerMoved(PlayerMoved {
             player_id: player.id,
+            movement_epoch: change.movement_epoch,
+            acknowledged_sequence: None,
+            correction: true,
             position: change.position,
             yaw: player.yaw,
             pitch: player.pitch,

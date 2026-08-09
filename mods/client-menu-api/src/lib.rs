@@ -105,6 +105,15 @@ impl MenuRegistryHandle {
             .push(screen);
     }
 
+    pub fn append_widget(&self, screen_id: &str, widget: MenuWidget) -> bool {
+        let mut screens = self.0.lock().expect("menu registry lock poisoned");
+        let Some(screen) = screens.iter_mut().find(|screen| screen.id == screen_id) else {
+            return false;
+        };
+        screen.widgets.push(widget);
+        true
+    }
+
     pub fn screen_for(&self, target: MenuTarget) -> Option<MenuScreen> {
         self.0
             .lock()
@@ -168,4 +177,5 @@ impl MenuRegistryHandle {
 
 pub trait MenuApi: Send + Sync + 'static {
     fn register_screen(&mut self, screen: MenuScreen);
+    fn append_widget(&mut self, screen_id: &str, widget: MenuWidget) -> bool;
 }

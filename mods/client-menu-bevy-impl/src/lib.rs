@@ -64,6 +64,10 @@ impl MenuApi for MenuBevyImpl {
     fn register_screen(&mut self, screen: MenuScreen) {
         self.registry.register_screen(screen);
     }
+
+    fn append_widget(&mut self, screen_id: &str, widget: MenuWidget) -> bool {
+        self.registry.append_widget(screen_id, widget)
+    }
 }
 
 #[derive(Component)]

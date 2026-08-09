@@ -1,0 +1,20 @@
+[package]
+name = "server-give-item-lib"
+version = "0.1.1"
+edition = "2024"
+
+[dependencies]
+block-manager-api = { path = "../block-manager-api" }
+generated-item-metadata = "0.1.0"
+inventory-core-api = { git = "https://github.com/paolobettelini/modularis.git" }
+inventory-quantity-operations-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+item-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-manager-api = { path = "../item-manager-api" }
+item-place-block-meta = { path = "../item-place-block-meta" }
+item-portal-igniter-meta = { path = "../item-portal-igniter-meta" }
+item-quantity-meta = { path = "../item-quantity-meta" }
+
+[patch.crates-io]
+generated-block-registry = { path = "../generated-block-registry" }
+generated-item-metadata = { path = "../generated-item-metadata" }
+generated-item-registry = { path = "../generated-item-registry" }

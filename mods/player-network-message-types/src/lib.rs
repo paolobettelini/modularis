@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 
 pub type PlayerId = u64;
+pub type MovementEpoch = u64;
+pub type MovementSequence = u64;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct NetworkPlayer {
@@ -13,6 +15,8 @@ pub struct NetworkPlayer {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct PlayerMove {
+    pub movement_epoch: MovementEpoch,
+    pub sequence: MovementSequence,
     pub position: [f32; 3],
     pub yaw: f32,
     pub pitch: f32,
@@ -31,6 +35,11 @@ pub struct PlayerLeft {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct PlayerMoved {
     pub player_id: PlayerId,
+    pub movement_epoch: MovementEpoch,
+    pub acknowledged_sequence: Option<MovementSequence>,
+    /// Whether the local predicted player must reconcile to `position`.
+    /// Remote players always use the position regardless of this flag.
+    pub correction: bool,
     pub position: [f32; 3],
     pub yaw: f32,
     pub pitch: f32,

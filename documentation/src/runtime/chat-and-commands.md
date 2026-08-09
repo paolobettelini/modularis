@@ -169,7 +169,7 @@ the generic dispatcher.
 ## Vanilla command feature pack
 
 `server-commands-vanilla.toml` is an optional policy pack. It currently selects
-nine independent command mods:
+ten independent command mods:
 
 | Mod | Syntax | Domain intention |
 | --- | --- | --- |
@@ -181,6 +181,7 @@ nine independent command mods:
 | `server-command-speed-vanilla-mod` | `/speed <amount>`, `/speed <player> <amount>` | changes the authoritative movement multiplier |
 | `server-command-scale-vanilla-mod` | `/setscale <scale>`, `/setscale <player> <scale>` | changes authoritative model scale through the scale state contract |
 | `server-command-gravity-vanilla-mod` | `/setgravity <g>`, `/setgravity <x> <y> <z>`, and both forms prefixed by a player | changes that player's gravity vector |
+| `server-command-give-vanilla-mod` | `/give [player] <item-id> [amount]` | plans an authoritative inventory insertion and emits a cell update |
 | `server-command-tps-vanilla-mod` | `/tps` | reports measured and target server tick rate to the caller |
 
 Speed `1` is the normal base speed. Flight speed is an independent multiplier
@@ -198,6 +199,13 @@ contracts, gravity and scale emit their per-player state changes, teleport emits
 `RequestPlayerDimensionChange`, and kick emits `ServerKickRequested`. The TPS
 command only reads neutral tick metrics and publishes personal feedback. None
 of these command mods sends its domain packet directly.
+
+`/give` autocompletes both online player names and IDs from the generated item
+registry. Its reusable mechanics live in `server-give-item-lib`: the library
+constructs the selected vanilla metadata and plans a merge or empty-cell
+insertion, while the command mod is only the always-enabled vanilla glue. A
+custom server can call the planner conditionally, construct different metadata,
+or omit the command entirely.
 
 `/clear` emits `ClearServerPlayerChatRequested`. The dedicated server network
 bridge sends `ClearChat` only to that player; the client receiver emits

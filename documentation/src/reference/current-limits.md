@@ -71,14 +71,15 @@ Current limits:
   not simulate full velocity;
 - sprint state is not explicitly validated server-side;
 - acceleration and drag are not reconstructed server-side;
-- correction protocol has no sequence number.
+- movement acknowledgements are cumulative position acknowledgements; the
+  client does not retain and replay an input history after a correction.
 
 Design direction:
 
 - optional per-world defaults layered under existing per-player force state;
-- input sequence/timestamp;
+- input timestamps and bounded prediction history;
 - authoritative velocity and acceleration validation;
-- reconciliation based on acknowledged input.
+- replay-based reconciliation after the acknowledged movement sequence.
 
 ## Networking
 

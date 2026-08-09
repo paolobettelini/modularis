@@ -114,6 +114,7 @@ pub struct RequestPlayerDimensionChange {
 #[derive(Message, Debug, Clone)]
 pub struct ServerPlayerDimensionChanged {
     pub player_id: PlayerId,
+    pub movement_epoch: u64,
     pub previous: Dimension,
     pub current: DimensionDefinition,
     pub position: [f32; 3],

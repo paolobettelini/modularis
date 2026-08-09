@@ -17,7 +17,8 @@ use server_chunk_world_api::ServerChunkWorldApi;
 use server_player_chat_lib::player_chat_message;
 use server_player_lifecycle_events_mod::ServerPlayerLifecycleEventsMod;
 use server_player_registry_api::{
-    ServerPlayerMovementSet, ServerPlayerRegistry, ServerPlayerRegistryApi, ServerPlayerSessionSet,
+    ServerPlayerMovementSet, ServerPlayerRegistry, ServerPlayerRegistryApi,
+    ServerPlayerRelocationSet, ServerPlayerSessionSet,
 };
 use server_player_world_api::{ServerPlayerWorldApi, ServerPlayerWorldSet};
 use server_scope_api::{ScopeFacetId, ServerScopeApi, ServerScopeSet, ServerScopes};
@@ -77,6 +78,7 @@ impl TheCrownMainMod {
                 Update,
                 progress_parkour
                     .after(ServerPlayerMovementSet::Apply)
+                    .before(ServerPlayerRelocationSet::Apply)
                     .before(ServerPlayerMovementSet::Sync)
                     .before(ServerBlockEditSet::Sync)
                     .in_set(ServerSoundSet::Publish),

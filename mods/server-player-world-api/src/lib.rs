@@ -43,6 +43,7 @@ pub struct RequestServerPlayerWorldChange {
 #[derive(Message, Debug, Clone)]
 pub struct ServerPlayerWorldChanged {
     pub player_id: PlayerId,
+    pub movement_epoch: u64,
     pub previous: Option<WorldInstanceId>,
     pub current: WorldInstanceId,
     pub position: [f32; 3],

@@ -14,7 +14,8 @@ use server_player_lifecycle_events_api::{ServerPlayerJoined, ServerPlayerLeft, S
 use server_player_lifecycle_events_mod::ServerPlayerLifecycleEventsMod;
 use server_player_registry_api::{
     PendingServerPlayerMove, PendingServerPlayerMoves, ServerPlayerMovementApplied,
-    ServerPlayerMovementSet, ServerPlayerRegistry, ServerPlayerRegistryApi, ServerPlayerSessionSet,
+    ServerPlayerMovementSet, ServerPlayerRegistry, ServerPlayerRegistryApi,
+    ServerPlayerRelocationSet, ServerPlayerSessionSet,
 };
 use server_player_visibility_api::{ServerPlayerVisibility, ServerPlayerVisibilityApi};
 use session_network_message_types::JoinAccepted;
@@ -72,6 +73,16 @@ impl ServerPlayerSessionMod {
                     ServerPlayerSessionSet::Cleanup,
                 )
                     .chain(),
+            )
+            .configure_sets(
+                Update,
+                ServerPlayerRelocationSet::Apply
+                    .after(ServerPlayerMovementSet::Apply)
+                    .before(ServerPlayerMovementSet::Sync),
+            )
+            .configure_sets(
+                Update,
+                ServerPlayerRelocationSet::Sync.after(ServerPlayerRelocationSet::Apply),
             )
             .configure_sets(
                 Update,
@@ -202,6 +213,7 @@ fn sync_joined_players(
             .collect();
         let accepted = ClientBoundMessage::JoinAccepted(JoinAccepted {
             player_id: player.id,
+            movement_epoch: registry.movement_epoch(player.id).unwrap_or_default(),
             players: visible_players,
         });
         packets.write(ServerPacketOut {
@@ -254,23 +266,46 @@ fn collect_movement_requests(
     mut pending: ResMut<PendingServerPlayerMoves>,
 ) {
     for movement in movements.read() {
-        let Some(player) = registry.player_for_address(movement.source) else {
+        let Some((player_id, current_position)) = registry
+            .player_for_address(movement.source)
+            .map(|player| (player.id, Vec3::from_array(player.position)))
+        else {
             continue;
         };
-        let current_position = Vec3::from_array(player.position);
+        if !registry.accept_movement_packet(
+            player_id,
+            movement.message.movement_epoch,
+            movement.message.sequence,
+        ) {
+            continue;
+        }
         let requested_position = Vec3::from_array(movement.message.position);
-        let player_id = player.id;
         registry.touch_address(movement.source, time.elapsed_secs_f64());
-        pending.moves.push(PendingServerPlayerMove {
+        let pending_move = PendingServerPlayerMove {
             source: movement.source,
             player_id,
+            movement_epoch: movement.message.movement_epoch,
+            sequence: movement.message.sequence,
             current_position,
             requested_position,
             accepted_position: requested_position,
             yaw: movement.message.yaw,
             pitch: movement.message.pitch,
             rejected: false,
-        });
+        };
+        // A server update may drain multiple TCP frames. Keeping the newest
+        // sequence gives validators one coherent displacement from the latest
+        // authoritative registry position instead of validating every packet
+        // against the same stale origin.
+        if let Some(previous) = pending
+            .moves
+            .iter_mut()
+            .find(|pending| pending.player_id == player_id)
+        {
+            *previous = pending_move;
+        } else {
+            pending.moves.push(pending_move);
+        }
     }
 }
 
@@ -287,6 +322,8 @@ fn apply_validated_movements(
         if let Some(player) = registry.apply_player_move(
             movement.source,
             movement.player_id,
+            movement.movement_epoch,
+            movement.sequence,
             if movement.rejected {
                 movement.current_position
             } else {
@@ -299,6 +336,8 @@ fn apply_validated_movements(
             let position = Vec3::from_array(player.position);
             applied.write(ServerPlayerMovementApplied {
                 player_id: player.id,
+                movement_epoch: movement.movement_epoch,
+                sequence: movement.sequence,
                 previous_position: movement.current_position,
                 position,
                 yaw: player.yaw,
@@ -307,8 +346,13 @@ fn apply_validated_movements(
                     || movement.requested_position.distance(position)
                         > LOCAL_PLAYER_CORRECTION_THRESHOLD,
             });
-            let moved = ClientBoundMessage::PlayerMoved(PlayerMoved {
+            let corrected = movement.rejected
+                || should_correct_local_player(movement.requested_position, &player);
+            let moved_for_viewers = ClientBoundMessage::PlayerMoved(PlayerMoved {
                 player_id: player.id,
+                movement_epoch: movement.movement_epoch,
+                acknowledged_sequence: None,
+                correction: false,
                 position: player.position,
                 yaw: player.yaw,
                 pitch: player.pitch,
@@ -316,7 +360,7 @@ fn apply_validated_movements(
             let viewers = visibility.viewers_of(&player, &registry.players());
             packets.write(ServerPacketOut {
                 audience: ServerAudience::Players(viewers.clone()),
-                message: moved.clone(),
+                message: moved_for_viewers,
             });
             packets.write(ServerPacketOut {
                 audience: ServerAudience::Players(viewers),
@@ -326,14 +370,18 @@ fn apply_validated_movements(
                     pitch: player.pitch,
                 }),
             });
-            if movement.rejected
-                || should_correct_local_player(movement.requested_position, &player)
-            {
-                packets.write(ServerPacketOut {
-                    audience: ServerAudience::Address(movement.source),
-                    message: moved,
-                });
-            }
+            packets.write(ServerPacketOut {
+                audience: ServerAudience::Address(movement.source),
+                message: ClientBoundMessage::PlayerMoved(PlayerMoved {
+                    player_id: player.id,
+                    movement_epoch: movement.movement_epoch,
+                    acknowledged_sequence: Some(movement.sequence),
+                    correction: corrected,
+                    position: player.position,
+                    yaw: player.yaw,
+                    pitch: player.pitch,
+                }),
+            });
         }
     }
 }

@@ -7,6 +7,7 @@ pub struct JoinRequest;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JoinAccepted {
     pub player_id: PlayerId,
+    pub movement_epoch: u64,
     pub players: Vec<NetworkPlayer>,
 }
 

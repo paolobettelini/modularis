@@ -3,7 +3,8 @@ use bevy_mod::BevyMod;
 use server_player_lifecycle_events_api::ServerPlayerLeft;
 use server_player_lifecycle_events_mod::ServerPlayerLifecycleEventsMod;
 use server_player_registry_api::{
-    ServerPlayerRegistry, ServerPlayerRegistryApi, ServerPlayerSessionSet,
+    ServerPlayerRegistry, ServerPlayerRegistryApi, ServerPlayerRelocationSet,
+    ServerPlayerSessionSet,
 };
 use server_player_world_api::{
     RequestServerPlayerWorldChange, ServerPlayerWorldApi, ServerPlayerWorldChanged,
@@ -36,6 +37,7 @@ impl ServerPlayerWorldStateMod {
                 Update,
                 apply_world_changes
                     .in_set(ServerPlayerWorldSet::Apply)
+                    .in_set(ServerPlayerRelocationSet::Apply)
                     .in_set(ServerPlayerSessionSet::Initialize),
             )
             .add_systems(
@@ -59,19 +61,19 @@ fn apply_world_changes(
     mut changed: MessageWriter<ServerPlayerWorldChanged>,
 ) {
     for request in requests.read() {
-        if players
-            .set_player_position(request.player_id, request.position)
-            .is_none()
-        {
+        let Some((_, movement_epoch)) =
+            players.relocate_player(request.player_id, request.position)
+        else {
             warn!(
                 "cannot move unknown player {} to world '{}'",
                 request.player_id, request.world
             );
             continue;
-        }
+        };
         let previous = worlds.set(request.player_id, request.world.clone());
         changed.write(ServerPlayerWorldChanged {
             player_id: request.player_id,
+            movement_epoch,
             previous,
             current: request.world.clone(),
             position: request.position,

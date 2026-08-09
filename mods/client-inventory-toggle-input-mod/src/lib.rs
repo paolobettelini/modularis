@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use client_game_state_api::{GameState, GameStateApi, InGameOverlayCommand, InGameOverlayState};
 use client_keybinding_api::parse_key_code;
+use client_inventory_ui_api::InventoryUiInputCapture;
 use client_settings_api::{SettingsApi, SettingsStore};
 use client_settings_registry_codegen::SettingsRegistryCodegenMod;
 use generated_client_settings_registry::SettingKey;
@@ -32,13 +33,16 @@ fn inventory_key_toggle(
     keyboard: Res<ButtonInput<KeyCode>>,
     settings: Res<SettingsStore>,
     overlay: Res<State<InGameOverlayState>>,
+    input_capture: Option<Res<InventoryUiInputCapture>>,
     mut commands: MessageWriter<InGameOverlayCommand>,
 ) {
     let inventory_key = settings
         .get_string(SettingKey::ControlsInventoryKey)
         .and_then(parse_key_code)
         .unwrap_or(KeyCode::KeyE);
-    if !keyboard.just_pressed(inventory_key) {
+    if input_capture.as_ref().is_some_and(|capture| capture.0)
+        || !keyboard.just_pressed(inventory_key)
+    {
         return;
     }
     match overlay.get() {

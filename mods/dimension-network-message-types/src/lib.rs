@@ -5,4 +5,5 @@ use serde::{Deserialize, Serialize};
 pub struct PlayerDimensionChanged {
     pub dimension: Dimension,
     pub position: [f32; 3],
+    pub movement_epoch: u64,
 }

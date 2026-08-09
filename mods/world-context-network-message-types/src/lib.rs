@@ -4,4 +4,5 @@ use serde::{Deserialize, Serialize};
 pub struct PlayerWorldChanged {
     pub world_id: String,
     pub position: [f32; 3],
+    pub movement_epoch: u64,
 }

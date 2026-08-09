@@ -48,6 +48,7 @@ fn begin_join(mut pending: ResMut<PendingJoin>, mut session: ResMut<ClientSessio
     pending.0 = true;
     session.player_id = None;
     session.disconnect_reason = None;
+    session.reset_movement_stream(0);
 }
 
 fn send_pending_join(
@@ -78,6 +79,7 @@ fn accept_join(
 ) {
     for accepted in accepted.read() {
         session.player_id = Some(accepted.0.player_id);
+        session.reset_movement_stream(accepted.0.movement_epoch);
         session.disconnect_reason = None;
         info!("joined server as player {}", accepted.0.player_id);
     }

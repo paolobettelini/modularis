@@ -10,6 +10,7 @@ are separate concepts.
 - next player ID;
 - address-to-player mapping;
 - `NetworkPlayer` records;
+- one movement epoch and sequence state per player;
 - last-seen timestamps.
 
 A joined player has:
@@ -183,16 +184,26 @@ ServerPlayerMovementSet::Receive
 ```
 
 The session mod collects requests, validators modify `accepted_position` or
-mark them rejected, and the apply stage updates the registry.
+mark them rejected, and the apply stage updates the registry. Every
+`PlayerMove` carries a movement epoch and sequence. Replayed, reordered, and
+pre-relocation packets are rejected before validation. When several packets
+are drained in one update, only the newest accepted sequence per player enters
+validation, avoiding several displacements from one stale registry position.
 
 Accepted movement is sent to visible remote players. The local player receives
-a `PlayerMoved` correction only when:
+an acknowledgement for the applied sequence, but changes its predicted
+position only when the packet is marked as a correction:
 
 - the move was rejected; or
 - accepted and requested positions differ by more than the correction
   threshold.
 
 This prevents the server from fighting local prediction every frame.
+
+Discontinuous relocation is ordered after movement apply through
+`ServerPlayerRelocationSet`. Teleports, respawns, dimension transitions, and
+world-instance changes increment the epoch and synchronize it to the client.
+Any late packet from the old position is then harmless.
 
 ## Extending visibility
 

@@ -8,7 +8,8 @@ use server_player_dimension_lifecycle_lib::{apply_dimension_change, initialize_d
 use server_player_lifecycle_events_api::{ServerPlayerJoined, ServerPlayerLeft};
 use server_player_lifecycle_events_mod::ServerPlayerLifecycleEventsMod;
 use server_player_registry_api::{
-    ServerPlayerRegistry, ServerPlayerRegistryApi, ServerPlayerSessionSet,
+    ServerPlayerRegistry, ServerPlayerRegistryApi, ServerPlayerRelocationSet,
+    ServerPlayerSessionSet,
 };
 use tokio::task::JoinHandle;
 
@@ -26,6 +27,7 @@ impl ServerPlayerDimensionLifecycleVanillaMod {
             (initialize_joined_dimensions, apply_dimension_changes)
                 .chain()
                 .in_set(ServerDimensionSet::Apply)
+                .in_set(ServerPlayerRelocationSet::Apply)
                 .in_set(ServerPlayerSessionSet::Initialize),
         );
         Self
