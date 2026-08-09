@@ -331,6 +331,7 @@ those operations to the authoritative inventory pipeline.</p>
 <li>optimistic move preview;</li>
 <li>network send/receive;</li>
 <li>inventory UI;</li>
+<li>optional read-only item catalog;</li>
 <li>drag/drop behavior;</li>
 <li>hotbar UI;</li>
 <li>quantity decoration;</li>
@@ -350,6 +351,19 @@ refer to one move.</p>
 </ul>
 <p>When favicon metadata exists, the fallback item name is hidden.</p>
 <p>The quantity visual must have a higher UI z-index than the favicon.</p>
+<h2 id="item-catalog-extension"><a class="header" href="#item-catalog-extension">Item catalog extension</a></h2>
+<p><code>client-item-catalog-ui-mod</code> extends the inventory through the public
+<code>ClientInventoryUiSet::Extensions</code> phase. It adds a collapsible panel on the
+left, lists every ID contributed to the generated item registry, and filters by
+ID or display label. The list is scrollable and emits the same
+<code>InventorySlotVisualCreated</code> contract as real slots, so favicon/model decorator
+mods render catalog entries without catalog-specific branches.</p>
+<p>Catalog entries are deliberately not <code>InventoryItemVisual</code> entities. They are
+read-only registry views, not authoritative cells and not drag sources. The
+search field uses the shared <code>InventoryUiInputCapture</code> resource so the
+inventory key cannot close the screen while the user is typing. A creative
+inventory or item-pick behavior should be a separate policy mod layered on top
+of this presentation contract.</p>
 <h2 id="extending-inventory"><a class="header" href="#extending-inventory">Extending inventory</a></h2>
 <p>Examples:</p>
 <ul>

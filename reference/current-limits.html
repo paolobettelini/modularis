@@ -211,14 +211,15 @@ the collision volume is still an axis-aligned radius/height box;</li>
 not simulate full velocity;</li>
 <li>sprint state is not explicitly validated server-side;</li>
 <li>acceleration and drag are not reconstructed server-side;</li>
-<li>correction protocol has no sequence number.</li>
+<li>movement acknowledgements are cumulative position acknowledgements; the
+client does not retain and replay an input history after a correction.</li>
 </ul>
 <p>Design direction:</p>
 <ul>
 <li>optional per-world defaults layered under existing per-player force state;</li>
-<li>input sequence/timestamp;</li>
+<li>input timestamps and bounded prediction history;</li>
 <li>authoritative velocity and acceleration validation;</li>
-<li>reconciliation based on acknowledged input.</li>
+<li>replay-based reconciliation after the acknowledged movement sequence.</li>
 </ul>
 <h2 id="networking"><a class="header" href="#networking">Networking</a></h2>
 <p>Current limits:</p>

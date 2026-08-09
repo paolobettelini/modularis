@@ -2901,6 +2901,7 @@ are separate concepts.</p>
 <li>next player ID;</li>
 <li>address-to-player mapping;</li>
 <li><code>NetworkPlayer</code> records;</li>
+<li>one movement epoch and sequence state per player;</li>
 <li>last-seen timestamps.</li>
 </ul>
 <p>A joined player has:</p>
@@ -3048,15 +3049,24 @@ on another client.</p>
   -&gt; Sync
 </code></pre>
 <p>The session mod collects requests, validators modify <code>accepted_position</code> or
-mark them rejected, and the apply stage updates the registry.</p>
+mark them rejected, and the apply stage updates the registry. Every
+<code>PlayerMove</code> carries a movement epoch and sequence. Replayed, reordered, and
+pre-relocation packets are rejected before validation. When several packets
+are drained in one update, only the newest accepted sequence per player enters
+validation, avoiding several displacements from one stale registry position.</p>
 <p>Accepted movement is sent to visible remote players. The local player receives
-a <code>PlayerMoved</code> correction only when:</p>
+an acknowledgement for the applied sequence, but changes its predicted
+position only when the packet is marked as a correction:</p>
 <ul>
 <li>the move was rejected; or</li>
 <li>accepted and requested positions differ by more than the correction
 threshold.</li>
 </ul>
 <p>This prevents the server from fighting local prediction every frame.</p>
+<p>Discontinuous relocation is ordered after movement apply through
+<code>ServerPlayerRelocationSet</code>. Teleports, respawns, dimension transitions, and
+world-instance changes increment the epoch and synchronize it to the client.
+Any late packet from the old position is then harmless.</p>
 <h2 id="extending-visibility"><a class="header" href="#extending-visibility">Extending visibility</a></h2>
 <p>Replace the provider with a policy based on:</p>
 <ul>
@@ -3235,7 +3245,7 @@ Permissions should be another rule/mod in that stage rather than hardcoded in
 the generic dispatcher.</p>
 <h2 id="vanilla-command-feature-pack"><a class="header" href="#vanilla-command-feature-pack">Vanilla command feature pack</a></h2>
 <p><code>server-commands-vanilla.toml</code> is an optional policy pack. It currently selects
-nine independent command mods:</p>
+ten independent command mods:</p>
 <table><thead><tr><th>Mod</th><th>Syntax</th><th>Domain intention</th></tr></thead><tbody>
 <tr><td><code>server-command-clear-vanilla-mod</code></td><td><code>/clear</code></td><td>requests clearing the caller's client chat log</td></tr>
 <tr><td><code>server-command-flight-vanilla-mod</code></td><td><code>/flight [player]</code></td><td>changes flight capability</td></tr>
@@ -3245,6 +3255,7 @@ nine independent command mods:</p>
 <tr><td><code>server-command-speed-vanilla-mod</code></td><td><code>/speed &lt;amount&gt;</code>, <code>/speed &lt;player&gt; &lt;amount&gt;</code></td><td>changes the authoritative movement multiplier</td></tr>
 <tr><td><code>server-command-scale-vanilla-mod</code></td><td><code>/setscale &lt;scale&gt;</code>, <code>/setscale &lt;player&gt; &lt;scale&gt;</code></td><td>changes authoritative model scale through the scale state contract</td></tr>
 <tr><td><code>server-command-gravity-vanilla-mod</code></td><td><code>/setgravity &lt;g&gt;</code>, <code>/setgravity &lt;x&gt; &lt;y&gt; &lt;z&gt;</code>, and both forms prefixed by a player</td><td>changes that player's gravity vector</td></tr>
+<tr><td><code>server-command-give-vanilla-mod</code></td><td><code>/give [player] &lt;item-id&gt; [amount]</code></td><td>plans an authoritative inventory insertion and emits a cell update</td></tr>
 <tr><td><code>server-command-tps-vanilla-mod</code></td><td><code>/tps</code></td><td>reports measured and target server tick rate to the caller</td></tr>
 </tbody></table>
 <p>Speed <code>1</code> is the normal base speed. Flight speed is an independent multiplier
@@ -3260,6 +3271,12 @@ contracts, gravity and scale emit their per-player state changes, teleport emits
 <code>RequestPlayerDimensionChange</code>, and kick emits <code>ServerKickRequested</code>. The TPS
 command only reads neutral tick metrics and publishes personal feedback. None
 of these command mods sends its domain packet directly.</p>
+<p><code>/give</code> autocompletes both online player names and IDs from the generated item
+registry. Its reusable mechanics live in <code>server-give-item-lib</code>: the library
+constructs the selected vanilla metadata and plans a merge or empty-cell
+insertion, while the command mod is only the always-enabled vanilla glue. A
+custom server can call the planner conditionally, construct different metadata,
+or omit the command entirely.</p>
 <p><code>/clear</code> emits <code>ClearServerPlayerChatRequested</code>. The dedicated server network
 bridge sends <code>ClearChat</code> only to that player; the client receiver emits
 <code>ClientChatCleared</code>, and the neutral client state owns the actual log mutation.</p>
@@ -5613,10 +5630,18 @@ not keep a player grounded while velocity moves away from the surface.</p>
 real upward or falling velocity.</p>
 <h2 id="movement-network-flow"><a class="header" href="#movement-network-flow">Movement network flow</a></h2>
 <p>The client sends a <code>PlayerMove</code> about every <code>0.05</code> seconds:</p>
-<pre><code class="language-text">position
+<pre><code class="language-text">movement_epoch
+sequence
+position
 yaw
 pitch
 </code></pre>
+<p><code>sequence</code> is strictly increasing inside one movement epoch. The server rejects
+duplicate and reordered sequences before gameplay validation. If one server
+update drains several TCP frames for the same player, the session policy keeps
+only the newest valid sequence. It therefore validates one coherent
+displacement from the current authoritative registry position instead of
+validating every queued packet from the same stale origin.</p>
 <p>The server collects:</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
@@ -5624,6 +5649,8 @@ pitch
 </span>PendingServerPlayerMove {
     source,
     player_id,
+    movement_epoch,
+    sequence,
     current_position,
     requested_position,
     accepted_position,
@@ -5645,9 +5672,32 @@ pitch
 every pending move. A server with different rules per runtime scope can omit
 that blanket validator and call the same resolver only for selected players.</p>
 <p>The apply stage updates the registry and synchronizes visible remote players.</p>
+<h2 id="relocation-and-movement-epochs"><a class="header" href="#relocation-and-movement-epochs">Relocation and movement epochs</a></h2>
+<p>A teleport, respawn, dimension change, or world-instance change is not an
+ordinary movement. It calls <code>ServerPlayerRegistry::relocate_player</code>, which
+updates the authoritative position, increments that player's <code>movement_epoch</code>,
+and clears sequence state. Packets produced before the relocation retain the
+old epoch and are discarded even if TCP buffering makes them reach gameplay
+systems later.</p>
+<p>All relocation policies use the public <code>ServerPlayerRelocationSet</code> boundary:</p>
+<pre><code class="language-text">ServerPlayerMovementSet::Apply
+  -&gt; ServerPlayerRelocationSet::Apply
+  -&gt; ServerPlayerRelocationSet::Sync
+</code></pre>
+<p>Portal and command mods emit relocation intentions before this boundary. The
+dimension/world state mods own the authoritative mutation and include the new
+epoch in their client-bound update. A custom server must use this contract for
+every discontinuous position change; writing <code>NetworkPlayer.position</code>
+directly would bypass stale-packet invalidation.</p>
+<p>The client resets its outgoing sequence when it accepts a newer epoch. Older
+movement acknowledgements and older dimension/world updates are ignored.</p>
 <h2 id="corrections"><a class="header" href="#corrections">Corrections</a></h2>
-<p>The server sends the local player a correction only when rejected or when the
-accepted position differs from requested position by more than <code>0.15</code>.</p>
+<p>The server acknowledges the newest applied sequence to the local player. The
+same packet carries a <code>correction</code> flag. Normal acknowledgements advance
+client bookkeeping without replacing the predicted position; <code>correction</code> is
+set only when the move was rejected or when accepted and requested positions
+differ by more than <code>0.15</code>. A relocation always carries a corrective position
+in its new epoch.</p>
 <p>The client treats each correction as a one-shot sample:</p>
 <ul>
 <li>snap when error is large;</li>
@@ -6344,6 +6394,7 @@ those operations to the authoritative inventory pipeline.</p>
 <li>optimistic move preview;</li>
 <li>network send/receive;</li>
 <li>inventory UI;</li>
+<li>optional read-only item catalog;</li>
 <li>drag/drop behavior;</li>
 <li>hotbar UI;</li>
 <li>quantity decoration;</li>
@@ -6363,6 +6414,19 @@ refer to one move.</p>
 </ul>
 <p>When favicon metadata exists, the fallback item name is hidden.</p>
 <p>The quantity visual must have a higher UI z-index than the favicon.</p>
+<h2 id="item-catalog-extension"><a class="header" href="#item-catalog-extension">Item catalog extension</a></h2>
+<p><code>client-item-catalog-ui-mod</code> extends the inventory through the public
+<code>ClientInventoryUiSet::Extensions</code> phase. It adds a collapsible panel on the
+left, lists every ID contributed to the generated item registry, and filters by
+ID or display label. The list is scrollable and emits the same
+<code>InventorySlotVisualCreated</code> contract as real slots, so favicon/model decorator
+mods render catalog entries without catalog-specific branches.</p>
+<p>Catalog entries are deliberately not <code>InventoryItemVisual</code> entities. They are
+read-only registry views, not authoritative cells and not drag sources. The
+search field uses the shared <code>InventoryUiInputCapture</code> resource so the
+inventory key cannot close the screen while the user is typing. A creative
+inventory or item-pick behavior should be a separate policy mod layered on top
+of this presentation contract.</p>
 <h2 id="extending-inventory"><a class="header" href="#extending-inventory">Extending inventory</a></h2>
 <p>Examples:</p>
 <ul>
@@ -6810,11 +6874,19 @@ Chat
 <ul>
 <li>main menu;</li>
 <li>pause menu;</li>
+<li>optional pause-menu extensions;</li>
 <li>settings screen;</li>
 <li>inventory UI.</li>
 </ul>
 <p>UI code emits state or setting actions rather than directly mutating unrelated
 systems.</p>
+<p><code>client-menu-api::append_widget</code> lets one feature extend a registered screen
+without owning or replacing it. The vanilla
+<code>client-pause-disconnect-menu-mod</code> uses this seam to append <code>Disconnect</code> to the
+pause screen. The button emits <code>GameStateCommand::BackToMainMenu</code>; the existing
+session and transport cleanup systems send <code>LeaveRequest</code> and close the
+connection when <code>InGame</code> exits. Omitting this extension leaves the base pause
+menu unchanged.</p>
 <p>The menu API also exposes <code>MenuWidget::TextboxButton</code> for a text field and a
 related action button on one row. The main menu uses this widget for the server
 connection target and <code>Play</code>; this is ordinary menu state, not a generated
@@ -9308,14 +9380,15 @@ the collision volume is still an axis-aligned radius/height box;</li>
 not simulate full velocity;</li>
 <li>sprint state is not explicitly validated server-side;</li>
 <li>acceleration and drag are not reconstructed server-side;</li>
-<li>correction protocol has no sequence number.</li>
+<li>movement acknowledgements are cumulative position acknowledgements; the
+client does not retain and replay an input history after a correction.</li>
 </ul>
 <p>Design direction:</p>
 <ul>
 <li>optional per-world defaults layered under existing per-player force state;</li>
-<li>input sequence/timestamp;</li>
+<li>input timestamps and bounded prediction history;</li>
 <li>authoritative velocity and acceleration validation;</li>
-<li>reconciliation based on acknowledged input.</li>
+<li>replay-based reconciliation after the acknowledged movement sequence.</li>
 </ul>
 <h2 id="networking"><a class="header" href="#networking">Networking</a></h2>
 <p>Current limits:</p>

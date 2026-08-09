@@ -304,10 +304,18 @@ not keep a player grounded while velocity moves away from the surface.</p>
 real upward or falling velocity.</p>
 <h2 id="movement-network-flow"><a class="header" href="#movement-network-flow">Movement network flow</a></h2>
 <p>The client sends a <code>PlayerMove</code> about every <code>0.05</code> seconds:</p>
-<pre><code class="language-text">position
+<pre><code class="language-text">movement_epoch
+sequence
+position
 yaw
 pitch
 </code></pre>
+<p><code>sequence</code> is strictly increasing inside one movement epoch. The server rejects
+duplicate and reordered sequences before gameplay validation. If one server
+update drains several TCP frames for the same player, the session policy keeps
+only the newest valid sequence. It therefore validates one coherent
+displacement from the current authoritative registry position instead of
+validating every queued packet from the same stale origin.</p>
 <p>The server collects:</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
@@ -315,6 +323,8 @@ pitch
 </span>PendingServerPlayerMove {
     source,
     player_id,
+    movement_epoch,
+    sequence,
     current_position,
     requested_position,
     accepted_position,
@@ -336,9 +346,32 @@ pitch
 every pending move. A server with different rules per runtime scope can omit
 that blanket validator and call the same resolver only for selected players.</p>
 <p>The apply stage updates the registry and synchronizes visible remote players.</p>
+<h2 id="relocation-and-movement-epochs"><a class="header" href="#relocation-and-movement-epochs">Relocation and movement epochs</a></h2>
+<p>A teleport, respawn, dimension change, or world-instance change is not an
+ordinary movement. It calls <code>ServerPlayerRegistry::relocate_player</code>, which
+updates the authoritative position, increments that player's <code>movement_epoch</code>,
+and clears sequence state. Packets produced before the relocation retain the
+old epoch and are discarded even if TCP buffering makes them reach gameplay
+systems later.</p>
+<p>All relocation policies use the public <code>ServerPlayerRelocationSet</code> boundary:</p>
+<pre><code class="language-text">ServerPlayerMovementSet::Apply
+  -&gt; ServerPlayerRelocationSet::Apply
+  -&gt; ServerPlayerRelocationSet::Sync
+</code></pre>
+<p>Portal and command mods emit relocation intentions before this boundary. The
+dimension/world state mods own the authoritative mutation and include the new
+epoch in their client-bound update. A custom server must use this contract for
+every discontinuous position change; writing <code>NetworkPlayer.position</code>
+directly would bypass stale-packet invalidation.</p>
+<p>The client resets its outgoing sequence when it accepts a newer epoch. Older
+movement acknowledgements and older dimension/world updates are ignored.</p>
 <h2 id="corrections"><a class="header" href="#corrections">Corrections</a></h2>
-<p>The server sends the local player a correction only when rejected or when the
-accepted position differs from requested position by more than <code>0.15</code>.</p>
+<p>The server acknowledges the newest applied sequence to the local player. The
+same packet carries a <code>correction</code> flag. Normal acknowledgements advance
+client bookkeeping without replacing the predicted position; <code>correction</code> is
+set only when the move was rejected or when accepted and requested positions
+differ by more than <code>0.15</code>. A relocation always carries a corrective position
+in its new epoch.</p>
 <p>The client treats each correction as a one-shot sample:</p>
 <ul>
 <li>snap when error is large;</li>

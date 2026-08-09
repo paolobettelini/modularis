@@ -286,7 +286,7 @@ Permissions should be another rule/mod in that stage rather than hardcoded in
 the generic dispatcher.</p>
 <h2 id="vanilla-command-feature-pack"><a class="header" href="#vanilla-command-feature-pack">Vanilla command feature pack</a></h2>
 <p><code>server-commands-vanilla.toml</code> is an optional policy pack. It currently selects
-nine independent command mods:</p>
+ten independent command mods:</p>
 <table><thead><tr><th>Mod</th><th>Syntax</th><th>Domain intention</th></tr></thead><tbody>
 <tr><td><code>server-command-clear-vanilla-mod</code></td><td><code>/clear</code></td><td>requests clearing the caller's client chat log</td></tr>
 <tr><td><code>server-command-flight-vanilla-mod</code></td><td><code>/flight [player]</code></td><td>changes flight capability</td></tr>
@@ -296,6 +296,7 @@ nine independent command mods:</p>
 <tr><td><code>server-command-speed-vanilla-mod</code></td><td><code>/speed &lt;amount&gt;</code>, <code>/speed &lt;player&gt; &lt;amount&gt;</code></td><td>changes the authoritative movement multiplier</td></tr>
 <tr><td><code>server-command-scale-vanilla-mod</code></td><td><code>/setscale &lt;scale&gt;</code>, <code>/setscale &lt;player&gt; &lt;scale&gt;</code></td><td>changes authoritative model scale through the scale state contract</td></tr>
 <tr><td><code>server-command-gravity-vanilla-mod</code></td><td><code>/setgravity &lt;g&gt;</code>, <code>/setgravity &lt;x&gt; &lt;y&gt; &lt;z&gt;</code>, and both forms prefixed by a player</td><td>changes that player's gravity vector</td></tr>
+<tr><td><code>server-command-give-vanilla-mod</code></td><td><code>/give [player] &lt;item-id&gt; [amount]</code></td><td>plans an authoritative inventory insertion and emits a cell update</td></tr>
 <tr><td><code>server-command-tps-vanilla-mod</code></td><td><code>/tps</code></td><td>reports measured and target server tick rate to the caller</td></tr>
 </tbody></table>
 <p>Speed <code>1</code> is the normal base speed. Flight speed is an independent multiplier
@@ -311,6 +312,12 @@ contracts, gravity and scale emit their per-player state changes, teleport emits
 <code>RequestPlayerDimensionChange</code>, and kick emits <code>ServerKickRequested</code>. The TPS
 command only reads neutral tick metrics and publishes personal feedback. None
 of these command mods sends its domain packet directly.</p>
+<p><code>/give</code> autocompletes both online player names and IDs from the generated item
+registry. Its reusable mechanics live in <code>server-give-item-lib</code>: the library
+constructs the selected vanilla metadata and plans a merge or empty-cell
+insertion, while the command mod is only the always-enabled vanilla glue. A
+custom server can call the planner conditionally, construct different metadata,
+or omit the command entirely.</p>
 <p><code>/clear</code> emits <code>ClearServerPlayerChatRequested</code>. The dedicated server network
 bridge sends <code>ClearChat</code> only to that player; the client receiver emits
 <code>ClientChatCleared</code>, and the neutral client state owns the actual log mutation.</p>

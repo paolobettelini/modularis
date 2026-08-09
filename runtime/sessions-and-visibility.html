@@ -152,6 +152,7 @@ are separate concepts.</p>
 <li>next player ID;</li>
 <li>address-to-player mapping;</li>
 <li><code>NetworkPlayer</code> records;</li>
+<li>one movement epoch and sequence state per player;</li>
 <li>last-seen timestamps.</li>
 </ul>
 <p>A joined player has:</p>
@@ -299,15 +300,24 @@ on another client.</p>
   -&gt; Sync
 </code></pre>
 <p>The session mod collects requests, validators modify <code>accepted_position</code> or
-mark them rejected, and the apply stage updates the registry.</p>
+mark them rejected, and the apply stage updates the registry. Every
+<code>PlayerMove</code> carries a movement epoch and sequence. Replayed, reordered, and
+pre-relocation packets are rejected before validation. When several packets
+are drained in one update, only the newest accepted sequence per player enters
+validation, avoiding several displacements from one stale registry position.</p>
 <p>Accepted movement is sent to visible remote players. The local player receives
-a <code>PlayerMoved</code> correction only when:</p>
+an acknowledgement for the applied sequence, but changes its predicted
+position only when the packet is marked as a correction:</p>
 <ul>
 <li>the move was rejected; or</li>
 <li>accepted and requested positions differ by more than the correction
 threshold.</li>
 </ul>
 <p>This prevents the server from fighting local prediction every frame.</p>
+<p>Discontinuous relocation is ordered after movement apply through
+<code>ServerPlayerRelocationSet</code>. Teleports, respawns, dimension transitions, and
+world-instance changes increment the epoch and synchronize it to the client.
+Any late packet from the old position is then harmless.</p>
 <h2 id="extending-visibility"><a class="header" href="#extending-visibility">Extending visibility</a></h2>
 <p>Replace the provider with a policy based on:</p>
 <ul>
