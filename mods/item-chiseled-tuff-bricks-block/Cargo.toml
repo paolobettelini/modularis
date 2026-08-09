@@ -1,0 +1,22 @@
+[package]
+name = "item-chiseled-tuff-bricks-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemChiseledTuffBricksBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-chiseled-tuff-bricks"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:chiseled_tuff_bricks_block"
+label = "Chiseled Tuff Bricks"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-chiseled-tuff-bricks = { path = "../block-chiseled-tuff-bricks" }
+tokio = { version = "1.48.0", features = ["full"] }

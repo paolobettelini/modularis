@@ -1,0 +1,22 @@
+[package]
+name = "item-weathered-copper-grate-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemWeatheredCopperGrateBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-weathered-copper-grate"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:weathered_copper_grate_block"
+label = "Weathered Copper Grate"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-weathered-copper-grate = { path = "../block-weathered-copper-grate" }
+tokio = { version = "1.48.0", features = ["full"] }

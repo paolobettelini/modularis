@@ -1,0 +1,6 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_all",
+  "textures": {
+    "all": "block-dead-fire-coral-block:block/dead_fire_coral_block"
+  }
+}

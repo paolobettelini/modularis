@@ -1,0 +1,29 @@
+[package]
+name = "server-biome-feature-nether-ores-vanilla-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerBiomeFeatureNetherOresVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-biome-api", "block-nether-quartz-ore", "block-nether-gold-ore", "block-ancient-debris", "block-gilded-blackstone"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+block-gilded-blackstone = { path = "../block-gilded-blackstone" }
+block-ancient-debris = { path = "../block-ancient-debris" }
+block-nether-gold-ore = { path = "../block-nether-gold-ore" }
+block-nether-quartz-ore = { path = "../block-nether-quartz-ore" }
+generated-block-registry = "0.1.0"
+server-biome-api = { path = "../server-biome-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
+
+[patch.crates-io]
+generated-biome-registry = { path = "../generated-biome-registry" }
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }

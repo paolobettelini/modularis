@@ -1,18 +1,24 @@
 [package]
 name = "server-biome-feature-boulders-vanilla-mod"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
 entry = "ServerBiomeFeatureBouldersVanillaMod"
 
 [package.metadata.mod.dependencies]
-init = ["bevy-mod", "server-biome-api", "block-gravel"]
+init = ["bevy-mod", "server-biome-api", "block-gravel", "block-andesite", "block-diorite", "block-granite", "block-tuff", "block-cobbled-deepslate", "block-mossy-cobblestone"]
 run = []
 ownership = []
 
 [dependencies]
 bevy-mod = { path = "../bevy-mod" }
+block-mossy-cobblestone = { path = "../block-mossy-cobblestone" }
+block-cobbled-deepslate = { path = "../block-cobbled-deepslate" }
+block-tuff = { path = "../block-tuff" }
+block-granite = { path = "../block-granite" }
+block-diorite = { path = "../block-diorite" }
+block-andesite = { path = "../block-andesite" }
 block-gravel = { path = "../block-gravel" }
 generated-block-registry = "0.1.0"
 server-biome-api = { path = "../server-biome-api" }

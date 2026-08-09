@@ -1,0 +1,22 @@
+[package]
+name = "item-light-blue-wool-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemLightBlueWoolBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-light-blue-wool"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:light_blue_wool_block"
+label = "Light Blue Wool"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-light-blue-wool = { path = "../block-light-blue-wool" }
+tokio = { version = "1.48.0", features = ["full"] }

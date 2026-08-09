@@ -1,0 +1,22 @@
+[package]
+name = "item-red-wool-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemRedWoolBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-red-wool"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:red_wool_block"
+label = "Red Wool"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-red-wool = { path = "../block-red-wool" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -1,0 +1,22 @@
+[package]
+name = "item-weathered-copper-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemWeatheredCopperBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-weathered-copper"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:weathered_copper_block"
+label = "Weathered Copper"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-weathered-copper = { path = "../block-weathered-copper" }
+tokio = { version = "1.48.0", features = ["full"] }

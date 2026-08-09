@@ -1,0 +1,22 @@
+[package]
+name = "item-red-sandstone-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemRedSandstoneBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-red-sandstone"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:red_sandstone_block"
+label = "Red Sandstone"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-red-sandstone = { path = "../block-red-sandstone" }
+tokio = { version = "1.48.0", features = ["full"] }

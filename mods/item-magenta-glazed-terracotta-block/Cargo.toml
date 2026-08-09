@@ -1,0 +1,22 @@
+[package]
+name = "item-magenta-glazed-terracotta-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemMagentaGlazedTerracottaBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-magenta-glazed-terracotta"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:magenta_glazed_terracotta_block"
+label = "Magenta Glazed Terracotta"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-magenta-glazed-terracotta = { path = "../block-magenta-glazed-terracotta" }
+tokio = { version = "1.48.0", features = ["full"] }

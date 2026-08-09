@@ -1,0 +1,22 @@
+[package]
+name = "item-glass-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemGlassBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-glass"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:glass_block"
+label = "Glass"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-glass = { path = "../block-glass" }
+tokio = { version = "1.48.0", features = ["full"] }

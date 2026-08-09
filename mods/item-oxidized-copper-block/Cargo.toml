@@ -1,0 +1,22 @@
+[package]
+name = "item-oxidized-copper-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemOxidizedCopperBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-oxidized-copper"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:oxidized_copper_block"
+label = "Oxidized Copper"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-oxidized-copper = { path = "../block-oxidized-copper" }
+tokio = { version = "1.48.0", features = ["full"] }

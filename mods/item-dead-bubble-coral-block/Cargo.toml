@@ -1,0 +1,22 @@
+[package]
+name = "item-dead-bubble-coral-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemDeadBubbleCoralBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-dead-bubble-coral-block"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:dead_bubble_coral_block"
+label = "Dead Bubble Coral Block"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-dead-bubble-coral-block = { path = "../block-dead-bubble-coral-block" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -1,0 +1,22 @@
+[package]
+name = "item-copper-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemCopperBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-copper-block"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:copper_block"
+label = "Copper Block"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-copper-block = { path = "../block-copper-block" }
+tokio = { version = "1.48.0", features = ["full"] }

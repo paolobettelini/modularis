@@ -1,0 +1,22 @@
+[package]
+name = "item-hay-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemHayBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-hay-block"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:hay_block"
+label = "Hay Block"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-hay-block = { path = "../block-hay-block" }
+tokio = { version = "1.48.0", features = ["full"] }

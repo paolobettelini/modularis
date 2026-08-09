@@ -1,0 +1,22 @@
+[package]
+name = "item-stripped-oak-log-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemStrippedOakLogBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-stripped-oak-log"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:stripped_oak_log_block"
+label = "Stripped Oak Log"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-stripped-oak-log = { path = "../block-stripped-oak-log" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -1,0 +1,7 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_column",
+  "textures": {
+    "side": "block-stripped-cherry-log:block/stripped_cherry_log",
+    "end": "block-stripped-cherry-log:block/stripped_cherry_log_top"
+  }
+}

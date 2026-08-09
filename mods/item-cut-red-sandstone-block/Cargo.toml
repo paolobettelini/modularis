@@ -1,0 +1,22 @@
+[package]
+name = "item-cut-red-sandstone-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemCutRedSandstoneBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-cut-red-sandstone"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:cut_red_sandstone_block"
+label = "Cut Red Sandstone"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-cut-red-sandstone = { path = "../block-cut-red-sandstone" }
+tokio = { version = "1.48.0", features = ["full"] }

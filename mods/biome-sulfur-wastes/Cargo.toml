@@ -1,0 +1,18 @@
+[package]
+name = "biome-sulfur-wastes"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "BiomeSulfurWastesMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.biome]
+id = "demo:sulfur-wastes"
+
+[dependencies]
+tokio = { version = "1.48.0", features = ["full"] }

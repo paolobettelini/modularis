@@ -1,0 +1,22 @@
+[package]
+name = "item-polished-deepslate-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemPolishedDeepslateBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-polished-deepslate"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:polished_deepslate_block"
+label = "Polished Deepslate"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-polished-deepslate = { path = "../block-polished-deepslate" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -1,0 +1,22 @@
+[package]
+name = "item-light-gray-stained-glass-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemLightGrayStainedGlassBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-light-gray-stained-glass"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:light_gray_stained_glass_block"
+label = "Light Gray Stained Glass"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-light-gray-stained-glass = { path = "../block-light-gray-stained-glass" }
+tokio = { version = "1.48.0", features = ["full"] }

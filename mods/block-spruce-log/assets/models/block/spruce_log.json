@@ -1,0 +1,7 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_column",
+  "textures": {
+    "side": "block-spruce-log:block/spruce_log",
+    "end": "block-spruce-log:block/spruce_log_top"
+  }
+}

@@ -1,0 +1,22 @@
+[package]
+name = "item-stripped-mangrove-log-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemStrippedMangroveLogBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-stripped-mangrove-log"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:stripped_mangrove_log_block"
+label = "Stripped Mangrove Log"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-stripped-mangrove-log = { path = "../block-stripped-mangrove-log" }
+tokio = { version = "1.48.0", features = ["full"] }

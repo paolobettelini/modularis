@@ -1,18 +1,34 @@
 [package]
 name = "server-biome-feature-ores-vanilla-mod"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
 entry = "ServerBiomeFeatureOresVanillaMod"
 
 [package.metadata.mod.dependencies]
-init = ["bevy-mod", "server-biome-api"]
+init = ["bevy-mod", "server-biome-api", "block-coal-ore", "block-iron-ore", "block-copper-ore", "block-gold-ore", "block-lapis-ore", "block-redstone-ore", "block-emerald-ore", "block-deepslate", "block-deepslate-coal-ore", "block-deepslate-iron-ore", "block-deepslate-copper-ore", "block-deepslate-gold-ore", "block-deepslate-lapis-ore", "block-deepslate-redstone-ore", "block-deepslate-diamond-ore", "block-deepslate-emerald-ore"]
 run = []
 ownership = []
 
 [dependencies]
 bevy-mod = { path = "../bevy-mod" }
+block-deepslate-emerald-ore = { path = "../block-deepslate-emerald-ore" }
+block-deepslate-diamond-ore = { path = "../block-deepslate-diamond-ore" }
+block-deepslate-redstone-ore = { path = "../block-deepslate-redstone-ore" }
+block-deepslate-lapis-ore = { path = "../block-deepslate-lapis-ore" }
+block-deepslate-gold-ore = { path = "../block-deepslate-gold-ore" }
+block-deepslate-copper-ore = { path = "../block-deepslate-copper-ore" }
+block-deepslate-iron-ore = { path = "../block-deepslate-iron-ore" }
+block-deepslate-coal-ore = { path = "../block-deepslate-coal-ore" }
+block-deepslate = { path = "../block-deepslate" }
+block-emerald-ore = { path = "../block-emerald-ore" }
+block-redstone-ore = { path = "../block-redstone-ore" }
+block-lapis-ore = { path = "../block-lapis-ore" }
+block-gold-ore = { path = "../block-gold-ore" }
+block-copper-ore = { path = "../block-copper-ore" }
+block-iron-ore = { path = "../block-iron-ore" }
+block-coal-ore = { path = "../block-coal-ore" }
 generated-block-registry = "0.1.0"
 server-biome-api = { path = "../server-biome-api" }
 tokio = { version = "1.48.0", features = ["full"] }

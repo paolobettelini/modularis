@@ -1,0 +1,18 @@
+[package]
+name = "biome-aether-tempest-isles"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "BiomeAetherTempestIslesMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.biome]
+id = "demo:aether-tempest-isles"
+
+[dependencies]
+tokio = { version = "1.48.0", features = ["full"] }

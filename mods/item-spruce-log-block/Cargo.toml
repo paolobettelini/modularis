@@ -1,0 +1,22 @@
+[package]
+name = "item-spruce-log-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemSpruceLogBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-spruce-log"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:spruce_log_block"
+label = "Spruce Log"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-spruce-log = { path = "../block-spruce-log" }
+tokio = { version = "1.48.0", features = ["full"] }

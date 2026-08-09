@@ -1,0 +1,29 @@
+[package]
+name = "server-biome-feature-mushroom-groves-vanilla-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerBiomeFeatureMushroomGrovesVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-biome-api", "block-red-mushroom-block", "block-brown-mushroom-block", "block-mushroom-block-inside", "block-mushroom-stem"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+block-mushroom-stem = { path = "../block-mushroom-stem" }
+block-mushroom-block-inside = { path = "../block-mushroom-block-inside" }
+block-brown-mushroom-block = { path = "../block-brown-mushroom-block" }
+block-red-mushroom-block = { path = "../block-red-mushroom-block" }
+generated-block-registry = "0.1.0"
+server-biome-api = { path = "../server-biome-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
+
+[patch.crates-io]
+generated-biome-registry = { path = "../generated-biome-registry" }
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }

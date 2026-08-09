@@ -1,0 +1,30 @@
+[package]
+name = "server-biome-feature-aether-lights-vanilla-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerBiomeFeatureAetherLightsVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-biome-api", "block-ochre-froglight", "block-pearlescent-froglight", "block-verdant-froglight", "block-sea-lantern", "block-honeycomb-block"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+block-honeycomb-block = { path = "../block-honeycomb-block" }
+block-sea-lantern = { path = "../block-sea-lantern" }
+block-verdant-froglight = { path = "../block-verdant-froglight" }
+block-pearlescent-froglight = { path = "../block-pearlescent-froglight" }
+block-ochre-froglight = { path = "../block-ochre-froglight" }
+generated-block-registry = "0.1.0"
+server-biome-api = { path = "../server-biome-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
+
+[patch.crates-io]
+generated-biome-registry = { path = "../generated-biome-registry" }
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }

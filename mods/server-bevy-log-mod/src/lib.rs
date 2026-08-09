@@ -18,9 +18,7 @@ impl ServerBevyLogMod {
             bevy.app.add_plugins(LogPlugin::default());
         }
 
-        info!(
-            "server logging initialized (set RUST_LOG to change the filter)"
-        );
+        info!("server logging initialized (set RUST_LOG to change the filter)");
         Self
     }
 

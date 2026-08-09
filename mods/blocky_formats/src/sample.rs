@@ -22,7 +22,11 @@ impl BlockyAnimation {
     /// loops and missing frame-0 keyframes interpolate across the animation boundary from the
     /// final keyframe back to the first one. This matches how looping DCC/game animations are
     /// usually expected to behave and avoids a visible snap near frame 0.
-    pub fn sample_node_seconds(&self, node_name: &str, seconds: f32) -> Option<SampledNodeAnimation> {
+    pub fn sample_node_seconds(
+        &self,
+        node_name: &str,
+        seconds: f32,
+    ) -> Option<SampledNodeAnimation> {
         let frames = Self::seconds_to_frames(seconds);
         self.sample_node_frames(node_name, frames)
     }
@@ -89,7 +93,12 @@ impl NodeAnimation {
             orientation: sample_quat_track(&self.orientation, frames, duration_frames, looping),
             shape_stretch: sample_vec3_track(&self.shape_stretch, frames, duration_frames, looping),
             shape_visible: sample_bool_track(&self.shape_visible, frames, duration_frames, looping),
-            shape_uv_offset: sample_vec2_track(&self.shape_uv_offset, frames, duration_frames, looping),
+            shape_uv_offset: sample_vec2_track(
+                &self.shape_uv_offset,
+                frames,
+                duration_frames,
+                looping,
+            ),
         }
     }
 }

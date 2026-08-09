@@ -1,0 +1,22 @@
+[package]
+name = "item-blue-ice-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemBlueIceBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-blue-ice"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:blue_ice_block"
+label = "Blue Ice"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-blue-ice = { path = "../block-blue-ice" }
+tokio = { version = "1.48.0", features = ["full"] }

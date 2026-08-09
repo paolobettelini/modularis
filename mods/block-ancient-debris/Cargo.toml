@@ -1,0 +1,21 @@
+[package]
+name = "block-ancient-debris"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "BlockAncientDebrisMod"
+
+[package.metadata.mod.dependencies]
+init = ["voxel-model-block-templates-mod"]
+run = []
+ownership = []
+
+[package.metadata.block]
+id = "demo:ancient-debris"
+
+[dependencies]
+block-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-model-block-templates-mod = { path = "../voxel-model-block-templates-mod" }
+tokio = { version = "1.48.0", features = ["full"] }

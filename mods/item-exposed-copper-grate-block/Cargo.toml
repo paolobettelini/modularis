@@ -1,0 +1,22 @@
+[package]
+name = "item-exposed-copper-grate-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemExposedCopperGrateBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-exposed-copper-grate"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:exposed_copper_grate_block"
+label = "Exposed Copper Grate"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-exposed-copper-grate = { path = "../block-exposed-copper-grate" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -1,0 +1,22 @@
+[package]
+name = "item-blue-stained-glass-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemBlueStainedGlassBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-blue-stained-glass"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:blue_stained_glass_block"
+label = "Blue Stained Glass"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-blue-stained-glass = { path = "../block-blue-stained-glass" }
+tokio = { version = "1.48.0", features = ["full"] }

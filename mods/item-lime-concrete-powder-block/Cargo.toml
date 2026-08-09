@@ -1,0 +1,22 @@
+[package]
+name = "item-lime-concrete-powder-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemLimeConcretePowderBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-lime-concrete-powder"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:lime_concrete_powder_block"
+label = "Lime Concrete Powder"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-lime-concrete-powder = { path = "../block-lime-concrete-powder" }
+tokio = { version = "1.48.0", features = ["full"] }

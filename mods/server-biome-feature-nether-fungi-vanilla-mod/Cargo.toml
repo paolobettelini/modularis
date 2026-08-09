@@ -1,0 +1,30 @@
+[package]
+name = "server-biome-feature-nether-fungi-vanilla-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerBiomeFeatureNetherFungiVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-biome-api", "block-crimson-stem", "block-nether-wart-block", "block-warped-stem", "block-warped-wart-block", "block-shroomlight"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+block-shroomlight = { path = "../block-shroomlight" }
+block-warped-wart-block = { path = "../block-warped-wart-block" }
+block-warped-stem = { path = "../block-warped-stem" }
+block-nether-wart-block = { path = "../block-nether-wart-block" }
+block-crimson-stem = { path = "../block-crimson-stem" }
+generated-block-registry = "0.1.0"
+server-biome-api = { path = "../server-biome-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
+
+[patch.crates-io]
+generated-biome-registry = { path = "../generated-biome-registry" }
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }

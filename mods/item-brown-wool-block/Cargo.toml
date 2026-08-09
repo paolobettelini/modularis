@@ -1,0 +1,22 @@
+[package]
+name = "item-brown-wool-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemBrownWoolBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-brown-wool"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:brown_wool_block"
+label = "Brown Wool"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-brown-wool = { path = "../block-brown-wool" }
+tokio = { version = "1.48.0", features = ["full"] }

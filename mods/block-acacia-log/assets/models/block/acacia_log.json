@@ -1,0 +1,7 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_column",
+  "textures": {
+    "side": "block-acacia-log:block/acacia_log",
+    "end": "block-acacia-log:block/acacia_log_top"
+  }
+}

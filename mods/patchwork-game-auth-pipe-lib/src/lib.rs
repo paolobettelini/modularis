@@ -106,15 +106,11 @@ fn read_unix_auth_pipe_from_environment() -> Result<AuthPipeBootstrap, AuthPipeE
 
     // Ownership is intentionally taken so dropping `pipe` closes the inherited
     // descriptor immediately after this one read.
-    eprintln!(
-        "[patchwork-auth] opening Unix auth fd: {descriptor}"
-    );
+    eprintln!("[patchwork-auth] opening Unix auth fd: {descriptor}");
 
     let pipe = unsafe { std::fs::File::from_raw_fd(descriptor) };
 
-    eprintln!(
-        "[patchwork-auth] Unix auth fd opened; waiting for ticket frame"
-    );
+    eprintln!("[patchwork-auth] Unix auth fd opened; waiting for ticket frame");
 
     let result = read_authenticated_ticket(backend_address, pipe);
 
@@ -174,9 +170,7 @@ fn read_windows_auth_pipe_from_environment() -> Result<AuthPipeBootstrap, AuthPi
         return Err(AuthPipeError::Read(error));
     }
 
-    eprintln!(
-        "[patchwork-auth] connected to Windows auth pipe; waiting for ticket frame"
-    );
+    eprintln!("[patchwork-auth] connected to Windows auth pipe; waiting for ticket frame");
 
     // `CreateFileW` returned an owned kernel handle. `File` takes ownership so
     // it is closed even when framing or UTF-8 validation fails.
@@ -227,11 +221,9 @@ mod tests {
         frame.extend_from_slice(&(ticket.len() as u32).to_be_bytes());
         frame.extend_from_slice(ticket);
 
-        let bootstrap = read_authenticated_ticket(
-            "https://backend.example".to_owned(),
-            Cursor::new(frame),
-        )
-        .expect("ticket frame should be valid");
+        let bootstrap =
+            read_authenticated_ticket("https://backend.example".to_owned(), Cursor::new(frame))
+                .expect("ticket frame should be valid");
 
         match bootstrap {
             AuthPipeBootstrap::Authenticated {
@@ -265,11 +257,9 @@ mod tests {
     #[test]
     fn rejects_non_utf8_ticket() {
         let frame = [0, 0, 0, 1, 0xff];
-        let error = read_authenticated_ticket(
-            "https://backend.example".to_owned(),
-            Cursor::new(frame),
-        )
-        .expect_err("ticket must be UTF-8");
+        let error =
+            read_authenticated_ticket("https://backend.example".to_owned(), Cursor::new(frame))
+                .expect_err("ticket must be UTF-8");
         assert!(matches!(error, AuthPipeError::InvalidUtf8));
     }
 }

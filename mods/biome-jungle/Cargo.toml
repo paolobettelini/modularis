@@ -1,0 +1,18 @@
+[package]
+name = "biome-jungle"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "BiomeJungleMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.biome]
+id = "demo:jungle"
+
+[dependencies]
+tokio = { version = "1.48.0", features = ["full"] }

@@ -1,0 +1,22 @@
+[package]
+name = "item-chiseled-resin-bricks-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemChiseledResinBricksBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-chiseled-resin-bricks"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:chiseled_resin_bricks_block"
+label = "Chiseled Resin Bricks"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-chiseled-resin-bricks = { path = "../block-chiseled-resin-bricks" }
+tokio = { version = "1.48.0", features = ["full"] }

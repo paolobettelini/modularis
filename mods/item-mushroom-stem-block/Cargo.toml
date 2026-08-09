@@ -1,0 +1,22 @@
+[package]
+name = "item-mushroom-stem-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemMushroomStemBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-mushroom-stem"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:mushroom_stem_block"
+label = "Mushroom Stem"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-mushroom-stem = { path = "../block-mushroom-stem" }
+tokio = { version = "1.48.0", features = ["full"] }

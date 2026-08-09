@@ -1,9 +1,8 @@
-name = "Minecraft demo vanilla Overworld biomes"
-version = "0.0.1"
-description = "Vanilla-style Overworld biome definitions and their generation features."
+name = "Modularis overworld vanilla biomes"
+version = "0.1.1"
+description = "Modularis overworld vanilla biomes."
 modpacks = ["biomes-overworld"]
 ignore = []
-
 mods = [
     "server-biome-feature-caves-vanilla-mod",
     "server-biome-feature-ores-vanilla-mod",
@@ -13,6 +12,18 @@ mods = [
     "server-biome-feature-ice-patches-vanilla-mod",
     "server-biome-feature-boulders-vanilla-mod",
     "server-biome-feature-short-grass-vanilla-mod",
+    "server-biome-feature-acacia-trees-vanilla-mod",
+    "server-biome-feature-spruce-trees-vanilla-mod",
+    "server-biome-feature-dark-oak-trees-vanilla-mod",
+    "server-biome-feature-jungle-trees-vanilla-mod",
+    "server-biome-feature-cherry-trees-vanilla-mod",
+    "server-biome-feature-mangrove-trees-vanilla-mod",
+    "server-biome-feature-pale-oak-trees-vanilla-mod",
+    "server-biome-feature-surface-patches-vanilla-mod",
+    "server-biome-feature-bamboo-groves-vanilla-mod",
+    "server-biome-feature-melon-patches-vanilla-mod",
+    "server-biome-feature-mushroom-groves-vanilla-mod",
+    "server-biome-feature-dripstone-spires-vanilla-mod",
     "server-biome-plains-vanilla-mod",
     "server-biome-forest-vanilla-mod",
     "server-biome-birch-forest-vanilla-mod",
@@ -20,4 +31,12 @@ mods = [
     "server-biome-badlands-vanilla-mod",
     "server-biome-tundra-vanilla-mod",
     "server-biome-rocky-peaks-vanilla-mod",
+    "server-biome-savanna-vanilla-mod",
+    "server-biome-dark-forest-vanilla-mod",
+    "server-biome-jungle-vanilla-mod",
+    "server-biome-cherry-grove-vanilla-mod",
+    "server-biome-mangrove-marsh-vanilla-mod",
+    "server-biome-pale-garden-vanilla-mod",
+    "server-biome-mushroom-fields-vanilla-mod",
+    "server-biome-dripstone-karst-vanilla-mod",
 ]

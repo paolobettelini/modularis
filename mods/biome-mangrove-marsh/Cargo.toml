@@ -1,0 +1,18 @@
+[package]
+name = "biome-mangrove-marsh"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "BiomeMangroveMarshMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.biome]
+id = "demo:mangrove-marsh"
+
+[dependencies]
+tokio = { version = "1.48.0", features = ["full"] }

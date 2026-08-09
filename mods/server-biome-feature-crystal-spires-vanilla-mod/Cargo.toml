@@ -1,20 +1,22 @@
 [package]
 name = "server-biome-feature-crystal-spires-vanilla-mod"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
 entry = "ServerBiomeFeatureCrystalSpiresVanillaMod"
 
 [package.metadata.mod.dependencies]
-init = ["bevy-mod", "server-biome-api", "block-calcite", "block-glowstone"]
+init = ["bevy-mod", "server-biome-api", "block-calcite", "block-glowstone", "block-amethyst-block", "block-smooth-basalt"]
 run = []
 ownership = []
 
 [dependencies]
 bevy-mod = { path = "../bevy-mod" }
-block-calcite = { path = "../block-calcite" }
+block-smooth-basalt = { path = "../block-smooth-basalt" }
+block-amethyst-block = { path = "../block-amethyst-block" }
 block-glowstone = { path = "../block-glowstone" }
+block-calcite = { path = "../block-calcite" }
 generated-block-registry = "0.1.0"
 server-biome-api = { path = "../server-biome-api" }
 tokio = { version = "1.48.0", features = ["full"] }

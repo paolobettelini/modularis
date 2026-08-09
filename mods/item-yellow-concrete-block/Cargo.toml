@@ -1,0 +1,22 @@
+[package]
+name = "item-yellow-concrete-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemYellowConcreteBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-yellow-concrete"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:yellow_concrete_block"
+label = "Yellow Concrete"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-yellow-concrete = { path = "../block-yellow-concrete" }
+tokio = { version = "1.48.0", features = ["full"] }

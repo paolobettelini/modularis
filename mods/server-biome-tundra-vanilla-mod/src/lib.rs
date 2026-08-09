@@ -10,18 +10,21 @@ use server_biome_feature_ice_patches_vanilla_mod::{
     ServerBiomeFeatureIcePatchesVanillaMod, ice_patches_feature_id,
 };
 use server_biome_feature_ores_vanilla_mod::{ServerBiomeFeatureOresVanillaMod, ores_feature_id};
+use server_biome_feature_spruce_trees_vanilla_mod::{
+    ServerBiomeFeatureSpruceTreesVanillaMod, sparse_spruce_trees_feature_id,
+};
 use tokio::task::JoinHandle;
 
 pub struct ServerBiomeTundraVanillaMod;
-
 impl ServerBiomeTundraVanillaMod {
     pub fn init<B: ServerBiomeApi>(
         bevy: &mut BevyMod,
         _biomes: &mut B,
         _declaration: &mut biome_tundra::BiomeTundraMod,
-        _caves: &mut ServerBiomeFeatureCavesVanillaMod,
-        _ores: &mut ServerBiomeFeatureOresVanillaMod,
-        _ice: &mut ServerBiomeFeatureIcePatchesVanillaMod,
+        _caves: &mut server_biome_feature_caves_vanilla_mod::ServerBiomeFeatureCavesVanillaMod,
+        _ores: &mut server_biome_feature_ores_vanilla_mod::ServerBiomeFeatureOresVanillaMod,
+        _ice_patches: &mut server_biome_feature_ice_patches_vanilla_mod::ServerBiomeFeatureIcePatchesVanillaMod,
+        _spruce_trees: &mut server_biome_feature_spruce_trees_vanilla_mod::ServerBiomeFeatureSpruceTreesVanillaMod,
     ) -> Self {
         bevy.app
             .world()
@@ -32,37 +35,37 @@ impl ServerBiomeTundraVanillaMod {
                 name: "Frozen Tundra",
                 climate: BiomeClimate {
                     temperature: 0.08,
-                    humidity: 0.48,
-                    continentalness: 0.44,
+                    humidity: 0.34,
+                    continentalness: 0.40,
                     has_precipitation: true,
-                    downfall: 0.58,
+                    downfall: 0.55,
                 },
                 terrain: BiomeTerrain {
-                    base_height: 5.0,
-                    height_variation: 2.8,
-                    detail_variation: 0.9,
+                    base_height: 5.00,
+                    height_variation: 2.70,
+                    detail_variation: 0.80,
                     surface: BlockId::Snow,
-                    subsurface: BlockId::Dirt,
+                    subsurface: BlockId::CoarseDirt,
                     underground: BlockId::Stone,
                     subsurface_depth: 4,
                 },
                 visuals: BiomeVisuals {
-                    sky_color: [0.62, 0.72, 0.86],
+                    sky_color: [0.54, 0.68, 0.90],
                     fog_color: [0.78, 0.84, 0.90],
-                    water_color: [0.20, 0.38, 0.62],
-                    grass_tint: [0.62, 0.70, 0.66],
-                    foliage_tint: [0.54, 0.66, 0.62],
+                    water_color: [0.24, 0.50, 0.78],
+                    grass_tint: [0.58, 0.68, 0.62],
+                    foliage_tint: [0.52, 0.64, 0.58],
                 },
                 features: vec![
                     caves_feature_id(),
                     ores_feature_id(),
                     ice_patches_feature_id(),
+                    sparse_spruce_trees_feature_id(),
                 ],
             })
-            .expect("the tundra biome definition must be unique");
+            .expect("the Frozen Tundra biome definition must be unique");
         Self
     }
-
     pub fn run(&self) -> Option<Vec<JoinHandle<()>>> {
         None
     }

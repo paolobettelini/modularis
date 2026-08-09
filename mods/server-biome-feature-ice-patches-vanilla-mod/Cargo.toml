@@ -1,18 +1,20 @@
 [package]
 name = "server-biome-feature-ice-patches-vanilla-mod"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
 entry = "ServerBiomeFeatureIcePatchesVanillaMod"
 
 [package.metadata.mod.dependencies]
-init = ["bevy-mod", "server-biome-api", "block-packed-ice"]
+init = ["bevy-mod", "server-biome-api", "block-packed-ice", "block-ice", "block-blue-ice"]
 run = []
 ownership = []
 
 [dependencies]
 bevy-mod = { path = "../bevy-mod" }
+block-blue-ice = { path = "../block-blue-ice" }
+block-ice = { path = "../block-ice" }
 block-packed-ice = { path = "../block-packed-ice" }
 generated-block-registry = "0.1.0"
 server-biome-api = { path = "../server-biome-api" }

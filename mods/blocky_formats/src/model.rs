@@ -1,4 +1,4 @@
-use crate::{BlockyError, Result, Quatf, Vec2f, Vec3f};
+use crate::{BlockyError, Quatf, Result, Vec2f, Vec3f};
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, path::Path};
 

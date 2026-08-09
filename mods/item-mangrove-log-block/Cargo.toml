@@ -1,0 +1,22 @@
+[package]
+name = "item-mangrove-log-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemMangroveLogBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-mangrove-log"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:mangrove_log_block"
+label = "Mangrove Log"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-mangrove-log = { path = "../block-mangrove-log" }
+tokio = { version = "1.48.0", features = ["full"] }

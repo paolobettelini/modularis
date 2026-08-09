@@ -1,0 +1,7 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_column",
+  "textures": {
+    "side": "block-chiseled-tuff:block/chiseled_tuff",
+    "end": "block-chiseled-tuff:block/chiseled_tuff_top"
+  }
+}

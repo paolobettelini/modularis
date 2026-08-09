@@ -1,0 +1,6 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_all",
+  "textures": {
+    "all": "block-red-stained-glass:block/red_stained_glass"
+  }
+}

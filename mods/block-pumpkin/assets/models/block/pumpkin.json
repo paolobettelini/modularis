@@ -1,0 +1,7 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_column",
+  "textures": {
+    "side": "block-pumpkin:block/pumpkin_side",
+    "end": "block-pumpkin:block/pumpkin_top"
+  }
+}

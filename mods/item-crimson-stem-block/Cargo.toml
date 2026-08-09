@@ -1,0 +1,22 @@
+[package]
+name = "item-crimson-stem-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemCrimsonStemBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-crimson-stem"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:crimson_stem_block"
+label = "Crimson Stem"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-crimson-stem = { path = "../block-crimson-stem" }
+tokio = { version = "1.48.0", features = ["full"] }

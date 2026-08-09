@@ -1,0 +1,22 @@
+[package]
+name = "item-blue-terracotta-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemBlueTerracottaBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-blue-terracotta"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:blue_terracotta_block"
+label = "Blue Terracotta"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-blue-terracotta = { path = "../block-blue-terracotta" }
+tokio = { version = "1.48.0", features = ["full"] }

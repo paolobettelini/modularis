@@ -1,0 +1,22 @@
+[package]
+name = "item-bubble-coral-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemBubbleCoralBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-bubble-coral-block"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:bubble_coral_block"
+label = "Bubble Coral Block"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-bubble-coral-block = { path = "../block-bubble-coral-block" }
+tokio = { version = "1.48.0", features = ["full"] }

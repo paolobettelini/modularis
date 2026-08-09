@@ -1,0 +1,7 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_column",
+  "textures": {
+    "side": "block-muddy-mangrove-roots:block/muddy_mangrove_roots_side",
+    "end": "block-muddy-mangrove-roots:block/muddy_mangrove_roots_top"
+  }
+}

@@ -1,0 +1,22 @@
+[package]
+name = "item-red-mushroom-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemRedMushroomBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-red-mushroom-block"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:red_mushroom_block"
+label = "Red Mushroom Block"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-red-mushroom-block = { path = "../block-red-mushroom-block" }
+tokio = { version = "1.48.0", features = ["full"] }

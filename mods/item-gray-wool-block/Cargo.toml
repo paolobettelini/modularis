@@ -1,0 +1,22 @@
+[package]
+name = "item-gray-wool-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemGrayWoolBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-gray-wool"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:gray_wool_block"
+label = "Gray Wool"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-gray-wool = { path = "../block-gray-wool" }
+tokio = { version = "1.48.0", features = ["full"] }

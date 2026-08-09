@@ -1,0 +1,22 @@
+[package]
+name = "item-clay-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemClayBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-clay"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:clay_block"
+label = "Clay"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-clay = { path = "../block-clay" }
+tokio = { version = "1.48.0", features = ["full"] }

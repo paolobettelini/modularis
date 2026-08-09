@@ -1,0 +1,22 @@
+[package]
+name = "item-prismarine-bricks-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemPrismarineBricksBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-prismarine-bricks"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:prismarine_bricks_block"
+label = "Prismarine Bricks"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-prismarine-bricks = { path = "../block-prismarine-bricks" }
+tokio = { version = "1.48.0", features = ["full"] }

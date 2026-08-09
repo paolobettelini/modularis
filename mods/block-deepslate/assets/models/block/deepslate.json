@@ -1,0 +1,7 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_column",
+  "textures": {
+    "side": "block-deepslate:block/deepslate",
+    "end": "block-deepslate:block/deepslate_top"
+  }
+}

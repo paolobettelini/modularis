@@ -1,0 +1,22 @@
+[package]
+name = "item-pearlescent-froglight-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemPearlescentFroglightBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-pearlescent-froglight"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:pearlescent_froglight_block"
+label = "Pearlescent Froglight"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-pearlescent-froglight = { path = "../block-pearlescent-froglight" }
+tokio = { version = "1.48.0", features = ["full"] }

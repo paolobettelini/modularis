@@ -1,0 +1,41 @@
+[package]
+name = "server-biome-feature-surface-patches-vanilla-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerBiomeFeatureSurfacePatchesVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-biome-api", "block-coarse-dirt", "block-podzol", "block-andesite", "block-diorite", "block-granite", "block-tuff", "block-azalea-leaves", "block-flowering-azalea-leaves", "block-mud", "block-packed-mud", "block-pale-moss-block", "block-red-sandstone", "block-red-terracotta", "block-orange-terracotta", "block-rooted-dirt", "block-mossy-cobblestone"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+block-mossy-cobblestone = { path = "../block-mossy-cobblestone" }
+block-rooted-dirt = { path = "../block-rooted-dirt" }
+block-orange-terracotta = { path = "../block-orange-terracotta" }
+block-red-terracotta = { path = "../block-red-terracotta" }
+block-red-sandstone = { path = "../block-red-sandstone" }
+block-pale-moss-block = { path = "../block-pale-moss-block" }
+block-packed-mud = { path = "../block-packed-mud" }
+block-mud = { path = "../block-mud" }
+block-flowering-azalea-leaves = { path = "../block-flowering-azalea-leaves" }
+block-azalea-leaves = { path = "../block-azalea-leaves" }
+block-tuff = { path = "../block-tuff" }
+block-granite = { path = "../block-granite" }
+block-diorite = { path = "../block-diorite" }
+block-andesite = { path = "../block-andesite" }
+block-podzol = { path = "../block-podzol" }
+block-coarse-dirt = { path = "../block-coarse-dirt" }
+generated-block-registry = "0.1.0"
+server-biome-api = { path = "../server-biome-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
+
+[patch.crates-io]
+generated-biome-registry = { path = "../generated-biome-registry" }
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }

@@ -1,0 +1,6 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_all",
+  "textures": {
+    "all": "block-cracked-polished-blackstone-bricks:block/cracked_polished_blackstone_bricks"
+  }
+}

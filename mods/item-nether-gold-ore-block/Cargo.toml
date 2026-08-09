@@ -1,0 +1,22 @@
+[package]
+name = "item-nether-gold-ore-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemNetherGoldOreBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-nether-gold-ore"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:nether_gold_ore_block"
+label = "Nether Gold Ore"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-nether-gold-ore = { path = "../block-nether-gold-ore" }
+tokio = { version = "1.48.0", features = ["full"] }

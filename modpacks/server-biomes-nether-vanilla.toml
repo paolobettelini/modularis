@@ -1,16 +1,20 @@
-name = "Minecraft demo vanilla Nether biomes"
-version = "0.0.1"
-description = "Vanilla-style Nether biome definitions and their generation features."
+name = "Modularis nether vanilla biomes"
+version = "0.1.1"
+description = "Modularis nether vanilla biomes."
 modpacks = ["biomes-nether"]
 ignore = []
-
 mods = [
     "server-biome-feature-caves-vanilla-mod",
     "server-biome-feature-glowstone-clusters-vanilla-mod",
-    "server-biome-feature-short-grass-vanilla-mod",
+    "server-biome-feature-nether-ores-vanilla-mod",
+    "server-biome-feature-nether-fungi-vanilla-mod",
+    "server-biome-feature-nether-formations-vanilla-mod",
     "server-biome-nether-wastes-vanilla-mod",
     "server-biome-soul-sand-valley-vanilla-mod",
     "server-biome-crimson-forest-vanilla-mod",
     "server-biome-warped-forest-vanilla-mod",
     "server-biome-basalt-deltas-vanilla-mod",
+    "server-biome-sulfur-wastes-vanilla-mod",
+    "server-biome-blackstone-ridges-vanilla-mod",
+    "server-biome-cinnabar-grotto-vanilla-mod",
 ]

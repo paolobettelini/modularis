@@ -1,0 +1,22 @@
+[package]
+name = "item-warped-planks-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemWarpedPlanksBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-warped-planks"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:warped_planks_block"
+label = "Warped Planks"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-warped-planks = { path = "../block-warped-planks" }
+tokio = { version = "1.48.0", features = ["full"] }

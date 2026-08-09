@@ -1,0 +1,7 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_column",
+  "textures": {
+    "side": "block-purpur-pillar:block/purpur_pillar_side",
+    "end": "block-purpur-pillar:block/purpur_pillar_top"
+  }
+}

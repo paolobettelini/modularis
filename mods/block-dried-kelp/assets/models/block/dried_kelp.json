@@ -1,0 +1,11 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube",
+  "textures": {
+    "down": "block-dried-kelp:block/dried_kelp_bottom",
+    "up": "block-dried-kelp:block/dried_kelp_top",
+    "north": "block-dried-kelp:block/dried_kelp_side",
+    "south": "block-dried-kelp:block/dried_kelp_side",
+    "west": "block-dried-kelp:block/dried_kelp_side",
+    "east": "block-dried-kelp:block/dried_kelp_side"
+  }
+}

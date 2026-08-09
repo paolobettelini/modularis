@@ -1,11 +1,13 @@
-name = "Minecraft demo Aether biome identities"
-version = "0.0.1"
-description = "Biome ID contributors for the Aether."
+name = "Modularis aether biomes"
+version = "0.1.1"
+description = "Modularis aether biomes."
 modpacks = []
 ignore = []
-
 mods = [
     "biome-aether-highlands",
     "biome-aether-golden-grove",
     "biome-aether-crystal-peaks",
+    "biome-aether-amethyst-gardens",
+    "biome-aether-verdant-canopy",
+    "biome-aether-tempest-isles",
 ]

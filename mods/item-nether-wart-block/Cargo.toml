@@ -1,0 +1,22 @@
+[package]
+name = "item-nether-wart-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemNetherWartBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-nether-wart-block"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:nether_wart_block"
+label = "Nether Wart Block"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-nether-wart-block = { path = "../block-nether-wart-block" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -1,0 +1,11 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube",
+  "textures": {
+    "down": "block-quartz-block:block/quartz_block_bottom",
+    "up": "block-quartz-block:block/quartz_block_top",
+    "north": "block-quartz-block:block/quartz_block_side",
+    "south": "block-quartz-block:block/quartz_block_side",
+    "west": "block-quartz-block:block/quartz_block_side",
+    "east": "block-quartz-block:block/quartz_block_side"
+  }
+}

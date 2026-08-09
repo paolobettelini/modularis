@@ -1,0 +1,22 @@
+[package]
+name = "item-raw-copper-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemRawCopperBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-raw-copper-block"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:raw_copper_block"
+label = "Raw Copper Block"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-raw-copper-block = { path = "../block-raw-copper-block" }
+tokio = { version = "1.48.0", features = ["full"] }

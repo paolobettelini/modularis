@@ -1,0 +1,22 @@
+[package]
+name = "item-dark-oak-leaves-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemDarkOakLeavesBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-dark-oak-leaves"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:dark_oak_leaves_block"
+label = "Dark Oak Leaves"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-dark-oak-leaves = { path = "../block-dark-oak-leaves" }
+tokio = { version = "1.48.0", features = ["full"] }

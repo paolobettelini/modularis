@@ -1,0 +1,22 @@
+[package]
+name = "item-mud-bricks-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemMudBricksBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-mud-bricks"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:mud_bricks_block"
+label = "Mud Bricks"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-mud-bricks = { path = "../block-mud-bricks" }
+tokio = { version = "1.48.0", features = ["full"] }

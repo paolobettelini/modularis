@@ -1,0 +1,22 @@
+[package]
+name = "item-deepslate-bricks-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemDeepslateBricksBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-deepslate-bricks"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:deepslate_bricks_block"
+label = "Deepslate Bricks"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-deepslate-bricks = { path = "../block-deepslate-bricks" }
+tokio = { version = "1.48.0", features = ["full"] }

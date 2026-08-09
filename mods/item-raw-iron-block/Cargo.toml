@@ -1,0 +1,22 @@
+[package]
+name = "item-raw-iron-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemRawIronBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-raw-iron-block"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:raw_iron_block"
+label = "Raw Iron Block"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-raw-iron-block = { path = "../block-raw-iron-block" }
+tokio = { version = "1.48.0", features = ["full"] }

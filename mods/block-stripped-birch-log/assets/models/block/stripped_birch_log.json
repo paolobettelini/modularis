@@ -1,0 +1,7 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_column",
+  "textures": {
+    "side": "block-stripped-birch-log:block/stripped_birch_log",
+    "end": "block-stripped-birch-log:block/stripped_birch_log_top"
+  }
+}

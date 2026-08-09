@@ -1,0 +1,22 @@
+[package]
+name = "item-stripped-crimson-stem-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemStrippedCrimsonStemBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-stripped-crimson-stem"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:stripped_crimson_stem_block"
+label = "Stripped Crimson Stem"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-stripped-crimson-stem = { path = "../block-stripped-crimson-stem" }
+tokio = { version = "1.48.0", features = ["full"] }

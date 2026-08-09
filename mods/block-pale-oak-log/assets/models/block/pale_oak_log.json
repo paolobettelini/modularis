@@ -1,0 +1,7 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_column",
+  "textures": {
+    "side": "block-pale-oak-log:block/pale_oak_log",
+    "end": "block-pale-oak-log:block/pale_oak_log_top"
+  }
+}

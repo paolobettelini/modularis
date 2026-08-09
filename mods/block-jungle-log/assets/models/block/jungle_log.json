@@ -1,0 +1,7 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_column",
+  "textures": {
+    "side": "block-jungle-log:block/jungle_log",
+    "end": "block-jungle-log:block/jungle_log_top"
+  }
+}

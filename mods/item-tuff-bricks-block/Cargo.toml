@@ -1,0 +1,22 @@
+[package]
+name = "item-tuff-bricks-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemTuffBricksBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-tuff-bricks"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:tuff_bricks_block"
+label = "Tuff Bricks"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-tuff-bricks = { path = "../block-tuff-bricks" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -1,0 +1,18 @@
+[package]
+name = "biome-aether-amethyst-gardens"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "BiomeAetherAmethystGardensMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.biome]
+id = "demo:aether-amethyst-gardens"
+
+[dependencies]
+tokio = { version = "1.48.0", features = ["full"] }

@@ -1,15 +1,22 @@
-name = "Minecraft demo vanilla Aether biomes"
-version = "0.0.1"
-description = "Vanilla-style Aether biome definitions and their generation features."
+name = "Modularis Aether vanilla biomes"
+version = "0.1.1"
+description = "Modularis Aether vanilla biomes."
 modpacks = ["biomes-aether"]
 ignore = []
-
 mods = [
     "server-biome-feature-oak-trees-vanilla-mod",
+    "server-biome-feature-spruce-trees-vanilla-mod",
+    "server-biome-feature-cherry-trees-vanilla-mod",
+    "server-biome-feature-pale-oak-trees-vanilla-mod",
+    "server-biome-feature-short-grass-vanilla-mod",
     "server-biome-feature-glowstone-clusters-vanilla-mod",
     "server-biome-feature-crystal-spires-vanilla-mod",
-    "server-biome-feature-short-grass-vanilla-mod",
+    "server-biome-feature-surface-patches-vanilla-mod",
+    "server-biome-feature-aether-lights-vanilla-mod",
     "server-biome-aether-highlands-vanilla-mod",
     "server-biome-aether-golden-grove-vanilla-mod",
     "server-biome-aether-crystal-peaks-vanilla-mod",
+    "server-biome-aether-amethyst-gardens-vanilla-mod",
+    "server-biome-aether-verdant-canopy-vanilla-mod",
+    "server-biome-aether-tempest-isles-vanilla-mod",
 ]

@@ -1,0 +1,22 @@
+[package]
+name = "item-cracked-polished-blackstone-bricks-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemCrackedPolishedBlackstoneBricksBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-cracked-polished-blackstone-bricks"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:cracked_polished_blackstone_bricks_block"
+label = "Cracked Polished Blackstone Bricks"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-cracked-polished-blackstone-bricks = { path = "../block-cracked-polished-blackstone-bricks" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -1,0 +1,22 @@
+[package]
+name = "item-purple-stained-glass-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemPurpleStainedGlassBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-purple-stained-glass"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:purple_stained_glass_block"
+label = "Purple Stained Glass"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-purple-stained-glass = { path = "../block-purple-stained-glass" }
+tokio = { version = "1.48.0", features = ["full"] }

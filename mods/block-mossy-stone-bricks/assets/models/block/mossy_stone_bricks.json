@@ -1,0 +1,6 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_all",
+  "textures": {
+    "all": "block-mossy-stone-bricks:block/mossy_stone_bricks"
+  }
+}

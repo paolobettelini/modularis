@@ -1,0 +1,11 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube",
+  "textures": {
+    "down": "block-reinforced-deepslate:block/reinforced_deepslate_bottom",
+    "up": "block-reinforced-deepslate:block/reinforced_deepslate_top",
+    "north": "block-reinforced-deepslate:block/reinforced_deepslate_side",
+    "south": "block-reinforced-deepslate:block/reinforced_deepslate_side",
+    "west": "block-reinforced-deepslate:block/reinforced_deepslate_side",
+    "east": "block-reinforced-deepslate:block/reinforced_deepslate_side"
+  }
+}

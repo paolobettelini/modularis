@@ -1,0 +1,30 @@
+[package]
+name = "server-biome-aether-verdant-canopy-vanilla-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerBiomeAetherVerdantCanopyVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-biome-api", "biome-aether-verdant-canopy", "server-biome-feature-cherry-trees-vanilla-mod", "server-biome-feature-pale-oak-trees-vanilla-mod", "server-biome-feature-aether-lights-vanilla-mod", "server-biome-feature-surface-patches-vanilla-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+biome-aether-verdant-canopy = { path = "../biome-aether-verdant-canopy" }
+generated-biome-registry = "0.1.0"
+generated-block-registry = "0.1.0"
+server-biome-api = { path = "../server-biome-api" }
+server-biome-feature-cherry-trees-vanilla-mod = { path = "../server-biome-feature-cherry-trees-vanilla-mod" }
+server-biome-feature-pale-oak-trees-vanilla-mod = { path = "../server-biome-feature-pale-oak-trees-vanilla-mod" }
+server-biome-feature-aether-lights-vanilla-mod = { path = "../server-biome-feature-aether-lights-vanilla-mod" }
+server-biome-feature-surface-patches-vanilla-mod = { path = "../server-biome-feature-surface-patches-vanilla-mod" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-biome-registry = { path = "../generated-biome-registry" }
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }

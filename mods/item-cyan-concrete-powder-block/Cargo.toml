@@ -1,0 +1,22 @@
+[package]
+name = "item-cyan-concrete-powder-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemCyanConcretePowderBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-cyan-concrete-powder"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:cyan_concrete_powder_block"
+label = "Cyan Concrete Powder"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-cyan-concrete-powder = { path = "../block-cyan-concrete-powder" }
+tokio = { version = "1.48.0", features = ["full"] }

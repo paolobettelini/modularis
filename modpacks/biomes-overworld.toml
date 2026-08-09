@@ -1,9 +1,8 @@
-name = "Minecraft demo Overworld biome identities"
-version = "0.0.1"
-description = "Biome ID contributors for the Overworld."
+name = "Modularis overworld biomes"
+version = "0.1.1"
+description = "Modularis overworld biomes."
 modpacks = []
 ignore = []
-
 mods = [
     "biome-plains",
     "biome-forest",
@@ -12,4 +11,12 @@ mods = [
     "biome-badlands",
     "biome-tundra",
     "biome-rocky-peaks",
+    "biome-savanna",
+    "biome-dark-forest",
+    "biome-jungle",
+    "biome-cherry-grove",
+    "biome-mangrove-marsh",
+    "biome-pale-garden",
+    "biome-mushroom-fields",
+    "biome-dripstone-karst",
 ]

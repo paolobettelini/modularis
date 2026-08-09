@@ -1,0 +1,7 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_column",
+  "textures": {
+    "side": "block-verdant-froglight:block/verdant_froglight_side",
+    "end": "block-verdant-froglight:block/verdant_froglight_top"
+  }
+}

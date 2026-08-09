@@ -1,0 +1,22 @@
+[package]
+name = "item-copper-ore-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemCopperOreBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-copper-ore"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:copper_ore_block"
+label = "Copper Ore"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-copper-ore = { path = "../block-copper-ore" }
+tokio = { version = "1.48.0", features = ["full"] }

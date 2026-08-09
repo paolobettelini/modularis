@@ -1,7 +1,6 @@
-name = "Minecraft demo biome identities"
-version = "0.0.1"
-description = "Dimension-scoped biome ID contributors and the generated biome registry."
+name = "Modularis biomes"
+version = "0.1.1"
+description = "Modularis vanilla biomes."
 modpacks = ["blocks", "dimensions", "biomes-overworld", "biomes-nether", "biomes-aether"]
 ignore = []
-
 mods = ["biome-registry-codegen"]

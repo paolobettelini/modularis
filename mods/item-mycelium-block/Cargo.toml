@@ -1,0 +1,22 @@
+[package]
+name = "item-mycelium-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemMyceliumBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-mycelium"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:mycelium_block"
+label = "Mycelium"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-mycelium = { path = "../block-mycelium" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -1,20 +1,13 @@
 [package]
 name = "server-biome-basalt-deltas-vanilla-mod"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
 entry = "ServerBiomeBasaltDeltasVanillaMod"
 
 [package.metadata.mod.dependencies]
-init = [
-    "bevy-mod",
-    "server-biome-api",
-    "biome-basalt-deltas",
-    "server-biome-feature-caves-vanilla-mod",
-    "server-biome-feature-glowstone-clusters-vanilla-mod",
-    "server-biome-feature-short-grass-vanilla-mod",
-]
+init = ["bevy-mod", "server-biome-api", "biome-basalt-deltas", "server-biome-feature-caves-vanilla-mod", "server-biome-feature-nether-ores-vanilla-mod", "server-biome-feature-nether-formations-vanilla-mod", "server-biome-feature-glowstone-clusters-vanilla-mod"]
 run = []
 ownership = []
 
@@ -25,8 +18,9 @@ generated-biome-registry = "0.1.0"
 generated-block-registry = "0.1.0"
 server-biome-api = { path = "../server-biome-api" }
 server-biome-feature-caves-vanilla-mod = { path = "../server-biome-feature-caves-vanilla-mod" }
+server-biome-feature-nether-ores-vanilla-mod = { path = "../server-biome-feature-nether-ores-vanilla-mod" }
+server-biome-feature-nether-formations-vanilla-mod = { path = "../server-biome-feature-nether-formations-vanilla-mod" }
 server-biome-feature-glowstone-clusters-vanilla-mod = { path = "../server-biome-feature-glowstone-clusters-vanilla-mod" }
-server-biome-feature-short-grass-vanilla-mod = { path = "../server-biome-feature-short-grass-vanilla-mod" }
 tokio = { version = "1.48.0", features = ["full"] }
 
 [patch.crates-io]

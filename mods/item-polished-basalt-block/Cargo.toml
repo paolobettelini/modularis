@@ -1,0 +1,22 @@
+[package]
+name = "item-polished-basalt-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemPolishedBasaltBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-polished-basalt"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:polished_basalt_block"
+label = "Polished Basalt"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-polished-basalt = { path = "../block-polished-basalt" }
+tokio = { version = "1.48.0", features = ["full"] }

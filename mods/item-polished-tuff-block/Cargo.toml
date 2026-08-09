@@ -1,0 +1,22 @@
+[package]
+name = "item-polished-tuff-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemPolishedTuffBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-polished-tuff"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:polished_tuff_block"
+label = "Polished Tuff"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-polished-tuff = { path = "../block-polished-tuff" }
+tokio = { version = "1.48.0", features = ["full"] }

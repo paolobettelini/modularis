@@ -1,0 +1,6 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_all",
+  "textures": {
+    "all": "block-light-gray-glazed-terracotta:block/light_gray_glazed_terracotta"
+  }
+}

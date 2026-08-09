@@ -1,0 +1,22 @@
+[package]
+name = "item-mangrove-roots-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemMangroveRootsBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-mangrove-roots"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:mangrove_roots_block"
+label = "Mangrove Roots"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-mangrove-roots = { path = "../block-mangrove-roots" }
+tokio = { version = "1.48.0", features = ["full"] }

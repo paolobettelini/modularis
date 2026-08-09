@@ -1,0 +1,22 @@
+[package]
+name = "item-polished-sulfur-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemPolishedSulfurBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-polished-sulfur"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:polished_sulfur_block"
+label = "Polished Sulfur"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-polished-sulfur = { path = "../block-polished-sulfur" }
+tokio = { version = "1.48.0", features = ["full"] }

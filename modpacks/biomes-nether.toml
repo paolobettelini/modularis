@@ -1,13 +1,15 @@
-name = "Minecraft demo Nether biome identities"
-version = "0.0.1"
-description = "Biome ID contributors for the Nether."
+name = "Modularis nether biomes"
+version = "0.1.1"
+description = "Modularis nether biomes."
 modpacks = []
 ignore = []
-
 mods = [
     "biome-nether-wastes",
     "biome-soul-sand-valley",
     "biome-crimson-forest",
     "biome-warped-forest",
     "biome-basalt-deltas",
+    "biome-sulfur-wastes",
+    "biome-blackstone-ridges",
+    "biome-cinnabar-grotto",
 ]

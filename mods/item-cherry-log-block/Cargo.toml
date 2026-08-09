@@ -1,0 +1,22 @@
+[package]
+name = "item-cherry-log-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemCherryLogBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-cherry-log"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:cherry_log_block"
+label = "Cherry Log"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-cherry-log = { path = "../block-cherry-log" }
+tokio = { version = "1.48.0", features = ["full"] }

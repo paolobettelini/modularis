@@ -1,0 +1,6 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube_all",
+  "textures": {
+    "all": "block-weathered-cut-copper:block/weathered_cut_copper"
+  }
+}

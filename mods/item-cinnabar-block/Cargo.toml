@@ -1,0 +1,22 @@
+[package]
+name = "item-cinnabar-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemCinnabarBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-cinnabar"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:cinnabar_block"
+label = "Cinnabar"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-cinnabar = { path = "../block-cinnabar" }
+tokio = { version = "1.48.0", features = ["full"] }

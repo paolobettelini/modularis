@@ -34,7 +34,9 @@ impl RuntimeModel {
     }
 
     pub fn node_by_id(&self, id: &str) -> Option<&RuntimeNode> {
-        self.nodes_by_id.get(id).and_then(|&idx| self.nodes.get(idx))
+        self.nodes_by_id
+            .get(id)
+            .and_then(|&idx| self.nodes.get(idx))
     }
 
     /// Returns the node pivot relative to the parent pivot.
@@ -67,12 +69,14 @@ impl RuntimeModel {
             .unwrap_or(&[])
     }
 
-
     /// Checks name-based compatibility between this model and an animation.
     ///
     /// `.blockyanim` targets nodes by name. Extra animation tracks are harmless but will not affect
     /// this model. Model nodes without animation tracks keep their rest transform.
-    pub fn check_animation_compatibility(&self, animation: &BlockyAnimation) -> AnimationCompatibility {
+    pub fn check_animation_compatibility(
+        &self,
+        animation: &BlockyAnimation,
+    ) -> AnimationCompatibility {
         let mut matched_node_names = Vec::new();
         let mut animation_nodes_missing_in_model = Vec::new();
         let mut model_nodes_without_animation = Vec::new();
@@ -146,7 +150,6 @@ pub struct RuntimeNode {
     pub shape: Option<crate::BlockyShape>,
 }
 
-
 /// Name-based compatibility report between a `RuntimeModel` and a `BlockyAnimation`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AnimationCompatibility {
@@ -157,7 +160,8 @@ pub struct AnimationCompatibility {
 
 impl AnimationCompatibility {
     pub fn is_fully_matched(&self) -> bool {
-        self.animation_nodes_missing_in_model.is_empty() && self.model_nodes_without_animation.is_empty()
+        self.animation_nodes_missing_in_model.is_empty()
+            && self.model_nodes_without_animation.is_empty()
     }
 }
 

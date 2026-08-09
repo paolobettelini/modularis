@@ -1,0 +1,22 @@
+[package]
+name = "item-chiseled-sulfur-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemChiseledSulfurBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-chiseled-sulfur"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:chiseled_sulfur_block"
+label = "Chiseled Sulfur"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-chiseled-sulfur = { path = "../block-chiseled-sulfur" }
+tokio = { version = "1.48.0", features = ["full"] }

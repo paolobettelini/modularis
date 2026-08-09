@@ -1,0 +1,11 @@
+{
+  "parent": "voxel-model-block-templates-mod:block/cube",
+  "textures": {
+    "down": "block-sandstone:block/sandstone_bottom",
+    "up": "block-sandstone:block/sandstone_top",
+    "north": "block-sandstone:block/sandstone",
+    "south": "block-sandstone:block/sandstone",
+    "west": "block-sandstone:block/sandstone",
+    "east": "block-sandstone:block/sandstone"
+  }
+}

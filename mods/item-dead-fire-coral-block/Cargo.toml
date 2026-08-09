@@ -1,0 +1,22 @@
+[package]
+name = "item-dead-fire-coral-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemDeadFireCoralBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-dead-fire-coral-block"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:dead_fire_coral_block"
+label = "Dead Fire Coral Block"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-dead-fire-coral-block = { path = "../block-dead-fire-coral-block" }
+tokio = { version = "1.48.0", features = ["full"] }

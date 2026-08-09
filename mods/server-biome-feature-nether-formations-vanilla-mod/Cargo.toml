@@ -1,0 +1,34 @@
+[package]
+name = "server-biome-feature-nether-formations-vanilla-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerBiomeFeatureNetherFormationsVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-biome-api", "block-bone-block", "block-sulfur", "block-potent-sulfur", "block-polished-sulfur", "block-cinnabar", "block-polished-cinnabar", "block-chiseled-cinnabar", "block-polished-blackstone", "block-gilded-blackstone"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+block-gilded-blackstone = { path = "../block-gilded-blackstone" }
+block-polished-blackstone = { path = "../block-polished-blackstone" }
+block-chiseled-cinnabar = { path = "../block-chiseled-cinnabar" }
+block-polished-cinnabar = { path = "../block-polished-cinnabar" }
+block-cinnabar = { path = "../block-cinnabar" }
+block-polished-sulfur = { path = "../block-polished-sulfur" }
+block-potent-sulfur = { path = "../block-potent-sulfur" }
+block-sulfur = { path = "../block-sulfur" }
+block-bone-block = { path = "../block-bone-block" }
+generated-block-registry = "0.1.0"
+server-biome-api = { path = "../server-biome-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
+
+[patch.crates-io]
+generated-biome-registry = { path = "../generated-biome-registry" }
+generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-registry = { path = "../generated-block-registry" }
+generated-dimension-registry = { path = "../generated-dimension-registry" }

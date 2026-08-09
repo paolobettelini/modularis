@@ -1,0 +1,22 @@
+[package]
+name = "item-exposed-cut-copper-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemExposedCutCopperBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-exposed-cut-copper"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:exposed_cut_copper_block"
+label = "Exposed Cut Copper"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-exposed-cut-copper = { path = "../block-exposed-cut-copper" }
+tokio = { version = "1.48.0", features = ["full"] }

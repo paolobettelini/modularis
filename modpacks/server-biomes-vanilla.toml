@@ -1,6 +1,6 @@
-name = "Minecraft demo vanilla biomes"
-version = "0.0.1"
-description = "Optional dimension-scoped vanilla biome definitions, selection, and world-generation features."
+name = "Modularis vanilla biomes"
+version = "0.1.1"
+description = "Modularis vanilla biomes."
 modpacks = [
     "biomes",
     "server-biomes-overworld-vanilla",
@@ -8,5 +8,4 @@ modpacks = [
     "server-biomes-aether-vanilla",
 ]
 ignore = []
-
 mods = ["server-biome-climate-selector-vanilla-mod"]

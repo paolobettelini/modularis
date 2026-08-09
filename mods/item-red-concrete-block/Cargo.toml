@@ -1,0 +1,22 @@
+[package]
+name = "item-red-concrete-block"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ItemRedConcreteBlockMod"
+
+[package.metadata.mod.dependencies]
+init = ["block-red-concrete"]
+run = []
+ownership = []
+
+[package.metadata.item]
+id = "demo:red_concrete_block"
+label = "Red Concrete"
+
+[dependencies]
+item-api = { git = "https://github.com/paolobettelini/modularis.git" }
+item-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-red-concrete = { path = "../block-red-concrete" }
+tokio = { version = "1.48.0", features = ["full"] }
