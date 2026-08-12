@@ -1,0 +1,422 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Block properties and sparse components - Minecraft Simple Demo Architecture</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting-started/project-overview.html"><strong aria-hidden="true">1.1.</strong> Project overview</a></li><li class="chapter-item expanded "><a href="../getting-started/build-and-run.html"><strong aria-hidden="true">1.2.</strong> Build and run</a></li></ol></li><li class="chapter-item expanded "><a href="../architecture/foundations.html"><strong aria-hidden="true">2.</strong> Architecture foundations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../architecture/patchwork-composition.html"><strong aria-hidden="true">2.1.</strong> Patchwork composition</a></li><li class="chapter-item expanded "><a href="../architecture/mod-anatomy.html"><strong aria-hidden="true">2.2.</strong> Mod anatomy and lifecycle</a></li><li class="chapter-item expanded "><a href="../architecture/dependency-sources.html"><strong aria-hidden="true">2.3.</strong> Cargo dependency sources</a></li><li class="chapter-item expanded "><a href="../architecture/apis-and-events.html"><strong aria-hidden="true">2.4.</strong> APIs, providers, and ECS contracts</a></li><li class="chapter-item expanded "><a href="../architecture/runtime-scopes.html"><strong aria-hidden="true">2.5.</strong> Runtime scope trees and facets</a></li><li class="chapter-item expanded "><a href="../architecture/vanilla-libraries.html"><strong aria-hidden="true">2.6.</strong> Vanilla mechanics as reusable libraries</a></li><li class="chapter-item expanded "><a href="../architecture/code-generation.html"><strong aria-hidden="true">2.7.</strong> Code generation and registries</a></li><li class="chapter-item expanded "><a href="../architecture/modpacks.html"><strong aria-hidden="true">2.8.</strong> Modpacks and feature boundaries</a></li><li class="chapter-item expanded "><a href="../architecture/assets-and-output.html"><strong aria-hidden="true">2.9.</strong> Assets and generated output</a></li></ol></li><li class="chapter-item expanded "><a href="../runtime/runtime-overview.html"><strong aria-hidden="true">3.</strong> Runtime and networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../runtime/bevy-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Bevy application lifecycle</a></li><li class="chapter-item expanded "><a href="../runtime/networking.html"><strong aria-hidden="true">3.2.</strong> Protocol, transport, and framing</a></li><li class="chapter-item expanded "><a href="../runtime/patchwork-authentication.html"><strong aria-hidden="true">3.3.</strong> Patchwork account authentication</a></li><li class="chapter-item expanded "><a href="../runtime/sessions-and-visibility.html"><strong aria-hidden="true">3.4.</strong> Sessions, routing, and visibility</a></li><li class="chapter-item expanded "><a href="../runtime/loading-tasks.html"><strong aria-hidden="true">3.5.</strong> Loading tasks and progress screens</a></li><li class="chapter-item expanded "><a href="../runtime/chat-and-commands.html"><strong aria-hidden="true">3.6.</strong> Chat, commands, and completion</a></li><li class="chapter-item expanded "><a href="../runtime/sounds.html"><strong aria-hidden="true">3.7.</strong> Sounds, audiences, and spatial playback</a></li></ol></li><li class="chapter-item expanded "><a href="../world/world-overview.html"><strong aria-hidden="true">4.</strong> World architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../world/blocks-and-items.html"><strong aria-hidden="true">4.1.</strong> Blocks, items, and state</a></li><li class="chapter-item expanded "><a href="../world/block-properties-and-components.html" class="active"><strong aria-hidden="true">4.2.</strong> Block properties and sparse components</a></li><li class="chapter-item expanded "><a href="../world/voxel-models.html"><strong aria-hidden="true">4.3.</strong> JSON voxel models and textures</a></li><li class="chapter-item expanded "><a href="../world/chunk-storage.html"><strong aria-hidden="true">4.4.</strong> Chunk coordinates and storage</a></li><li class="chapter-item expanded "><a href="../world/server-world.html"><strong aria-hidden="true">4.5.</strong> Server world providers and residency</a></li><li class="chapter-item expanded "><a href="../world/biomes.html"><strong aria-hidden="true">4.6.</strong> Biomes and world-generation features</a></li><li class="chapter-item expanded "><a href="../world/client-chunks.html"><strong aria-hidden="true">4.7.</strong> Client streaming, meshing, and rendering</a></li><li class="chapter-item expanded "><a href="../world/dimensions.html"><strong aria-hidden="true">4.8.</strong> Dimensions and world scopes</a></li><li class="chapter-item expanded "><a href="../world/portals.html"><strong aria-hidden="true">4.9.</strong> Portals</a></li></ol></li><li class="chapter-item expanded "><a href="../gameplay/gameplay-overview.html"><strong aria-hidden="true">5.</strong> Gameplay systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../gameplay/permissions-and-game-modes.html"><strong aria-hidden="true">5.1.</strong> Permissions and server game modes</a></li><li class="chapter-item expanded "><a href="../gameplay/movement.html"><strong aria-hidden="true">5.2.</strong> Player movement and prediction</a></li><li class="chapter-item expanded "><a href="../gameplay/movement-features.html"><strong aria-hidden="true">5.3.</strong> Gravity, jump, sprint, and flight</a></li><li class="chapter-item expanded "><a href="../gameplay/block-interaction.html"><strong aria-hidden="true">5.4.</strong> Block interaction and world edits</a></li><li class="chapter-item expanded "><a href="../gameplay/inventory.html"><strong aria-hidden="true">5.5.</strong> Inventory, hotbar, and item use</a></li><li class="chapter-item expanded "><a href="../gameplay/cell-menus.html"><strong aria-hidden="true">5.6.</strong> Cell menus, audiences, and crafting tables</a></li></ol></li><li class="chapter-item expanded "><a href="../client/client-overview.html"><strong aria-hidden="true">6.</strong> Client systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../client/input-settings-menus.html"><strong aria-hidden="true">6.1.</strong> Input, settings, menus, and game state</a></li><li class="chapter-item expanded "><a href="../client/graphics.html"><strong aria-hidden="true">6.2.</strong> Graphics, lighting, sky, and outlines</a></li><li class="chapter-item expanded "><a href="../client/animated-grass.html"><strong aria-hidden="true">6.3.</strong> Animated grass and wind</a></li><li class="chapter-item expanded "><a href="../client/blocky-models.html"><strong aria-hidden="true">6.4.</strong> Blocky models and animation</a></li></ol></li><li class="chapter-item expanded "><a href="../development/developer-guide.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../development/extension-cookbook.html"><strong aria-hidden="true">7.1.</strong> Extension cookbook</a></li><li class="chapter-item expanded "><a href="../development/thecrown-parkour.html"><strong aria-hidden="true">7.2.</strong> TheCrown multi-instance parkour server</a></li><li class="chapter-item expanded "><a href="../development/testing-and-performance.html"><strong aria-hidden="true">7.3.</strong> Testing, debugging, and performance</a></li><li class="chapter-item expanded "><a href="../reference/crate-map.html"><strong aria-hidden="true">7.4.</strong> Crate map</a></li><li class="chapter-item expanded "><a href="../reference/current-limits.html"><strong aria-hidden="true">7.5.</strong> Current limits and design direction</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Minecraft Simple Demo Architecture</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="block-properties-and-sparse-components"><a class="header" href="#block-properties-and-sparse-components">Block properties and sparse components</a></h1>
+<p>The world separates three kinds of block data because they have different
+cardinality, ownership, storage, and replication requirements.</p>
+<pre><code class="language-text">BlockState
+  BlockId + compact discrete state
+  dense, palette-compressed, streamed with chunks
+
+BlockProperties
+  defaults/static facts for a BlockId
+  registered by mods, not saved once per position
+
+BlockComponents
+  optional data for one world position
+  sparse, independently persisted, independently replicated
+</code></pre>
+<p>This distinction is a hard architecture boundary. Putting per-position data in
+the palette makes compression depend on how many unique values happen to exist
+in a chunk. A damage counter, UUID, timer, or inventory could otherwise turn a
+small palette into thousands of entries.</p>
+<h2 id="block-state-is-the-palette-key"><a class="header" href="#block-state-is-the-palette-key">Block state is the palette key</a></h2>
+<p><code>BlockState</code> contains a generated <code>BlockStateSet</code>. State contributors are for
+small enumerations that are part of the represented voxel:</p>
+<ul>
+<li>facing direction;</li>
+<li>slab half;</li>
+<li>open or closed;</li>
+<li>a bounded growth stage;</li>
+<li>a small model variant.</li>
+</ul>
+<p>The chunk core knows only <code>BlockState</code>. It does not know which state fields are
+selected by a composition. <code>BlockStateSet::default()</code> must be used when a mod
+does not set a field, so later contributors remain source-compatible.</p>
+<h2 id="static-block-properties"><a class="header" href="#static-block-properties">Static block properties</a></h2>
+<p><code>block-properties-api</code> provides a type-indexed registry. A property type owns a
+stable namespaced ID, value type, and common default:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct BlockDurabilityProperty;
+
+impl BlockProperty for BlockDurabilityProperty {
+    type Value = BlockDurability;
+    const ID: &amp;'static str = &quot;vanilla:durability&quot;;
+
+    fn default_value() -&gt; BlockDurability {
+        BlockDurability::breakable(100)
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>A feature mod can override one block type without editing a block enum or
+central struct. Keep every optional block/property pairing in its own
+contributor mod:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut properties = world.resource_mut::&lt;BlockProperties&gt;();
+properties.set::&lt;BlockDurabilityProperty&gt;(
+    BlockId::Obsidian,
+    BlockDurability::breakable(600),
+);
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>BlockProperties::get</code> returns the registered override or the property's
+default. A new property requires only its own type and the mods that consume or
+register it. It does not add a field to every block and is never serialized per
+world position.</p>
+<p>The active provider is <code>block-properties-registry-mod</code>. Vanilla durability
+overrides are independent contributors such as
+<code>block-durability-obsidian-vanilla-mod</code> and
+<code>block-durability-bedrock-vanilla-mod</code>. Each contributor formally depends on
+the one block it configures and registers exactly one <code>(property, BlockId)</code>
+value. It must not mention unrelated optional blocks.</p>
+<p><code>block-durabilities-vanilla</code> is only a convenience modpack that selects the
+current vanilla policy set. It contains no Rust behavior. A custom composition
+can import that modpack, ignore individual contributors, or select only the
+specific durability mods it wants. Aggregating optional block IDs inside one
+Rust mod would make those blocks inseparable and is an architecture violation.</p>
+<h2 id="sparse-per-position-components"><a class="header" href="#sparse-per-position-components">Sparse per-position components</a></h2>
+<p><code>block-component-api</code> defines independently typed components:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Serialize, Deserialize)]
+pub struct BlockDamage(pub u32);
+
+impl BlockComponent for BlockDamage {
+    const ID: &amp;'static str = &quot;vanilla:block-damage&quot;;
+    const VERSION: u32 = 1;
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>The stable ID is the persistence identity. The Rust <code>TypeId</code> is used only for
+typed runtime access. A component can override <code>encode</code> and <code>decode_version</code>
+when its data format evolves; the default codec uses CBOR.</p>
+<p>Storage is shaped as:</p>
+<pre><code class="language-text">chunk key
+  -&gt; local block index
+       -&gt; component ID
+            -&gt; decoded value or preserved opaque payload
+</code></pre>
+<p>There is no 4096-entry component array. A chunk with no components has no
+component map and no component persistence record. Unknown component IDs and
+versions are preserved as opaque payloads during load/save, so temporarily
+missing feature mods do not force the generic container to understand their
+types.</p>
+<p><code>block-component-registry-mod</code> owns the codec registry. A component contributor
+such as <code>block-damage-component-mod</code> registers only its own codec.</p>
+<h2 id="durability-without-palette-expansion"><a class="header" href="#durability-without-palette-expansion">Durability without palette expansion</a></h2>
+<p>Durability demonstrates how properties and components cooperate. Its static
+property is one of:</p>
+<ul>
+<li><code>BlockDurability::Breakable(0)</code> for an instant break;</li>
+<li><code>BlockDurability::Breakable(n)</code> for a positive durability;</li>
+<li><code>BlockDurability::Unbreakable</code>.</li>
+</ul>
+<p>For finite blocks:</p>
+<pre><code class="language-text">default durability = BlockProperties[BlockDurabilityProperty, BlockId]
+damage             = BlockComponents[position, BlockDamage] or 0
+remaining          = default durability - damage
+</code></pre>
+<p>An untouched block stores no <code>BlockDamage</code>. Damage is inserted only after a
+successful Survival hit. Restoring the block to its default removes the
+component instead of writing zero. Breaking or replacing a block also clears
+all components at that position.</p>
+<p>The damage value never enters <code>BlockStateSet</code>, the local chunk palette, the
+world block index, or the normal chunk packet.</p>
+<p>The vanilla breaking pipeline is split into replaceable layers:</p>
+<pre><code class="language-text">held left mouse
+  -&gt; BlockBreakRequest packets
+  -&gt; permission/reach validation
+  -&gt; ServerValidatedBlockBreak
+       -&gt; Creative listener: immediate mutation
+       -&gt; Survival listener: sparse damage accumulation
+  -&gt; ServerBlockDamageChanged
+  -&gt; scoped damage packet
+  -&gt; client six-stage overlay
+</code></pre>
+<p>The Survival library groups requests by resolved <code>ResidentChunkKey</code> and local
+position. Repeated packets from one player in one server update count once,
+while distinct players contribute independently. Damage remains after players
+stop mining and survives save/load. The current amount per player tick is a
+vanilla policy constant, not a chunk-core rule.</p>
+<p>Blocks with durability zero mutate on the first validated hit and never
+allocate damage.
+Unbreakable blocks ignore damage and also never allocate it.</p>
+<p>Decoded component values are stored behind a type-erased box. Reads must
+dispatch the downcast through the erased inner value, not through the <code>Box</code>
+container itself. The component API has a regression test for an immediate
+<code>set</code> followed by typed <code>get</code> and <code>entries</code>; this is essential because damage
+accumulation reads its newly written sparse delta in the same server update.</p>
+<p>The animated <code>ShortGrass</code> block uses a dedicated
+<code>block-durability-short-grass-vanilla-mod</code> contributor with
+<code>BlockDurability::Breakable(0)</code>. The generic durability registry does not know
+about short grass, and a composition that omits that block also omits its
+override.</p>
+<p>The client overlay is another optional mod. It consumes only replicated
+discrete stages <code>0..=6</code> and renders transparent shape-aware overlays using
+<code>block_breakage1.png</code> through <code>block_breakage6.png</code>. A server can retain damage
+without selecting that presentation, or replicate it with another policy.</p>
+<h2 id="persistence-domains"><a class="header" href="#persistence-domains">Persistence domains</a></h2>
+<p>Block components do not extend the region chunk payload. They use
+<code>server-world-data-storage-api</code>, an opaque write-behind service addressed by:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>WorldDataKey {
+    instance,
+    domain: &quot;modularis:block-components&quot;,
+    source,
+    partition: chunk_position,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>The block-component domain encodes records containing:</p>
+<ul>
+<li>local block index;</li>
+<li>namespaced component ID;</li>
+<li>component version;</li>
+<li>opaque payload length and bytes.</li>
+</ul>
+<p>There is no generated mega-struct containing every possible component. The
+binary container can carry components introduced by unrelated mods.</p>
+<p><code>server-world-data-storage-fs-impl</code> buffers opaque records and atomically
+flushes them under each world's <code>data/</code> directory. The storage API is not named
+after blocks: future entity, fluid, or item-drop systems can own other
+namespaced domains and choose different payloads without entering chunk or
+block-component formats. The memory provider supports tests and transient
+servers. After dirty data has entered the readable write-behind queue, clean
+component maps for chunks outside the resident set are evicted from RAM.</p>
+<h2 id="persistence-is-not-replication"><a class="header" href="#persistence-is-not-replication">Persistence is not replication</a></h2>
+<p>Registering a persistent component does not put it in normal chunk streaming.
+These are independent choices:</p>
+<ul>
+<li>server-only data may never leave the server;</li>
+<li>interaction data may be sent only when a menu opens;</li>
+<li>visible data may be sent only to viewers in the same world scope;</li>
+<li>some data may have a prediction-specific protocol.</li>
+</ul>
+<p>Damage uses <code>block-damage-network-messages-mod</code> and
+<code>server-block-damage-network-sync-mod</code>. The sync mod sends progress to matching
+world viewers and sends existing damage after the corresponding chunk has been
+streamed. The generic component store has no networking dependency.</p>
+<h2 id="crafting-table-state"><a class="header" href="#crafting-table-state">Crafting-table state</a></h2>
+<p>The crafting table opens a shared <code>CellMenu</code>. Its cells currently belong to the
+cell-menu subsystem, keyed by the world/block menu ID and governed by an
+audience. They are not encoded in <code>BlockState</code>, so no palette migration was
+needed.</p>
+<p>That state is also not silently moved into block components: a cell menu has
+its own operation, audience, and replication lifecycle. If persistent crafting
+tables are selected later, a bridge mod can serialize the menu payload as a
+namespaced block component or as a dedicated menu persistence domain. The
+chunk core must remain unaware of either choice.</p>
+<h2 id="adding-another-component"><a class="header" href="#adding-another-component">Adding another component</a></h2>
+<ol>
+<li>Define a small serializable type in a feature-owned crate.</li>
+<li>Implement <code>BlockComponent</code> with a namespaced ID and version.</li>
+<li>Add a registration mod that inserts its codec.</li>
+<li>Read and mutate it through <code>ServerBlockComponents</code> at a public ECS phase.</li>
+<li>Remove it when the value returns to the semantic default.</li>
+<li>Select a persistence policy only if the data must survive restart.</li>
+<li>Add a separate replication mod only for the audiences that need the data.</li>
+</ol>
+<p>This same path can later support an owner, machine state, custom override,
+timer, or block inventory without changing <code>ChunkSection</code>, <code>BlockStateSet</code>, or
+the world block index.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../world/blocks-and-items.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../world/voxel-models.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../world/blocks-and-items.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../world/voxel-models.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>
