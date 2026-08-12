@@ -1,6 +1,6 @@
 [package]
 name = "server-chunk-storage-fs-impl"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
@@ -15,7 +15,7 @@ ownership = []
 [dependencies]
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
-block-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-state-api = { git = "https://github.com/paolobettelini/modularis.git" }
 chunk-api = { git = "https://github.com/paolobettelini/modularis.git" }
 chunk-storage-binary-format-lib = { git = "https://github.com/paolobettelini/modularis.git" }
 server-chunk-storage-api = { path = "../server-chunk-storage-api" }
@@ -25,5 +25,5 @@ voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
 world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
-generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-state = { path = "../generated-block-state" }
 generated-block-registry = { path = "../generated-block-registry" }

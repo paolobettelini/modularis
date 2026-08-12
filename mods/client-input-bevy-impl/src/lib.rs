@@ -5,7 +5,7 @@ use bevy::{
 };
 use bevy_mod::BevyMod;
 use client_game_state_api::{GameStateApi, InGameOverlayState};
-use client_input_api::{InputApi, PlayerInput};
+use client_input_api::{ClientInputSet, InputApi, PlayerInput};
 use tokio::task::JoinHandle;
 
 pub struct InputBevyImpl;
@@ -24,7 +24,9 @@ impl InputBevyImpl {
             )
             .add_systems(
                 Update,
-                (keep_cursor_hidden, update_input).run_if(in_state(InGameOverlayState::Playing)),
+                (keep_cursor_hidden, update_input)
+                    .in_set(ClientInputSet::Capture)
+                    .run_if(in_state(InGameOverlayState::Playing)),
             );
         Self
     }
@@ -58,6 +60,7 @@ fn update_input(
     input.movement = movement.normalize_or_zero();
     input.look_delta = mouse.delta;
     input.break_block_pressed = mouse_buttons.just_pressed(MouseButton::Left);
+    input.break_block_held = mouse_buttons.pressed(MouseButton::Left);
     input.use_item_pressed = mouse_buttons.just_pressed(MouseButton::Right);
 }
 

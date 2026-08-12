@@ -1,4 +1,4 @@
-use block_instance_api::BlockInstance;
+use block_state_api::BlockState;
 use packed_bit_array_api::{PackedBitArray, bits_required};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::HashMap;
@@ -6,8 +6,8 @@ use voxel_math_api::{CHUNK_VOLUME, LocalBlockPos};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChunkSection {
-    palette: Vec<BlockInstance>,
-    reverse_map: HashMap<BlockInstance, u32>,
+    palette: Vec<BlockState>,
+    reverse_map: HashMap<BlockState, u32>,
     entries: PackedBitArray,
 }
 
@@ -20,7 +20,7 @@ pub enum ChunkSectionError {
 }
 
 impl ChunkSection {
-    pub fn filled(block: impl Into<BlockInstance>) -> Self {
+    pub fn filled(block: impl Into<BlockState>) -> Self {
         let block = block.into();
         Self {
             palette: vec![block.clone()],
@@ -30,7 +30,7 @@ impl ChunkSection {
     }
 
     pub fn from_parts(
-        palette: Vec<BlockInstance>,
+        palette: Vec<BlockState>,
         bits_per_entry: u8,
         data: Vec<u64>,
     ) -> Result<Self, ChunkSectionError> {
@@ -60,11 +60,11 @@ impl ChunkSection {
         })
     }
 
-    pub fn get(&self, local: LocalBlockPos) -> BlockInstance {
+    pub fn get(&self, local: LocalBlockPos) -> BlockState {
         self.palette[self.entries.get(local.index()) as usize].clone()
     }
 
-    pub fn set(&mut self, local: LocalBlockPos, block: impl Into<BlockInstance>) -> BlockInstance {
+    pub fn set(&mut self, local: LocalBlockPos, block: impl Into<BlockState>) -> BlockState {
         let block = block.into();
         let index = local.index();
         let previous = self.palette[self.entries.get(index) as usize].clone();
@@ -85,15 +85,15 @@ impl ChunkSection {
         previous
     }
 
-    pub fn palette(&self) -> &[BlockInstance] {
+    pub fn palette(&self) -> &[BlockState] {
         &self.palette
     }
 
-    pub fn uniform_block(&self) -> Option<BlockInstance> {
+    pub fn uniform_block(&self) -> Option<BlockState> {
         (self.palette.len() == 1).then(|| self.palette[0].clone())
     }
 
-    pub fn reverse_map(&self) -> &HashMap<BlockInstance, u32> {
+    pub fn reverse_map(&self) -> &HashMap<BlockState, u32> {
         &self.reverse_map
     }
 
@@ -108,7 +108,7 @@ impl ChunkSection {
 
 #[derive(Serialize, Deserialize)]
 struct ChunkSectionWire {
-    palette: Vec<BlockInstance>,
+    palette: Vec<BlockState>,
     entries: PackedBitArray,
 }
 
@@ -146,41 +146,41 @@ mod tests {
 
     #[test]
     fn grows_palette_and_repacks() {
-        let mut section = ChunkSection::filled(block_instance_api::BlockId::Air);
+        let mut section = ChunkSection::filled(block_state_api::BlockId::Air);
         section.set(
             LocalBlockPos::new(0, 0, 0).unwrap(),
-            block_instance_api::BlockId::Dirt,
+            block_state_api::BlockId::Dirt,
         );
         section.set(
             LocalBlockPos::new(1, 0, 0).unwrap(),
-            block_instance_api::BlockId::Stone,
+            block_state_api::BlockId::Stone,
         );
         assert_eq!(section.palette().len(), 3);
         assert_eq!(section.bits_per_entry(), 2);
         assert_eq!(
             section.get(LocalBlockPos::new(1, 0, 0).unwrap()).block,
-            block_instance_api::BlockId::Stone
+            block_state_api::BlockId::Stone
         );
         assert_eq!(section.data().len(), 128);
     }
 
     #[test]
     fn uniform_sections_have_no_packed_words() {
-        let section = ChunkSection::filled(block_instance_api::BlockId::Air);
+        let section = ChunkSection::filled(block_state_api::BlockId::Air);
         assert_eq!(section.bits_per_entry(), 0);
         assert!(section.data().is_empty());
         assert_eq!(
             section.uniform_block().unwrap().block,
-            block_instance_api::BlockId::Air
+            block_state_api::BlockId::Air
         );
     }
 
     #[test]
     fn reconstructs_a_section_from_palette_and_words() {
-        let mut original = ChunkSection::filled(block_instance_api::BlockId::Air);
+        let mut original = ChunkSection::filled(block_state_api::BlockId::Air);
         original.set(
             LocalBlockPos::new(3, 4, 5).unwrap(),
-            block_instance_api::BlockId::Stone,
+            block_state_api::BlockId::Stone,
         );
         let restored = ChunkSection::from_parts(
             original.palette().to_vec(),
@@ -195,9 +195,9 @@ mod tests {
     fn rejects_too_few_bits_for_the_palette() {
         let result = ChunkSection::from_parts(
             vec![
-                block_instance_api::BlockId::Air.into(),
-                block_instance_api::BlockId::Stone.into(),
-                block_instance_api::BlockId::Dirt.into(),
+                block_state_api::BlockId::Air.into(),
+                block_state_api::BlockId::Stone.into(),
+                block_state_api::BlockId::Dirt.into(),
             ],
             1,
             vec![0; 64],

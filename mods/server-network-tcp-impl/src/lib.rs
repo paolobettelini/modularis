@@ -79,15 +79,19 @@ impl ServerTcpNetwork {
                             format!("client {address} is not connected"),
                         )
                     })?;
+                // Preserve the exact order in which secure sequence numbers
+                // are assigned. Encoding and enqueueing under the same
+                // per-client lock prevents parallel systems from swapping two
+                // otherwise valid AES-GCM frames.
+                let mut outbox = outbox
+                    .lock()
+                    .expect("server TCP outbox lock poisoned");
                 let bytes = message
                     .encode_cbor()
                     .map_err(|error| std::io::Error::new(std::io::ErrorKind::InvalidData, error))?;
                 let bytes = sender_security.encode(address, &bytes)?;
                 let frame = encode_frame(&bytes)?;
-                outbox
-                    .lock()
-                    .expect("server TCP outbox lock poisoned")
-                    .push_back(frame);
+                outbox.push_back(frame);
                 Ok(())
             }))
             .add_systems(

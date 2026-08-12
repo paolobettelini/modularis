@@ -31,9 +31,10 @@ shared domain crates
 They share generated domain types:
 
 - `BlockId`;
+- `BlockStateSet`;
 - `ItemId`;
 - `ItemMetaSet`;
-- `BlockMetaSet`;
+- `GameMode`;
 - `Dimension`;
 - network packet enums.
 
@@ -47,7 +48,8 @@ The current compositions are:
 
 | Modpack | Responsibility |
 | --- | --- |
-| `blocks.toml` | Block contributors, block metadata, generated block registry |
+| `blocks.toml` | Block contributors, block state, generated block registries |
+| `game-modes.toml` | Game-mode identity contributors and generated `GameMode` enum |
 | `items.toml` | Item contributors, item metadata, generated item registry |
 | `dimensions.toml` | Dimension contributors and generated `Dimension` enum |
 | `biomes-{overworld,nether,aether}.toml` | Dimension-specific biome identity contributors |
@@ -102,7 +104,8 @@ permissions, mutate the world, consume an item, and broadcast the result.
 The repository contains development copies of generated crates:
 
 - `generated-block-registry`;
-- `generated-block-metadata`;
+- `generated-block-state`;
+- `generated-game-mode-registry`;
 - `generated-item-registry`;
 - `generated-item-metadata`;
 - `generated-dimension-registry`;
@@ -139,8 +142,10 @@ The demo currently includes:
 - catalogued filesystem worlds with binary palette-based chunk persistence;
 - buffered periodic writes and shutdown flush;
 - generated biome IDs with code-side definitions and phased world features;
-- palette-compressed chunks carrying block instances and metadata;
-- block breaking, item-based placement, reach checks, and hitbox checks;
+- palette-compressed chunks carrying only block type and compact state;
+- modular block properties plus sparse versioned per-position components;
+- persistent cooperative Survival damage and instant Creative breaking;
+- item-based placement, reach checks, and hitbox checks;
 - server-authoritative inventory, hotbar, stacking, quantity consumption, and
   drag/drop;
 - shared cell menus, including a shared crafting-table grid;

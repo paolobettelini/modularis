@@ -4,7 +4,7 @@ The world subsystem separates data representation, source selection, cache
 policy, client streaming, and rendering.
 
 ```text
-Block and metadata registries
+Block ID and state registries
              │
        Chunk data format
              │
@@ -33,6 +33,10 @@ client cache
 streaming priority + remesh budget
              │
 mesher + renderer
+
+Block properties ───────────────▶ gameplay policies
+Sparse block components ────────▶ world-data persistence
+             └──────────────────▶ optional feature replication
 ```
 
 No single "world manager" owns this entire flow.
@@ -49,6 +53,9 @@ The server decides:
 - which chunks stay in the resident cache;
 - which storage backend buffers and persists chunks;
 - which provider generates a missing chunk;
+- which static block properties are registered;
+- which sparse block components are loaded and persisted;
+- which components, if any, are independently replicated;
 - which players receive changes.
 
 ## Client concerns

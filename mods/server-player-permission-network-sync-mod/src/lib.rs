@@ -39,6 +39,13 @@ fn sync_changed_permissions(
     mut packets: MessageWriter<ServerPacketOut>,
 ) {
     for change in changes.read() {
+        info!(
+            "player {} effective permissions changed: +{:?} -{:?}; synchronizing {} entries",
+            change.player_id,
+            change.added,
+            change.removed,
+            change.effective.len()
+        );
         send(change.player_id, change.effective.clone(), &mut packets);
     }
 }

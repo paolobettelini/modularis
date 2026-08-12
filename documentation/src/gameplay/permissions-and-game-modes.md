@@ -11,8 +11,8 @@ SetPlayerGameMode
         ▼
 ServerPlayerGameModeChanged
         │
-        ▼ vanilla policy adapter
-permission changes + outline change
+        ▼ registered mode policy
+permission grants/denials + outline change
         │                    │
         ▼                    ▼
 capability adapters       SetOutline packet
@@ -76,12 +76,27 @@ permission when a game mode, rank, temporary effect, or another mod still
 grants it. Effective permissions include every permission implied transitively
 by any explicit grant.
 
+An owner-scoped explicit denial is available for narrower policy overrides:
+
+```rust
+SetPlayerPermissionDenied {
+    player_id,
+    owner: "vanilla:game-mode".to_string(),
+    permission: PermissionId::CanInteract,
+    denied: true,
+}
+```
+
+A denial of the requested permission takes precedence over direct and inherited
+grants. It does not revoke the parent role. Adventure can therefore disable
+world interaction while leaving an administrator `Privileged` and able to use
+administrative commands. Removing that denial restores the normal hierarchy.
+
 Administrative policy can deliberately revoke every owner through
 `ClearPlayerPermissionGrants`. This is stronger than normal feature cleanup and
 is used only when the requested operation means "remove this authority",
-regardless of where it came from. Game-mode downgrades and `/privilege` use this
-contract; independent feature mods should continue to remove only their own
-owner-scoped grants.
+regardless of where it came from. `/privilege` uses this contract; game modes
+must not use it for the independent administrative role.
 
 The ordered server pipeline is:
 
@@ -98,32 +113,61 @@ affected client.
 The client cache is for presentation and intention availability only. The
 server always validates the permission again before applying an operation.
 
-## Vanilla game-mode policy
+## Generated game-mode identities
 
-`server-player-game-mode-api` owns neutral per-player state and change events.
-`server-player-game-mode-vanilla-lib` is a pure reusable policy function, while
-`server-player-game-mode-vanilla-mod` is the blanket ECS glue selected by the
-vanilla modpack.
+Game modes are a generated domain, just like permissions and dimensions. Each
+identity is contributed by its own support crate:
+
+```toml
+[package.metadata.game_mode]
+id = "vanilla:survival"
+```
+
+`game-mode-registry-codegen` generates the `GameMode` enum, iteration, parsing,
+and stable namespaced IDs. The active contributors are:
+
+- `game-mode-creative`;
+- `game-mode-survival`;
+- `game-mode-adventure`.
+
+A custom composition may add another contributor without editing a central
+enum. `server-player-game-mode-api` owns only neutral per-player state,
+`SetPlayerGameMode`, and change events.
+
+## Separate mode policies
+
+Identity, policy dispatch, mode semantics, and commands are separate concerns.
+`server-player-game-mode-policy-mod` is a generic dispatcher over registered
+policies. Each vanilla mode has its own reusable library and thin registration
+mod:
+
+- `server-game-mode-creative-vanilla-lib` and `-mod`;
+- `server-game-mode-survival-vanilla-lib` and `-mod`;
+- `server-game-mode-adventure-vanilla-lib` and `-mod`.
+
+The command mod only parses a generated `GameMode` and emits
+`SetPlayerGameMode`. It does not contain permission or outline logic.
 
 The current policies are deliberately small:
 
 | Mode | Permission policy | Outline |
 | --- | --- | --- |
-| Creative | grants `Privileged` | enabled |
-| Survival | clears every `Privileged` grant and grants `CanInteract` | enabled |
-| Adventure | clears every `Privileged` and `CanInteract` grant | disabled |
+| Creative | grants `CanInteract` and removes the Adventure denial | enabled |
+| Survival | grants `CanInteract` and removes the Adventure denial | enabled |
+| Adventure | removes grants and explicitly denies `CanInteract` | disabled |
 
-The strong clears make an explicit mode downgrade authoritative: a stale rank
-or default grant cannot leave administrative commands enabled. A later server
-rule may still grant a capability again after the mode policy has run, or a
-custom composition may use a weaker owner-scoped policy.
+No game-mode policy changes `Privileged`. Administrative role assignment is an
+independent concern and only `/privilege` changes it in the current vanilla
+composition. This also means a privileged administrator may switch between
+Creative, Survival, and Adventure without locking itself out of `/gamemode`.
 
 `server-player-default-creative-vanilla-mod` is a separate join policy. It puts
 new players in Creative and grants `Privileged`; the hierarchy then supplies
 flight, interaction, and game-mode command capabilities. The generic state
-provider does not choose a default. A scoped or minigame server should omit the
-join policy and blanket game-mode glue, call `vanilla_game_mode_policy` only
-where desired, or define a different policy over the same contracts.
+provider does not choose a default. A scoped or minigame server can omit that
+join policy, omit selected vanilla mode policies, register policies with
+different semantics, or emit mode/capability requests from its own
+orchestrator.
 
 ## Commands and authorization
 
@@ -137,7 +181,14 @@ Brigadier availability and direct execution:
 - gameplay handlers still recheck authority for stronger forms such as
   targeting another player.
 
-The vanilla `/gamemode` command supports:
+At this command boundary, `Privileged` is an explicit superuser role: it
+satisfies every registered command requirement, including permissions added by
+future mods that are not part of the vanilla implication tree. This bypass is
+local to command authorization; it does not silently bypass unrelated gameplay
+validators.
+
+The vanilla `/gamemode` command derives accepted values and completion from the
+generated game-mode registry. With the current contributors it supports:
 
 ```text
 /gamemode <creative|survival|adventure>
@@ -145,8 +196,8 @@ The vanilla `/gamemode` command supports:
 ```
 
 The first form needs `CanChangeOwnGameMode`, which `Privileged` implies. The
-player-targeted form also needs `Privileged`. Switching to Survival or
-Adventure removes that authority, so the player cannot switch itself back.
+player-targeted form also needs `Privileged`. Switching modes does not alter
+that role; only `/privilege` can remove it in the vanilla composition.
 
 The vanilla administration pack also contributes:
 
@@ -159,6 +210,25 @@ target's explicit `Privileged` authority. Revocation clears every owner so the
 restricted command roots disappear from subsequent server completions and
 manual execution is rejected. Public policy commands such as `/clear` and
 `/tps` remain available by design.
+
+Command refresh is driven by permission state, not by `/privilege` or any other
+specific command. Every accepted `SetPlayerPermission`,
+`SetPlayerPermissionDenied`, or `ClearPlayerPermissionGrants` intention emits
+`ServerPlayerPermissionsChanged`. The generic network adapter synchronizes the
+effective snapshot, and the client state emits `ClientPlayerPermissionsChanged`.
+
+`client-chat-permission-refresh-mod` listens only to that client-side domain
+event. It invalidates the current completion request, clears stale roots
+immediately, and requests completion again for the current input. An old
+in-flight response cannot restore removed commands because the client advances
+the request generation at the same time. A rank mod, game-mode policy, timed
+effect, operator console, or future custom rule therefore gets identical
+refresh behavior without depending on the chat UI.
+
+Mods must request permission mutations through the permission ECS messages.
+Writing directly into the state resource bypasses validation, derivation,
+network synchronization, and downstream reactions and is not a supported
+extension path.
 
 Administrative vanilla commands such as teleport, give, kick, speed, flight
 speed, scale, and gravity require `Privileged`. `/flight` requires

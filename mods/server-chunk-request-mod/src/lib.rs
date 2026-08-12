@@ -4,6 +4,8 @@ use chunk_network_message_types::ChunkResponse;
 use generated_network_messages::{ChunkRequestReceived, ClientBoundMessage, NetworkMessageSet};
 use network_protocol_mod::NetworkProtocolMod;
 use server_chunk_residency_api::{ServerChunkResidencyApi, ServerChunkResidencyConfig};
+use server_chunk_stream_events_api::ServerChunkSent;
+use server_chunk_stream_events_mod::ServerChunkStreamEventsMod;
 use server_chunk_world_api::{ServerChunkWorld, ServerChunkWorldApi};
 use server_network_events_api::{ServerAudience, ServerNetworkEventsApi, ServerPacketOut};
 use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
@@ -27,6 +29,7 @@ impl ServerChunkRequestMod {
         _world: &mut W,
         _players: &mut P,
         _residency: &mut R,
+        _stream_events: &mut ServerChunkStreamEventsMod,
         _protocol: &mut NetworkProtocolMod,
     ) -> Self {
         bevy.app
@@ -50,6 +53,7 @@ fn answer_chunk_requests(
     residency: Res<ServerChunkResidencyConfig>,
     mut logged_streams: ResMut<ChunkStreamingLogState>,
     mut packets: MessageWriter<ServerPacketOut>,
+    mut sent: MessageWriter<ServerChunkSent>,
 ) {
     for request in requests.read() {
         let Some(player) = players.player_for_address(request.source) else {
@@ -85,5 +89,8 @@ fn answer_chunk_requests(
             audience: ServerAudience::Address(request.source),
             message: ClientBoundMessage::ChunkResponse(ChunkResponse { chunk }),
         });
+        if let Some(key) = world.resident_key_for_player(player.id, request.message.position) {
+            sent.write(ServerChunkSent { player_id: player.id, key });
+        }
     }
 }

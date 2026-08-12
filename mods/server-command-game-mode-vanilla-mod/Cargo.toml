@@ -1,6 +1,6 @@
 [package]
 name = "server-command-game-mode-vanilla-mod"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 
 [package.metadata.mod]
@@ -14,6 +14,7 @@ init = [
     "server-player-registry-api",
     "server-player-permission-api",
     "server-player-game-mode-api",
+    "game-mode-registry-codegen",
 ]
 run = []
 ownership = []
@@ -23,6 +24,7 @@ audience-api = { git = "https://github.com/paolobettelini/modularis.git" }
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 generated-permission-registry = "0.1.0"
+game-mode-registry-codegen = { path = "../game-mode-registry-codegen" }
 player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
 server-chat-api = { path = "../server-chat-api" }
 server-command-api = { path = "../server-command-api" }

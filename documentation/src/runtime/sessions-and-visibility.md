@@ -111,6 +111,14 @@ identifies the local `player_id`.
 Explicit leave removes the registry entry, network client, and emits
 `ServerPlayerLeft`.
 
+The same session cleanup listens to the transport-independent
+`ServerTransportDisconnected` event. A closed window, connection loss, failed
+secure frame, or other ungraceful TCP termination therefore removes the
+address/name mapping and emits the normal lifecycle event even when no
+`LeaveRequest` was received. Repeating cleanup for the later transport event is
+safe because removal is idempotent. This is what allows an authenticated account
+to reconnect with the same unique name after any disconnect path.
+
 `server-player-kick-mod` performs the same authoritative cleanup for a kick. It
 accepts either a pre-admission socket address or an admitted `PlayerId`, sends a
 bounded reason, removes session/network membership when present, emits the

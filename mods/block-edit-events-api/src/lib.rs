@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use block_instance_api::BlockInstance;
+use block_state_api::BlockState;
 use voxel_math_api::BlockPos;
 use world_instance_api::WorldScopeId;
 
@@ -43,14 +43,14 @@ pub struct PendingBlockBreaks {
 #[derive(Message, Debug, Clone, PartialEq, Eq)]
 pub struct BlockBroken {
     pub position: BlockPos,
-    pub previous: BlockInstance,
+    pub previous: BlockState,
 }
 
 #[derive(Message, Debug, Clone, PartialEq, Eq)]
 pub struct BlockPlaced {
     pub position: BlockPos,
-    pub block: BlockInstance,
-    pub replaced: BlockInstance,
+    pub block: BlockState,
+    pub replaced: BlockState,
 }
 
 #[derive(Message, Debug, Clone, PartialEq, Eq)]
@@ -58,7 +58,7 @@ pub struct ServerBlockBroken {
     pub player_id: BlockEditorId,
     pub scope: WorldScopeId,
     pub position: BlockPos,
-    pub previous: BlockInstance,
+    pub previous: BlockState,
 }
 
 #[derive(Message, Debug, Clone, PartialEq, Eq)]
@@ -66,6 +66,6 @@ pub struct ServerBlockPlaced {
     pub player_id: BlockEditorId,
     pub scope: WorldScopeId,
     pub position: BlockPos,
-    pub block: BlockInstance,
-    pub replaced: BlockInstance,
+    pub block: BlockState,
+    pub replaced: BlockState,
 }

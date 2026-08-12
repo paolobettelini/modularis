@@ -85,78 +85,103 @@ They do not need to edit one central right-click match.
 
 ## Block break pipeline
 
-Public server order:
+Holding the left mouse button emits break intentions while the same block is
+targeted. Packets are intentions, not direct mutations.
+
+Public server order is split across two contracts:
 
 ```text
-ServerBlockEditSet::Receive
-  -> Collect
-  -> Validate
-  -> Apply
-  -> Sync
+ServerBlockEditSet
+  Receive -> Collect -> Validate -> Apply -> Sync
+
+ServerBlockBreakingSet
+  Dispatch -> ApplyEffects
 ```
 
-### Receive
+### Receive and collect
 
-The network mod maps packet source address to an authenticated player and emits:
-
-```rust
-ServerBlockBreakRequested {
-    player_id,
-    position,
-}
-```
-
-### Collect
-
-The world edit mod creates:
-
-```rust
-PendingBlockBreak {
-    player_id,
-    position,
-    allowed: true,
-}
-```
+The network mod maps packet source to an authenticated player and emits
+`ServerBlockBreakRequested`. `server-block-breaking-events-mod` checks the
+generic `CanInteract` capability and creates a `PendingBlockBreak`.
 
 ### Validate
 
-The vanilla reach mod can deny pending operations. Other validators can enforce:
+The vanilla reach mod can deny pending operations. Other validators can enforce
+protected regions, tools, game phase, scope-specific rules, or rate limits. A
+validator does not need to know whether the final policy will break instantly
+or accumulate damage.
 
-- permissions;
-- protected regions;
-- tool requirements;
-- game mode;
-- block hardness;
-- damage on break;
-- rate limits.
+### Dispatch
 
-### Apply
-
-Allowed edits call `ServerChunkWorld::break_block_for_player`.
-
-The world route is resolved for the actor, so edits affect the correct scope.
-
-The always-on world glue delegates to `server-block-edit-world-lib`. A custom
-server can omit `server-block-edit-world-mod`, inspect the same pending request
-inside its own scope or game rules, and call the library only where breaking is
-valid.
-
-Success emits:
+An allowed request is resolved against the actor's current world route. The
+generic dispatcher publishes:
 
 ```rust
-ServerBlockBroken {
+ServerValidatedBlockBreak {
     player_id,
-    scope,
+    mode,
+    key,
     position,
-    previous,
+    block,
 }
 ```
 
-### Sync
+This event is the extension point for mode- or game-specific mechanics.
 
-The network sync mod sends changes only to players in the same world scope.
+### Apply effects
 
-The client cache applies the authoritative block instance and requests remeshes.
+The vanilla composition selects two independent listeners:
+
+- Creative calls `server-creative-block-breaking-vanilla-lib` and mutates the
+  block immediately;
+- Survival calls `server-survival-block-breaking-vanilla-lib`, accumulates the
+  sparse `BlockDamage` component, and mutates only when durability is exhausted;
+- Adventure has no break listener.
+
+Repeated packets from one player in one server update count once. Distinct
+players targeting the same resolved world position contribute together, so
+cooperative breaking is faster. Stopping does not reset damage.
+
+The world route is resolved before grouping, so identical coordinates in two
+instances do not share damage. Successful mutation emits `ServerBlockBroken`.
+Replacing or breaking a block clears its per-position components.
+
+The older `server-block-edit-world-mod` remains an optional instant-break glue
+for custom compositions, but it is not selected by the vanilla server together
+with the mode-aware pipeline.
+
+### Persistence and synchronization
+
+Damage is saved by the independent block-component persistence domain, not in
+the chunk palette. `ServerBlockDamageChanged` is replicated only to viewers in
+the same world scope. Existing damage is sent after a chunk is streamed, while
+normal chunk packets remain unaware of block components.
+
+The runtime ordering is explicit: validated break effects run in
+`ServerBlockBreakingSet::ApplyEffects`, damage replication runs afterward in
+`ServerBlockEditSet::Sync`, the client receives packets after protocol dispatch,
+and client damage state is applied before drawing. This keeps the first visible
+crack and the persistent sparse value in the same authoritative update path.
+Only discrete stage transitions are replicated; holding on the same stage does
+not resend an identical packet every server tick, and unbreakable blocks do not
+send meaningless stage-zero updates.
+
+The current path logs each boundary needed to diagnose a missing break:
+transport receipt, permission/reach validation, scoped world lookup, durability
+stage, audience replication, and final world mutation. The client logs received
+damage stages and warns when an overlay cannot find its chunk or block shape.
+These logs belong to the adapters that own each boundary; the durability
+library remains free of transport and rendering concerns.
+
+The selected input backend publishes the frame state in
+`ClientInputSet::Capture`. Raycasting is explicitly ordered after this set, and
+network sending is ordered after raycasting, so a feature never depends on an
+accidental Bevy system order to observe a held mouse button.
+
+The client cache applies authoritative block states and requests remeshes. A
+separate overlay mod renders the six discrete damage stages against the block's
+actual shape. See
+[Block properties and sparse components](../world/block-properties-and-components.md).
 
 ## Placement through item use
 

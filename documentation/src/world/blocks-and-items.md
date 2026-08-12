@@ -1,4 +1,4 @@
-# Blocks, items, and metadata
+# Blocks, items, and state
 
 Blocks and items are generated domains, but their behavior is not centralized
 in the generated enums.
@@ -104,21 +104,21 @@ Consumers should depend on `BlockManagerApi` when they only need general block
 properties. A feature that requires one exact block may depend on its
 contributor and generated variant.
 
-## Block instances and metadata
+## Block state
 
 Placed world data is:
 
 ```rust
-pub struct BlockInstance {
+pub struct BlockState {
     pub block: BlockId,
-    pub metadata: BlockMetaSet,
+    pub state: BlockStateSet,
 }
 ```
 
-Construct a metadata-free block with:
+Construct a default-state block with:
 
 ```rust
-BlockInstance::new(BlockId::Stone)
+BlockState::new(BlockId::Stone)
 ```
 
 or:
@@ -127,33 +127,41 @@ or:
 BlockId::Stone.into()
 ```
 
-`BlockMetaSet` is generated. It is empty today, but block instances are already:
+`BlockStateSet` is generated. It is empty today, but block states are already:
 
 - palette keys;
 - serialized in chunks;
 - stored in durable chunk local palettes;
 - sent in block update packets.
 
-Adding a metadata contributor later can distinguish two instances of the same
-block ID in the palette.
+Only discrete, low-cardinality values that change the represented block belong
+in this set. Examples are orientation, slab half, open/closed, growth stage, or
+a small visual variant. Adding a state contributor later can distinguish two
+states of the same block ID in the palette.
 
 Example future contributor:
 
 ```toml
-[package.metadata.block_metadata]
+[package.metadata.block_state]
 id = "example:facing"
 field = "facing"
 type = "block-facing-meta::Facing"
 ```
 
-Code that creates explicit metadata should use:
+Code that creates explicit state should use:
 
 ```rust
-BlockMetaSet {
+BlockStateSet {
     facing: Some(Facing::North),
     ..Default::default()
 }
 ```
+
+Do not put durability damage, an owner UUID, a chest inventory, machine data,
+or a timer in `BlockStateSet`. Those values have high cardinality, would create
+many palette entries, and belong in sparse block components. Static defaults
+such as the normal durability of stone belong in block properties. See
+[Block properties and sparse components](./block-properties-and-components.md).
 
 ## Item contributor
 

@@ -1,0 +1,28 @@
+[package]
+name = "server-join-loading-vanilla-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerJoinLoadingVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "server-loading-api",
+    "server-player-lifecycle-events-mod",
+    "server-chunk-stream-events-mod",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+loading-task-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-stream-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-stream-events-mod = { path = "../server-chunk-stream-events-mod" }
+server-loading-api = { path = "../server-loading-api" }
+server-player-lifecycle-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-lifecycle-events-mod = { path = "../server-player-lifecycle-events-mod" }
+tokio = { version = "1.48.0", features = ["full"] }

@@ -1,0 +1,20 @@
+[package]
+name = "block-damage-component-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "BlockDamageComponentMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "block-component-registry-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+block-component-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-component-registry-mod = { path = "../block-component-registry-mod" }
+block-durability-api = { git = "https://github.com/paolobettelini/modularis.git" }
+tokio = { version = "1.48.0", features = ["full"] }
+

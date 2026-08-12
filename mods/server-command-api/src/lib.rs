@@ -27,7 +27,8 @@ pub struct ServerCommandSource {
 
 impl ServerCommandSource {
     pub fn has_permission(&self, permission: PermissionId) -> bool {
-        self.effective_permissions.contains(&permission)
+        self.effective_permissions.contains(&PermissionId::Privileged)
+            || self.effective_permissions.contains(&permission)
     }
 }
 
@@ -149,11 +150,36 @@ impl ServerCommandRegistry {
             .dispatcher
             .read()
             .expect("server command registry lock poisoned");
-        let parsed = dispatcher.parse(command.to_string().into(), source);
-        CommandDispatcher::get_completion_suggestions_with_cursor(parsed, command_cursor)
+        let parsed = dispatcher.parse(command.to_string().into(), source.clone());
+        let suggestions = CommandDispatcher::get_completion_suggestions_with_cursor(parsed, command_cursor)
             .list()
             .iter()
             .map(|suggestion| format!("/{}", suggestion.apply(command)))
+            .collect::<Vec<_>>();
+        drop(dispatcher);
+
+        // Brigadier requirements remain the first line of filtering, but the
+        // wire-facing result is filtered again from the authoritative
+        // requirement registry. This prevents an unavailable root from being
+        // retained or suggested if a Brigadier implementation returns a
+        // completion for a partially parsed restricted node.
+        let requirements = self
+            .requirements
+            .read()
+            .expect("server command requirement registry lock poisoned");
+        suggestions
+            .into_iter()
+            .filter(|suggestion| {
+                let root = suggestion
+                    .strip_prefix('/')
+                    .unwrap_or(suggestion)
+                    .split_whitespace()
+                    .next()
+                    .unwrap_or_default();
+                requirements
+                    .get(root)
+                    .is_none_or(|permission| source.has_permission(*permission))
+            })
             .collect()
     }
 }
@@ -183,6 +209,35 @@ mod tests {
 
         assert_eq!(registry.execute("ping", source()), Ok(7));
         assert_eq!(registry.suggestions("/p", 2, source()), vec!["/ping"]);
+    }
+
+    #[test]
+    fn privileged_is_a_command_layer_superuser() {
+        let registry = ServerCommandRegistry::default();
+        let command: ArgumentBuilder<ServerCommandSource> = literal("admin")
+            .executes(|_context: &CommandContext<ServerCommandSource>| 1);
+        registry.register_restricted("admin", PermissionId::CanInteract, command);
+        let mut source = source();
+        source.effective_permissions.insert(PermissionId::Privileged);
+
+        assert_eq!(registry.execute("admin", source.clone()), Ok(1));
+        assert_eq!(registry.suggestions("/a", 2, source), vec!["/admin"]);
+    }
+
+    #[test]
+    fn restricted_commands_are_not_suggested_without_their_permission() {
+        let registry = ServerCommandRegistry::default();
+        let command: ArgumentBuilder<ServerCommandSource> = literal("admin")
+            .executes(|_context: &CommandContext<ServerCommandSource>| 1);
+        registry.register_restricted("admin", PermissionId::CanInteract, command);
+
+        assert!(registry.suggestions("/a", 2, source()).is_empty());
+
+        let mut allowed = source();
+        allowed
+            .effective_permissions
+            .insert(PermissionId::CanInteract);
+        assert_eq!(registry.suggestions("/a", 2, allowed), vec!["/admin"]);
     }
 
     #[test]

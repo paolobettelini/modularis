@@ -292,7 +292,7 @@ fn io_error(error: std::io::Error) -> ChunkStorageError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use block_instance_api::BlockId;
+    use block_state_api::BlockId;
     use server_world_catalog_api::WorldId;
     use std::time::{SystemTime, UNIX_EPOCH};
     use voxel_math_api::LocalBlockPos;

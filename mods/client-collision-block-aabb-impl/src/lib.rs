@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
-use block_instance_api::BlockInstance;
+use block_state_api::BlockState;
 use block_manager_api::BlockManagerApi;
 use block_shape_api::{BlockShape, BlockShapeApi, BlockShapeService};
 use client_chunk_cache_api::{ClientChunkCache, ClientChunkCacheApi};
@@ -74,9 +74,9 @@ fn collision_shape<B: BlockManagerApi>(
 ) -> BlockShape {
     let block = cache.block(position).unwrap_or_else(|| {
         if position.y <= 0 {
-            BlockInstance::new(BlockId::Stone)
+            BlockState::new(BlockId::Stone)
         } else {
-            BlockInstance::new(BlockId::Air)
+            BlockState::new(BlockId::Air)
         }
     });
     if B::is_solid(block.block) {

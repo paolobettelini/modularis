@@ -1,7 +1,7 @@
 use audience_api::Audience;
 use bevy::prelude::*;
 use block_edit_events_api::{ServerBlockBroken, ServerBlockPlaced};
-use block_instance_api::BlockInstance;
+use block_state_api::BlockState;
 use generated_block_registry::BlockId;
 use generated_sound_registry::SoundId;
 use parkour_gameplay_lib::{ParkourBlockEdit, ParkourConfig, ParkourRun, ParkourUpdate};
@@ -364,7 +364,7 @@ fn apply_parkour_edits(
 ) {
     for edit in edits {
         let Ok(mutation) =
-            world.set_block_for_player(player_id, edit.position, BlockInstance::new(edit.block))
+            world.set_block_for_player(player_id, edit.position, BlockState::new(edit.block))
         else {
             continue;
         };

@@ -1,6 +1,6 @@
 [package]
 name = "server-chunk-provider-biomes-mod"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
@@ -39,6 +39,6 @@ world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-biome-registry = { path = "../generated-biome-registry" }
-generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-state = { path = "../generated-block-state" }
 generated-block-registry = { path = "../generated-block-registry" }
 generated-dimension-registry = { path = "../generated-dimension-registry" }

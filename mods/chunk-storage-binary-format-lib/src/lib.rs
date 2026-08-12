@@ -1,4 +1,4 @@
-use block_instance_api::{BlockId, BlockInstance, all_blocks, block_id_as_str, block_id_from_str};
+use block_state_api::{BlockId, BlockState, all_blocks, block_id_as_str, block_id_from_str};
 use chunk_api::Chunk;
 use chunk_section_api::ChunkSection;
 use std::{
@@ -10,7 +10,7 @@ use voxel_math_api::ChunkPos;
 
 const INDEX_MAGIC: &[u8; 4] = b"PWBI";
 const REGION_MAGIC: &[u8; 4] = b"PWCR";
-const FORMAT_VERSION: u16 = 1;
+const FORMAT_VERSION: u16 = 2;
 pub const REGION_EDGE_CHUNKS: i32 = 8;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -163,16 +163,16 @@ pub fn encode_chunk(
         &mut bytes,
         checked_u16(section.palette().len(), "chunk palette entries")?,
     );
-    for instance in section.palette() {
-        write_u32(&mut bytes, index.index_of(instance.block)?);
-        let metadata = serde_cbor::to_vec(&instance.metadata).map_err(|error| {
-            StorageFormatError(format!("failed to encode block metadata: {error}"))
+    for state in section.palette() {
+        write_u32(&mut bytes, index.index_of(state.block)?);
+        let state_data = serde_cbor::to_vec(&state.state).map_err(|error| {
+            StorageFormatError(format!("failed to encode block state: {error}"))
         })?;
         write_u32(
             &mut bytes,
-            checked_u32(metadata.len(), "block metadata length")?,
+            checked_u32(state_data.len(), "block state length")?,
         );
-        bytes.extend_from_slice(&metadata);
+        bytes.extend_from_slice(&state_data);
     }
     bytes.push(section.bits_per_entry());
     write_u32(
@@ -200,12 +200,12 @@ pub fn decode_chunk(
     let mut palette = Vec::with_capacity(palette_len);
     for _ in 0..palette_len {
         let block = index.block_at(cursor.read_u32()?)?;
-        let metadata_len = cursor.read_u32()? as usize;
-        let metadata =
-            serde_cbor::from_slice(cursor.read_bytes(metadata_len)?).map_err(|error| {
-                StorageFormatError(format!("failed to decode block metadata: {error}"))
+        let state_len = cursor.read_u32()? as usize;
+        let state =
+            serde_cbor::from_slice(cursor.read_bytes(state_len)?).map_err(|error| {
+                StorageFormatError(format!("failed to decode block state: {error}"))
             })?;
-        palette.push(BlockInstance { block, metadata });
+        palette.push(BlockState { block, state });
     }
     let bits_per_entry = cursor.read_u8()?;
     let word_count = cursor.read_u32()? as usize;

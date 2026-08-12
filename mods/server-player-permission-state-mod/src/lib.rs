@@ -5,6 +5,7 @@ use server_player_lifecycle_events_mod::ServerPlayerLifecycleEventsMod;
 use server_player_permission_api::{
     ClearPlayerPermissionGrants, ServerPlayerPermissionApi, ServerPlayerPermissionSet,
     ServerPlayerPermissions, ServerPlayerPermissionsChanged, SetPlayerPermission,
+    SetPlayerPermissionDenied,
 };
 use server_player_registry_api::ServerPlayerSessionSet;
 use std::collections::HashSet;
@@ -21,6 +22,7 @@ impl ServerPlayerPermissionStateMod {
         bevy.app
             .init_resource::<ServerPlayerPermissions>()
             .add_message::<SetPlayerPermission>()
+            .add_message::<SetPlayerPermissionDenied>()
             .add_message::<ClearPlayerPermissionGrants>()
             .add_message::<ServerPlayerPermissionsChanged>()
             .configure_sets(
@@ -35,7 +37,7 @@ impl ServerPlayerPermissionStateMod {
             )
             .add_systems(
                 Update,
-                (clear_permission_grants, apply_permission_changes)
+                (clear_permission_grants, apply_permission_changes, apply_permission_denials)
                     .chain()
                     .in_set(ServerPlayerPermissionSet::Apply),
             )
@@ -44,6 +46,32 @@ impl ServerPlayerPermissionStateMod {
     }
 
     pub fn run(&self) -> Option<Vec<JoinHandle<()>>> { None }
+}
+
+fn apply_permission_denials(
+    mut permissions: ResMut<ServerPlayerPermissions>,
+    mut requests: MessageReader<SetPlayerPermissionDenied>,
+    mut changed: MessageWriter<ServerPlayerPermissionsChanged>,
+) {
+    for request in requests.read() {
+        let before = permissions.effective(request.player_id).into_iter().collect::<HashSet<_>>();
+        if !permissions.set_denied(
+            request.player_id,
+            &request.owner,
+            request.permission,
+            request.denied,
+        ) {
+            continue;
+        }
+        let effective = permissions.effective(request.player_id);
+        let after = effective.iter().copied().collect::<HashSet<_>>();
+        changed.write(ServerPlayerPermissionsChanged {
+            player_id: request.player_id,
+            added: after.difference(&before).copied().collect(),
+            removed: before.difference(&after).copied().collect(),
+            effective,
+        });
+    }
 }
 
 impl ServerPlayerPermissionApi for ServerPlayerPermissionStateMod {}

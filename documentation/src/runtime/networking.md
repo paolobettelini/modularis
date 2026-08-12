@@ -190,6 +190,13 @@ can be plaintext, temporarily paused during a handshake, AES-GCM protected, or
 failed. Servers that do not select an authentication policy stay in plaintext
 mode; TheCrown switches every accepted connection to a fresh secure channel.
 
+For a secure connection, sequence assignment and insertion into the TCP outbox
+share the same per-connection critical section. This is required because Bevy
+systems may send in parallel: encrypting frames N and N+1 under one lock but
+queueing them later under another could reverse their wire order and cause a
+valid frame to fail AES-GCM authentication. The transport owns this invariant;
+packet-producing gameplay mods do not coordinate with each other.
+
 See [Patchwork account authentication](./patchwork-authentication.md) for the
 handshake, key derivation, account binding, and composition boundaries.
 

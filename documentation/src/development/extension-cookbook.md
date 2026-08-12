@@ -227,20 +227,59 @@ ItemMetaSet {
 
 Implement spell semantics in one or more separate feature mods.
 
-## Add block metadata
+## Add compact block state
 
-Use `package.metadata.block_metadata` with stable `id`, generated field name,
-and type path.
+Use `package.metadata.block_state` with a stable `id`, generated field name,
+and type path. The value must be discrete and low-cardinality, such as facing,
+open/closed, or a bounded variant.
 
-Ensure the metadata type derives:
+Ensure the state type derives clone, equality, hash, and
+serialization/deserialization. State is used as a chunk palette key, so these
+semantics must be stable. Construct `BlockStateSet` with
+`..Default::default()`.
 
-- clone;
-- equality;
-- hash;
-- serialization/deserialization.
+Do not use this mechanism for damage, UUIDs, inventories, timers, or arbitrary
+machine data.
 
-Block metadata is used as a chunk palette key, so equality and hash semantics
-must be stable.
+## Add a block property
+
+Define a feature-owned `BlockProperty` when the value is a static/default fact
+of a block type:
+
+```rust
+pub struct HeatCapacity;
+
+impl BlockProperty for HeatCapacity {
+    type Value = f32;
+    const ID: &'static str = "example:heat-capacity";
+    fn default_value() -> f32 { 1.0 }
+}
+```
+
+A registration mod can override selected `BlockId` values through
+`BlockProperties::set`. The property is not stored per position.
+
+## Add a sparse block component
+
+Define and version a component:
+
+```rust
+#[derive(Serialize, Deserialize)]
+pub struct MachineTimer(pub u64);
+
+impl BlockComponent for MachineTimer {
+    const ID: &'static str = "example:machine-timer";
+    const VERSION: u32 = 1;
+}
+```
+
+Register its codec in a small mod, then use `ServerBlockComponents` with a
+`ResidentChunkKey` and local block index. Remove the component when its value
+returns to the semantic default, preserving sparse storage.
+
+Persistence and replication are separate opt-in adapters. A persistent
+component does not automatically enter chunk packets, and a replicated
+component does not have to be persistent.
 
 ## Add a network packet
 
@@ -368,7 +407,7 @@ select it through routing or a dimension definition.
 Provider generation must:
 
 - return a chunk at `request.position`;
-- use complete `BlockInstance` values;
+- use complete `BlockState` values;
 - avoid blocking operations;
 - return uniform chunks early when possible;
 - remain deterministic unless mutable source state is intentional.

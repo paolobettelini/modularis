@@ -1,6 +1,6 @@
 [package]
 name = "server-player-game-mode-api"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 
 [package.metadata.mod]
@@ -8,4 +8,10 @@ api = true
 
 [dependencies]
 bevy = "0.17.3"
+generated-game-mode-registry = "0.1.0"
+generated-permission-registry = "0.1.0"
 player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+
+[patch.crates-io]
+generated-game-mode-registry = { path = "../generated-game-mode-registry" }
+generated-permission-registry = { path = "../generated-permission-registry" }

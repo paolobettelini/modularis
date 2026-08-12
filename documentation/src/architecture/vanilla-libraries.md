@@ -71,6 +71,11 @@ team rules permit it.
 | `server-player-jump-lib` | test grounding and validate a jump against gravity/hitbox/world state | `server-player-jump-vanilla-mod` |
 | `server-block-break-reach-lib` | evaluate vanilla reach for a pending break | `server-block-break-reach-vanilla-mod` |
 | `server-block-edit-world-lib` | create a pending break and apply an allowed mutation | `server-block-edit-world-mod` |
+| `server-creative-block-breaking-vanilla-lib` | apply one validated break immediately | creative breaking vanilla mod |
+| `server-survival-block-breaking-vanilla-lib` | group validated hits by world position and distinct player | survival breaking vanilla mod |
+| `server-game-mode-creative-vanilla-lib` | Creative permission and outline policy | Creative policy registration mod |
+| `server-game-mode-survival-vanilla-lib` | Survival permission and outline policy | Survival policy registration mod |
+| `server-game-mode-adventure-vanilla-lib` | Adventure permission and outline policy | Adventure policy registration mod |
 | `server-place-block-item-use-lib` | validate and apply a `PlaceBlock` item use | `server-place-block-item-use-mod` |
 | `server-crafting-table-menu-lib` | build the shared crafting-table menu request | `server-crafting-table-menu-vanilla-mod` |
 | `server-inventory-default-loadout-lib` | construct the demo inventory and hotbar reset | `server-inventory-default-loadout-mod` |
@@ -134,7 +139,7 @@ need to copy the geometry or menu construction logic.
 can depend on:
 
 - `ServerChunkWorld`;
-- `BlockInstance`;
+- `BlockState`;
 - player hitboxes;
 - item metadata;
 - block positions.

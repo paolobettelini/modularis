@@ -1,0 +1,27 @@
+[package]
+name = "client-loading-ui-bevy-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientLoadingUiBevyMod"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "client-bevy-default-plugins-mod",
+    "client-loading-api",
+    "client-game-state-api",
+    "client-ui-font-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-bevy-default-plugins-mod = { path = "../client-bevy-default-plugins-mod" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-loading-api = { path = "../client-loading-api" }
+client-ui-font-api = { path = "../client-ui-font-api" }
+tokio = { version = "1.48.0", features = ["full"] }

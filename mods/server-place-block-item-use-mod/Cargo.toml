@@ -1,6 +1,6 @@
 [package]
 name = "server-place-block-item-use-mod"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 
 [package.metadata.mod]
@@ -29,7 +29,7 @@ bevy-mod = { path = "../bevy-mod" }
 generated-permission-registry = "0.1.0"
 block-edit-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
 block-edit-events-mod = { path = "../block-edit-events-mod" }
-block-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-state-api = { git = "https://github.com/paolobettelini/modularis.git" }
 block-manager-api = { path = "../block-manager-api" }
 block-shape-api = { path = "../block-shape-api" }
 inventory-events-api = { git = "https://github.com/paolobettelini/modularis.git" }

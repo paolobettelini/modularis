@@ -1,0 +1,8 @@
+[package]
+name = "block-component-binary-format-lib"
+version = "0.1.1"
+edition = "2024"
+
+[dependencies]
+block-component-api = { git = "https://github.com/paolobettelini/modularis.git" }
+

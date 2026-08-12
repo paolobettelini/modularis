@@ -1,5 +1,5 @@
 name = "Minecraft demo server core"
-version = "0.0.2"
+version = "0.0.3"
 description = "Minimal headless process, transport, session lifecycle and cleanup infrastructure."
 modpacks = ["common"]
 ignore = []
@@ -16,6 +16,8 @@ mods = [
     "server-player-lifecycle-events-mod",
     "server-player-permission-state-mod",
     "server-player-permission-network-sync-mod",
+    "server-loading-state-mod",
+    "server-loading-network-sync-mod",
     "server-kick-events-mod",
     "server-player-session-mod",
     "server-player-kick-mod",

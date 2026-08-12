@@ -104,15 +104,19 @@ fn connect(
     security.reset_plaintext();
     let sender_security = security.clone();
     commands.insert_resource(ClientNetworkSender::new(move |message| {
+        // The secure sequence number and the TCP queue order are one atomic
+        // ordering domain. Holding the outbox lock while encoding prevents
+        // concurrent Bevy systems from encrypting N/N+1 and enqueueing them
+        // in the opposite order.
+        let mut outbox = sender_outbox
+            .lock()
+            .expect("client TCP outbox lock poisoned");
         let bytes = message
             .encode_cbor()
             .map_err(|error| std::io::Error::new(std::io::ErrorKind::InvalidData, error))?;
         let bytes = sender_security.encode(&bytes)?;
         let frame = encode_frame(&bytes)?;
-        sender_outbox
-            .lock()
-            .expect("client TCP outbox lock poisoned")
-            .push_back(frame);
+        outbox.push_back(frame);
         Ok(())
     }));
     commands.insert_resource(ClientTcpConnection {

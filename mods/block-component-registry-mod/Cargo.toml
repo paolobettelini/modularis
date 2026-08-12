@@ -1,0 +1,18 @@
+[package]
+name = "block-component-registry-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "BlockComponentRegistryMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+block-component-api = { git = "https://github.com/paolobettelini/modularis.git" }
+tokio = { version = "1.48.0", features = ["full"] }
+

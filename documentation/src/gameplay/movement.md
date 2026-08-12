@@ -157,7 +157,7 @@ falls back to a tiny movement resolution. The block-AABB implementation scans
 only the leading face of the hitbox, which avoids repeatedly traversing the
 whole volume of very large scaled players.
 
-The active implementation reads block instances from `ClientChunkCache`, asks
+The active implementation reads block states from `ClientChunkCache`, asks
 `BlockShapeService` for each solid block's local AABB union, and resolves the
 player against the translated boxes. The server validator uses the same shape
 contract against its authoritative world route.

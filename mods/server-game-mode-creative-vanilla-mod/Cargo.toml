@@ -1,0 +1,23 @@
+[package]
+name = "server-game-mode-creative-vanilla-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerGameModeCreativeVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-player-game-mode-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+generated-game-mode-registry = "0.1.0"
+server-game-mode-creative-vanilla-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+server-player-game-mode-api = { path = "../server-player-game-mode-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-game-mode-registry = { path = "../generated-game-mode-registry" }
+

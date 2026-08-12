@@ -1,5 +1,5 @@
 name = "Minecraft demo network protocol"
-version = "0.0.2"
+version = "0.0.3"
 description = "Common ECS event contracts, packet contributors, and the generated network protocol."
 modpacks = ["blocks", "dimensions", "sounds", "permissions", "patchwork-auth-network"]
 ignore = []
@@ -25,6 +25,8 @@ mods = [
     "sound-network-messages-mod",
     "portal-network-messages-mod",
     "outline-network-messages-mod",
+    "loading-screen-network-messages-mod",
+    "block-damage-network-messages-mod",
     "creative-inventory-events-mod",
     "creative-inventory-network-messages-mod",
     "cell-menu-network-messages-mod",

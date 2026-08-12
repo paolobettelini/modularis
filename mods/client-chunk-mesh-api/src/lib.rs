@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use block_instance_api::BlockInstance;
+use block_state_api::BlockState;
 use chunk_api::Chunk;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -29,7 +29,7 @@ impl ChunkMeshNeighborhood {
         self.chunks.get(&position)
     }
 
-    pub fn block(&self, position: BlockPos) -> Option<BlockInstance> {
+    pub fn block(&self, position: BlockPos) -> Option<BlockState> {
         self.chunks
             .get(&position.chunk())
             .map(|chunk| chunk.get(position.local()))

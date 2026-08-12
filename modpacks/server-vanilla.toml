@@ -1,7 +1,7 @@
 name = "Minecraft demo vanilla server features"
-version = "0.0.2"
+version = "0.0.3"
 description = "Optional vanilla-style server gameplay features. Import this from a server profile only when you want classic behavior."
-modpacks = ["server-biomes-vanilla", "server-commands-vanilla"]
+modpacks = ["server-biomes-vanilla", "server-commands-vanilla", "game-modes", "block-durabilities-vanilla"]
 ignore = []
 
 mods = [
@@ -11,13 +11,17 @@ mods = [
     "server-player-visibility-world-instance-mod",
     "server-audience-basic-impl",
     "server-player-name-unique-vanilla-mod",
+    "server-join-loading-vanilla-mod",
     "server-chat-global-vanilla-mod",
     "server-chat-command-router-mod",
     "server-player-dimension-lifecycle-vanilla-mod",
     "server-dimension-network-sync-mod",
     "server-player-flight-permission-vanilla-mod",
     "server-player-game-mode-state-mod",
-    "server-player-game-mode-vanilla-mod",
+    "server-player-game-mode-policy-mod",
+    "server-game-mode-creative-vanilla-mod",
+    "server-game-mode-survival-vanilla-mod",
+    "server-game-mode-adventure-vanilla-mod",
     "server-player-default-creative-vanilla-mod",
     "server-sun-vanilla-mod",
     "server-portal-state-mod",
@@ -46,10 +50,19 @@ mods = [
     "server-inventory-layout-default-impl",
     "server-block-interaction-rules-vanilla-mod",
     "server-block-break-reach-vanilla-mod",
+    "block-properties-registry-mod",
+    "block-component-registry-mod",
+    "block-damage-component-mod",
+    "block-damage-events-mod",
+    "server-block-component-state-mod",
+    "server-block-component-block-edit-mod",
+    "server-block-breaking-events-mod",
+    "server-creative-block-breaking-vanilla-mod",
+    "server-survival-block-breaking-vanilla-mod",
+    "server-block-damage-network-sync-mod",
     "server-inventory-default-loadout-mod",
     "server-inventory-quantity-stacking-mod",
     "server-item-quantity-consumption-mod",
-    "server-block-edit-world-mod",
     "server-place-block-item-use-mod",
     "server-crafting-table-menu-vanilla-mod",
     "server-creative-inventory-network-receive-mod",

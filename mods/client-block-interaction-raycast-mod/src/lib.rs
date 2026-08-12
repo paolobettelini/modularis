@@ -12,7 +12,7 @@ use client_block_interaction_rules_api::{
 use client_camera_api::{CameraApi, PlayerCamera};
 use client_chunk_cache_api::{ClientChunkCache, ClientChunkCacheApi};
 use client_game_state_api::{GameStateApi, InGameOverlayState};
-use client_input_api::{InputApi, PlayerInput};
+use client_input_api::{ClientInputSet, InputApi, PlayerInput};
 use item_use_api::ItemUseTarget;
 use std::marker::PhantomData;
 use tokio::task::JoinHandle;
@@ -44,6 +44,7 @@ impl<B: BlockManagerApi> ClientBlockInteractionRaycastMod<B> {
             Update,
             interact_with_blocks::<B>
                 .run_if(in_state(InGameOverlayState::Playing))
+                .after(ClientInputSet::Capture)
                 .in_set(ClientBlockInteractionSet::Raycast),
         );
         Self(PhantomData)
@@ -63,8 +64,9 @@ fn interact_with_blocks<B: BlockManagerApi>(
     mut breaks: MessageWriter<BlockBreakRequested>,
     mut uses: MessageWriter<LocalBlockUseIntent>,
     mut counter: Local<u64>,
+    mut last_logged_break: Local<Option<voxel_math_api::BlockPos>>,
 ) {
-    if !input.break_block_pressed && !input.use_item_pressed {
+    if !input.break_block_held && !input.use_item_pressed {
         return;
     }
     let Ok(camera) = camera.single() else {
@@ -90,10 +92,14 @@ fn interact_with_blocks<B: BlockManagerApi>(
         return;
     };
 
-    if input.break_block_pressed {
+    if input.break_block_held {
         breaks.write(BlockBreakRequested {
             position: hit.block,
         });
+        if *last_logged_break != Some(hit.block) {
+            info!("local block-break raycast selected {:?}", hit.block);
+            *last_logged_break = Some(hit.block);
+        }
     }
     if input.use_item_pressed {
         *counter = counter.wrapping_add(1);

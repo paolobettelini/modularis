@@ -260,7 +260,7 @@ needs model data.
 
 To author physical geometry independently, implement `BlockShapeApi` and
 insert a `BlockShapeService`. The service returns local-space AABB unions for a
-`BlockInstance`, not only a block ID. The default provider ignores metadata,
+`BlockState`, not only a block ID. The default provider ignores metadata,
 but a future orientation or open/closed metadata provider can change geometry
 without breaking the API. Collision, precise raycast, placement occupancy
 checks, and outlines do not need to know where those boxes came from.

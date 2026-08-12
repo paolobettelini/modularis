@@ -1,4 +1,4 @@
-use block_instance_api::BlockInstance;
+use block_state_api::BlockState;
 use serde::{Deserialize, Serialize};
 use voxel_math_api::BlockPos;
 
@@ -10,12 +10,12 @@ pub struct BlockBreakRequest {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct BlockBrokenPacket {
     pub position: BlockPos,
-    pub previous: BlockInstance,
+    pub previous: BlockState,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct BlockPlacedPacket {
     pub position: BlockPos,
-    pub block: BlockInstance,
-    pub replaced: BlockInstance,
+    pub block: BlockState,
+    pub replaced: BlockState,
 }

@@ -5,6 +5,7 @@ use block_edit_events_mod::BlockEditEventsMod;
 use generated_network_messages::{BlockBreakRequestReceived, NetworkMessageSet};
 use network_protocol_mod::NetworkProtocolMod;
 use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
+use std::collections::HashMap;
 use tokio::task::JoinHandle;
 
 pub struct ServerBlockEditNetworkReceiveMod;
@@ -34,6 +35,7 @@ fn receive_edit_requests(
     players: Res<ServerPlayerRegistry>,
     mut break_packets: MessageReader<BlockBreakRequestReceived>,
     mut breaks: MessageWriter<ServerBlockBreakRequested>,
+    mut last_logged_target: Local<HashMap<u64, voxel_math_api::BlockPos>>,
 ) {
     for packet in break_packets.read() {
         let Some(player) = players.player_for_address(packet.source) else {
@@ -43,5 +45,12 @@ fn receive_edit_requests(
             player_id: player.id,
             position: packet.message.position,
         });
+        if last_logged_target.get(&player.id) != Some(&packet.message.position) {
+            info!(
+                "player {} started breaking block {:?}",
+                player.id, packet.message.position
+            );
+            last_logged_target.insert(player.id, packet.message.position);
+        }
     }
 }

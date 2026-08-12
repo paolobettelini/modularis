@@ -1,5 +1,5 @@
 use block_edit_events_api::ServerBlockPlaced;
-use block_instance_api::BlockInstance;
+use block_state_api::BlockState;
 use block_manager_api::BlockManagerApi;
 use block_shape_api::BlockShapeService;
 use inventory_events_api::{HeldItemUseDispatched, ItemUseSucceeded};
@@ -54,7 +54,7 @@ pub fn try_place_block_item<B: BlockManagerApi>(
     else {
         return Ok(None);
     };
-    let placed_shape = shapes.shape(&BlockInstance::new(place_block.block));
+    let placed_shape = shapes.shape(&BlockState::new(place_block.block));
     let occupied_by_visible_player = B::is_solid(place_block.block)
         && players.players().iter().any(|player| {
             let hitbox = hitboxes.hitbox(player.id);

@@ -1,0 +1,12 @@
+name = "Modularis game modes"
+version = "0.1.1"
+description = "Generated game-mode IDs contributed by independent mods."
+modpacks = []
+ignore = []
+
+mods = [
+    "game-mode-registry-codegen",
+    "game-mode-creative",
+    "game-mode-survival",
+    "game-mode-adventure",
+]

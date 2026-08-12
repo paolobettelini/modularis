@@ -6,9 +6,10 @@ registries.
 The current generated domains are:
 
 - blocks;
-- block metadata;
+- block state;
 - items;
 - item metadata;
+- game modes;
 - dimensions;
 - biomes;
 - sounds;
@@ -109,7 +110,7 @@ let id = B::id(block);
 This is useful for data-driven mods that do not want to name a generated
 variant directly.
 
-## Metadata code generation
+## Generated field sets
 
 An item metadata contributor declares:
 
@@ -147,15 +148,42 @@ let metadata = ItemMetaSet {
 Without the struct update, adding a new generated field would break every item
 constructor.
 
-Block metadata follows the same architecture:
+Block state follows the same generated-field architecture:
 
 ```text
-BlockInstance = BlockId + BlockMetaSet
+BlockState = BlockId + BlockStateSet
 ```
 
-The current `BlockMetaSet` is empty, but chunk palettes and packets already
-store complete `BlockInstance` values. Future orientation, growth, owner, or
-color metadata can therefore be added without redesigning chunk storage.
+The current `BlockStateSet` is empty, but chunk palettes and packets already
+store complete `BlockState` values. Future orientation, bounded growth, or a
+small model variant can therefore be added without redesigning chunk storage.
+
+Do not generate fields here for arbitrary per-position values. Owner IDs,
+damage, timers, inventories, and machine data belong in sparse block
+components. Static/default values belong in block properties. This prevents
+high-cardinality values from expanding every chunk palette.
+
+## Game-mode code generation
+
+A game-mode contributor is a support mod with only an identity declaration:
+
+```toml
+[package.metadata.mod]
+support = true
+
+[package.metadata.game_mode]
+id = "example:spectator"
+```
+
+`game-mode-registry-codegen` generates `GameMode`, `all_game_modes()`,
+namespaced ID conversion, short-ID conversion, and parsing. Creative, Survival,
+and Adventure are three independent contributors; no handwritten central enum
+must be edited to add another mode.
+
+Identity does not implement semantics. Each mode selects a separate policy
+library and thin vanilla glue mod. Commands enumerate the generated registry
+and only publish `SetPlayerGameMode`; they do not grant permissions or apply
+the mode themselves.
 
 ## Dimension code generation
 

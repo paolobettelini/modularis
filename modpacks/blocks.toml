@@ -1,5 +1,5 @@
 name = "Modularis vanilla blocks"
-version = "0.0.2"
+version = "0.0.3"
 description = "Modularis vanilla blocks."
 modpacks = []
 ignore = []
@@ -340,7 +340,7 @@ mods = [
     "block-anvil",
     "block-oak-stairs",
     "block-cauldron",
-    "block-metadata-registry-codegen",
+    "block-state-registry-codegen",
     "block-registry-codegen",
     "block-manager-registry-impl",
 ]

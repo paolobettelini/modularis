@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
-use block_instance_api::BlockInstance;
+use block_state_api::BlockState;
 use chunk_api::Chunk;
 use generated_block_registry::BlockId;
 use server_chunk_provider_api::{ChunkGenerationRequest, ChunkViewer, ServerChunkProviderRegistry};
@@ -140,7 +140,7 @@ impl DynamicServerChunkWorld {
         &self,
         viewer: ChunkViewer,
         position: BlockPos,
-        block: BlockInstance,
+        block: BlockState,
     ) -> Result<BlockMutation, WorldEditError> {
         let key = self
             .resident_key(viewer, position.chunk())
@@ -242,7 +242,7 @@ impl ServerChunkWorldBackend for DynamicServerChunkWorld {
         self.load_chunk(viewer, position)
     }
 
-    fn block(&self, viewer: ChunkViewer, position: BlockPos) -> Option<BlockInstance> {
+    fn block(&self, viewer: ChunkViewer, position: BlockPos) -> Option<BlockState> {
         self.load_chunk(viewer, position.chunk())
             .map(|chunk| chunk.get(position.local()))
     }
@@ -251,7 +251,7 @@ impl ServerChunkWorldBackend for DynamicServerChunkWorld {
         &self,
         viewer: ChunkViewer,
         position: BlockPos,
-        block: BlockInstance,
+        block: BlockState,
     ) -> Result<BlockMutation, WorldEditError> {
         self.mutate(viewer, position, block)
     }
@@ -260,7 +260,7 @@ impl ServerChunkWorldBackend for DynamicServerChunkWorld {
         &self,
         viewer: ChunkViewer,
         position: BlockPos,
-        block: BlockInstance,
+        block: BlockState,
     ) -> Result<BlockMutation, WorldEditError> {
         let current = self
             .block(viewer, position)

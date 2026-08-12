@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use block_instance_api::BlockInstance;
+use block_state_api::BlockState;
 use collision_api::Aabb;
 use std::sync::Arc;
 
@@ -61,7 +61,7 @@ impl AsRef<[Aabb]> for BlockShape {
     }
 }
 
-type BlockShapeFn = dyn Fn(&BlockInstance) -> BlockShape + Send + Sync + 'static;
+type BlockShapeFn = dyn Fn(&BlockState) -> BlockShape + Send + Sync + 'static;
 
 #[derive(Resource, Clone)]
 pub struct BlockShapeService {
@@ -69,13 +69,13 @@ pub struct BlockShapeService {
 }
 
 impl BlockShapeService {
-    pub fn new(shape: impl Fn(&BlockInstance) -> BlockShape + Send + Sync + 'static) -> Self {
+    pub fn new(shape: impl Fn(&BlockState) -> BlockShape + Send + Sync + 'static) -> Self {
         Self {
             shape: Arc::new(shape),
         }
     }
 
-    pub fn shape(&self, block: &BlockInstance) -> BlockShape {
+    pub fn shape(&self, block: &BlockState) -> BlockShape {
         (self.shape)(block)
     }
 }

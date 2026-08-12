@@ -89,7 +89,7 @@ Examples:
 
 - block;
 - item;
-- item/block metadata;
+- item metadata or compact block state;
 - dimension;
 - biome;
 - setting;
@@ -183,8 +183,9 @@ ItemMetaSet {
 }
 ```
 
-The same applies to block metadata and normal Rust configuration structs when
-appropriate.
+The same applies to generated block state and normal Rust configuration structs
+when appropriate. Do not use generated block state for arbitrary per-position
+data; use a sparse block component instead.
 
 ## Update the right documentation
 

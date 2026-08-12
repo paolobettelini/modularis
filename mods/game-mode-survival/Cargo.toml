@@ -1,0 +1,11 @@
+[package]
+name = "game-mode-survival"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+support = true
+
+[package.metadata.game_mode]
+id = "vanilla:survival"
+

@@ -1,0 +1,21 @@
+[package]
+name = "server-block-durability-lib"
+version = "0.1.1"
+edition = "2024"
+
+[dependencies]
+block-component-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-component-binary-format-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+block-durability-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-properties-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-state-api = { git = "https://github.com/paolobettelini/modularis.git" }
+chunk-section-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-block-component-api = { path = "../server-block-component-api" }
+server-chunk-provider-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
+world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
+
+[patch.crates-io]
+generated-block-registry = { path = "../generated-block-registry" }
+generated-block-state = { path = "../generated-block-state" }

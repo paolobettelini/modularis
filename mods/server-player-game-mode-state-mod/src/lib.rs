@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use server_player_game_mode_api::{
     ServerPlayerGameModeApi, ServerPlayerGameModeChanged, ServerPlayerGameModeSet,
-    ServerPlayerGameModes, SetPlayerGameMode,
+    ServerPlayerGameModePolicies, ServerPlayerGameModes, SetPlayerGameMode,
 };
 use server_player_lifecycle_events_api::ServerPlayerLeft;
 use server_player_lifecycle_events_mod::ServerPlayerLifecycleEventsMod;
@@ -15,6 +15,7 @@ impl ServerPlayerGameModeStateMod {
     pub fn init(bevy: &mut BevyMod, _lifecycle: &mut ServerPlayerLifecycleEventsMod) -> Self {
         bevy.app
             .init_resource::<ServerPlayerGameModes>()
+            .init_resource::<ServerPlayerGameModePolicies>()
             .add_message::<SetPlayerGameMode>()
             .add_message::<ServerPlayerGameModeChanged>()
             .configure_sets(

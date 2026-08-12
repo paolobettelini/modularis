@@ -1,0 +1,19 @@
+[package]
+name = "block-damage-events-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "BlockDamageEventsMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+block-damage-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
+tokio = { version = "1.48.0", features = ["full"] }
+

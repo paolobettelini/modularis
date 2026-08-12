@@ -1,6 +1,6 @@
 [package]
 name = "server-player-session-mod"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 
 [package.metadata.mod]
@@ -12,6 +12,7 @@ init = [
     "bevy-mod",
     "server-network-api",
     "server-network-events-api",
+    "network-transport-events-mod",
     "network-protocol-mod",
     "server-player-lifecycle-events-mod",
     "server-player-visibility-api",
@@ -25,6 +26,7 @@ bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 generated-network-messages = "0.1.0"
 network-protocol-mod = { path = "../network-protocol-mod" }
+network-transport-events-mod = { path = "../network-transport-events-mod" }
 player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
 session-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
 server-network-api = { path = "../server-network-api" }

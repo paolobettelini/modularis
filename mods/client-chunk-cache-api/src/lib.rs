@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use block_instance_api::BlockInstance;
+use block_state_api::BlockState;
 use chunk_api::Chunk;
 use std::{
     collections::{HashMap, HashSet},
@@ -61,7 +61,7 @@ impl ClientChunkCache {
             .collect()
     }
 
-    pub fn uniform_block(&self, position: ChunkPos) -> Option<BlockInstance> {
+    pub fn uniform_block(&self, position: ChunkPos) -> Option<BlockState> {
         self.chunks
             .read()
             .expect("client chunk cache lock poisoned")
@@ -69,7 +69,7 @@ impl ClientChunkCache {
             .and_then(Chunk::uniform_block)
     }
 
-    pub fn block(&self, position: BlockPos) -> Option<BlockInstance> {
+    pub fn block(&self, position: BlockPos) -> Option<BlockState> {
         self.chunks
             .read()
             .expect("client chunk cache lock poisoned")
@@ -77,7 +77,7 @@ impl ClientChunkCache {
             .map(|chunk| chunk.get(position.local()))
     }
 
-    pub fn set_block(&self, position: BlockPos, block: impl Into<BlockInstance>) -> bool {
+    pub fn set_block(&self, position: BlockPos, block: impl Into<BlockState>) -> bool {
         let mut chunks = self
             .chunks
             .write()

@@ -202,6 +202,10 @@ CBOR packet decoding succeed. Invalid tags, malformed secure packets, or
 counter exhaustion fail closed. The key, IV, and sequence state is never reused
 for another connection.
 
+Outbound sequence allocation and TCP queue insertion are atomic with respect
+to other senders for the same connection. This preserves sequence order even
+when independent ECS systems publish packets concurrently.
+
 `network-frame-security-api` contains this neutral frame transform. The TCP
 mods call it without knowing what a Patchwork account means. A different
 transport can preserve the auth protocol by providing the same frame-security

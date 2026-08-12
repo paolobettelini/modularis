@@ -1,28 +1,12 @@
 use bevy::prelude::*;
+use generated_permission_registry::PermissionId;
 use player_network_message_types::PlayerId;
 use std::collections::HashMap;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum GameMode { Creative, Survival, Adventure }
-
-impl GameMode {
-    pub fn parse(value: &str) -> Option<Self> {
-        match value.to_ascii_lowercase().as_str() {
-            "creative" => Some(Self::Creative),
-            "survival" => Some(Self::Survival),
-            "adventure" => Some(Self::Adventure),
-            _ => None,
-        }
-    }
-
-    pub fn id(self) -> &'static str {
-        match self {
-            Self::Creative => "creative",
-            Self::Survival => "survival",
-            Self::Adventure => "adventure",
-        }
-    }
-}
+pub use generated_game_mode_registry::{
+    GameMode, all_game_modes, from_str as game_mode_from_str, id as game_mode_id,
+    short_id as game_mode_short_id,
+};
 
 #[derive(Resource, Default)]
 pub struct ServerPlayerGameModes(HashMap<PlayerId, GameMode>);
@@ -45,5 +29,24 @@ pub struct ServerPlayerGameModeChanged {
 
 #[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ServerPlayerGameModeSet { Apply, ApplyPolicy }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ServerPlayerGameModePolicy {
+    pub clear_permissions: Vec<PermissionId>,
+    pub permission_changes: Vec<(PermissionId, bool)>,
+    pub permission_denials: Vec<(PermissionId, bool)>,
+    pub outline_enabled: Option<bool>,
+}
+
+#[derive(Resource, Default)]
+pub struct ServerPlayerGameModePolicies(HashMap<GameMode, ServerPlayerGameModePolicy>);
+
+impl ServerPlayerGameModePolicies {
+    pub fn register(&mut self, mode: GameMode, policy: ServerPlayerGameModePolicy) {
+        assert!(self.0.insert(mode, policy).is_none(), "duplicate policy for game mode '{}'", mode.id());
+    }
+
+    pub fn get(&self, mode: GameMode) -> Option<&ServerPlayerGameModePolicy> { self.0.get(&mode) }
+}
 
 pub trait ServerPlayerGameModeApi: Send + Sync + 'static {}

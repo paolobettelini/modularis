@@ -1,0 +1,30 @@
+[package]
+name = "server-block-component-state-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerBlockComponentStateMod"
+provides = "server-block-component-api"
+
+[package.metadata.mod.dependencies]
+init = [
+    "bevy-mod",
+    "block-component-registry-mod",
+    "server-chunk-world-api",
+    "server-world-data-storage-api",
+]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+block-component-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-component-registry-mod = { path = "../block-component-registry-mod" }
+server-block-component-api = { path = "../server-block-component-api" }
+server-block-component-persistence-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }
+server-world-data-storage-api = { path = "../server-world-data-storage-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+

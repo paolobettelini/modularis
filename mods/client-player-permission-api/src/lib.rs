@@ -26,4 +26,10 @@ pub struct ClientPlayerPermissionsChanged {
     pub effective: Vec<PermissionId>,
 }
 
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ClientPlayerPermissionSet {
+    Receive,
+    React,
+}
+
 pub trait ClientPlayerPermissionApi: Send + Sync + 'static {}

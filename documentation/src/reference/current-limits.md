@@ -9,8 +9,10 @@ Current limits:
 
 - chunk generation and filesystem region I/O are synchronous;
 - the filesystem backend keeps opened encoded region maps in memory;
-- there is no save migration framework beyond explicit binary format versions
-  and serde defaults for added metadata;
+- there is no save migration framework beyond explicit chunk/domain versions;
+  the block-state refactor intentionally does not read the old format;
+- component codecs can preserve unknown payloads, but there is no coordinated
+  cross-component migration tool;
 - one chunk is one `16x16x16` section;
 - no palette compaction;
 - no revision/version field in chunk responses;
@@ -124,7 +126,8 @@ Design direction:
 Current limits:
 
 - no maximum finite stack size;
-- no durability/equipment semantics;
+- no item durability or equipment semantics; block durability is implemented
+  independently through sparse block components;
 - the vanilla audience resolver maps shared audiences to all online players,
   while the scope provider interprets shared IDs as scope subtrees;
 - cell-menu state is not persistent;

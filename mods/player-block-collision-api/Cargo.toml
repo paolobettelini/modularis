@@ -1,6 +1,6 @@
 [package]
 name = "player-block-collision-api"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [dependencies]
@@ -10,5 +10,5 @@ collision-api = { path = "../collision-api" }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
-generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-state = { path = "../generated-block-state" }
 generated-block-registry = { path = "../generated-block-registry" }

@@ -1,4 +1,4 @@
-use block_instance_api::BlockInstance;
+use block_state_api::BlockState;
 use chunk_section_api::ChunkSection;
 use serde::{Deserialize, Serialize};
 use voxel_math_api::{CHUNK_VOLUME, ChunkPos, LocalBlockPos};
@@ -10,7 +10,7 @@ pub struct Chunk {
 }
 
 impl Chunk {
-    pub fn filled(position: ChunkPos, block: impl Into<BlockInstance>) -> Self {
+    pub fn filled(position: ChunkPos, block: impl Into<BlockState>) -> Self {
         Self {
             position,
             section: ChunkSection::filled(block),
@@ -25,11 +25,11 @@ impl Chunk {
         self.position
     }
 
-    pub fn get(&self, local: LocalBlockPos) -> BlockInstance {
+    pub fn get(&self, local: LocalBlockPos) -> BlockState {
         self.section.get(local)
     }
 
-    pub fn set(&mut self, local: LocalBlockPos, block: impl Into<BlockInstance>) -> BlockInstance {
+    pub fn set(&mut self, local: LocalBlockPos, block: impl Into<BlockState>) -> BlockState {
         self.section.set(local, block)
     }
 
@@ -37,11 +37,11 @@ impl Chunk {
         &self.section
     }
 
-    pub fn uniform_block(&self) -> Option<BlockInstance> {
+    pub fn uniform_block(&self) -> Option<BlockState> {
         self.section.uniform_block()
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = (LocalBlockPos, BlockInstance)> + '_ {
+    pub fn iter(&self) -> impl Iterator<Item = (LocalBlockPos, BlockState)> + '_ {
         (0..CHUNK_VOLUME).map(|index| {
             let layer = 16 * 16;
             let y = index / layer;
@@ -64,7 +64,7 @@ mod tests {
 
     #[test]
     fn uniform_chunks_roundtrip_without_a_packed_data_payload() {
-        let chunk = Chunk::filled(ChunkPos::new(12, 80, -9), block_instance_api::BlockId::Air);
+        let chunk = Chunk::filled(ChunkPos::new(12, 80, -9), block_state_api::BlockId::Air);
         assert!(chunk.section().data().is_empty());
         let encoded = serde_cbor::to_vec(&chunk).unwrap();
         assert!(encoded.len() < 256);

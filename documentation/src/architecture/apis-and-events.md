@@ -167,10 +167,28 @@ Apply -> DeriveCapabilities -> Sync
 
 Permission IDs come from codegen and may imply other IDs transitively. Explicit
 grants are owner-scoped, so two independent mods can grant the same permission
-without one revoking the other's contribution. Capability adapters run after
-the effective set changes and before it is synchronized. This is useful when a
+without one revoking the other's contribution. Owner-scoped denials may mask a
+narrow effective permission without deleting a parent role; they take
+precedence over direct and inherited grants. Capability adapters run after the
+effective set changes and before it is synchronized. This is useful when a
 permission should drive a narrower API such as flight while remaining
 independent from the transport and client controls.
+
+Permission-dependent consumers react to the generic change event. Commands do
+not manually refresh completion when they grant or revoke a permission:
+
+```text
+any permission mutation producer
+  -> ServerPlayerPermissionsChanged
+  -> synchronized effective snapshot
+  -> ClientPlayerPermissionsChanged
+  -> permission-dependent client reactions
+```
+
+The loading pipeline follows the same rule. Feature loaders publish progress
+intentions, state providers own the current tasks, network adapters replicate
+server-owned tasks, and a selected UI renders them. Neither side's API depends
+on a particular join policy or visual implementation.
 
 ## Claim-and-fallback behavior
 

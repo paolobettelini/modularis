@@ -1,6 +1,6 @@
 [package]
 name = "server-biome-feature-spruce-trees-vanilla-mod"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 
 [package.metadata.mod]
@@ -22,6 +22,6 @@ voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
 generated-biome-registry = { path = "../generated-biome-registry" }
-generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-state = { path = "../generated-block-state" }
 generated-block-registry = { path = "../generated-block-registry" }
 generated-dimension-registry = { path = "../generated-dimension-registry" }

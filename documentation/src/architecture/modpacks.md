@@ -125,8 +125,8 @@ adds neutral, but optional, feature pipelines:
 - world-scope player visibility;
 - default dimension lifecycle;
 - typed vanilla permissions and the permission-to-flight-capability adapter;
-- neutral game-mode state plus vanilla Creative, Survival, and Adventure
-  policy;
+- generated game-mode identities, neutral state, generic policy dispatch, and
+  separate Creative, Survival, and Adventure policies;
 - a separate default join policy that starts players Creative and Privileged;
 - server-driven outline policy;
 - default sun;
@@ -137,7 +137,8 @@ adds neutral, but optional, feature pipelines:
 - default inventory layout and loadout;
 - quantity stacking and consumption;
 - reach validation;
-- block breaking and `PlaceBlock` item behavior;
+- mode-aware Creative/Survival block breaking, persistent sparse damage, and
+  `PlaceBlock` item behavior;
 - crafting-table menus;
 - privileged creative catalog item creation.
 

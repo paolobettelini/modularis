@@ -1,0 +1,19 @@
+name = "Minecraft demo vanilla block durability policies"
+version = "0.0.2"
+description = "Optional, independently selectable vanilla durability overrides. Each mod configures exactly one block contributor."
+modpacks = []
+ignore = []
+
+mods = [
+    "block-durability-dirt-vanilla-mod",
+    "block-durability-grass-vanilla-mod",
+    "block-durability-short-grass-vanilla-mod",
+    "block-durability-sand-vanilla-mod",
+    "block-durability-gravel-vanilla-mod",
+    "block-durability-stone-vanilla-mod",
+    "block-durability-cobblestone-vanilla-mod",
+    "block-durability-deepslate-vanilla-mod",
+    "block-durability-blackstone-vanilla-mod",
+    "block-durability-obsidian-vanilla-mod",
+    "block-durability-bedrock-vanilla-mod",
+]

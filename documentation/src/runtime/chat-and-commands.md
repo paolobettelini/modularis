@@ -232,10 +232,22 @@ another player additionally requires `Privileged`. `/gamemode` requires
 `Privileged`. Personal `/clear` and read-only `/tps` remain public in the
 current policy pack. These requirements affect both suggestions and execution.
 
+`Privileged` is a command-layer superuser and therefore satisfies any command
+permission registered by another mod. It is not a generic bypass for world or
+gameplay validation outside command dispatch.
+
 Permission state is read afresh for every execution and completion request.
 After `/privilege` removes authority, restricted roots are absent from the next
 autocomplete response and typing one manually returns `This command is not
 available`.
+
+The optional vanilla client reaction mod also refreshes an already visible
+completion list when a permission packet arrives. It clears stale suggestions,
+invalidates older response IDs, and asks the authoritative server to complete
+the unchanged input again. The server applies a final permission filter to the
+completed root names as well as Brigadier's node requirements. Therefore a
+response produced after the refresh cannot reintroduce a restricted command,
+even if the command parser returns a root completion for a partial input.
 
 Servers can import the whole command pack, select only individual commands, or
 replace any command while keeping the underlying gameplay APIs.

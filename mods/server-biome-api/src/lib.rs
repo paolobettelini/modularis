@@ -1,5 +1,5 @@
 use bevy::prelude::Resource;
-use block_instance_api::BlockInstance;
+use block_state_api::BlockState;
 use chunk_api::Chunk;
 pub use generated_biome_registry::BiomeId;
 use generated_block_registry::BlockId;
@@ -186,14 +186,14 @@ impl<'a> BiomeFeatureContext<'a> {
         self.biome_at(x, z) == Some(self.target_biome)
     }
 
-    pub fn block(&self, position: BlockPos) -> Option<BlockInstance> {
+    pub fn block(&self, position: BlockPos) -> Option<BlockState> {
         (position.chunk() == self.chunk.position()).then(|| self.chunk.get(position.local()))
     }
 
     /// Writes only inside the chunk currently being generated. Features may inspect
     /// neighboring anchor positions and call this method; writes are clipped so the
     /// same deterministic feature can be evaluated independently for every chunk.
-    pub fn set_block(&mut self, position: BlockPos, block: impl Into<BlockInstance>) -> bool {
+    pub fn set_block(&mut self, position: BlockPos, block: impl Into<BlockState>) -> bool {
         if position.chunk() != self.chunk.position() {
             return false;
         }

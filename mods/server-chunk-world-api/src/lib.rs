@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use block_instance_api::BlockInstance;
+use block_state_api::BlockState;
 use chunk_api::Chunk;
 use player_network_message_types::PlayerId;
 use server_chunk_provider_api::{ChunkProviderId, ChunkViewer};
@@ -24,8 +24,8 @@ impl ResidentChunkKey {
 pub struct BlockMutation {
     pub scope: WorldScopeId,
     pub position: BlockPos,
-    pub previous: BlockInstance,
-    pub current: BlockInstance,
+    pub previous: BlockState,
+    pub current: BlockState,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -39,18 +39,18 @@ pub enum WorldEditError {
 pub trait ServerChunkWorldBackend: Send + Sync + 'static {
     fn resident_key(&self, viewer: ChunkViewer, position: ChunkPos) -> Option<ResidentChunkKey>;
     fn chunk(&self, viewer: ChunkViewer, position: ChunkPos) -> Option<Chunk>;
-    fn block(&self, viewer: ChunkViewer, position: BlockPos) -> Option<BlockInstance>;
+    fn block(&self, viewer: ChunkViewer, position: BlockPos) -> Option<BlockState>;
     fn set_block(
         &self,
         viewer: ChunkViewer,
         position: BlockPos,
-        block: BlockInstance,
+        block: BlockState,
     ) -> Result<BlockMutation, WorldEditError>;
     fn place_block(
         &self,
         viewer: ChunkViewer,
         position: BlockPos,
-        block: BlockInstance,
+        block: BlockState,
     ) -> Result<BlockMutation, WorldEditError>;
     fn break_block(
         &self,
@@ -96,7 +96,7 @@ impl ServerChunkWorld {
         self.chunk_for(ChunkViewer::Player(player_id), position)
     }
 
-    pub fn block_for(&self, viewer: ChunkViewer, position: BlockPos) -> Option<BlockInstance> {
+    pub fn block_for(&self, viewer: ChunkViewer, position: BlockPos) -> Option<BlockState> {
         self.0.block(viewer, position)
     }
 
@@ -104,7 +104,7 @@ impl ServerChunkWorld {
         &self,
         player_id: PlayerId,
         position: BlockPos,
-    ) -> Option<BlockInstance> {
+    ) -> Option<BlockState> {
         self.block_for(ChunkViewer::Player(player_id), position)
     }
 
@@ -112,7 +112,7 @@ impl ServerChunkWorld {
         &self,
         player_id: PlayerId,
         position: BlockPos,
-        block: impl Into<BlockInstance>,
+        block: impl Into<BlockState>,
     ) -> Result<BlockMutation, WorldEditError> {
         self.0
             .set_block(ChunkViewer::Player(player_id), position, block.into())
@@ -122,7 +122,7 @@ impl ServerChunkWorld {
         &self,
         player_id: PlayerId,
         position: BlockPos,
-        block: impl Into<BlockInstance>,
+        block: impl Into<BlockState>,
     ) -> Result<BlockMutation, WorldEditError> {
         self.0
             .place_block(ChunkViewer::Player(player_id), position, block.into())

@@ -1,6 +1,6 @@
 [package]
 name = "client-chunk-mesh-api"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
@@ -8,12 +8,12 @@ api = true
 
 [dependencies]
 bevy = "0.17.3"
-block-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-state-api = { git = "https://github.com/paolobettelini/modularis.git" }
 block-manager-api = { path = "../block-manager-api" }
 block-render-api = { git = "https://github.com/paolobettelini/modularis.git" }
 chunk-api = { git = "https://github.com/paolobettelini/modularis.git" }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]
-generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-state = { path = "../generated-block-state" }
 generated-block-registry = { path = "../generated-block-registry" }

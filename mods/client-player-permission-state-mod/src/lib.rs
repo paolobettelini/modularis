@@ -3,6 +3,7 @@ use bevy_mod::BevyMod;
 use client_game_state_api::{GameState, GameStateApi};
 use client_player_permission_api::{
     ClientPlayerPermissionApi, ClientPlayerPermissions, ClientPlayerPermissionsChanged,
+    ClientPlayerPermissionSet,
 };
 use tokio::task::JoinHandle;
 
@@ -17,6 +18,10 @@ impl ClientPlayerPermissionStateMod {
         bevy.app
             .init_resource::<ClientPlayerPermissions>()
             .add_message::<ClientPlayerPermissionsChanged>()
+            .configure_sets(
+                Update,
+                (ClientPlayerPermissionSet::Receive, ClientPlayerPermissionSet::React).chain(),
+            )
             .add_systems(OnExit(GameState::InGame), clear_permissions);
         Self
     }

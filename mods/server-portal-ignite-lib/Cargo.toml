@@ -1,6 +1,6 @@
 [package]
 name = "server-portal-ignite-lib"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [dependencies]
@@ -13,7 +13,7 @@ server-dimension-api = { path = "../server-dimension-api" }
 server-portal-api = { path = "../server-portal-api" }
 
 [patch.crates-io]
-generated-block-metadata = { path = "../generated-block-metadata" }
+generated-block-state = { path = "../generated-block-state" }
 generated-block-registry = { path = "../generated-block-registry" }
 generated-item-metadata = { path = "../generated-item-metadata" }
 generated-item-registry = { path = "../generated-item-registry" }

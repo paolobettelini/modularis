@@ -1,6 +1,6 @@
 [package]
 name = "client-block-interaction-raycast-mod"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
@@ -39,3 +39,4 @@ client-input-api = { path = "../client-input-api" }
 item-use-api = { git = "https://github.com/paolobettelini/modularis.git" }
 tokio = { version = "1.48.0", features = ["full"] }
 voxel-raycast-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }

@@ -1,0 +1,20 @@
+[package]
+name = "client-loading-state-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientLoadingStateMod"
+provides = "client-loading-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "client-game-state-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-loading-api = { path = "../client-loading-api" }
+tokio = { version = "1.48.0", features = ["full"] }

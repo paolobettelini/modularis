@@ -1,0 +1,12 @@
+[package]
+name = "server-game-mode-adventure-vanilla-lib"
+version = "0.1.1"
+edition = "2024"
+
+[dependencies]
+generated-permission-registry = "0.1.0"
+server-player-game-mode-api = { path = "../server-player-game-mode-api" }
+
+[patch.crates-io]
+generated-permission-registry = { path = "../generated-permission-registry" }
+

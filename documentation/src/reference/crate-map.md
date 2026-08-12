@@ -24,13 +24,14 @@ as families.
 | Owner | Generated crate | Contributors |
 | --- | --- | --- |
 | `block-registry-codegen` | `generated-block-registry` | `block-*` |
-| `block-metadata-registry-codegen` | `generated-block-metadata` | block metadata crates |
+| `block-state-registry-codegen` | `generated-block-state` | block-state contributors |
 | `item-registry-codegen` | `generated-item-registry` | `item-*` contributors |
 | `item-metadata-registry-codegen` | `generated-item-metadata` | `item-*-meta` |
 | `dimension-registry-codegen` | `generated-dimension-registry` | `dimension-*` |
 | `biome-registry-codegen` | `generated-biome-registry` | `biome-*` identity contributors |
 | `sound-registry-codegen` | `generated-sound-registry` | `sound-*` contributors |
 | `permission-registry-codegen` | `generated-permission-registry` | `permission-*` contributors |
+| `game-mode-registry-codegen` | `generated-game-mode-registry` | `game-mode-*` contributors |
 | `client-settings-registry-codegen` | `generated-client-settings-registry` | `client-setting-*` |
 | `network-protocol-mod` / `network-codegen-utils` | `generated-network-messages` | `*-network-messages-mod` |
 
@@ -47,12 +48,18 @@ Generated identity and declarations:
 - `permission-can-change-own-game-mode`;
 - `permission-privileged`.
 
+Generated game-mode identities:
+
+- `game-mode-registry-codegen` and `generated-game-mode-registry`;
+- `game-mode-creative`, `game-mode-survival`, `game-mode-adventure`.
+
 Server state and policy:
 
 - `server-player-permission-api` and `server-player-permission-state-mod`;
 - `server-player-permission-network-sync-mod`;
 - `server-player-game-mode-api` and `server-player-game-mode-state-mod`;
-- `server-player-game-mode-vanilla-lib` and its blanket vanilla glue mod;
+- `server-player-game-mode-policy-mod`;
+- separate `server-game-mode-<mode>-vanilla-lib` and `-mod` pairs;
 - `server-player-default-creative-vanilla-mod`;
 - `server-player-flight-permission-vanilla-mod`;
 - `server-command-game-mode-vanilla-mod`;
@@ -62,7 +69,30 @@ Client presentation cache:
 
 - `client-player-permission-api`;
 - `client-player-permission-state-mod`;
-- `client-player-permission-network-receive-mod`.
+- `client-player-permission-network-receive-mod`;
+- `client-chat-permission-refresh-mod` invalidates and re-requests
+  command completion after an effective permission change.
+
+## Loading progress
+
+Neutral contracts and state providers:
+
+- `loading-task-api`;
+- `client-loading-api` and `client-loading-state-mod`;
+- `server-loading-api` and `server-loading-state-mod`.
+
+Replication and presentation:
+
+- `loading-screen-network-message-types`;
+- `loading-screen-network-messages-mod`;
+- `server-loading-network-sync-mod`;
+- `client-loading-network-receive-mod`;
+- `client-loading-ui-bevy-mod`.
+
+Current policy adapters:
+
+- `client-join-loading-mod`;
+- `server-join-loading-vanilla-mod`.
 
 Protocol contributors are split into
 `player-permission-network-messages-mod` and
@@ -98,10 +128,21 @@ Contracts:
 
 - `block-api`;
 - `block-render-api`;
-- `block-instance-api`;
+- `block-state-api`;
 - `block-manager-api`;
 - `block-edit-events-api`;
 - `block-edit-events-mod`.
+
+State, properties, and sparse components:
+
+- `block-state-registry-codegen` and `generated-block-state`;
+- `block-properties-api` and `block-properties-registry-mod`;
+- `block-component-api` and `block-component-registry-mod`;
+- `block-component-binary-format-lib`;
+- `block-durability-api`;
+- `block-damage-component-mod`;
+- one-block contributors named `block-durability-<block>-vanilla-mod`;
+- the selection-only `block-durabilities-vanilla` modpack.
 
 Registry-backed manager:
 
@@ -214,6 +255,9 @@ Client consumers:
 | `chunk-network-messages-mod` | Protocol contribution |
 | `coherent-noise-api` | Noise helper contract |
 
+Chunk palettes contain only `BlockState`. Sparse per-position components are a
+separate data and persistence path.
+
 ## Server chunk world
 
 Contracts:
@@ -240,6 +284,25 @@ Infrastructure:
 - `server-chunk-request-mod`;
 - `server-world-catalog-build-server-impl`;
 - `server-world-seed-catalog-fs-impl`.
+
+Independent world-data persistence:
+
+- `server-world-data-storage-api`;
+- filesystem and memory providers;
+- `server-world-data-storage-flush-mod`;
+- `server-block-component-api`;
+- `server-block-component-persistence-lib`;
+- `server-block-component-state-mod`;
+- `server-block-component-block-edit-mod`.
+
+Mode-aware block breaking and damage replication:
+
+- `server-block-breaking-events-api` and `-mod`;
+- Creative and Survival breaking library/glue pairs;
+- `block-damage-events-api` and `-mod`;
+- `block-damage-network-message-types` and message contributor;
+- `server-block-damage-network-sync-mod`;
+- `server-chunk-stream-events-api` and `-mod`.
 
 Alternative infrastructure:
 
@@ -328,6 +391,13 @@ World transition/reset:
 - `client-world-context-network-receive-mod`;
 - `client-chunk-reset-on-world-change-mod`;
 - `client-player-world-position-mod`.
+
+Block damage presentation:
+
+- `client-block-damage-api`;
+- `client-block-damage-state-mod`;
+- `client-block-damage-network-receive-mod`;
+- `client-block-break-overlay-bevy-mod`.
 
 ## Animated grass
 

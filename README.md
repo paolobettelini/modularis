@@ -90,6 +90,7 @@ Some textures and character assets used in this project are taken from or based 
 * [Good Vibes](https://github.com/Phyronnaz/VoxelAssets/tree/master/GoodVibes) by Acaitart — **CC BY 4.0**
 * [Pixel Perfection Fidelity](https://modrinth.com/resourcepack/pixel-perfection-fidelity) by SourAlien, based on Pixel Perfection by XSSheep — **CC BY 4.0 / CC BY-SA 4.0 upstream**
 * [Colorful Kobolds](https://www.curseforge.com/hytale/mods/pastels-kobold) by PastelPaints and KukeiTheProtogen — **Creative Commons 4.0**, as listed on CurseForge
+* [Craking block](https://opengameart.org/content/craking-block) by Xavier4321 — **CC0 1.0**
 
 Some of these assets may have been modified, renamed, or adapted for use in this project.
 

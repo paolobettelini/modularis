@@ -57,17 +57,18 @@ The API exposes:
 `ChunkSection` stores:
 
 ```text
-palette:     palette index -> BlockInstance
-reverseMap:  BlockInstance -> palette index
+palette:     palette index -> BlockState
+reverseMap:  BlockState -> palette index
 entries:     packed palette indices
 ```
 
-The palette stores complete `BlockInstance` values. Metadata is part of equality
-and can create a distinct palette entry even when `BlockId` is the same.
+The palette stores complete `BlockState` values. Discrete state is part of
+equality and can create a distinct palette entry even when `BlockId` is the
+same. Arbitrary per-position data is deliberately excluded.
 
 On `set`:
 
-1. look up the block instance in `reverse_map`;
+1. look up the block state in `reverse_map`;
 2. add a palette entry if it is new;
 3. increase bits per entry if required;
 4. repack existing indices;
@@ -93,12 +94,12 @@ index zero.
 This makes a uniform air chunk or uniform stone chunk very small:
 
 ```text
-palette = [one BlockInstance]
+palette = [one BlockState]
 bits_per_entry = 0
 data = []
 ```
 
-The representation is used both in memory and in CBOR chunk payloads.
+The representation is used both in memory and in the binary chunk payload.
 
 ## Serialization
 
@@ -186,8 +187,9 @@ root:
 }
 ```
 
-The generic `data/` directory deliberately owns only a `chunk/` child today.
-Future persistence mods can add independent domains such as:
+The generic `data/` directory also accepts independent persistence domains.
+The selected block-component backend currently adds a namespaced domain beside
+`chunk/`. Future persistence mods can own domains such as:
 
 ```text
 data/
@@ -197,9 +199,10 @@ data/
 └── item-drops/
 ```
 
-Do not put entity or fluid state into the chunk binary format merely because it
-shares coordinates. Those systems can have different lifetime, indexing,
-versioning, and write-frequency needs.
+Do not put block components, entity state, or fluid state into the chunk binary
+format merely because they share coordinates. Those systems can have different
+lifetime, indexing, replication, versioning, and write-frequency needs. See
+[Block properties and sparse components](./block-properties-and-components.md).
 
 ## Global and local palettes
 
@@ -224,12 +227,16 @@ instead of silently replacing it with another block.
 Every stored chunk keeps a smaller local palette. Each local entry contains:
 
 1. an index into the world's global block index;
-2. a binary CBOR payload for `BlockMetaSet`.
+2. a binary payload for the generated `BlockStateSet`.
 
-The metadata payload matters because two instances of one block ID may carry
-different generated metadata and must remain distinct local palette entries.
-Generated metadata sets use serde defaults so adding a new optional metadata
-contributor does not make older saves invalid.
+The state payload matters because two represented states of one block ID may
+have different orientation, variant, or another low-cardinality value and must
+remain distinct local palette entries. Damage and other sparse components are
+not present here.
+
+The current region/index format is version 2. There is intentionally no
+backwards compatibility with the old block-metadata payload: this refactor
+defines a clean storage boundary and old worlds must be regenerated.
 
 After the local palette, the payload stores `bits_per_entry` and the packed
 `u64` array from `ChunkSection`. Uniform chunks therefore remain very small.
@@ -291,9 +298,29 @@ Current region I/O is synchronous. A high-throughput server should replace the
 backend or add an asynchronous persistence pipeline while keeping
 `ServerChunkStorage` as the contract.
 
+## Independent world-data storage
+
+`server-world-data-storage-api` is a second persistence contract for opaque,
+namespaced domains. It is separate from `ServerChunkStorage`:
+
+- chunk storage owns compressed `BlockState` sections and the global block
+  index;
+- world-data storage owns records selected by independent world systems;
+- neither contract implies network replication.
+
+The filesystem implementation keys data by world instance, namespaced domain,
+provider/source, and chunk-sized spatial partition. It supports buffered
+replace/delete operations, periodic flush, shutdown flush, and atomic file
+replacement. A domain can delete its file when its sparse record set becomes
+empty.
+
+The first domain is `modularis:block-components`. Its versioned binary records
+carry local index, stable component ID, component version, and opaque bytes.
+Other future domains do not need to use that record format.
+
 ## Uniform fast paths
 
-`uniform_block()` returns a block instance when the palette has one entry.
+`uniform_block()` returns a block state when the palette has one entry.
 
 The project uses this information in several places:
 
@@ -309,7 +336,7 @@ not need a separate "empty chunk packet".
 ## Editing and palette growth
 
 Editing a uniform chunk introduces a second palette entry and repacks from zero
-to one bit per block. Further unique block instances may cause more repacks.
+to one bit per block. Further unique block states may cause more repacks.
 
 This is simple and correct for the demo. A high-edit workload may prefer:
 

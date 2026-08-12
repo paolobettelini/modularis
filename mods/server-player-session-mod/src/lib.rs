@@ -5,6 +5,9 @@ use generated_network_messages::{
     PlayerMoveReceived,
 };
 use network_protocol_mod::NetworkProtocolMod;
+use network_transport_events_mod::{
+    NetworkTransportEventsMod, ServerTransportDisconnected,
+};
 use player_network_message_types::{PlayerJoined, PlayerLeft, PlayerMoved, PlayerRotationChanged};
 use server_kick_api::{ServerKickApi, ServerKickRequested, ServerKickSet, ServerKickTarget};
 use server_network_api::{ServerNetworkApi, ServerNetworkSender};
@@ -50,6 +53,7 @@ impl ServerPlayerSessionMod {
         bevy: &mut BevyMod,
         _network: &mut N,
         _network_events: &mut E,
+        _transport_events: &mut NetworkTransportEventsMod,
         _protocol: &mut NetworkProtocolMod,
         _lifecycle: &mut ServerPlayerLifecycleEventsMod,
         _visibility: &mut V,
@@ -105,7 +109,8 @@ impl ServerPlayerSessionMod {
                         .before(ServerKickSet::Apply),
                     register_joined_players.in_set(ServerPlayerSessionSet::Register),
                     sync_joined_players.in_set(ServerPlayerSessionSet::Sync),
-                    handle_leave
+                    (handle_leave, handle_transport_disconnect)
+                        .chain()
                         .after(NetworkMessageSet::DispatchPackets)
                         .in_set(ServerPlayerSessionSet::Cleanup),
                 ),
@@ -240,23 +245,66 @@ fn handle_leave(
     visibility: Res<ServerPlayerVisibility>,
 ) {
     for leave in leaves.read() {
-        let viewers = registry
-            .player_for_address(leave.source)
-            .map(|player| visibility.viewers_of(player, &registry.players()))
-            .unwrap_or_default();
-        if let Some(player) = registry.leave(leave.source) {
-            left.write(ServerPlayerLeft {
-                player_id: player.id,
-            });
-            network.remove_client(leave.source);
-            packets.write(ServerPacketOut {
-                audience: ServerAudience::Players(viewers),
-                message: ClientBoundMessage::PlayerLeft(PlayerLeft {
-                    player_id: player.id,
-                }),
-            });
-        }
+        cleanup_departed_player(
+            leave.source,
+            &mut registry,
+            &network,
+            &mut left,
+            &mut packets,
+            &visibility,
+        );
     }
+}
+
+fn handle_transport_disconnect(
+    mut disconnected: MessageReader<ServerTransportDisconnected>,
+    mut registry: ResMut<ServerPlayerRegistry>,
+    network: Res<ServerNetworkSender>,
+    mut left: MessageWriter<ServerPlayerLeft>,
+    mut packets: MessageWriter<ServerPacketOut>,
+    visibility: Res<ServerPlayerVisibility>,
+) {
+    for event in disconnected.read() {
+        cleanup_departed_player(
+            event.address,
+            &mut registry,
+            &network,
+            &mut left,
+            &mut packets,
+            &visibility,
+        );
+    }
+}
+
+fn cleanup_departed_player(
+    address: std::net::SocketAddr,
+    registry: &mut ServerPlayerRegistry,
+    network: &ServerNetworkSender,
+    left: &mut MessageWriter<ServerPlayerLeft>,
+    packets: &mut MessageWriter<ServerPacketOut>,
+    visibility: &ServerPlayerVisibility,
+) {
+    let viewers = registry
+        .player_for_address(address)
+        .map(|player| visibility.viewers_of(player, &registry.players()))
+        .unwrap_or_default();
+    let Some(player) = registry.leave(address) else {
+        return;
+    };
+    left.write(ServerPlayerLeft {
+        player_id: player.id,
+    });
+    network.remove_client(address);
+    packets.write(ServerPacketOut {
+        audience: ServerAudience::Players(viewers),
+        message: ClientBoundMessage::PlayerLeft(PlayerLeft {
+            player_id: player.id,
+        }),
+    });
+    info!(
+        "cleaned up disconnected player '{}' ({}) from {address}",
+        player.name, player.id
+    );
 }
 
 fn collect_movement_requests(
