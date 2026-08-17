@@ -1,0 +1,601 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>TheCrown network and dynamic instances - Minecraft Simple Demo Architecture</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting-started/project-overview.html"><strong aria-hidden="true">1.1.</strong> Project overview</a></li><li class="chapter-item expanded "><a href="../getting-started/build-and-run.html"><strong aria-hidden="true">1.2.</strong> Build and run</a></li></ol></li><li class="chapter-item expanded "><a href="../architecture/foundations.html"><strong aria-hidden="true">2.</strong> Architecture foundations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../architecture/patchwork-composition.html"><strong aria-hidden="true">2.1.</strong> Patchwork composition</a></li><li class="chapter-item expanded "><a href="../architecture/mod-anatomy.html"><strong aria-hidden="true">2.2.</strong> Mod anatomy and lifecycle</a></li><li class="chapter-item expanded "><a href="../architecture/dependency-sources.html"><strong aria-hidden="true">2.3.</strong> Cargo dependency sources</a></li><li class="chapter-item expanded "><a href="../architecture/apis-and-events.html"><strong aria-hidden="true">2.4.</strong> APIs, providers, and ECS contracts</a></li><li class="chapter-item expanded "><a href="../architecture/runtime-scopes.html"><strong aria-hidden="true">2.5.</strong> Runtime scope trees and facets</a></li><li class="chapter-item expanded "><a href="../architecture/vanilla-libraries.html"><strong aria-hidden="true">2.6.</strong> Vanilla mechanics as reusable libraries</a></li><li class="chapter-item expanded "><a href="../architecture/code-generation.html"><strong aria-hidden="true">2.7.</strong> Code generation and registries</a></li><li class="chapter-item expanded "><a href="../architecture/modpacks.html"><strong aria-hidden="true">2.8.</strong> Modpacks and feature boundaries</a></li><li class="chapter-item expanded "><a href="../architecture/assets-and-output.html"><strong aria-hidden="true">2.9.</strong> Assets and generated output</a></li></ol></li><li class="chapter-item expanded "><a href="../runtime/runtime-overview.html"><strong aria-hidden="true">3.</strong> Runtime and networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../runtime/bevy-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Bevy application lifecycle</a></li><li class="chapter-item expanded "><a href="../runtime/networking.html"><strong aria-hidden="true">3.2.</strong> Protocol, transport, and framing</a></li><li class="chapter-item expanded "><a href="../runtime/patchwork-authentication.html"><strong aria-hidden="true">3.3.</strong> Patchwork account authentication</a></li><li class="chapter-item expanded "><a href="../runtime/sessions-and-visibility.html"><strong aria-hidden="true">3.4.</strong> Sessions, routing, and visibility</a></li><li class="chapter-item expanded "><a href="../runtime/loading-tasks.html"><strong aria-hidden="true">3.5.</strong> Loading tasks and progress screens</a></li><li class="chapter-item expanded "><a href="../runtime/chat-and-commands.html"><strong aria-hidden="true">3.6.</strong> Chat, commands, and completion</a></li><li class="chapter-item expanded "><a href="../runtime/sounds.html"><strong aria-hidden="true">3.7.</strong> Sounds, audiences, and spatial playback</a></li></ol></li><li class="chapter-item expanded "><a href="../world/world-overview.html"><strong aria-hidden="true">4.</strong> World architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../world/blocks-and-items.html"><strong aria-hidden="true">4.1.</strong> Blocks, items, and state</a></li><li class="chapter-item expanded "><a href="../world/block-properties-and-components.html"><strong aria-hidden="true">4.2.</strong> Block properties and sparse components</a></li><li class="chapter-item expanded "><a href="../world/voxel-models.html"><strong aria-hidden="true">4.3.</strong> JSON voxel models and textures</a></li><li class="chapter-item expanded "><a href="../world/chunk-storage.html"><strong aria-hidden="true">4.4.</strong> Chunk coordinates and storage</a></li><li class="chapter-item expanded "><a href="../world/server-world.html"><strong aria-hidden="true">4.5.</strong> Server world providers and residency</a></li><li class="chapter-item expanded "><a href="../world/biomes.html"><strong aria-hidden="true">4.6.</strong> Biomes and world-generation features</a></li><li class="chapter-item expanded "><a href="../world/client-chunks.html"><strong aria-hidden="true">4.7.</strong> Client streaming, meshing, and rendering</a></li><li class="chapter-item expanded "><a href="../world/dimensions.html"><strong aria-hidden="true">4.8.</strong> Dimensions and world scopes</a></li><li class="chapter-item expanded "><a href="../world/portals.html"><strong aria-hidden="true">4.9.</strong> Portals</a></li></ol></li><li class="chapter-item expanded "><a href="../gameplay/gameplay-overview.html"><strong aria-hidden="true">5.</strong> Gameplay systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../gameplay/permissions-and-game-modes.html"><strong aria-hidden="true">5.1.</strong> Permissions and server game modes</a></li><li class="chapter-item expanded "><a href="../gameplay/movement.html"><strong aria-hidden="true">5.2.</strong> Player movement and prediction</a></li><li class="chapter-item expanded "><a href="../gameplay/movement-features.html"><strong aria-hidden="true">5.3.</strong> Gravity, jump, sprint, and flight</a></li><li class="chapter-item expanded "><a href="../gameplay/block-interaction.html"><strong aria-hidden="true">5.4.</strong> Block interaction and world edits</a></li><li class="chapter-item expanded "><a href="../gameplay/inventory.html"><strong aria-hidden="true">5.5.</strong> Inventory, hotbar, and item use</a></li><li class="chapter-item expanded "><a href="../gameplay/cell-menus.html"><strong aria-hidden="true">5.6.</strong> Cell menus, audiences, and crafting tables</a></li></ol></li><li class="chapter-item expanded "><a href="../client/client-overview.html"><strong aria-hidden="true">6.</strong> Client systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../client/input-settings-menus.html"><strong aria-hidden="true">6.1.</strong> Input, settings, menus, and game state</a></li><li class="chapter-item expanded "><a href="../client/graphics.html"><strong aria-hidden="true">6.2.</strong> Graphics, lighting, sky, and outlines</a></li><li class="chapter-item expanded "><a href="../client/animated-grass.html"><strong aria-hidden="true">6.3.</strong> Animated grass and wind</a></li><li class="chapter-item expanded "><a href="../client/blocky-models.html"><strong aria-hidden="true">6.4.</strong> Blocky models and animation</a></li></ol></li><li class="chapter-item expanded "><a href="../development/developer-guide.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../development/extension-cookbook.html"><strong aria-hidden="true">7.1.</strong> Extension cookbook</a></li><li class="chapter-item expanded "><a href="../development/thecrown-network.html" class="active"><strong aria-hidden="true">7.2.</strong> TheCrown network and dynamic instances</a></li><li class="chapter-item expanded "><a href="../development/testing-and-performance.html"><strong aria-hidden="true">7.3.</strong> Testing, debugging, and performance</a></li><li class="chapter-item expanded "><a href="../reference/crate-map.html"><strong aria-hidden="true">7.4.</strong> Crate map</a></li><li class="chapter-item expanded "><a href="../reference/current-limits.html"><strong aria-hidden="true">7.5.</strong> Current limits and design direction</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Minecraft Simple Demo Architecture</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="thecrown-network-and-dynamic-instances"><a class="header" href="#thecrown-network-and-dynamic-instances">TheCrown network and dynamic instances</a></h1>
+<p>TheCrown is a network of Modularis processes, not one special game server. It
+contains four independently deployed roles:</p>
+<pre><code class="language-text">Patchwork-authenticated client
+              |
+              v
+       thecrown-auth :9999
+              |
+              | PlayerWantsToJoin
+              v
+          NATS + Relay &lt;----------------&gt; standalone Leptos web application
+              |
+              | StartInstance, transfer tickets, whispers
+              v
+   N x thecrown-game processes :10000+
+              |
+              +-- Hub instances
+              +-- Parkour instances
+</code></pre>
+<p>The Relay owns global routing state. A game process owns local ECS state. An
+instance is a logical game space hosted by one physical game process. The
+standalone web application observes and controls the network through Relay; no
+HTTP or Leptos runtime is embedded in a game server.</p>
+<p>This subsystem is also an architecture example. It shows how a custom server
+can keep one application-specific orchestration mod while reusing neutral
+Patchwork services and pure gameplay libraries.</p>
+<h2 id="compositions-and-executables"><a class="header" href="#compositions-and-executables">Compositions and executables</a></h2>
+<p>The network adds two top-level modpacks:</p>
+<table><thead><tr><th>Modpack</th><th align="right">Default port</th><th>Responsibility</th></tr></thead><tbody>
+<tr><td><code>thecrown-auth.toml</code></td><td align="right"><code>9999</code></td><td>Authenticate the Patchwork account, ask Relay for a destination, then transfer the client</td></tr>
+<tr><td><code>thecrown-game.toml</code></td><td align="right"><code>10000</code></td><td>Register a physical game worker and host Relay-assigned Hub and Parkour instances</td></tr>
+</tbody></table>
+<p>Both import <code>server-core.toml</code> and <code>server-patchwork-auth.toml</code>. They do not
+import <code>server-base.toml</code> or <code>server-vanilla.toml</code>. This prevents crafting,
+portals, default inventories, global chat, biome generation, and other blanket
+vanilla policy from becoming accidental requirements.</p>
+<p>The same <code>client.toml</code> connects first to auth and follows later transfer
+packets. The transfer behavior is a separate client mod, so a client profile
+can omit TheCrown routing while retaining ordinary Modularis networking.</p>
+<p>The old <code>thecrown.toml</code> and embedded web server were removed. The standalone
+services remain under:</p>
+<pre><code class="language-text">thecrown/
+├── thecrown-relay/
+└── thecrown-web/
+</code></pre>
+<p>Shared protocol, NATS, token, and database crates live under <code>mods/</code> as plain
+Rust libraries. They are dependencies, not Bevy runtime mods.</p>
+<h2 id="configuration-used-by-the-local-game-worker"><a class="header" href="#configuration-used-by-the-local-game-worker">Configuration used by the local game worker</a></h2>
+<p><code>thecrown-game-config-api</code> defines the configuration resource. The current
+<code>thecrown-game-config-local-impl</code> provides development values in code:</p>
+<pre><code class="language-text">server_id                 modularis-local-&lt;random UUID&gt;
+public address            127.0.0.1
+public port               10000
+NATS URL                  nats://127.0.0.1:4222
+request timeout           2000 ms
+Relay subject             thecrown.relay
+web subject               thecrown.web
+game-server prefix        thecrown.gameserver
+web address               127.0.0.1:8080
+</code></pre>
+<p>The random server ID is suitable for local runs. A deployment should replace
+this provider with a stable, externally configured ID and reachable public
+address. Consumers depend on the API, not on this local implementation.</p>
+<p><code>thecrown-auth</code> intentionally has no game-server identity. It must never send
+<code>RegisterServer</code>, <code>AuthUserJoin</code>, or <code>PlayerQuit</code>, because Relay must not treat
+the entry process as an instance host or online player location.</p>
+<h2 id="entry-authentication-flow"><a class="header" href="#entry-authentication-flow">Entry authentication flow</a></h2>
+<p>The auth server performs the normal Patchwork account handshake first. This
+provides the trusted account UUID and username; no client-selected game name is
+used.</p>
+<p>After <code>ServerPatchworkPlayerJoined</code>:</p>
+<ol>
+<li>
+<p><code>thecrown-auth-main-mod</code> emits <code>RequestTheCrownAdmission</code>.</p>
+</li>
+<li>
+<p><code>thecrown-auth-relay-nats-mod</code> sends a NATS request:</p>
+<pre><code class="language-text">PlayerWantsToJoin { PlayerIdentity { uuid, username } }
+</code></pre>
+</li>
+<li>
+<p>Relay checks bans, stores the identity, and chooses a Hub instance.</p>
+</li>
+<li>
+<p>Relay answers with <code>AccomodatePlayer</code>.</p>
+</li>
+<li>
+<p><code>Ban</code> and <code>Unavailable</code> become a normal <code>ServerKickRequested</code>, so the client
+sees the reason through the existing disconnect UI.</p>
+</li>
+<li>
+<p><code>Join { transfer }</code> becomes a client-bound <code>TransferPlayer</code> packet.</p>
+</li>
+</ol>
+<p>The auth NATS adapter runs on a dedicated Tokio thread and reports results back
+through ECS messages. A failed worker or request produces an explicit admission
+error instead of leaving a connected player waiting forever.</p>
+<h2 id="client-transfer-flow"><a class="header" href="#client-transfer-flow">Client transfer flow</a></h2>
+<p><code>thecrown-network-message-types</code> defines the Modularis transport payloads:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>TransferPlayer { transfer: TransferPacketData }
+AuthenticateTransfer { transfer: TransferPacketData }
+TransferAuthenticated
+<span class="boring">}
+</span></code></pre></pre>
+<p><code>thecrown-network-messages-mod</code> contributes them to network codegen. It does
+not own transport behavior.</p>
+<p>When <code>client-thecrown-transfer-mod</code> receives <code>TransferPlayer</code>, it:</p>
+<ol>
+<li>replaces <code>ClientConnectionTarget</code> with the supplied address and port;</li>
+<li>installs the namespaced <code>thecrown:relay-transfer</code> session join gate;</li>
+<li>returns to the main-menu state to tear down the old TCP session cleanly;</li>
+<li>immediately starts a connection to the destination;</li>
+<li>completes the normal Patchwork game-server authentication handshake;</li>
+<li>sends <code>AuthenticateTransfer</code> with Relay's one-use transfer data;</li>
+<li>releases the join gate only after <code>TransferAuthenticated</code> arrives.</li>
+</ol>
+<p>Patchwork backend authentication and TheCrown Relay admission are intentionally
+different proofs. The Relay cookie is not passed to the Patchwork backend as a
+backend transfer ticket.</p>
+<p><code>ClientSessionJoinGates</code> is generic and namespaced. Other mods may block the
+ordinary <code>JoinRequest</code> for their own asynchronous prerequisites without
+depending on TheCrown.</p>
+<h2 id="game-server-registration"><a class="header" href="#game-server-registration">Game-server registration</a></h2>
+<p><code>thecrown-game-relay-nats-mod</code> owns the game worker's NATS connection. Its
+worker performs startup in this exact order:</p>
+<ol>
+<li>connect to NATS;</li>
+<li>subscribe to <code>thecrown.gameserver.&lt;server_id&gt;</code>;</li>
+<li>publish <code>RegisterServer { server_id, address, port }</code>.</li>
+</ol>
+<p>Subscribing first is required because core NATS does not retain messages and
+Relay may publish <code>StartInstance</code> immediately during registration.</p>
+<p>Dropping the worker sends its shutdown command, publishes
+<code>UnregisterServer</code>, and joins the worker thread. This is the clean-shutdown
+path; Relay also removes stale state when a server re-registers with the same
+ID.</p>
+<p>The NATS adapter only translates external protocol packets into domain ECS
+messages such as <code>RelayStartInstance</code>, <code>AuthenticateRelayTransfer</code>, and
+<code>RelayExecuteTransfer</code>. It does not create scopes, mutate worlds, or assign
+players.</p>
+<h2 id="dynamic-instance-lifecycle"><a class="header" href="#dynamic-instance-lifecycle">Dynamic instance lifecycle</a></h2>
+<p>A game worker starts with only the root scope:</p>
+<pre><code class="language-text">patchwork:root
+└── thecrown
+</code></pre>
+<p>It does not pre-create Hub or Parkour instances. Relay sends:</p>
+<pre><code class="language-text">StartInstance { GameInstanceSpec { instance_id, mode } }
+StopInstance { instance_id }
+</code></pre>
+<p>The game process stores exact Relay IDs in <code>TheCrownRuntime.instances</code>; it
+never derives or renames them. Starting the same ID twice is idempotent.</p>
+<p>Only an empty instance may be stopped. Relay and the game worker both reject
+removal while players remain. This preserves authoritative session location
+instead of silently forgetting connected players. Stopping an empty instance:</p>
+<ul>
+<li>unbinds its world route;</li>
+<li>removes its RAM template and resident chunks;</li>
+<li>removes its scope subtree;</li>
+<li>despawns its ECS marker entities.</li>
+</ul>
+<p>Future scaling policy belongs in Relay. The game process only exposes safe
+lifecycle primitives.</p>
+<h2 id="destination-admission-and-one-use-cookies"><a class="header" href="#destination-admission-and-one-use-cookies">Destination admission and one-use cookies</a></h2>
+<p>A direct, ordinary connection to <code>thecrown-game</code> is not enough to join. The
+destination must verify both independent identities:</p>
+<ul>
+<li>the Patchwork backend account bound to the TCP address;</li>
+<li>the Relay transfer data presented by that connection.</li>
+</ul>
+<p>The destination flow is:</p>
+<pre><code class="language-text">client AuthenticateTransfer
+        |
+        v
+AuthenticateRelayTransfer ECS message
+        |
+        v
+Relay AuthUserJoin { player_uuid, server_id, instance_id, cookie }
+        |
+        v
+ServeAuthResult { value }
+</code></pre>
+<p>Relay consumes the cookie before validation. It therefore cannot be replayed,
+including after a failed attempt. <code>thecrown-game-session-mod</code> stores a short
+local approval keyed by socket address. Its admission rule allows the normal
+session join only while that approval exists. Binding the final player ID
+removes the approval and records:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>TheCrownGamePlayerSession {
+    identity,
+    instance_id,
+    mode,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>The session resource has indices by local <code>PlayerId</code> and account UUID. UUID is
+used for Relay operations; <code>PlayerId</code> remains the efficient local ECS/network
+handle.</p>
+<p>If the assigned local instance is absent or has a different mode, the player
+is kicked instead of being left connected without a world.</p>
+<h2 id="player-exit-and-transfer"><a class="header" href="#player-exit-and-transfer">Player exit and transfer</a></h2>
+<p><code>thecrown-game-session-mod</code> is the single owner of outbound Modularis transfer
+packets. Commands and externally forced transfers emit
+<code>TransferTheCrownPlayer</code>; the session mod resolves that to <code>ServerPacketOut</code>.</p>
+<p>On <code>ServerPlayerLeft</code>, it removes the UUID/player index and publishes:</p>
+<pre><code class="language-text">PlayerQuit { player_uuid, server_id, instance_id }
+</code></pre>
+<p>This also happens when disconnecting from the source server during a transfer.
+Relay compares the supplied old location with its current location, so a late
+quit cannot remove a session already admitted elsewhere.</p>
+<p>The following commands ask Relay for a transfer instead of choosing a local
+destination directly:</p>
+<table><thead><tr><th>Command</th><th>Relay request</th></tr></thead><tbody>
+<tr><td><code>/hub</code></td><td><code>PlayerEnterLobby</code></td></tr>
+<tr><td><code>/play parkour</code></td><td><code>PlayerEnterMode { Parkour }</code></td></tr>
+<tr><td><code>/server parkour2</code></td><td><code>PlayerEnterSpecificServer { instance_id }</code></td></tr>
+</tbody></table>
+<p><code>DataTransferResult::Join</code> uses the same central transfer event as every other
+source. <code>NotFound</code> is shown as a personal chat message.</p>
+<p>The standalone website may ask Relay to move a player. Relay sends
+<code>GameServerPacket::ExecuteTransfer</code> to the physical process currently holding
+the UUID. The game session index finds the local player across all instances
+and sends the supplied transfer packet.</p>
+<h2 id="scope-topology"><a class="header" href="#scope-topology">Scope topology</a></h2>
+<p>Each logical instance has its own scope node. Facets decide which services are
+shared; there is no single hardcoded meaning of an “instance.”</p>
+<p>Hub:</p>
+<pre><code class="language-text">thecrown
+└── thecrown:instance:hub1      [chat, visibility, shared world route]
+    ├── player 1
+    └── player 2
+</code></pre>
+<p>Parkour:</p>
+<pre><code class="language-text">thecrown
+└── thecrown:instance:parkour1  [chat]
+    ├── ...:player:1            [visibility, private world route]
+    └── ...:player:2            [visibility, private world route]
+</code></pre>
+<p>Hub players share chat, world, and avatar visibility. Parkour players share
+instance chat but have private worlds and cannot see each other's avatars.
+Chat, visibility, and chunk routing remain separate facets, so another custom
+mode can combine them differently without changing the scope core.</p>
+<h2 id="hub-world"><a class="header" href="#hub-world">Hub world</a></h2>
+<p><code>thecrown-world-template-api</code> stores complete, palette-compressed <code>Chunk</code>
+templates in RAM. <code>server-chunk-provider-thecrown-mod</code> is the selected primary
+provider and clones the requested in-memory chunk, or returns an air chunk when
+the template has no data at that position.</p>
+<p>The current Hub loader reads:</p>
+<pre><code class="language-text">thecrown/data/hub/
+  info.json
+  data/chunk/index.bin
+  data/chunk/regions/...
+</code></pre>
+<p>This is the same binary, globally indexed, region-grouped chunk format used by
+the normal filesystem world storage. <code>thecrown-game-main-mod::hub</code> hardcodes
+the application-owned path, decodes it once when an instance starts, and
+installs the chunks in RAM. Every Hub instance gets a separate
+<code>WorldInstanceId</code>, while all players inside that Hub use its shared route.</p>
+<p>The standalone Rust tool under
+<code>thecrown/scripts/minecraft-world-converter</code> reads Java Edition Anvil/NBT data
+from <code>thecrown/scripts/minecraft_world</code>. It maps matching Minecraft block IDs
+to composed <code>demo:*</code> IDs, maps unsupported blocks and fluids to stone, and
+does not import entities, block entities, ticks, biomes, or other world
+domains. Minecraft parsing therefore stays outside the game runtime and the
+generic provider.</p>
+<p>Hub admission also applies two instance policies:</p>
+<ul>
+<li>gravity <code>(0, -5, 0)</code>;</li>
+<li>a fresh pseudo-random model scale in <code>[0.4, 5.0]</code> for every Hub admission,
+including reconnects by the same account.</li>
+</ul>
+<p>The template API, state provider, chunk provider, and TheCrown loader are
+separate concerns. A future map format or database loader can replace only the
+loader/state side.</p>
+<h2 id="parkour-instances"><a class="header" href="#parkour-instances">Parkour instances</a></h2>
+<p>Every admitted Parkour player gets a child scope and private
+<code>WorldInstanceId</code>. <code>parkour-gameplay-lib</code> remains a plain, pure Rust library:
+it receives positions and returns block edits, score changes, and optional
+teleports. It knows nothing about Bevy, NATS, packets, audiences, or chunk
+storage.</p>
+<p><code>thecrown-game-main-mod::parkour</code> is the application-specific adapter. It:</p>
+<ul>
+<li>applies generated edits to the player's routed world;</li>
+<li>publishes generic block-edit events for client synchronization;</li>
+<li>requests authoritative relocation on reset;</li>
+<li>publishes personal score messages;</li>
+<li>emits a personal spatial note-block sound for successful checkpoints;</li>
+<li>loads and submits the player's persistent personal best through the Relay;</li>
+<li>drops the transient world and scope when the player leaves.</li>
+</ul>
+<p>Parkour admission applies its own instance policy:</p>
+<ul>
+<li>gravity <code>(0, -20, 0)</code>;</li>
+<li>fixed player model and hitbox scale <code>1.0</code>.</li>
+</ul>
+<p>These values are stored as part of the runtime instance policy rather than as
+global TheCrown defaults. Hub and Parkour can therefore configure the same
+generic gravity and scale services differently, and another mode can define a
+third policy without changing either service provider.</p>
+<p>This is deliberately monolithic policy inside TheCrown, while the mechanics it
+reuses remain independent libraries and services.</p>
+<h3 id="persistent-parkour-records"><a class="header" href="#persistent-parkour-records">Persistent parkour records</a></h3>
+<p>The game worker never opens the player database directly. On Parkour admission
+it emits <code>RequestRelayParkourRecord</code>; the NATS provider translates that ECS
+request to <code>RelayPacket::GetParkourRecord</code>. The Relay owns the database query
+and returns the current personal best. The player receives it as a personal
+chat message after joining the arena.</p>
+<p>Checkpoint progress stays only in the current <code>ParkourRun</code>. When a fall ends
+the run, the update carries <code>completed_score</code>; only that run boundary may emit
+<code>SubmitRelayParkourRecord</code>. If the initial record query is still in flight, the
+best completed score is queued until the query returns. The database update is
+monotonic and transactional: a delayed lower submission cannot replace a newer
+higher score. A confirmed improvement produces a personal <code>New parkour record</code>
+chat message. The standalone website already reads the same player row, so its
+record view reflects the saved value without access to the game worker's Bevy
+world.</p>
+<p>This split keeps persistence out of <code>parkour-gameplay-lib</code>. The pure library
+still owns only course and score rules; TheCrown policy chooses that this score
+is persisted and at which lifecycle boundary, Relay transports it, and the
+database owns consistency.</p>
+<h2 id="chat-whispers-and-web-login"><a class="header" href="#chat-whispers-and-web-login">Chat, whispers, and web login</a></h2>
+<p>Normal text resolves the nearest chat facet and is published to
+<code>Audience::Shared(scope)</code>. This gives Hub-wide or Parkour-instance chat without
+changing the neutral chat pipeline.</p>
+<p><code>/msg &lt;name&gt; &lt;message&gt;</code> sends <code>WhisperCommandByName</code> to Relay. Relay resolves
+the persistent account name through its database, locates the online UUID, and
+forwards <code>GameServerPacket::WhisperCommand</code> to the correct physical process.
+The destination process resolves UUID to its local player ID and publishes a
+personal chat message.</p>
+<p><code>/weblogin</code> requests <code>GenerateAuthToken { player_uuid }</code> from
+<code>thecrown.web</code>. The returned token becomes a personal structured external-link
+prompt whose URL is:</p>
+<pre><code class="language-text">http://127.0.0.1:8080/auth/&lt;token&gt;
+</code></pre>
+<p>TheCrown only publishes <code>PublishServerExternalLink</code>. The generic server network
+adapter, client receiver and Bevy presenter own replication, the modal and OS
+browser launching. This keeps web-login policy independent from one concrete
+client UI. The presenter uses the generic exclusive <code>Modal</code> overlay state, so
+opening a link releases gameplay input without spawning the pause menu behind
+the prompt.</p>
+<p>The web application is a separate Actix/Leptos executable. It has no access to
+the Bevy <code>World</code>; all cross-process state goes through the shared protocol and
+NATS.</p>
+<h2 id="crate-boundaries"><a class="header" href="#crate-boundaries">Crate boundaries</a></h2>
+<p>The main boundaries are:</p>
+<table><thead><tr><th>Crate</th><th>Kind</th><th>Role</th></tr></thead><tbody>
+<tr><td><code>thecrown-protocol</code></td><td>plain library</td><td>Serializable Relay, game-server, web, identity, instance, and transfer types</td></tr>
+<tr><td><code>thecrown-common</code></td><td>plain library</td><td>NATS client, token, and shared configuration helpers</td></tr>
+<tr><td><code>thecrown-database</code></td><td>plain library</td><td>Relay/web persistence</td></tr>
+<tr><td><code>thecrown-network-message-types</code></td><td>plain library</td><td>Modularis client/server transfer payloads</td></tr>
+<tr><td><code>thecrown-network-messages-mod</code></td><td>contributor mod</td><td>Adds those payloads to network codegen</td></tr>
+<tr><td><code>thecrown-auth-relay-api</code></td><td>API mod</td><td>Entry-server admission ECS contract</td></tr>
+<tr><td><code>thecrown-auth-relay-nats-mod</code></td><td>provider mod</td><td>NATS implementation of entry admission</td></tr>
+<tr><td><code>thecrown-auth-main-mod</code></td><td>policy mod</td><td>Patchwork identity to Relay admission and transfer/kick</td></tr>
+<tr><td><code>thecrown-game-config-api</code></td><td>API mod</td><td>Physical game-worker configuration</td></tr>
+<tr><td><code>thecrown-game-relay-api</code></td><td>API mod</td><td>Relay lifecycle, transfer, whisper, and web ECS contracts</td></tr>
+<tr><td><code>thecrown-game-relay-nats-mod</code></td><td>provider mod</td><td>Dedicated NATS worker and protocol adapter</td></tr>
+<tr><td><code>thecrown-game-session-api</code></td><td>API mod</td><td>Local UUID/player/instance session index and transfer event</td></tr>
+<tr><td><code>thecrown-game-session-mod</code></td><td>implementation mod</td><td>Relay admission rule, one-use binding, quit, and transfer output</td></tr>
+<tr><td><code>thecrown-world-template-api</code></td><td>API mod</td><td>Sparse RAM map templates</td></tr>
+<tr><td><code>thecrown-world-template-state-mod</code></td><td>provider mod</td><td>Template resource implementation</td></tr>
+<tr><td><code>server-chunk-provider-thecrown-mod</code></td><td>provider mod</td><td>Chunk generation from the selected template</td></tr>
+<tr><td><code>thecrown-game-main-mod</code></td><td>application policy mod</td><td>Dynamic scopes, Hub/Parkour rules, and commands</td></tr>
+</tbody></table>
+<p>No Relay adapter contains gameplay logic, and no world provider understands
+NATS or player admission.</p>
+<h2 id="local-startup"><a class="header" href="#local-startup">Local startup</a></h2>
+<p>Start NATS, then Relay and the standalone web process. Compose the two
+Modularis servers and the client:</p>
+<pre><code class="language-sh">patchwork compose --modpack thecrown-auth --modpacks-folder ./modpacks \
+  --mods-folder ./mods --cache ./build-thecrown-auth
+
+patchwork compose --modpack thecrown-game --modpacks-folder ./modpacks \
+  --mods-folder ./mods --cache ./build-thecrown-game
+
+patchwork compose --modpack client --modpacks-folder ./modpacks \
+  --mods-folder ./mods --cache ./build-client
+</code></pre>
+<p>Run the game worker before joining through auth so Relay has Hub instances to
+select:</p>
+<pre><code class="language-sh">cargo run --manifest-path build-thecrown-game/thecrown-game/Cargo.toml
+cargo run --manifest-path build-thecrown-auth/thecrown-auth/Cargo.toml
+cargo run --manifest-path build-client/client/Cargo.toml
+</code></pre>
+<p>Point the client at <code>127.0.0.1:9999</code>. Relay transfers it to the selected game
+worker at <code>127.0.0.1:10000</code>.</p>
+<h2 id="extension-rules"><a class="header" href="#extension-rules">Extension rules</a></h2>
+<p>When adding another TheCrown mode:</p>
+<ol>
+<li>extend the shared protocol mode identity;</li>
+<li>teach Relay how and when to allocate that mode;</li>
+<li>add one local instance constructor that creates its scope facets and world
+route;</li>
+<li>keep pure game rules in a reusable library when useful;</li>
+<li>adapt those results to generic ECS events in TheCrown orchestration;</li>
+<li>keep transfer, authentication, chat, and chunk providers unchanged unless
+the new mode genuinely needs a different provider.</li>
+</ol>
+<p>A mode may share a world but isolate chat, share chat but isolate visibility,
+or create one child world per player. Those choices belong in its runtime scope
+topology, not in TCP, Relay, or the chunk core.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../development/extension-cookbook.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../development/testing-and-performance.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../development/extension-cookbook.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../development/testing-and-performance.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>
