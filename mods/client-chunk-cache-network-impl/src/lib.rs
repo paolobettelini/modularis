@@ -6,6 +6,7 @@ use client_chunk_cache_api::{
     ClientChunkAvailable, ClientChunkCache, ClientChunkCacheApi, ClientChunkChanged,
 };
 use client_chunk_streaming_api::ChunkUnload;
+use client_game_state_api::{GameState, GameStateApi};
 use generated_network_messages::{ChunkResponseReceived, NetworkMessageSet};
 use network_protocol_mod::NetworkProtocolMod;
 use tokio::task::JoinHandle;
@@ -13,16 +14,18 @@ use tokio::task::JoinHandle;
 pub struct ClientNetworkChunkCache;
 
 impl ClientNetworkChunkCache {
-    pub fn init(
+    pub fn init<G: GameStateApi>(
         bevy: &mut BevyMod,
         _protocol: &mut NetworkProtocolMod,
         _block_edits: &mut BlockEditEventsMod,
         _streaming: &mut impl client_chunk_streaming_api::ChunkStreamingApi,
+        _game_state: &mut G,
     ) -> Self {
         bevy.app
             .init_resource::<ClientChunkCache>()
             .add_message::<ClientChunkAvailable>()
             .add_message::<ClientChunkChanged>()
+            .add_systems(OnExit(GameState::InGame), clear_disconnected_cache)
             .add_systems(
                 Update,
                 (cache_chunks, apply_block_edits, remove_unloaded_chunks)
@@ -35,6 +38,10 @@ impl ClientNetworkChunkCache {
     pub fn run(&self) -> Option<Vec<JoinHandle<()>>> {
         None
     }
+}
+
+fn clear_disconnected_cache(cache: Res<ClientChunkCache>) {
+    cache.clear();
 }
 
 impl ClientChunkCacheApi for ClientNetworkChunkCache {}

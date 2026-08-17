@@ -56,22 +56,30 @@ Then check:
 cargo check --manifest-path build-server/server/Cargo.toml
 ```
 
-## Compose the TheCrown server
+## Compose the TheCrown servers
 
-The alternate scoped parkour server uses the same client:
+TheCrown uses a dedicated entry server and one or more game workers. The same
+client follows transfer packets between them:
 
 ```sh
 patchwork compose \
-  --modpack thecrown \
+  --modpack thecrown-auth \
   --modpacks-folder ./modpacks \
   --mods-folder ./mods \
-  --cache ./build-thecrown
+  --cache ./build-thecrown-auth
+
+patchwork compose \
+  --modpack thecrown-game \
+  --modpacks-folder ./modpacks \
+  --mods-folder ./mods \
+  --cache ./build-thecrown-game
 ```
 
-Check it with:
+Check both with:
 
 ```sh
-cargo check --manifest-path build-thecrown/thecrown/Cargo.toml
+cargo check --manifest-path build-thecrown-auth/thecrown-auth/Cargo.toml
+cargo check --manifest-path build-thecrown-game/thecrown-game/Cargo.toml
 ```
 
 Recompose after changing:
@@ -122,11 +130,18 @@ The client also has no player-name field. On Patchwork-authenticated server
 compositions, the backend nickname and account UUID obtained through the
 launcher authentication flow become the authoritative player identity.
 
-To run TheCrown instead of the vanilla server:
+To run TheCrown, start NATS and the standalone Relay first. Start the game
+worker before the entry server so Relay can allocate Hub instances:
 
 ```sh
-cargo run --manifest-path build-thecrown/thecrown/Cargo.toml
+cargo run --manifest-path build-thecrown-game/thecrown-game/Cargo.toml
+cargo run --manifest-path build-thecrown-auth/thecrown-auth/Cargo.toml
 ```
+
+Use `127.0.0.1:9999` in the client. The entry server transfers authenticated
+accounts to the game worker on `127.0.0.1:10000`. See
+[TheCrown network and dynamic instances](../development/thecrown-network.md)
+for the NATS, one-use ticket, instance, and standalone web flow.
 
 Default controls:
 
@@ -151,7 +166,8 @@ Do not make source changes in:
 ```text
 build-client/
 build-server/
-build-thecrown/
+build-thecrown-auth/
+build-thecrown-game/
 mods/generated-*/
 ```
 

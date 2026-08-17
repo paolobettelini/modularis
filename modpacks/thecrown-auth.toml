@@ -1,0 +1,15 @@
+name = "TheCrown Auth"
+version = "0.1.1"
+description = "Patchwork-authenticated TheCrown entry server. It only asks Relay for a destination and transfers the client."
+color = "#b56cff"
+modpacks = ["server-core", "server-patchwork-auth"]
+ignore = ["server-config-local-impl"]
+
+mods = [
+    "server-config-thecrown-auth-impl",
+    "server-player-visibility-all-impl",
+    "thecrown-auth-relay-nats-mod",
+    "thecrown-auth-main-mod",
+]
+
+

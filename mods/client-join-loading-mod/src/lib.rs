@@ -1,11 +1,12 @@
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
-use client_chunk_cache_api::{ClientChunkAvailable, ClientChunkCacheApi};
+use client_chunk_cache_api::{ClientChunkAvailable, ClientChunkCache, ClientChunkCacheApi};
 use client_game_state_api::{GameState, GameStateApi};
 use client_loading_api::{
     ClearClientLoadingAuthority, ClientLoadingApi, ClientLoadingAuthority, ClientLoadingSet,
     ClientLoadingTaskKey, RemoveClientLoadingTask, SetClientLoadingTask,
 };
+use client_session_api::{ClientSession, ClientSessionApi};
 use generated_network_messages::{JoinAcceptedReceived, NetworkMessageSet};
 use loading_task_api::LoadingTask;
 use network_protocol_mod::NetworkProtocolMod;
@@ -20,17 +21,25 @@ const TASK_ID: &str = "modularis:server-join";
 #[derive(Resource, Default)]
 struct ClientJoinLoadingState {
     active: bool,
+    connection_id: Option<u64>,
+    session_accepted: bool,
     remove_after: Option<f64>,
 }
 
 pub struct ClientJoinLoadingMod;
 
 impl ClientJoinLoadingMod {
-    pub fn init<L: ClientLoadingApi, G: GameStateApi, C: ClientChunkCacheApi>(
+    pub fn init<
+        L: ClientLoadingApi,
+        G: GameStateApi,
+        C: ClientChunkCacheApi,
+        S: ClientSessionApi,
+    >(
         bevy: &mut BevyMod,
         _loading: &mut L,
         _game: &mut G,
         _chunks: &mut C,
+        _session: &mut S,
         _transport: &mut NetworkTransportEventsMod,
         _protocol: &mut NetworkProtocolMod,
     ) -> Self {
@@ -73,26 +82,32 @@ fn begin_join_loading(
     mut tasks: MessageWriter<SetClientLoadingTask>,
 ) {
     state.active = true;
+    state.connection_id = None;
+    state.session_accepted = false;
     state.remove_after = None;
     publish(0.05, "Connecting to the server", &mut tasks);
 }
 
 fn observe_connection(
     mut connected: MessageReader<ClientTransportConnected>,
-    state: Res<ClientJoinLoadingState>,
+    mut state: ResMut<ClientJoinLoadingState>,
     mut tasks: MessageWriter<SetClientLoadingTask>,
 ) {
-    if state.active && connected.read().last().is_some() {
+    if let Some(connected) = connected.read().last().filter(|_| state.active) {
+        state.connection_id = Some(connected.connection_id);
         publish(0.25, "Transport connected; authenticating session", &mut tasks);
     }
 }
 
 fn observe_join_acceptance(
     mut accepted: MessageReader<JoinAcceptedReceived>,
-    state: Res<ClientJoinLoadingState>,
+    session: Res<ClientSession>,
+    mut state: ResMut<ClientJoinLoadingState>,
     mut tasks: MessageWriter<SetClientLoadingTask>,
 ) {
-    if state.active && accepted.read().last().is_some() {
+    let received = accepted.read().last().is_some();
+    if state.active && !state.session_accepted && (received || session.player_id.is_some()) {
+        state.session_accepted = true;
         publish(0.65, "Session accepted; receiving world data", &mut tasks);
     }
 }
@@ -100,10 +115,12 @@ fn observe_join_acceptance(
 fn observe_first_chunk(
     time: Res<Time>,
     mut available: MessageReader<ClientChunkAvailable>,
+    chunks: Res<ClientChunkCache>,
     mut state: ResMut<ClientJoinLoadingState>,
     mut tasks: MessageWriter<SetClientLoadingTask>,
 ) {
-    if !state.active || state.remove_after.is_some() || available.read().next().is_none() {
+    let received = available.read().next().is_some();
+    if !state.active || state.remove_after.is_some() || (!received && chunks.is_empty()) {
         return;
     }
     publish(1.0, "World stream is ready", &mut tasks);
@@ -122,6 +139,8 @@ fn finish_join_loading(
         key: ClientLoadingTaskKey { authority: authority(), id: TASK_ID.to_string() },
     });
     state.active = false;
+    state.connection_id = None;
+    state.session_accepted = false;
     state.remove_after = None;
 }
 
@@ -130,8 +149,13 @@ fn cancel_disconnected_join(
     mut state: ResMut<ClientJoinLoadingState>,
     mut clear: MessageWriter<ClearClientLoadingAuthority>,
 ) {
-    if disconnected.read().last().is_none() { return; }
+    let disconnected_active_connection = disconnected
+        .read()
+        .any(|event| Some(event.connection_id) == state.connection_id);
+    if !disconnected_active_connection { return; }
     state.active = false;
+    state.connection_id = None;
+    state.session_accepted = false;
     state.remove_after = None;
     clear.write(ClearClientLoadingAuthority { authority: authority() });
 }

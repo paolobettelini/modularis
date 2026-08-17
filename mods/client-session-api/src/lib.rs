@@ -1,5 +1,42 @@
 use bevy::prelude::*;
 use player_network_message_types::PlayerId;
+use std::{collections::HashSet, sync::{Arc, RwLock}};
+
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ClientSessionSet {
+    Accept,
+}
+
+/// Composable blockers for the moment in which the client may send JoinRequest.
+///
+/// Authentication, relay transfer validation, resource negotiation, or a future
+/// mod can each own a namespaced blocker without the session implementation
+/// knowing any domain-specific type.
+#[derive(Resource, Clone, Default)]
+pub struct ClientSessionJoinGates(Arc<RwLock<HashSet<String>>>);
+
+impl ClientSessionJoinGates {
+    pub fn block(&self, owner: impl Into<String>) {
+        self.0
+            .write()
+            .expect("client session join gates lock poisoned")
+            .insert(owner.into());
+    }
+
+    pub fn release(&self, owner: &str) {
+        self.0
+            .write()
+            .expect("client session join gates lock poisoned")
+            .remove(owner);
+    }
+
+    pub fn is_open(&self) -> bool {
+        self.0
+            .read()
+            .expect("client session join gates lock poisoned")
+            .is_empty()
+    }
+}
 
 #[derive(Resource, Debug, Default)]
 pub struct ClientSession {

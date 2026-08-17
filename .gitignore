@@ -1,6 +1,8 @@
 build-client
 build-server
 build-thecrown
+build-thecrown-auth
+build-thecrown-game
 build
 target
 
@@ -11,3 +13,7 @@ mods/generated-*
 
 # Game files
 worlds
+thecrown/data/hub
+thecrown/data/skywars_modularis
+thecrown/scripts/hub_world_minecraft
+thecrown/scripts/skywars_world_minecraft

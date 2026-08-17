@@ -18,6 +18,8 @@ pub enum InGameOverlayState {
     Settings,
     Inventory,
     Chat,
+    /// Generic exclusive modal surface owned by a feature mod.
+    Modal,
 }
 
 #[derive(Message, Debug, Clone, Copy, PartialEq, Eq)]
@@ -47,6 +49,7 @@ pub enum InGameOverlayCommand {
     BackToPause,
     OpenInventory,
     OpenChat,
+    OpenModal,
 }
 
 impl InGameOverlayCommand {
@@ -57,6 +60,7 @@ impl InGameOverlayCommand {
             Self::OpenSettings => InGameOverlayState::Settings,
             Self::OpenInventory => InGameOverlayState::Inventory,
             Self::OpenChat => InGameOverlayState::Chat,
+            Self::OpenModal => InGameOverlayState::Modal,
         }
     }
 }

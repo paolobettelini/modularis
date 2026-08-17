@@ -48,6 +48,9 @@ pub struct ParkourUpdate {
     pub score_changed: bool,
     pub score: i32,
     pub combo: i32,
+    /// Final score of a run that ended in this update. Persistence adapters
+    /// can use this boundary without coupling themselves to score progress.
+    pub completed_score: Option<i32>,
 }
 
 impl ParkourUpdate {
@@ -58,6 +61,7 @@ impl ParkourUpdate {
             score_changed: false,
             score,
             combo,
+            completed_score: None,
         }
     }
 }
@@ -137,6 +141,7 @@ impl ParkourRun {
             score_changed: true,
             score: self.score,
             combo: self.combo,
+            completed_score: None,
         }
     }
 
@@ -157,7 +162,9 @@ impl ParkourRun {
         }
 
         if player_position.y < config.start.y as f32 - config.fall_reset_distance {
-            let update = self.reset(config, now_seconds);
+            let completed_score = self.score;
+            let mut update = self.reset(config, now_seconds);
+            update.completed_score = Some(completed_score);
             self.awaiting_respawn = true;
             return update;
         }
@@ -207,6 +214,7 @@ impl ParkourRun {
             score_changed: true,
             score: self.score,
             combo: self.combo,
+            completed_score: None,
         }
     }
 
@@ -317,6 +325,7 @@ mod tests {
         let first = run.observe_position(&config, fallen, 2.0);
         assert!(first.score_changed);
         assert!(first.teleport.is_some());
+        assert_eq!(first.completed_score, Some(0));
 
         let duplicate = run.observe_position(&config, fallen, 2.1);
         assert!(!duplicate.score_changed);
@@ -330,5 +339,28 @@ mod tests {
         let next_fall = run.observe_position(&config, fallen, 3.0);
         assert!(next_fall.score_changed);
         assert!(next_fall.teleport.is_some());
+    }
+
+    #[test]
+    fn a_finished_run_reports_its_score_only_when_the_player_falls() {
+        let mut run = ParkourRun::new(42);
+        let config = ParkourConfig::default();
+        run.reset(&config, 1.0);
+        let target = run.blocks()[1].position;
+        let checkpoint = run.observe_position(
+            &config,
+            Vec3::new(
+                target.x as f32 + 0.5,
+                target.y as f32 + 1.0,
+                target.z as f32 + 0.5,
+            ),
+            1.2,
+        );
+        assert_eq!(checkpoint.score, 1);
+        assert_eq!(checkpoint.completed_score, None);
+
+        let finished = run.observe_position(&config, Vec3::new(0.5, -1.0, 0.5), 2.0);
+        assert_eq!(finished.completed_score, Some(1));
+        assert_eq!(finished.score, 0);
     }
 }

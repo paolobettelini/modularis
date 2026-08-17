@@ -14,6 +14,13 @@ mods = [
     "client-ui-font-dejavu-mod",
     "client-sound-events-mod",
     "client-game-state-bevy-impl",
+    "client-loading-state-mod",
+    "client-loading-network-receive-mod",
+    "client-loading-ui-bevy-mod",
+    "client-join-loading-mod",
+    "client-external-link-events-mod",
+    "client-external-link-network-receive-mod",
+    "client-external-link-ui-bevy-mod",
     "client-player-flight-state-mod",
     "client-player-permission-state-mod",
     "client-player-flight-speed-state-mod",
@@ -68,6 +75,7 @@ mods = [
     "client-item-favicon-ui-mod",
     "client-item-model-ui-mod",
     "client-session-network-mod",
+    "client-thecrown-transfer-mod",
     "client-kick-network-receive-mod",
     "client-disconnect-menu-mod",
     "client-chat-network-receive-mod",
@@ -77,6 +85,7 @@ mods = [
     "client-chat-ui-bevy-mod",
     "client-player-flight-network-receive-mod",
     "client-player-permission-network-receive-mod",
+    "client-chat-permission-refresh-mod",
     "client-player-flight-speed-network-receive-mod",
     "client-player-speed-network-receive-mod",
     "client-player-scale-network-receive-mod",
@@ -90,6 +99,9 @@ mods = [
     "client-block-interaction-events-mod",
     "client-block-edit-network-send-mod",
     "client-block-edit-network-receive-mod",
+    "client-block-damage-state-mod",
+    "client-block-damage-network-receive-mod",
+    "client-block-break-overlay-bevy-mod",
     "client-chunk-streaming-around-player-impl",
     "client-chunk-cache-network-impl",
     "voxel-model-assets-fs-impl",
@@ -116,5 +128,6 @@ mods = [
     "client-block-outline-bevy-mod",
     "client-block-outline-network-receive-mod",
 ]
+version = "0.0.6"
 name = "Modularis client"
-version = "0.0.4"
+

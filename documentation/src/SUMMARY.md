@@ -45,7 +45,7 @@
   - [Blocky models and animation](./client/blocky-models.md)
 - [Developer guide](./development/developer-guide.md)
   - [Extension cookbook](./development/extension-cookbook.md)
-  - [TheCrown multi-instance parkour server](./development/thecrown-parkour.md)
+  - [TheCrown network and dynamic instances](./development/thecrown-network.md)
   - [Testing, debugging, and performance](./development/testing-and-performance.md)
   - [Crate map](./reference/crate-map.md)
   - [Current limits and design direction](./reference/current-limits.md)

@@ -49,6 +49,7 @@ struct PendingAuthorization {
 
 #[derive(Resource, Default)]
 struct ClientHandshakeRuntime {
+    connection_id: Option<u64>,
     connected_since: Option<Instant>,
     deferred: Option<patchwork_auth_network_message_types::KeyExchangeRequest>,
     pending: Option<PendingAuthorization>,
@@ -98,9 +99,10 @@ fn reset_on_connection(
     gate: Option<Res<ClientPatchworkJoinGate>>,
     mut runtime: ResMut<ClientHandshakeRuntime>,
 ) {
-    if connected.read().next().is_none() {
+    let Some(connected) = connected.read().last() else {
         return;
-    }
+    };
+    runtime.connection_id = Some(connected.connection_id);
     runtime.deferred = None;
     runtime.pending = None;
     runtime.awaiting_login_hash = None;
@@ -449,9 +451,13 @@ fn cleanup_disconnected_handshake(
     gate: Option<Res<ClientPatchworkJoinGate>>,
     mut runtime: ResMut<ClientHandshakeRuntime>,
 ) {
-    if disconnected.read().next().is_none() {
+    let disconnected_active_connection = disconnected
+        .read()
+        .any(|event| Some(event.connection_id) == runtime.connection_id);
+    if !disconnected_active_connection {
         return;
     }
+    runtime.connection_id = None;
     runtime.deferred = None;
     runtime.pending = None;
     runtime.awaiting_login_hash = None;

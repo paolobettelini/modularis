@@ -39,13 +39,18 @@ replace the fallback before uniqueness, bans, or other validators inspect the
 candidate. The final prepared name is what the registry stores in
 `NetworkPlayer`.
 
-TheCrown adds the Patchwork authenticated-account admission rule. Its prepare
-phase maps the socket to a backend-redeemed account and replaces the candidate
-name with the backend nickname. After the session is admitted, the created
-`PlayerId` is bound to the complete authenticated account, including the stable
-account UUID. Other servers can omit this rule or install a different identity
-policy over the same admission seam. See
-[Patchwork account authentication](./patchwork-authentication.md).
+Authenticated compositions add the Patchwork account admission rule. Its
+prepare phase maps the socket to a backend-redeemed account and replaces the
+candidate name with the backend nickname. After admission, the created
+`PlayerId` is bound to the complete account, including its stable UUID.
+
+`thecrown-game` composes an additional, independent Relay admission rule. It
+requires a one-use transfer approval for the socket before the ordinary join
+may proceed, then binds the final `PlayerId` to the Relay-assigned instance.
+Other servers can omit either rule or install different identity/routing policy
+over the same admission seam. See
+[Patchwork account authentication](./patchwork-authentication.md) and
+[TheCrown network and dynamic instances](../development/thecrown-network.md).
 
 The selected `server-player-name-unique-vanilla-mod` rejects duplicate names
 case-insensitively. A rejected admission emits

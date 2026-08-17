@@ -4,7 +4,7 @@ use client_player_gravity_map_api::{
     ClientPlayerGravities, ClientPlayerGravityChanged, ClientPlayerGravityMapApi,
     ClientPlayerGravityMapSet,
 };
-use client_session_api::{ClientSession, ClientSessionApi};
+use client_session_api::{ClientSession, ClientSessionApi, ClientSessionSet};
 use generated_network_messages::{
     NetworkMessageSet, PlayerGravityChangedReceived, PlayerLeftReceived,
 };
@@ -27,7 +27,8 @@ impl ClientPlayerGravityNetworkReceiveMod {
             (apply_server_gravity, remove_left_player_gravity)
                 .chain()
                 .in_set(ClientPlayerGravityMapSet)
-                .after(NetworkMessageSet::DispatchPackets),
+                .after(NetworkMessageSet::DispatchPackets)
+                .after(ClientSessionSet::Accept),
         );
         Self
     }

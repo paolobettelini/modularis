@@ -1,0 +1,14 @@
+[package]
+name = "thecrown-game-relay-api"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+api = true
+
+[dependencies]
+bevy = "0.17.3"
+player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+thecrown-protocol = { git = "https://github.com/paolobettelini/modularis.git" }
+uuid = { version = "1.24.0", features = ["serde"] }
+

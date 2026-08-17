@@ -23,10 +23,18 @@ The feature is split into three modpacks:
 | `server-patchwork-auth` | Server lease, handshake registration/redeem, and authenticated admission rule |
 
 `network.toml` imports the shared protocol modpack. `client.toml` imports the
-client behavior. `server.toml` and `thecrown.toml` import the server behavior.
+client behavior. `server.toml`, `thecrown-auth.toml`, and
+`thecrown-game.toml` import the server behavior.
 Keeping these choices separate means another server can reuse the protocol but
 provide a different admission policy, or omit account authentication
 completely.
+
+TheCrown adds a second authorization layer after this backend handshake. The
+Patchwork proof establishes account UUID and nickname; a separate one-use
+Relay cookie authorizes one exact game server and logical instance. The cookie
+is transported by `client-thecrown-transfer-mod` and is never substituted for
+the Patchwork backend proof. See
+[TheCrown network and dynamic instances](../development/thecrown-network.md).
 
 The implementation also keeps ordinary Rust libraries separate from runtime
 mods:

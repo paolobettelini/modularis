@@ -3,6 +3,7 @@ use bevy_mod::BevyMod;
 use chunk_api::Chunk;
 use chunk_storage_binary_format_lib::{
     ChunkRegionPos, GlobalBlockIndex, decode_chunk, decode_region, encode_chunk, encode_region,
+    storage_source_component,
 };
 use server_chunk_storage_api::{
     ChunkStorageError, ChunkStorageFlushReport, ServerChunkStorage, ServerChunkStorageApi,
@@ -11,7 +12,6 @@ use server_chunk_storage_api::{
 use server_world_catalog_api::{ServerWorldCatalog, ServerWorldCatalogApi, WorldDirectory};
 use std::{
     collections::{BTreeMap, HashMap, HashSet},
-    fmt::Write as _,
     fs,
     path::{Path, PathBuf},
     sync::Mutex,
@@ -256,19 +256,11 @@ fn flush_state(
 fn region_path(world_root: &Path, key: &RegionCacheKey) -> PathBuf {
     world_root
         .join("data/chunk/regions")
-        .join(hex_component(&key.source))
+        .join(storage_source_component(&key.source))
         .join(format!(
             "r.{}.{}.{}.bin",
             key.region.x, key.region.y, key.region.z
         ))
-}
-
-fn hex_component(value: &str) -> String {
-    let mut encoded = String::with_capacity(value.len() * 2);
-    for byte in value.as_bytes() {
-        write!(&mut encoded, "{byte:02x}").expect("writing to a string cannot fail");
-    }
-    encoded
 }
 
 fn atomic_write(path: &Path, bytes: &[u8]) -> Result<(), ChunkStorageError> {

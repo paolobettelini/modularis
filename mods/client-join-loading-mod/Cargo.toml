@@ -1,6 +1,6 @@
 [package]
 name = "client-join-loading-mod"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 
 [package.metadata.mod]
@@ -12,6 +12,7 @@ init = [
     "client-loading-api",
     "client-game-state-api",
     "client-chunk-cache-api",
+    "client-session-api",
     "network-transport-events-mod",
     "network-protocol-mod",
 ]
@@ -24,6 +25,7 @@ bevy-mod = { path = "../bevy-mod" }
 client-chunk-cache-api = { path = "../client-chunk-cache-api" }
 client-game-state-api = { path = "../client-game-state-api" }
 client-loading-api = { path = "../client-loading-api" }
+client-session-api = { path = "../client-session-api" }
 generated-network-messages = "0.1.0"
 loading-task-api = { git = "https://github.com/paolobettelini/modularis.git" }
 network-protocol-mod = { path = "../network-protocol-mod" }

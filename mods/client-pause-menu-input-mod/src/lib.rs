@@ -31,5 +31,6 @@ fn escape_to_pause(
         InGameOverlayState::Settings => InGameOverlayCommand::BackToPause,
         InGameOverlayState::Inventory => InGameOverlayCommand::Resume,
         InGameOverlayState::Chat => InGameOverlayCommand::Resume,
+        InGameOverlayState::Modal => return,
     });
 }

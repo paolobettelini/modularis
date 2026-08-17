@@ -12,6 +12,8 @@ mods = [
     "server-chunk-storage-fs-impl",
     "server-chunk-storage-periodic-flush-mod",
     "server-chunk-storage-shutdown-flush-mod",
+    "server-world-data-storage-fs-impl",
+    "server-world-data-storage-flush-mod",
     "server-dimension-registry-mod",
     "server-dimension-overworld-mod",
     "server-chunk-routing-dimensions-mod",
@@ -21,5 +23,6 @@ mods = [
     "server-dimension-aether-mod",
     "server-chunk-world-dynamic-impl",
 ]
+version = "0.0.5"
 name = "Modularis server"
-version = "0.0.2"
+

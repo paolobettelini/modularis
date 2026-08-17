@@ -13,6 +13,13 @@ pub struct ClientChunkCache {
 }
 
 impl ClientChunkCache {
+    pub fn is_empty(&self) -> bool {
+        self.chunks
+            .read()
+            .expect("client chunk cache lock poisoned")
+            .is_empty()
+    }
+
     pub fn insert(&self, chunk: Chunk) {
         self.chunks
             .write()

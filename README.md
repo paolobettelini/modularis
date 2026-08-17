@@ -45,20 +45,31 @@ Then start one or more clients:
 cargo run --manifest-path build-client/client/Cargo.toml
 ```
 
-The same client can connect to the alternate scoped parkour server:
+The same client can enter the TheCrown network through its dedicated auth
+server. Start NATS and `thecrown-relay` first, then compose both Modularis
+processes:
 
 ```sh
 patchwork compose \
-  --modpack thecrown \
+  --modpack thecrown-game \
   --modpacks-folder ./modpacks \
   --mods-folder ./mods \
-  --cache ./build-thecrown
+  --cache ./build-thecrown-game
 
-cargo run --manifest-path build-thecrown/thecrown/Cargo.toml
+patchwork compose \
+  --modpack thecrown-auth \
+  --modpacks-folder ./modpacks \
+  --mods-folder ./mods \
+  --cache ./build-thecrown-auth
+
+cargo run --manifest-path build-thecrown-game/thecrown-game/Cargo.toml
+cargo run --manifest-path build-thecrown-auth/thecrown-auth/Cargo.toml
 ```
 
-`thecrown` uses runtime scope nodes to host separate parkour chat groups and a
-private transient world for every player.
+Point the client at `127.0.0.1:9999`. The entry server asks Relay for a Hub and
+transfers the client to the selected game worker. Relay creates exact Hub and
+Parkour instance IDs; game workers start with no instances of their own. See
+[TheCrown network and dynamic instances](documentation/src/development/thecrown-network.md).
 
 ## Local dependency maintenance
 

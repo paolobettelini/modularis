@@ -1,0 +1,7 @@
+[package]
+name = "external-link-network-message-types"
+version = "0.1.1"
+edition = "2024"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }

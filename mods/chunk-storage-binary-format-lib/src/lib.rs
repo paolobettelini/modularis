@@ -5,6 +5,7 @@ use std::{
     collections::{BTreeMap, HashMap, HashSet},
     error::Error,
     fmt,
+    fmt::Write as _,
 };
 use voxel_math_api::ChunkPos;
 
@@ -12,6 +13,16 @@ const INDEX_MAGIC: &[u8; 4] = b"PWBI";
 const REGION_MAGIC: &[u8; 4] = b"PWCR";
 const FORMAT_VERSION: u16 = 2;
 pub const REGION_EDGE_CHUNKS: i32 = 8;
+
+/// Encodes an arbitrary provider/source ID as a filesystem-safe directory
+/// component used by the native chunk-storage layout.
+pub fn storage_source_component(source: &str) -> String {
+    let mut encoded = String::with_capacity(source.len() * 2);
+    for byte in source.as_bytes() {
+        write!(&mut encoded, "{byte:02x}").expect("writing to a string cannot fail");
+    }
+    encoded
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StorageFormatError(pub String);

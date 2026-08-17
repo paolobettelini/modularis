@@ -1,0 +1,20 @@
+[package]
+name = "thecrown-game-config-local-impl"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "TheCrownGameConfigLocalImpl"
+provides = "thecrown-game-config-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+thecrown-game-config-api = { path = "../thecrown-game-config-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+uuid = { version = "1.24.0", features = ["v4"] }
+

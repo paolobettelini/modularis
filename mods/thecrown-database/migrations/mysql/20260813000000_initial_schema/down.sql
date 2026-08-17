@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS auth_user_tokens;
+DROP TABLE IF EXISTS bans;
+DROP TABLE IF EXISTS players;

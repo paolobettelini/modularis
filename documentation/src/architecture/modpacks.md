@@ -161,30 +161,36 @@ checkerboard provider, or a custom biome composition.
 It can also replace filesystem persistence with an in-memory, database, remote,
 or application-specific storage provider without changing terrain generation.
 
-## TheCrown composition
+## TheCrown compositions
 
-`thecrown.toml` is a second top-level server profile. It imports only
-`server-core.toml`, then explicitly selects the neutral chat, outbound block
-edit, flight, and sun pipelines it uses. It imports neither
-`server-base.toml` nor `server-vanilla.toml`.
+TheCrown has two top-level profiles. `thecrown-auth.toml` is a minimal entry
+server: after Patchwork account authentication, it asks Relay for admission and
+sends the returned transfer to the client. It never registers as an instance
+host.
 
-It selects:
+`thecrown-game.toml` is a Relay-managed worker. It imports only
+`server-core.toml` and Patchwork authentication, then explicitly selects:
 
 - the runtime scope tree;
 - scope-backed world routing, audience, and player visibility;
 - transient in-memory chunk storage;
-- an empty parkour chunk provider;
+- a sparse RAM-template chunk provider;
 - generic player world-context synchronization;
 - selected reusable movement policies;
-- one custom `thecrown-main-mod` orchestrator.
+- separate Relay and TheCrown session API providers;
+- one custom `thecrown-game-main-mod` orchestrator.
 
-It deliberately omits default inventory loadout, block mutation glue, item
-placement, dimensions, portals, biome generation, and crafting-table behavior.
-The result validates that those features are not accidentally required by the
-server foundation.
+The worker starts empty. `StartInstance` messages create exact Relay-assigned
+Hub or Parkour IDs. It deliberately omits default inventory loadout, block
+mutation glue, item placement, dimensions, portals, biome generation, and
+crafting-table behavior. The result validates that those features are not
+accidentally required by the server foundation.
 
-See [TheCrown multi-instance parkour server](../development/thecrown-parkour.md)
-for its runtime topology.
+The standalone Leptos web application is a separate executable and talks to
+Relay over NATS; it is not a game-server mod.
+
+See [TheCrown network and dynamic instances](../development/thecrown-network.md)
+for authentication, transfer, lifecycle, and runtime topology.
 
 ## Why vanilla is not base
 

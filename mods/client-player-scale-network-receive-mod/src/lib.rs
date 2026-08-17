@@ -3,7 +3,7 @@ use bevy_mod::BevyMod;
 use client_player_scale_map_api::{
     ClientPlayerScaleChanged, ClientPlayerScaleMapApi, ClientPlayerScaleMapSet, ClientPlayerScales,
 };
-use client_session_api::{ClientSession, ClientSessionApi};
+use client_session_api::{ClientSession, ClientSessionApi, ClientSessionSet};
 use generated_network_messages::{
     NetworkMessageSet, PlayerLeftReceived, PlayerScaleChangedReceived,
 };
@@ -26,7 +26,8 @@ impl ClientPlayerScaleNetworkReceiveMod {
             (apply_server_scale, remove_left_player_scale)
                 .chain()
                 .in_set(ClientPlayerScaleMapSet)
-                .after(NetworkMessageSet::DispatchPackets),
+                .after(NetworkMessageSet::DispatchPackets)
+                .after(ClientSessionSet::Accept),
         );
         Self
     }

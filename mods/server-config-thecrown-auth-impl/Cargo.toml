@@ -1,0 +1,18 @@
+[package]
+name = "server-config-thecrown-auth-impl"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "TheCrownAuthServerConfigImpl"
+provides = "server-config-api"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[dependencies]
+server-config-api = { path = "../server-config-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+

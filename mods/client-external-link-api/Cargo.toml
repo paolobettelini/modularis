@@ -1,0 +1,10 @@
+[package]
+name = "client-external-link-api"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+api = true
+
+[dependencies]
+bevy = "0.17.3"

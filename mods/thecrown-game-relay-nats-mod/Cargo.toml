@@ -1,0 +1,23 @@
+[package]
+name = "thecrown-game-relay-nats-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "TheCrownGameRelayNatsMod"
+provides = "thecrown-game-relay-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "thecrown-game-config-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+futures-util = "0.3"
+thecrown-common = { git = "https://github.com/paolobettelini/modularis.git" }
+thecrown-game-config-api = { path = "../thecrown-game-config-api" }
+thecrown-game-relay-api = { path = "../thecrown-game-relay-api" }
+thecrown-protocol = { git = "https://github.com/paolobettelini/modularis.git" }
+tokio = { version = "1.48.0", features = ["full"] }

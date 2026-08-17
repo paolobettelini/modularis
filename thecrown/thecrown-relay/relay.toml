@@ -1,0 +1,23 @@
+# Configuration for the central TheCrown Relay.
+#
+# Relay does not expose a direct TCP protocol: game servers and the web service
+# reach it through NATS. Consequently the only network endpoint Relay connects
+# to is the NATS broker below.
+
+[relay]
+auth-ticket-ttl-seconds = 10
+initial-instances-per-mode = 2
+
+[nats]
+url = "nats://127.0.0.1:4222"
+request-timeout-ms = 2000
+
+[database]
+# SQLite is the default Cargo feature. With --no-default-features --features mysql,
+# replace this with a mysql:// URL.
+url = "../data/thecrown.sqlite"
+max-pool-size = 15
+
+[log]
+filter = "info"
+style = "auto"

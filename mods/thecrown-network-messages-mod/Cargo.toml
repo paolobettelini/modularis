@@ -1,0 +1,24 @@
+[package]
+name = "thecrown-network-messages-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "TheCrownNetworkMessagesMod"
+
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[package.metadata.network.messages]
+clientbound = [
+    "thecrown_network_message_types::TransferPlayer",
+    "thecrown_network_message_types::TransferAuthenticated",
+]
+serverbound = ["thecrown_network_message_types::AuthenticateTransfer"]
+
+[dependencies]
+thecrown-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+tokio = { version = "1.48.0", features = ["full"] }
+

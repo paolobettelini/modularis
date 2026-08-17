@@ -118,8 +118,9 @@ provider sends `Everyone` and shared audiences to all online players.
 Formatting attributed player text is reusable through
 `server-player-chat-lib`: the caller supplies the audience. TheCrown resolves
 the player's nearest chat facet, passes that scope as `Audience::Shared`, and
-uses `server-audience-scope-impl` to reach only members of the same parkour
-instance. Its world and player visibility boundaries remain independent.
+uses `server-audience-scope-impl` to reach only members of the same logical
+instance. A Hub shares chat, world, and visibility; Parkour shares chat while
+keeping world and visibility private per player.
 
 A proximity chat replacement can omit the global mod and publish to a custom
 shared audience. A no-chat server can omit both routing policies while keeping

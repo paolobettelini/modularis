@@ -1,0 +1,27 @@
+[package]
+name = "server-chunk-provider-thecrown-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerChunkProviderTheCrownMod"
+provides = "server-primary-chunk-provider-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod", "server-chunk-provider-registry-mod", "thecrown-world-template-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy-mod = { path = "../bevy-mod" }
+chunk-api = { git = "https://github.com/paolobettelini/modularis.git" }
+generated-block-registry = "0.1.0"
+server-chunk-provider-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-provider-registry-mod = { path = "../server-chunk-provider-registry-mod" }
+server-primary-chunk-provider-api = { path = "../server-primary-chunk-provider-api" }
+thecrown-world-template-api = { path = "../thecrown-world-template-api" }
+tokio = { version = "1.48.0", features = ["full"] }
+
+[patch.crates-io]
+generated-block-registry = { path = "../generated-block-registry" }
+generated-block-state = { path = "../generated-block-state" }

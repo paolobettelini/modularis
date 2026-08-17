@@ -1,6 +1,6 @@
 [package]
 name = "client-chunk-cache-network-impl"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
@@ -13,6 +13,7 @@ init = [
     "network-protocol-mod",
     "block-edit-events-mod",
     "client-chunk-streaming-api",
+    "client-game-state-api",
 ]
 run = []
 ownership = []
@@ -24,6 +25,7 @@ block-edit-events-api = { git = "https://github.com/paolobettelini/modularis.git
 block-edit-events-mod = { path = "../block-edit-events-mod" }
 client-chunk-cache-api = { path = "../client-chunk-cache-api" }
 client-chunk-streaming-api = { path = "../client-chunk-streaming-api" }
+client-game-state-api = { path = "../client-game-state-api" }
 generated-network-messages = "0.1.0"
 generated-block-registry = "0.1.0"
 network-protocol-mod = { path = "../network-protocol-mod" }

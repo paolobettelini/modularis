@@ -1,0 +1,17 @@
+[package]
+name = "thecrown-world-template-api"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+api = true
+
+[dependencies]
+bevy = "0.17.3"
+chunk-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
+world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
+
+[patch.crates-io]
+generated-block-state = { path = "../generated-block-state" }
+generated-block-registry = { path = "../generated-block-registry" }

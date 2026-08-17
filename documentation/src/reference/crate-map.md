@@ -94,6 +94,18 @@ Current policy adapters:
 - `client-join-loading-mod`;
 - `server-join-loading-vanilla-mod`.
 
+## External links
+
+- `external-link-network-message-types` and
+  `external-link-network-messages-mod`: protocol payload and contributor;
+- `server-external-link-api` and `server-external-link-events-mod`: generic
+  audience-addressed publication contract;
+- `server-external-link-network-sync-mod`: server ECS-to-network adapter;
+- `client-external-link-api` and `client-external-link-events-mod`: neutral
+  client presentation request;
+- `client-external-link-network-receive-mod`: network-to-client ECS adapter;
+- `client-external-link-ui-bevy-mod`: modal presentation and browser launcher.
+
 Protocol contributors are split into
 `player-permission-network-messages-mod` and
 `outline-network-messages-mod`; neither is centralized in the protocol owner.
@@ -315,8 +327,9 @@ Providers:
 - `server-chunk-provider-perlin-mod`;
 - `server-chunk-provider-nether-mod` (active biome-driven Nether provider);
 - `server-chunk-provider-aether-mod` (active biome-driven Aether provider);
-- `server-chunk-provider-checkerboard-mod`.
-- `server-chunk-provider-parkour-empty-mod`.
+- `server-chunk-provider-checkerboard-mod`;
+- `server-chunk-provider-thecrown-mod` (Relay-managed RAM templates for Hub
+  and private Parkour worlds).
 
 Routing:
 
@@ -508,9 +521,18 @@ Providers and synchronization:
 TheCrown:
 
 - `parkour-gameplay-lib`;
-- `server-chunk-provider-parkour-empty-mod`;
-- `thecrown-main-mod`;
-- `thecrown.toml`.
+- `thecrown-protocol`, `thecrown-common`, and `thecrown-database` plain
+  libraries;
+- `thecrown-network-message-types` and `thecrown-network-messages-mod`;
+- `thecrown-auth-relay-api`, `thecrown-auth-relay-nats-mod`, and
+  `thecrown-auth-main-mod`;
+- `thecrown-game-config-api` and `thecrown-game-config-local-impl`;
+- `thecrown-game-relay-api` and `thecrown-game-relay-nats-mod`;
+- `thecrown-game-session-api` and `thecrown-game-session-mod`;
+- `thecrown-world-template-api`, `thecrown-world-template-state-mod`, and
+  `server-chunk-provider-thecrown-mod`;
+- `thecrown-game-main-mod`;
+- `thecrown-auth.toml` and `thecrown-game.toml`.
 
 ## Chat and commands
 

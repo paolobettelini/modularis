@@ -39,7 +39,8 @@ Feature families own their packets:
 - dimensions;
 - sky and sun;
 - portals;
-- chat and command completion.
+- chat and command completion;
+- structured external-link prompts.
 
 `Kick { reason }` is intentionally not session-admission-specific. The server
 can address it to a socket before a `PlayerId` exists or to an admitted player,
@@ -54,6 +55,30 @@ serverbound = []
 ```
 
 The protocol generator collects all selected contributors.
+
+## External link prompts
+
+A server does not need to encode a clickable URL inside chat. The generic
+external-link domain is split into four layers:
+
+```text
+PublishServerExternalLink { audience, title, description, url }
+  -> server-external-link-network-sync-mod
+  -> ShowExternalLink packet
+  -> client-external-link-network-receive-mod
+  -> ShowClientExternalLink
+  -> client-external-link-ui-bevy-mod
+```
+
+The client presenter pauses the in-game overlay, displays the title,
+description and complete URL, and offers `Close` and `Open in browser`. Only
+HTTP and HTTPS URLs are accepted by the browser launcher. The OS integration
+uses `rundll32` on Windows, `open` on macOS, and `xdg-open` on Unix desktop
+systems.
+
+The server event accepts an `Audience`, so personal account links and shared
+documentation links use the same mechanism without placing audience policy in
+the packet or UI mod.
 
 ## CBOR
 
@@ -199,6 +224,33 @@ packet-producing gameplay mods do not coordinate with each other.
 
 See [Patchwork account authentication](./patchwork-authentication.md) for the
 handshake, key derivation, account binding, and composition boundaries.
+
+## TheCrown connection transfer
+
+TheCrown adds a protocol contributor, not a second transport. A source server
+sends `TransferPlayer { TransferPacketData }`; the client changes
+`ClientConnectionTarget`, tears down the old TCP session through game state,
+and opens a normal TCP connection to the destination.
+
+The destination still performs the Patchwork secure-frame handshake. A
+namespaced client session gate delays `JoinRequest` until the client has sent
+the Relay proof and received `TransferAuthenticated`. The game server redeems
+the one-use cookie with Relay before its admission rule allows the session.
+
+The client retains the entry endpoint while a transfer is active. A normal
+return to Home restores that endpoint; otherwise the next Play attempt would
+connect directly to the destination game worker without a fresh one-use Relay
+ticket.
+
+This keeps responsibilities independent:
+
+- TCP owns framing, connection lifetime, and secure frame ordering;
+- Patchwork authentication owns account identity and frame keys;
+- TheCrown Relay owns destination and one-use instance admission;
+- the generic session layer owns final `PlayerId` creation.
+
+See [TheCrown network and dynamic instances](../development/thecrown-network.md)
+for the full cross-process flow.
 
 ## Backpressure and current limits
 

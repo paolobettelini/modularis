@@ -1,0 +1,26 @@
+[package]
+name = "thecrown-relay"
+version = "0.3.0"
+edition = "2024"
+rust-version = "1.88"
+publish = false
+
+[features]
+default = ["sqlite"]
+sqlite = ["thecrown-database/sqlite"]
+mysql = ["thecrown-database/mysql"]
+
+[dependencies]
+anyhow = "1.0"
+chrono = { version = "0.4.44", features = ["serde"] }
+clap = { version = "4.6.6", features = ["derive"] }
+env_logger = "0.11"
+futures-util = "0.3"
+log = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thecrown-common = { path = "../../mods/thecrown-common" }
+thecrown-database = { path = "../../mods/thecrown-database", default-features = false }
+thecrown-protocol = { path = "../../mods/thecrown-protocol" }
+tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread", "signal", "sync", "time"] }
+uuid = { version = "1.24.0", features = ["serde"] }

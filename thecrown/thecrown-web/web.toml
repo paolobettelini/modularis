@@ -1,0 +1,23 @@
+# Configuration for the Actix + Leptos web process.
+
+[web]
+# Bind address of the HTTP server. Use 0.0.0.0 to listen on all interfaces.
+address = "0.0.0.0"
+port = 8080
+auth-token-ttl-seconds = 300
+session-ttl-seconds = 2592000
+session-cookie-secure = false
+auth-success-redirect = "/"
+
+[nats]
+# The web process reaches Relay through this NATS broker.
+url = "nats://127.0.0.1:4222"
+request-timeout-ms = 2000
+
+[database]
+url = "../data/thecrown.sqlite"
+max-pool-size = 15
+
+[log]
+filter = "info"
+style = "auto"

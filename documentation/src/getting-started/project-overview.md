@@ -1,15 +1,17 @@
 # Project overview
 
-The repository has four important source areas:
+The repository has five important source areas:
 
 ```text
 minecraft_simple_demo/
 ├── mods/           Rust crates used as APIs, providers, features, and contributors
 ├── modpacks/       Compile-time compositions
 ├── documentation/  This mdBook
+├── thecrown/       Standalone Relay and Actix/Leptos web services
 ├── build-client/   Generated client project
 ├── build-server/   Generated vanilla server project
-└── build-thecrown/ Generated scoped parkour server project
+├── build-thecrown-auth/ Generated TheCrown entry server
+└── build-thecrown-game/ Generated TheCrown game worker
 ```
 
 `mods/` and `modpacks/` are the main source of truth. The build directories are
@@ -25,7 +27,8 @@ shared domain crates
        ├── client.toml ──> Bevy window, input, rendering, client cache
        │
        ├── server.toml ──> vanilla authority and persistent worlds
-       └── thecrown.toml -> scoped parkour instances and transient worlds
+       ├── thecrown-auth.toml -> entry admission and client transfer
+       └── thecrown-game.toml -> Relay-managed Hub and Parkour instances
 ```
 
 They share generated domain types:
@@ -65,7 +68,8 @@ The current compositions are:
 | `server-biomes-vanilla.toml` | Umbrella vanilla biome packs and selector |
 | `server-vanilla.toml` | Optional Minecraft-like server rules and selected biome runtime/provider |
 | `server.toml` | Demo server composition and concrete world providers |
-| `thecrown.toml` | Custom multi-instance parkour server over scoped runtime services |
+| `thecrown-auth.toml` | Minimal Patchwork-authenticated entry server and Relay admission adapter |
+| `thecrown-game.toml` | Relay-managed game worker with dynamic Hub and Parkour instances |
 
 The split between `server-core.toml`, `server-base.toml`, and
 `server-vanilla.toml` is especially important. The core contains process,
@@ -75,9 +79,11 @@ pipelines. The vanilla pack adds rules such as default loadouts, collision
 validation, block placement, portal behavior, and the default
 Creative/Privileged join policy.
 
-`thecrown.toml` proves that the split is real. It imports only the core, chooses
-the few neutral feature pipelines it needs, then selects scope-aware providers
-and one custom orchestrator.
+The TheCrown profiles prove that the split is real. Both start from the core.
+The auth profile only admits and transfers accounts. The game profile selects
+the neutral services it needs, scope-aware providers, Relay/session adapters,
+and one custom orchestrator. The standalone web application is not embedded in
+the Bevy game process.
 
 ## Runtime layers
 
@@ -153,8 +159,9 @@ The demo currently includes:
 - sky and sun synchronization;
 - optional ambient light, shadows, face shading, and voxel ambient occlusion;
 - Blocky/Hytale model and animation loading for remote players.
-- an alternate TheCrown server with dynamic chat groups and one private
-  transient parkour world per player.
+- a TheCrown network with a dedicated entry server, Relay-managed Hub and
+  Parkour instances, scoped chat/visibility/worlds, cross-server transfer,
+  whispers, and standalone web login.
 
 The implementation is intentionally small in visual scope, but the boundaries
 are designed for replacement.

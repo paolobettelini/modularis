@@ -9,8 +9,8 @@ use network_frame_security_state_mod::NetworkFrameSecurityStateMod;
 use network_framing_api::{drain_next_frame, encode_frame, flush_queued_frames, read_available};
 use network_protocol_mod::NetworkProtocolMod;
 use network_transport_events_mod::{
-    ClientTransportConnected, ClientTransportDisconnectRequested, ClientTransportDisconnected,
-    NetworkTransportEventsMod,
+    ClientTransportConnected, ClientTransportConnectionIds, ClientTransportDisconnectRequested,
+    ClientTransportDisconnected, NetworkTransportEventsMod,
 };
 use std::{
     collections::VecDeque,
@@ -28,6 +28,7 @@ struct ClientTcpConnection {
     pending_write: Vec<u8>,
     pending_offset: usize,
     server: SocketAddr,
+    connection_id: u64,
 }
 
 pub struct ClientTcpNetwork;
@@ -65,6 +66,7 @@ fn connect(
     mut commands: Commands,
     target: Res<ClientConnectionTarget>,
     security: Res<ClientFrameSecurity>,
+    connection_ids: Res<ClientTransportConnectionIds>,
     mut connected: MessageWriter<ClientTransportConnected>,
     mut game_state: MessageWriter<GameStateCommand>,
 ) {
@@ -119,6 +121,7 @@ fn connect(
         outbox.push_back(frame);
         Ok(())
     }));
+    let connection_id = connection_ids.next();
     commands.insert_resource(ClientTcpConnection {
         reader: stream,
         writer,
@@ -127,8 +130,9 @@ fn connect(
         pending_write: Vec::new(),
         pending_offset: 0,
         server,
+        connection_id,
     });
-    connected.write(ClientTransportConnected { server });
+    connected.write(ClientTransportConnected { server, connection_id });
     info!("client TCP connected to {server}");
 }
 
@@ -141,6 +145,7 @@ fn disconnect(
     if let Some(connection) = connection {
         disconnected.write(ClientTransportDisconnected {
             server: connection.server,
+            connection_id: connection.connection_id,
         });
     }
     security.reset_plaintext();
@@ -164,6 +169,7 @@ fn receive_packets(
     if disconnect_requests.read().next().is_some() {
         disconnected.write(ClientTransportDisconnected {
             server: connection.server,
+            connection_id: connection.connection_id,
         });
         security.fail();
         commands.remove_resource::<ClientNetworkSender>();
@@ -185,6 +191,7 @@ fn receive_packets(
         warn!("client TCP send failed: {error}");
         disconnected.write(ClientTransportDisconnected {
             server: connection.server,
+            connection_id: connection.connection_id,
         });
         security.fail();
         commands.remove_resource::<ClientNetworkSender>();
@@ -198,6 +205,7 @@ fn receive_packets(
             warn!("server {} closed TCP connection", connection.server);
             disconnected.write(ClientTransportDisconnected {
                 server: connection.server,
+                connection_id: connection.connection_id,
             });
             security.fail();
             commands.remove_resource::<ClientNetworkSender>();
@@ -208,6 +216,7 @@ fn receive_packets(
             warn!("client TCP receive failed: {error}");
             disconnected.write(ClientTransportDisconnected {
                 server: connection.server,
+                connection_id: connection.connection_id,
             });
             security.fail();
             commands.remove_resource::<ClientNetworkSender>();
@@ -225,6 +234,7 @@ fn receive_packets(
                 warn!("client TCP framing error: {error}");
                 disconnected.write(ClientTransportDisconnected {
                     server: connection.server,
+                    connection_id: connection.connection_id,
                 });
                 security.fail();
                 commands.remove_resource::<ClientNetworkSender>();
@@ -239,6 +249,7 @@ fn receive_packets(
                 warn!("client secure frame rejected: {error}");
                 disconnected.write(ClientTransportDisconnected {
                     server: connection.server,
+                    connection_id: connection.connection_id,
                 });
                 security.fail();
                 commands.remove_resource::<ClientNetworkSender>();
@@ -252,6 +263,7 @@ fn receive_packets(
                     warn!("client secure sequence failed: {error}");
                     disconnected.write(ClientTransportDisconnected {
                         server: connection.server,
+                        connection_id: connection.connection_id,
                     });
                     security.fail();
                     commands.remove_resource::<ClientNetworkSender>();
@@ -265,6 +277,7 @@ fn receive_packets(
                 if !plaintext_mode {
                     disconnected.write(ClientTransportDisconnected {
                         server: connection.server,
+                        connection_id: connection.connection_id,
                     });
                     security.fail();
                     commands.remove_resource::<ClientNetworkSender>();

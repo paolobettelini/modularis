@@ -2,7 +2,9 @@ use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use client_game_state_api::{GameState, GameStateApi};
 use client_network_api::{ClientNetworkApi, ClientNetworkSender};
-use client_session_api::{ClientSession, ClientSessionApi};
+use client_session_api::{
+    ClientSession, ClientSessionApi, ClientSessionJoinGates, ClientSessionSet,
+};
 use generated_network_messages::{JoinAcceptedReceived, NetworkMessageSet, ServerBoundMessage};
 use network_protocol_mod::NetworkProtocolMod;
 use patchwork_game_auth_api::ClientPatchworkJoinGate;
@@ -23,13 +25,16 @@ impl ClientSessionNetworkMod {
     ) -> Self {
         bevy.app
             .init_resource::<ClientSession>()
+            .init_resource::<ClientSessionJoinGates>()
             .init_resource::<PendingJoin>()
             .add_systems(OnEnter(GameState::InGame), begin_join)
             .add_systems(
                 Update,
                 (
                     send_pending_join,
-                    accept_join.after(NetworkMessageSet::DispatchPackets),
+                    accept_join
+                        .after(NetworkMessageSet::DispatchPackets)
+                        .in_set(ClientSessionSet::Accept),
                 )
                     .run_if(in_state(GameState::InGame)),
             )
@@ -54,6 +59,7 @@ fn begin_join(mut pending: ResMut<PendingJoin>, mut session: ResMut<ClientSessio
 fn send_pending_join(
     sender: Option<Res<ClientNetworkSender>>,
     auth_gate: Option<Res<ClientPatchworkJoinGate>>,
+    join_gates: Res<ClientSessionJoinGates>,
     mut pending: ResMut<PendingJoin>,
 ) {
     if !pending.0 {
@@ -63,6 +69,9 @@ fn send_pending_join(
         return;
     };
     if auth_gate.as_ref().is_some_and(|gate| !gate.may_join()) {
+        return;
+    }
+    if !join_gates.is_open() {
         return;
     }
     if sender

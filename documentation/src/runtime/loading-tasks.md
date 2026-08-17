@@ -85,6 +85,20 @@ task-removal timer is separate from the completed-player set, so later chunk
 streaming cannot recreate the join task while the player moves through the
 world. Both pieces of state are cleared only when that session leaves.
 
+The client policy treats packet events as notifications, not as its only source
+of truth. It also observes the authoritative `ClientSession` and
+`ClientChunkCache` resources. This matters during a server transfer: a state
+transition must not leave the task at 25% merely because `JoinAccepted` or the
+first chunk event was emitted between two schedules. The network chunk cache is
+cleared when leaving `GameState::InGame`, so data from the source server cannot
+complete the destination server's loader accidentally.
+
+Transport connection and disconnection events carry a monotonic client-side
+connection ID. Cleanup systems compare this ID with their active connection.
+During an auth-to-game transfer, the delayed disconnect event from the entry
+server therefore cannot cancel the destination server's authentication
+handshake or join loader.
+
 These percentages describe the current vanilla join process. They are not
 embedded in either state provider. A custom server can omit the vanilla policy,
 publish more detailed tasks, or use runtime scopes to expose different loading

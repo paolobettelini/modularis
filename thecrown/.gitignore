@@ -1,0 +1,6 @@
+target/
+*.sqlite
+*.sqlite3
+.env
+thecrown-web/dist/*
+!thecrown-web/dist/.gitkeep
