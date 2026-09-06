@@ -1,0 +1,509 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Voxel frames and three-dimensional interest - Minecraft Simple Demo Architecture</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting-started/project-overview.html"><strong aria-hidden="true">1.1.</strong> Project overview</a></li><li class="chapter-item expanded "><a href="../getting-started/build-and-run.html"><strong aria-hidden="true">1.2.</strong> Build and run</a></li></ol></li><li class="chapter-item expanded "><a href="../architecture/foundations.html"><strong aria-hidden="true">2.</strong> Architecture foundations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../architecture/patchwork-composition.html"><strong aria-hidden="true">2.1.</strong> Patchwork composition</a></li><li class="chapter-item expanded "><a href="../architecture/mod-anatomy.html"><strong aria-hidden="true">2.2.</strong> Mod anatomy and lifecycle</a></li><li class="chapter-item expanded "><a href="../architecture/dependency-sources.html"><strong aria-hidden="true">2.3.</strong> Cargo dependency sources</a></li><li class="chapter-item expanded "><a href="../architecture/apis-and-events.html"><strong aria-hidden="true">2.4.</strong> APIs, providers, and ECS contracts</a></li><li class="chapter-item expanded "><a href="../architecture/runtime-scopes.html"><strong aria-hidden="true">2.5.</strong> Runtime scope trees and facets</a></li><li class="chapter-item expanded "><a href="../architecture/vanilla-libraries.html"><strong aria-hidden="true">2.6.</strong> Vanilla mechanics as reusable libraries</a></li><li class="chapter-item expanded "><a href="../architecture/code-generation.html"><strong aria-hidden="true">2.7.</strong> Code generation and registries</a></li><li class="chapter-item expanded "><a href="../architecture/modpacks.html"><strong aria-hidden="true">2.8.</strong> Modpacks and feature boundaries</a></li><li class="chapter-item expanded "><a href="../architecture/assets-and-output.html"><strong aria-hidden="true">2.9.</strong> Assets and generated output</a></li></ol></li><li class="chapter-item expanded "><a href="../runtime/runtime-overview.html"><strong aria-hidden="true">3.</strong> Runtime and networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../runtime/bevy-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Bevy application lifecycle</a></li><li class="chapter-item expanded "><a href="../runtime/networking.html"><strong aria-hidden="true">3.2.</strong> Protocol, transport, and framing</a></li><li class="chapter-item expanded "><a href="../runtime/patchwork-authentication.html"><strong aria-hidden="true">3.3.</strong> Patchwork account authentication</a></li><li class="chapter-item expanded "><a href="../runtime/sessions-and-visibility.html"><strong aria-hidden="true">3.4.</strong> Sessions, routing, and visibility</a></li><li class="chapter-item expanded "><a href="../runtime/loading-tasks.html"><strong aria-hidden="true">3.5.</strong> Loading tasks and progress screens</a></li><li class="chapter-item expanded "><a href="../runtime/chat-and-commands.html"><strong aria-hidden="true">3.6.</strong> Chat, commands, and completion</a></li><li class="chapter-item expanded "><a href="../runtime/sounds.html"><strong aria-hidden="true">3.7.</strong> Sounds, audiences, and spatial playback</a></li></ol></li><li class="chapter-item expanded "><a href="../world/world-overview.html"><strong aria-hidden="true">4.</strong> World architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../world/blocks-and-items.html"><strong aria-hidden="true">4.1.</strong> Blocks, items, and state</a></li><li class="chapter-item expanded "><a href="../world/block-properties-and-components.html"><strong aria-hidden="true">4.2.</strong> Block properties and sparse components</a></li><li class="chapter-item expanded "><a href="../world/voxel-models.html"><strong aria-hidden="true">4.3.</strong> JSON voxel models and textures</a></li><li class="chapter-item expanded "><a href="../world/voxel-frames.html" class="active"><strong aria-hidden="true">4.4.</strong> Voxel frames and three-dimensional interest</a></li><li class="chapter-item expanded "><a href="../world/chunk-storage.html"><strong aria-hidden="true">4.5.</strong> Chunk coordinates and storage</a></li><li class="chapter-item expanded "><a href="../world/server-world.html"><strong aria-hidden="true">4.6.</strong> Server world providers and residency</a></li><li class="chapter-item expanded "><a href="../world/biomes.html"><strong aria-hidden="true">4.7.</strong> Biomes and world-generation features</a></li><li class="chapter-item expanded "><a href="../world/client-chunks.html"><strong aria-hidden="true">4.8.</strong> Client streaming, meshing, and rendering</a></li><li class="chapter-item expanded "><a href="../world/dimensions.html"><strong aria-hidden="true">4.9.</strong> Dimensions and world scopes</a></li><li class="chapter-item expanded "><a href="../world/portals.html"><strong aria-hidden="true">4.10.</strong> Portals</a></li></ol></li><li class="chapter-item expanded "><a href="../gameplay/gameplay-overview.html"><strong aria-hidden="true">5.</strong> Gameplay systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../gameplay/permissions-and-game-modes.html"><strong aria-hidden="true">5.1.</strong> Permissions and server game modes</a></li><li class="chapter-item expanded "><a href="../gameplay/movement.html"><strong aria-hidden="true">5.2.</strong> Player movement and prediction</a></li><li class="chapter-item expanded "><a href="../gameplay/character-collisions.html"><strong aria-hidden="true">5.3.</strong> Character collisions and moving supports</a></li><li class="chapter-item expanded "><a href="../gameplay/movement-features.html"><strong aria-hidden="true">5.4.</strong> Gravity, jump, sprint, and flight</a></li><li class="chapter-item expanded "><a href="../gameplay/block-interaction.html"><strong aria-hidden="true">5.5.</strong> Block interaction and world edits</a></li><li class="chapter-item expanded "><a href="../gameplay/inventory.html"><strong aria-hidden="true">5.6.</strong> Inventory, hotbar, and item use</a></li><li class="chapter-item expanded "><a href="../gameplay/cell-menus.html"><strong aria-hidden="true">5.7.</strong> Cell menus, audiences, and crafting tables</a></li></ol></li><li class="chapter-item expanded "><a href="../client/client-overview.html"><strong aria-hidden="true">6.</strong> Client systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../client/input-settings-menus.html"><strong aria-hidden="true">6.1.</strong> Input, settings, menus, and game state</a></li><li class="chapter-item expanded "><a href="../client/graphics.html"><strong aria-hidden="true">6.2.</strong> Graphics, lighting, sky, and outlines</a></li><li class="chapter-item expanded "><a href="../client/animated-grass.html"><strong aria-hidden="true">6.3.</strong> Animated grass and wind</a></li><li class="chapter-item expanded "><a href="../client/blocky-models.html"><strong aria-hidden="true">6.4.</strong> Blocky models and animation</a></li></ol></li><li class="chapter-item expanded "><a href="../development/developer-guide.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../development/extension-cookbook.html"><strong aria-hidden="true">7.1.</strong> Extension cookbook</a></li><li class="chapter-item expanded "><a href="../development/thecrown-network.html"><strong aria-hidden="true">7.2.</strong> TheCrown network and dynamic instances</a></li><li class="chapter-item expanded "><a href="../development/testing-and-performance.html"><strong aria-hidden="true">7.3.</strong> Testing, debugging, and performance</a></li><li class="chapter-item expanded "><a href="../reference/crate-map.html"><strong aria-hidden="true">7.4.</strong> Crate map</a></li><li class="chapter-item expanded "><a href="../reference/current-limits.html"><strong aria-hidden="true">7.5.</strong> Current limits and design direction</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Minecraft Simple Demo Architecture</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="voxel-frames-and-three-dimensional-interest"><a class="header" href="#voxel-frames-and-three-dimensional-interest">Voxel frames and three-dimensional interest</a></h1>
+<p>A <strong>voxel frame</strong> is an independently positioned, rigid voxel grid inside a
+world scope. It is not a dimension, a generator, a Patchwork mod, or a player
+visibility group. A scope can contain its implicit root grid and any number of
+runtime-created frames.</p>
+<p>This refactor reuses the existing block-state palette, chunk codec, sparse
+components and mesh builders. It does not introduce a second kind of block.</p>
+<h2 id="identity-and-ownership"><a class="header" href="#identity-and-ownership">Identity and ownership</a></h2>
+<p>The relevant keys answer different questions:</p>
+<table><thead><tr><th>Key</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>World instance</td><td>Which independently stored/routed world owns this data?</td></tr>
+<tr><td>Provider/source</td><td>Which terrain source within that world?</td></tr>
+<tr><td>VoxelFrameId</td><td>Which local grid within this scope?</td></tr>
+<tr><td>Local chunk/block position</td><td>Where in that grid?</td></tr>
+<tr><td>Audience / scope facets</td><td>Who receives which gameplay information?</td></tr>
+</tbody></table>
+<p><code>VoxelFrameId</code> is a runtime UUID, persisted with structural metadata. It must
+not be generated from a mod list or from the frame's current pose.
+<code>VoxelFrameId::ROOT</code> is the implicit identity grid in each scope. It cannot
+be moved or registered as an extra frame and requires no catalogue entry.</p>
+<p><code>VoxelBlockAddress { frame, local }</code> and
+<code>VoxelChunkAddress { frame, local }</code> prevent two frames with the same integer
+coordinates from sharing cache entries, edits, damage or menus. Scope remains
+on server resident/storage keys; the client holds its currently routed scope.
+Root-only callers can still pass <code>BlockPos</code> or <code>ChunkPos</code> to the facade's
+conversion-based convenience methods.</p>
+<p>Chunks remain cubic 16 × 16 × 16, with the same negative-coordinate Euclidean
+division and local index layout on every axis.</p>
+<h2 id="crate-boundaries"><a class="header" href="#crate-boundaries">Crate boundaries</a></h2>
+<table><thead><tr><th>Concern</th><th>Owner</th></tr></thead><tbody>
+<tr><td>UUIDs, local addresses, rigid pose, bounds, physics seams</td><td><code>voxel-frame-api</code></td></tr>
+<tr><td>Scoped structural registry and replaceable broad phase</td><td><code>voxel-frame-registry-api</code></td></tr>
+<tr><td>World/local ray queries and oriented-box overlap</td><td><code>voxel-frame-geometry-lib</code></td></tr>
+<tr><td>Structural binary catalogue codec</td><td><code>voxel-frame-storage-lib</code></td></tr>
+<tr><td>Symmetric interest volumes and 3D distance</td><td><code>chunk-interest-api</code></td></tr>
+<tr><td>Client frame state and render-parent handles</td><td><code>client-voxel-frame-api</code></td></tr>
+<tr><td>Wire payloads / codegen contribution</td><td><code>voxel-frame-network-message-types</code> / <code>voxel-frame-network-messages-mod</code></td></tr>
+<tr><td>Client wire adapter</td><td><code>client-voxel-frame-network-mod</code></td></tr>
+<tr><td>Client pose-to-render transform adapter</td><td><code>client-voxel-frame-render-mod</code></td></tr>
+<tr><td>Server viewer snapshots and pose replication</td><td><code>server-voxel-frame-network-mod</code></td></tr>
+<tr><td>Registry changes to public ECS messages</td><td><code>server-voxel-frame-events-mod</code></td></tr>
+<tr><td>Structural catalogue save/load adapter</td><td><code>server-voxel-frame-persistence-mod</code></td></tr>
+<tr><td>Pending placement contract and phases</td><td><code>server-block-placement-api</code></td></tr>
+<tr><td>Optional cross-frame placement exclusion</td><td><code>server-voxel-overlap-lib</code> + <code>server-voxel-overlap-validation-vanilla-mod</code></td></tr>
+<tr><td>Reusable construction / privileged command</td><td><code>server-voxel-frame-spawn-lib</code>, <code>server-command-spawn-frame-lib</code>, <code>server-command-spawn-frame-vanilla-mod</code></td></tr>
+<tr><td>Movement curves / client animation</td><td><code>voxel-frame-movement-lib</code>, <code>client-voxel-frame-movement-api</code>, <code>client-voxel-frame-movement-mod</code></td></tr>
+<tr><td>Server presentation requests</td><td><code>server-voxel-frame-motion-api</code></td></tr>
+</tbody></table>
+<p>The data/math/codec crates are ordinary libraries, not exclusive Patchwork
+providers. The network contributor is a support mod. Runtime adapters are
+lifecycle mods. Existing world/provider, storage, chunk cache, mesher and
+interaction APIs keep their separate responsibilities.</p>
+<h2 id="rigid-coordinates"><a class="header" href="#rigid-coordinates">Rigid coordinates</a></h2>
+<p><code>VoxelFrameTransform</code> stores a double-precision translation and normalized
+quaternion. Construction and deserialization reject non-finite values and
+zero quaternions. There is no scale or shear.</p>
+<p>Use its methods consistently:</p>
+<ul>
+<li><code>local_to_world</code> and <code>world_to_local</code> for points;</li>
+<li><code>local_direction_to_world</code> and <code>world_direction_to_local</code> for directions;</li>
+<li><code>transform_bounds</code> for conservative world bounds;</li>
+<li><code>render_transform(render_origin)</code> at the rendering boundary.</li>
+</ul>
+<p>Do not add a frame's translation to voxel positions in storage. Do not bake its
+rotation into mesh vertices. Moving a frame updates structural metadata and its
+render parent, not the chunk palette, damage records or voxel mesh.</p>
+<p>The client API exposes a double-precision render origin. This is an integration
+seam, not a complete floating-origin implementation: an application that changes
+it must also rebase cameras, players and other world-space consumers. Existing
+player simulation and local DDA still use their established float precision.</p>
+<h2 id="creating-and-editing-a-frame"><a class="header" href="#creating-and-editing-a-frame">Creating and editing a frame</a></h2>
+<p>A custom server obtains the existing routed scope, registers a frame, and uses
+the same authoritative world facade as for root blocks:</p>
+<pre><code class="language-rust ignore">let viewer = ChunkViewer::Player(player_id);
+let root = world.resident_key(viewer, ChunkPos::new(0, 0, 0))?;
+let id = VoxelFrameId::new();
+let pose = VoxelFrameTransform::new(
+    [12.0, 8.0, -3.0],
+    DQuat::from_rotation_y(0.4).to_array(),
+)?;
+world.frames().upsert(VoxelFrame::new(id, root.scope(), pose))?;
+
+world.set_block_for(
+    viewer,
+    VoxelBlockAddress::new(id, BlockPos::new(-1, 0, 0)),
+    selected_block,
+)?;
+</code></pre>
+<p>This is an orchestration example; handle errors according to your application.
+The block ID must come from that application's selected content, not a
+hardcoded list in the frame core.</p>
+<p>Extra frames have a sparse set of occupied local chunks. Unoccupied positions
+read as air; they do not invoke the root terrain generator. First/last block
+mutations update occupancy and conservative bounds. Empty frames have no
+streamable geometry. Removing an entire transient instance also removes its
+runtime frames.</p>
+<p>Use <code>world.frames().set_transform(scope, id, pose)</code> to move a frame. Pose
+changes leave voxel and component addresses unchanged. The registry emits
+structural changes through the ECS bridge. Lifecycle code must use this shared
+registry rather than mutating a detached copy of a frame descriptor.</p>
+<h2 id="spatial-index-and-streaming"><a class="header" href="#spatial-index-and-streaming">Spatial index and streaming</a></h2>
+<p>The registry keeps an index per scope. <code>VoxelFrameSpatialIndex</code> is replaceable;
+the default median-split BVH filters bounds in all three axes. It rebuilds its
+metadata tree when bounds change, not voxel meshes. For many frequently moving
+frames, a dynamic tree or spatial hash can implement the same trait.</p>
+<p>Root interest uses a shared <code>ChunkInterestVolume</code> contract. The default is:</p>
+<pre><code class="language-text">dx² + dy² + dz² &lt;= radius²
+</code></pre>
+<p>The client default maximum radius is 8 chunks; server residency uses radius 9
+for isotropic slack and a configurable maintenance interval. There is no
+special short Y window or XZ-first priority.
+<code>client-chunk-distance-priority-vanilla-mod</code> selects squared 3D distance
+through the existing work-priority API.</p>
+<p>Extra-frame interest first queries world bounds, then considers only occupied
+local chunks whose transformed bounds intersect the world-space interest
+sphere. It never enumerates an infinite grid for each frame. Bounds are
+conservative, so a small number of extra candidates is expected.</p>
+<p>Client request retries, deduplication and bounded remeshing remain active.
+<code>ServerChunkRequestBudget</code> additionally bounds server generation work:
+32 chunks per update, an 8 ms soft budget, 256 queued requests per player and
+4096 in total by default. One chunk generation cannot be preempted; the time
+budget is therefore soft. Custom orchestration can replace these resource
+values. Requests are revalidated against player identity, epoch and interest
+when dequeued. Dropped excess requests recover through client reconciliation.</p>
+<h2 id="rendering-and-selection"><a class="header" href="#rendering-and-selection">Rendering and selection</a></h2>
+<p>Chunk meshes, grass, damage overlays and outlines use frame-local geometry
+under a shared <code>VoxelFrameEntity</code> parent. The independent render adapter
+updates parent transforms before Bevy propagates global transforms.</p>
+<p>Neighbor lookup carries the same frame ID: touching grids do not cull each
+other's faces. Pose changes do not trigger voxel mesh regeneration.</p>
+<p>Selection follows this chain:</p>
+<ol>
+<li>Create a world-space ray and conservative segment bounds.</li>
+<li>Query candidate frames in the active scope, including implicit root.</li>
+<li>Transform the ray into each candidate's local coordinates.</li>
+<li>Run the existing shape-aware voxel DDA.</li>
+<li>Compare world distances and select the nearest hit.</li>
+</ol>
+<p>A hit contains its frame-aware block and adjacent addresses, local face normal,
+world normal and world hit position. Placement uses the <strong>local</strong> adjacent cell;
+reach checks compare the player's world-space eye with the transformed target.
+Outlines retain the model's precomputed exterior-edge geometry.</p>
+<h2 id="authoritative-mutations-and-optional-policy"><a class="header" href="#authoritative-mutations-and-optional-policy">Authoritative mutations and optional policy</a></h2>
+<p>Block breaking, survival damage and item placement carry frame addresses end to
+end. The backend serializes mutations and performs occupied/air checks inside
+the mutation boundary. Concurrent chunk misses cannot publish generated data
+over a newer authoritative edit.</p>
+<p>Placement exposes public phases:</p>
+<pre><code class="language-text">BlockPlacementSet::Collect -&gt; Validate -&gt; Apply
+</code></pre>
+<p>These are inside the inventory world-effects phase. Preparation is a reusable
+function; the vanilla caller chooses when to invoke it. The optional overlap
+mod rejects intersections with occupied shapes in other frames, using broad
+phase bounds followed by oriented-box SAT. It also considers accepted pending
+placements in the same update. Mere face contact is allowed.</p>
+<p>Removing that policy mod allows overlapping frames; the chunk core does not
+silently enforce a vanilla spatial rule. Custom code can call the overlap
+library between preparation and commit, or use another policy altogether.</p>
+<p>This is <strong>placement validation</strong>, not physical rigid-body simulation.
+<code>VoxelFrameVelocity</code> and <code>VoxelFrameCollisionPolicy</code> expose a future
+integration boundary. Kinematic player support/carrying is now implemented separately; see
+<a href="../gameplay/character-collisions.html">character collisions</a>. A rigid-body frame
+physics engine is still outside the project.</p>
+<h2 id="palette-properties-and-sparse-data"><a class="header" href="#palette-properties-and-sparse-data">Palette, properties and sparse data</a></h2>
+<p>The representation remains:</p>
+<ul>
+<li><code>BlockState</code>: block type and low-cardinality discrete state in the palette;</li>
+<li>block properties: modular static/default values, not saved per position;</li>
+<li>block components: optional per-position records outside the palette.</li>
+</ul>
+<p>A component key includes world scope, frame, local chunk and local block index.
+Damage remains a sparse delta against default durability. An undamaged block
+has no damage record, and restoring the default removes it. Equal local
+coordinates in different frames have independent records.</p>
+<p>Persistent components retain stable namespaced IDs, versions and opaque bytes.
+Unknown components are preserved by the component codec. Persistent data is
+not automatically part of normal chunk streaming: damage replication remains
+its own feature adapter.</p>
+<p>Crafting-table identity now includes scope, frame and local position. Different
+frames cannot accidentally share a table menu. The menu remains a transient
+shared 3×3 session managed by the cell-menu system; no persistent crafting
+inventory or chest implementation is added. Vanilla opening applies world-space
+reach validation; custom code may invoke the reusable opening mechanic under
+its own conditions.</p>
+<h2 id="persistence-domains"><a class="header" href="#persistence-domains">Persistence domains</a></h2>
+<p>There are three independent payload families:</p>
+<ol>
+<li><strong>Chunk data</strong>: existing global block index, local subpalette and packed state.</li>
+<li><strong>Block components</strong>: sparse versioned records in their existing domain.</li>
+<li><strong>Frame structure</strong>: a versioned binary catalogue in
+<code>modularis:voxel-frames</code>.</li>
+</ol>
+<p>Root region paths stay compatible with the existing world converter:
+<code>data/chunk/regions/&lt;source&gt;/r.x.y.z.bin</code>.
+Extra grids use
+<code>data/chunk/regions/&lt;source&gt;/frames/&lt;uuid&gt;/r.x.y.z.bin</code>.
+Here <code>&lt;source&gt;</code> means the filesystem adapter's encoded source key.</p>
+<p>Generic world-data domains similarly add a frame segment only for non-root
+keys. The structural catalogue stores IDs, scope, rigid pose, revision and
+occupied local chunks; it does not contain chunk payloads or concrete gameplay
+component structs.</p>
+<p>Adapters queue dirty writes through existing storage services and their
+periodic/shutdown flush. A frame pose change queues structure only.
+Malformed stored chunks/catalogues produce errors instead of silently
+regenerating and overwriting the saved world. This is buffered persistence,
+not a transaction across every storage domain; crash-atomic multi-domain saves
+would need a separate journal/transaction layer.</p>
+<h2 id="network-lifecycle"><a class="header" href="#network-lifecycle">Network lifecycle</a></h2>
+<p>The frame support contributor exports:</p>
+<ul>
+<li><code>VoxelFrameUpsert</code>: complete structural snapshot;</li>
+<li><code>VoxelFramePose</code>: pose, revision and server clock sample;</li>
+<li><code>VoxelFrameRemove</code>: stop displaying a frame.</li>
+</ul>
+<p>All carry a movement epoch and stream sequence. The server snapshots after
+relocation synchronization; the client merges typed packet readers by sequence
+before applying operations. This matters when leave/re-enter packets arrive
+in the same update. Epoch checks discard packets from before a relocation.</p>
+<p>Chunk requests/responses also carry the movement epoch, and chunk responses
+identify their frame independently from the unchanged local chunk payload.
+World/dimension reset clears active frame state and child entities. Recompose
+both client and server: the wire schema changed.</p>
+<h2 id="spawning-a-frame-on-demand"><a class="header" href="#spawning-a-frame-on-demand">Spawning a frame on demand</a></h2>
+<p>The default server no longer constructs the tilted sample at startup.
+Use the privileged command:</p>
+<pre><code class="language-text">/spawnframe 10 8 0 15 35 -10
+</code></pre>
+<p>The first three numbers are world position. The last three are Euler rotations
+about X, Y, Z <strong>in degrees</strong>, composed using quaternion Euler XYZ convention.
+They are angles, not a direction vector or angular velocity. The origin is the
+corner of local block (0,0,0), not its center.</p>
+<p>The command creates a UUID frame in the caller's routed world, with one stone
+block at local (0,0,0). Its command library takes the initial block as input;
+only the vanilla glue selects Stone and explicitly depends on <code>block-stone</code>.
+A custom server can invoke <code>server_voxel_frame_spawn_lib::spawn_frame</code> without
+installing the command or choosing stone.</p>
+<p>The former demo mod remains available but is not selected. Previously saved
+demo frames are not destructively deleted when changing a modpack.</p>
+<h2 id="animated-pose-packets"><a class="header" href="#animated-pose-packets">Animated pose packets</a></h2>
+<p><code>VoxelFramePose</code> now includes <code>FrameMovement</code>:</p>
+<ul>
+<li><code>Instant</code>: apply the target directly;</li>
+<li><code>Animated</code>: duration in milliseconds, independent translation and rotation
+easing, and <code>Once</code>, <code>Loop</code> or <code>PingPong</code> repetition.</li>
+</ul>
+<p><code>Easing</code> supports Linear and CSS cubic Bézier curves. The implementation solves
+X(t) for the elapsed fraction before evaluating Y(t), rather than treating
+elapsed time as the Bézier parameter. X control points must be in [0,1]; all
+control points must be finite. Y can overshoot. Zero duration is instant,
+including for repeat modes.</p>
+<p>The network adapter validates ordering and starts/replaces a track. The
+independent client movement mod advances it using translation lerp and quaternion
+slerp. New motion starts at the current displayed pose, not the previous target.
+Snapshots, instant poses, frame removal and world/disconnect reset cancel tracks.
+Animation updates frame bounds for client queries without rebuilding voxel meshes.</p>
+<p>A server mod can write this ECS message, preferably before
+<code>VoxelFrameSet::Replicate</code>:</p>
+<pre><code class="language-rust ignore">motions.write(SendVoxelFrameMotion {
+    player_id,
+    frame: frame_id,
+    target: target_pose,
+    movement: FrameMovement::Animated {
+        duration_ms: 1200,
+        translation_easing: Easing::CubicBezier {
+            x1: 0.42, y1: 0.0, x2: 0.58, y2: 1.0,
+        },
+        rotation_easing: Easing::Linear,
+        repeat: RepeatMode::PingPong,
+    },
+});
+</code></pre>
+<p>The server network adapter supplies the recipient's epoch, ordered sequence
+and frame revision. Requests for frames not visible to that recipient are
+ignored. Ordinary authoritative registry pose changes still send Instant.</p>
+<p>For actual moving collision geometry use <code>SetVoxelFrameMotion</code> from
+<code>voxel-frame-kinematic-api</code> and the server kinematic adapter. See
+<a href="../gameplay/character-collisions.html">character collisions</a>.</p>
+<p><code>voxel-frame-kinematic-api</code> is a Patchwork API and
+<code>server-voxel-frame-kinematic-mod</code> is its default provider. Gameplay depends
+on the API contract; a composition selects the provider. A custom server can
+therefore replace trajectory simulation without changing the gameplay mod.</p>
+<p><code>SetVoxelFrameMotion</code> also carries <code>initial_elapsed_seconds</code>. Leave it at
+<code>0.0</code> for an animation that starts at its first endpoint. A deterministic
+procedural feature can provide an offset within a repeating trajectory so that
+different frames do not all start in phase. The kinematic adapter stores the
+offset by backdating <code>FrameTrajectory::started_at_seconds</code>; the existing
+trajectory packet then gives late viewers the same authoritative phase.</p>
+<p>The <code>SendVoxelFrameMotion</code> message requests <strong>client presentation</strong>, not server simulation:
+it does not move collision geometry, change persistence or extend authoritative
+streaming interest along an animation path. A future moving-frame authority
+must drive those separately. The client starts at receipt time; the server clock
+sample is retained for a future synchronized-clock adapter, not incorrectly
+compared with a client's unrelated startup clock. Loops jump back to the start;
+ping-pong reverses direction continuously. The TheCrown parkour is the first
+gameplay consumer of authoritative animated frame motion.</p>
+<p>Root-axis portal mechanics remain root-only. They do not attempt to interpret
+a tilted frame as a vertical portal. A rotated-portal feature can be added
+separately.</p>
+<h2 id="verification-and-extension-checklist"><a class="header" href="#verification-and-extension-checklist">Verification and extension checklist</a></h2>
+<p>Focused invariant checks cover rigid transforms, negative local coordinates,
+isotropic interest, nearest rotated hits, SAT contact, equal local positions in
+different frames, structural save/load, sparse damage and menu identity.
+Compile representative client, vanilla server and TheCrown compositions after
+changing public addresses or packet types.</p>
+<p>For a new feature ask:</p>
+<ul>
+<li>Is this data structural, static property, sparse component or UI session?</li>
+<li>Does every key preserve frame and scope?</li>
+<li>Does a pose change leave saved local data untouched?</li>
+<li>Are world/local conversions centralized?</li>
+<li>Can its policy be omitted without breaking the underlying operation?</li>
+<li>Is replication explicitly selected rather than implied by persistence?</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../world/voxel-models.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../world/chunk-storage.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../world/voxel-models.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../world/chunk-storage.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>
