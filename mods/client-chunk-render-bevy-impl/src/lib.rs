@@ -18,7 +18,7 @@ use tokio::task::JoinHandle;
 struct ChunkMaterials(HashMap<String, Handle<StandardMaterial>>);
 
 #[derive(Resource, Default)]
-struct PendingChunkRemeshes(HashSet<voxel_math_api::ChunkPos>);
+struct PendingChunkRemeshes(HashSet<voxel_frame_api::VoxelChunkAddress>);
 
 pub struct ChunkRenderBevyImpl;
 
@@ -41,6 +41,8 @@ impl ChunkRenderBevyImpl {
     ) -> Self {
         bevy.app
             .init_resource::<RenderedChunks>()
+            .init_resource::<client_voxel_frame_api::ClientVoxelFrames>()
+            .init_resource::<client_voxel_frame_api::ClientVoxelFrameEntities>()
             .init_resource::<ChunkMaterials>()
             .init_resource::<PendingChunkRemeshes>()
             .init_resource::<ChunkRemeshBudget>()
@@ -95,6 +97,8 @@ fn process_chunk_remeshes<B: BlockManagerApi>(
     mut commands: Commands,
     mut pending: ResMut<PendingChunkRemeshes>,
     budget: Res<ChunkRemeshBudget>,
+    frames: Res<client_voxel_frame_api::ClientVoxelFrames>,
+    mut roots: ResMut<client_voxel_frame_api::ClientVoxelFrameEntities>,
     focus: Res<ChunkStreamingFocus>,
     priority: Res<ChunkWorkPriorityService>,
     cache: Res<ClientChunkCache>,
@@ -109,7 +113,7 @@ fn process_chunk_remeshes<B: BlockManagerApi>(
         .0
         .iter()
         .copied()
-        .map(|position| ((priority.priority)(position, focus.center), position))
+        .map(|position| ((priority.priority)(frames.world_chunk(position).unwrap_or(position.local), focus.center), position))
         .collect::<Vec<_>>();
     let budget = budget.chunks_per_frame.max(1);
     if requests.len() > budget {
@@ -142,7 +146,8 @@ fn process_chunk_remeshes<B: BlockManagerApi>(
             continue;
         }
 
-        let origin = position.world_origin();
+        let Some(parent) = roots.parent(&mut commands,&frames,position.frame) else { pending.0.insert(position); continue; };
+        let origin = position.local.world_origin();
         let transform = Transform::from_xyz(origin.x as f32, origin.y as f32, origin.z as f32);
         let mut entities = Vec::new();
         for part in mesh_data.parts {
@@ -172,6 +177,7 @@ fn process_chunk_remeshes<B: BlockManagerApi>(
                         Mesh3d(meshes.add(build_bevy_mesh(part))),
                         MeshMaterial3d(material),
                         transform,
+                        ChildOf(parent),
                         DespawnOnExit(GameState::InGame),
                     ))
                     .id(),
@@ -184,16 +190,16 @@ fn process_chunk_remeshes<B: BlockManagerApi>(
 }
 
 fn add_chunk_and_neighbors(
-    requests: &mut HashSet<voxel_math_api::ChunkPos>,
-    position: voxel_math_api::ChunkPos,
+    requests: &mut HashSet<voxel_frame_api::VoxelChunkAddress>,
+    position: voxel_frame_api::VoxelChunkAddress,
 ) {
     requests.insert(position);
     requests.extend(neighboring_chunk_positions(position));
 }
 
 fn neighboring_chunk_positions(
-    position: voxel_math_api::ChunkPos,
-) -> Vec<voxel_math_api::ChunkPos> {
+    position: voxel_frame_api::VoxelChunkAddress,
+) -> Vec<voxel_frame_api::VoxelChunkAddress> {
     let mut neighbors = Vec::with_capacity(26);
     for y in -1..=1 {
         for z in -1..=1 {
@@ -201,11 +207,11 @@ fn neighboring_chunk_positions(
                 if x == 0 && y == 0 && z == 0 {
                     continue;
                 }
-                neighbors.push(voxel_math_api::ChunkPos::new(
-                    position.x + x,
-                    position.y + y,
-                    position.z + z,
-                ));
+                neighbors.push(voxel_frame_api::VoxelChunkAddress::new(position.frame,voxel_math_api::ChunkPos::new(
+                    position.local.x + x,
+                    position.local.y + y,
+                    position.local.z + z,
+                )));
             }
         }
     }
@@ -227,7 +233,7 @@ fn unload_chunks(
 fn despawn_chunk(
     commands: &mut Commands,
     rendered: &mut RenderedChunks,
-    position: voxel_math_api::ChunkPos,
+    position: voxel_frame_api::VoxelChunkAddress,
 ) {
     if let Some(entities) = rendered.entities.remove(&position) {
         for entity in entities {

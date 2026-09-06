@@ -3,12 +3,12 @@ use generated_game_mode_registry::GameMode;
 use server_block_breaking_events_api::ServerValidatedBlockBreak;
 use server_chunk_world_api::ResidentChunkKey;
 use std::collections::{HashMap, HashSet};
-use voxel_math_api::BlockPos;
+use voxel_frame_api::VoxelBlockAddress;
 
 #[derive(Debug, Clone)]
 pub struct SurvivalDamageBatch {
     pub key: ResidentChunkKey,
-    pub position: BlockPos,
+    pub position: VoxelBlockAddress,
     pub block: BlockState,
     pub players: HashSet<u64>,
 }
@@ -18,7 +18,7 @@ pub struct SurvivalDamageBatch {
 pub fn collect_survival_damage<'a>(
     requests: impl IntoIterator<Item = &'a ServerValidatedBlockBreak>,
 ) -> Vec<SurvivalDamageBatch> {
-    let mut batches = HashMap::<(ResidentChunkKey, BlockPos), SurvivalDamageBatch>::new();
+    let mut batches = HashMap::<(ResidentChunkKey, VoxelBlockAddress), SurvivalDamageBatch>::new();
     for request in requests {
         if request.mode != GameMode::Survival { continue; }
         let entry = batches.entry((request.key.clone(), request.position)).or_insert_with(|| SurvivalDamageBatch {
@@ -38,11 +38,12 @@ mod tests {
     use world_instance_api::WorldInstanceId;
 
     fn request(player_id: u64, mode: GameMode) -> ServerValidatedBlockBreak {
-        let position = BlockPos::new(1, 2, 3);
+        let position = VoxelBlockAddress::root(voxel_math_api::BlockPos::new(1, 2, 3));
         ServerValidatedBlockBreak {
             player_id,
             mode,
             key: ResidentChunkKey {
+                frame: voxel_frame_api::VoxelFrameId::ROOT,
                 instance: WorldInstanceId::new("test:world"),
                 provider: ChunkProviderId::new("test:terrain"),
                 position: ChunkPos::new(0, 0, 0),

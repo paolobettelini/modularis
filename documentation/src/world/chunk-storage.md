@@ -361,3 +361,10 @@ The chunk payload includes `ChunkPos`. This lets:
 A production protocol may also include revision or scope identity. The current
 client resets its cache on dimension changes instead of keying the cache by
 scope.
+
+## Frame-aware ownership
+
+Chunk payloads still use local coordinates and the same palette codec. Resident
+and storage keys now include `VoxelFrameId`; moving a frame never changes those
+keys. Root region paths are preserved for the existing converter. See
+[voxel frames](voxel-frames.md) for non-root storage and structural metadata.

@@ -1,6 +1,6 @@
 [package]
 name = "client-chunk-cache-network-impl"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 
 [package.metadata.mod]
@@ -14,11 +14,17 @@ init = [
     "block-edit-events-mod",
     "client-chunk-streaming-api",
     "client-game-state-api",
+    "client-session-api",
 ]
 run = []
 ownership = []
 
 [dependencies]
+client-voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
+client-dimension-api = { path = "../client-dimension-api" }
+client-world-context-api = { path = "../client-world-context-api" }
+client-session-api = { path = "../client-session-api" }
+voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 block-edit-events-api = { git = "https://github.com/paolobettelini/modularis.git" }

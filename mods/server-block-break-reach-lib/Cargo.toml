@@ -1,9 +1,10 @@
 [package]
 name = "server-block-break-reach-lib"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [dependencies]
+server-chunk-world-api = { path = "../server-chunk-world-api" }
 block-edit-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
 player-gravity-api = { path = "../player-gravity-api" }
 server-block-interaction-rules-api = { path = "../server-block-interaction-rules-api" }

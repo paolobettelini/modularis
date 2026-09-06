@@ -2,12 +2,12 @@ use cell_menu_api::{CellMenuId, CellMenuMoveEndpoint, CellMenuState};
 use inventory_core_api::InventoryCell;
 use item_instance_api::ItemInstance;
 use serde::{Deserialize, Serialize};
-use voxel_math_api::BlockPos;
+use voxel_frame_api::VoxelBlockAddress;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CellMenuOpenRequest {
     pub kind: String,
-    pub anchor: Option<BlockPos>,
+    pub anchor: Option<VoxelBlockAddress>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

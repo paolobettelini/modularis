@@ -330,6 +330,7 @@ fn collect_movement_requests(
         let requested_position = Vec3::from_array(movement.message.position);
         registry.touch_address(movement.source, time.elapsed_secs_f64());
         let pending_move = PendingServerPlayerMove {
+            surface:movement.message.surface,
             source: movement.source,
             player_id,
             movement_epoch: movement.message.movement_epoch,

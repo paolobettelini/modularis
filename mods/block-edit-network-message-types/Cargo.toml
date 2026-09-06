@@ -1,9 +1,10 @@
 [package]
 name = "block-edit-network-message-types"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 
 [dependencies]
+voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
 block-state-api = { git = "https://github.com/paolobettelini/modularis.git" }
 serde = { version = "1.0", features = ["derive"] }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }

@@ -1,9 +1,11 @@
 [package]
 name = "server-chunk-residency-player-interest-lib"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [dependencies]
+bevy = "0.17.3"
+chunk-interest-api = { git = "https://github.com/paolobettelini/modularis.git" }
 player-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
 server-chunk-residency-api = { path = "../server-chunk-residency-api" }
 server-chunk-world-api = { path = "../server-chunk-world-api" }

@@ -1,0 +1,11 @@
+[package]
+name = "voxel-frame-api"
+version = "0.1.1"
+edition = "2024"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+bevy = "0.17.3"
+uuid = { version = "1", features = ["v4", "serde"] }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
+world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }

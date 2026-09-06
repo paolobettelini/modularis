@@ -31,10 +31,11 @@ use client_wind_api::{ClientWind, ClientWindApi};
 use std::collections::{HashMap, HashSet};
 use tokio::task::JoinHandle;
 use voxel_math_api::{CHUNK_SIZE, ChunkPos};
+use voxel_frame_api::VoxelChunkAddress;
+use client_voxel_frame_api::{ClientVoxelFrames,ClientVoxelFrameEntities};
 
 const GRASS_SHADER: &str = "client-grass-render-bevy-impl/shaders/grass.wgsl";
 const CHUNKS_PER_FRAME: usize = 2;
-const MAX_VERTICAL_CHUNK_DISTANCE: i32 = 4;
 const MAX_GRASS_INTERACTIONS: usize = 8;
 
 #[derive(Clone, Copy, Debug, ShaderType)]
@@ -85,9 +86,9 @@ struct GrassMaterialHandle(Option<Handle<GrassMaterial>>);
 
 #[derive(Resource, Default)]
 struct GrassChunkState {
-    known: HashSet<ChunkPos>,
-    pending: HashSet<ChunkPos>,
-    entities: HashMap<ChunkPos, Entity>,
+    known: HashSet<VoxelChunkAddress>,
+    pending: HashSet<VoxelChunkAddress>,
+    entities: HashMap<VoxelChunkAddress, Entity>,
 }
 
 pub struct ClientGrassRenderBevyImpl;
@@ -125,6 +126,8 @@ impl ClientGrassRenderBevyImpl {
                 ..default()
             })
             .init_resource::<GrassMaterialHandle>()
+            .init_resource::<ClientVoxelFrames>()
+            .init_resource::<ClientVoxelFrameEntities>()
             .init_resource::<GrassChunkState>()
             .add_message::<GrassChunkMeshRebuilt>()
             .add_systems(Startup, create_grass_material)
@@ -258,6 +261,8 @@ fn process_grass_chunk_work(
     settings: Res<ClientGrassSettings>,
     dimension: Res<ClientDimension>,
     mesher: Res<GrassMeshService>,
+    frames: Res<ClientVoxelFrames>,
+    mut roots: ResMut<ClientVoxelFrameEntities>,
     handle: Res<GrassMaterialHandle>,
     mut state: ResMut<GrassChunkState>,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -275,12 +280,13 @@ fn process_grass_chunk_work(
     };
 
     let mut pending = state.pending.iter().copied().collect::<Vec<_>>();
-    pending.sort_unstable_by_key(|chunk| chunk_distance_squared(*chunk, focus));
+    pending.sort_unstable_by_key(|chunk| chunk_distance_squared(frames.world_chunk(*chunk).unwrap_or(chunk.local), focus));
     pending.truncate(CHUNKS_PER_FRAME);
 
     for position in pending {
         state.pending.remove(&position);
-        if !in_render_range(position, focus, settings.render_radius) {
+        let world_position = frames.world_chunk(position).unwrap_or(position.local);
+        if !in_render_range(world_position, focus, settings.render_radius) {
             despawn_grass_chunk(&mut commands, &mut state, position);
             continue;
         }
@@ -290,7 +296,7 @@ fn process_grass_chunk_work(
             // race.
             continue;
         };
-        let distance = horizontal_chunk_distance(position, focus);
+        let distance = chunk_distance(world_position, focus);
         let mesh_data = (mesher.mesh_chunk)(&chunk, *settings, distance, dimension.0);
         if mesh_data.is_empty() {
             despawn_grass_chunk(&mut commands, &mut state, position);
@@ -298,13 +304,15 @@ fn process_grass_chunk_work(
         }
         let blade_count = mesh_data.blade_count;
 
-        let origin = position.world_origin();
+        let Some(parent) = roots.parent(&mut commands,&frames,position.frame) else { state.pending.insert(position); continue; };
+        let origin = position.local.world_origin();
         let replacement = commands
             .spawn((
                 Mesh3d(meshes.add(bevy_mesh(mesh_data))),
                 MeshMaterial3d(material.clone()),
                 Transform::from_xyz(origin.x as f32, origin.y as f32, origin.z as f32),
                 grass_chunk_bounds(),
+                ChildOf(parent),
                 DespawnOnExit(GameState::InGame),
             ))
             .id();
@@ -338,21 +346,21 @@ fn clear_grass_state(mut state: ResMut<GrassChunkState>) {
     state.entities.clear();
 }
 
-fn despawn_grass_chunk(commands: &mut Commands, state: &mut GrassChunkState, position: ChunkPos) {
+fn despawn_grass_chunk(commands: &mut Commands, state: &mut GrassChunkState, position: VoxelChunkAddress) {
     if let Some(entity) = state.entities.remove(&position) {
         commands.entity(entity).try_despawn();
     }
 }
 
 fn in_render_range(position: ChunkPos, focus: ChunkPos, render_radius: f32) -> bool {
-    (position.y - focus.y).abs() <= MAX_VERTICAL_CHUNK_DISTANCE
-        && horizontal_chunk_distance(position, focus) <= render_radius
+    chunk_distance(position, focus) <= render_radius
 }
 
-fn horizontal_chunk_distance(position: ChunkPos, focus: ChunkPos) -> f32 {
+fn chunk_distance(position: ChunkPos, focus: ChunkPos) -> f32 {
     let dx = (position.x - focus.x) as f32 * CHUNK_SIZE as f32;
     let dz = (position.z - focus.z) as f32 * CHUNK_SIZE as f32;
-    (dx * dx + dz * dz).sqrt()
+    let dy = (position.y as f64 - focus.y as f64) as f32 * CHUNK_SIZE as f32;
+    (dx * dx + dy * dy + dz * dz).sqrt()
 }
 
 fn chunk_distance_squared(position: ChunkPos, focus: ChunkPos) -> i64 {

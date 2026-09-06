@@ -1,0 +1,30 @@
+[package]
+name = "server-player-surface-motion-vanilla-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerPlayerSurfaceMotionVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod","server-chunk-world-api","server-player-registry-api","server-player-gravity-api","server-player-hitbox-api","block-manager-api","block-shape-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = {path="../bevy-mod"}
+server-chunk-world-api = {path="../server-chunk-world-api"}
+server-player-registry-api = {path="../server-player-registry-api"}
+server-player-gravity-api = {path="../server-player-gravity-api"}
+server-player-hitbox-api = {path="../server-player-hitbox-api"}
+block-manager-api = {path="../block-manager-api"}
+block-shape-api = {path="../block-shape-api"}
+server-player-surface-lib = {git = "https://github.com/paolobettelini/modularis.git"}
+server-player-movement-collision-lib = {git = "https://github.com/paolobettelini/modularis.git"}
+character-collision-lib = {git = "https://github.com/paolobettelini/modularis.git"}
+collision-api = {path="../collision-api"}
+voxel-frame-api = {git = "https://github.com/paolobettelini/modularis.git"}
+voxel-math-api = {git = "https://github.com/paolobettelini/modularis.git"}
+player-gravity-api = {path="../player-gravity-api"}
+tokio = {version="1",features=["full"]}

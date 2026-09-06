@@ -8,6 +8,14 @@ pub struct ServerBlockInteractionRules {
 }
 
 impl ServerBlockInteractionRules {
+    pub fn player_can_reach_in_frame(self, player_position: [f32;3], up: Vec3, eye_height: f32, block: voxel_frame_api::VoxelBlockAddress, pose: voxel_frame_api::VoxelFrameTransform) -> bool {
+        let eye = (Vec3::from_array(player_position)+up.normalize_or_zero()*eye_height).as_dvec3();
+        let local_eye = pose.world_to_local(eye);
+        let min = bevy::math::DVec3::new(block.local.x as f64,block.local.y as f64,block.local.z as f64);
+        let nearest = local_eye.clamp(min,min+bevy::math::DVec3::ONE);
+        local_eye.distance_squared(nearest) <= (self.max_reach as f64).powi(2)
+    }
+
     pub fn player_can_reach(self, player_position: [f32; 3], up: Vec3, block: BlockPos) -> bool {
         self.player_can_reach_from_eye(player_position, up, self.eye_height, block)
     }

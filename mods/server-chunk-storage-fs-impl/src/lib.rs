@@ -55,6 +55,7 @@ struct FilesystemWorldState {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct RegionCacheKey {
     source: String,
+    frame: voxel_frame_api::VoxelFrameId,
     region: ChunkRegionPos,
 }
 
@@ -119,7 +120,7 @@ impl ServerChunkStorageBackend for FilesystemChunkStorage {
         let Some(world) = state.worlds.get_mut(&key.instance) else {
             return Ok(None);
         };
-        let payload = region_buffer(world, &key.source, key.position)?
+        let payload = region_buffer(world, &key.source, key.frame, key.position)?
             .chunks
             .get(&key.position)
             .cloned();
@@ -147,7 +148,7 @@ impl ServerChunkStorageBackend for FilesystemChunkStorage {
             return Ok(false);
         };
         let payload = encode_chunk(chunk, &world.index).map_err(format_error)?;
-        let region = region_buffer(world, &key.source, key.position)?;
+        let region = region_buffer(world, &key.source, key.frame, key.position)?;
         region.chunks.insert(key.position, payload);
         region.dirty_chunks.insert(key.position);
         Ok(true)
@@ -195,10 +196,12 @@ impl Drop for FilesystemChunkStorage {
 fn region_buffer<'a>(
     world: &'a mut FilesystemWorldState,
     source: &str,
+    frame: voxel_frame_api::VoxelFrameId,
     position: ChunkPos,
 ) -> Result<&'a mut RegionBuffer, ChunkStorageError> {
     let key = RegionCacheKey {
         source: source.to_string(),
+        frame,
         region: ChunkRegionPos::from_chunk(position),
     };
     if !world.regions.contains_key(&key) {
@@ -254,13 +257,10 @@ fn flush_state(
 }
 
 fn region_path(world_root: &Path, key: &RegionCacheKey) -> PathBuf {
-    world_root
-        .join("data/chunk/regions")
-        .join(storage_source_component(&key.source))
-        .join(format!(
-            "r.{}.{}.{}.bin",
-            key.region.x, key.region.y, key.region.z
-        ))
+    let root=world_root.join("data/chunk/regions").join(storage_source_component(&key.source));
+    // Root keeps the existing simple path and native world-converter format.
+    let root=if key.frame.is_root() { root } else { root.join("frames").join(key.frame.to_string()) };
+    root.join(format!("r.{}.{}.{}.bin",key.region.x,key.region.y,key.region.z))
 }
 
 fn atomic_write(path: &Path, bytes: &[u8]) -> Result<(), ChunkStorageError> {
@@ -301,6 +301,7 @@ mod tests {
         let storage = FilesystemChunkStorage::open(vec![directory.clone()]).unwrap();
         let position = ChunkPos::new(-1, 4, 7);
         let key = StoredChunkKey {
+            frame: voxel_frame_api::VoxelFrameId::ROOT,
             instance: instance.clone(),
             source: "test:terrain".to_string(),
             position,
@@ -319,6 +320,26 @@ mod tests {
         let reopened = FilesystemChunkStorage::open(vec![directory]).unwrap();
         assert_eq!(reopened.load(&key).unwrap(), Some(chunk));
         assert!(root.join("data/chunk/index.bin").is_file());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn equal_local_chunks_in_distinct_frames_survive_flush_and_reopen() {
+        let root=temporary_world_root();
+        let instance=WorldInstanceId::new("test:frames");
+        let directory=WorldDirectory{id:WorldId::new("frames").unwrap(),instance:instance.clone(),root:root.clone()};
+        let storage=FilesystemChunkStorage::open(vec![directory.clone()]).unwrap();
+        let position=ChunkPos::new(-2,-3,4);
+        let first=StoredChunkKey{instance:instance.clone(),source:"test:terrain".into(),frame:voxel_frame_api::VoxelFrameId::new(),position};
+        let second=StoredChunkKey{frame:voxel_frame_api::VoxelFrameId::new(),..first.clone()};
+        let a=Chunk::filled(position,BlockId::Stone);
+        let b=Chunk::filled(position,BlockId::Obsidian);
+        assert!(storage.queue_store(&first,&a).unwrap());
+        assert!(storage.queue_store(&second,&b).unwrap());
+        storage.flush().unwrap();drop(storage);
+        let reopened=FilesystemChunkStorage::open(vec![directory]).unwrap();
+        assert_eq!(reopened.load(&first).unwrap(),Some(a));
+        assert_eq!(reopened.load(&second).unwrap(),Some(b));
         fs::remove_dir_all(root).unwrap();
     }
 

@@ -1,10 +1,12 @@
 name = "Minecraft demo vanilla server features"
-version = "0.0.3"
+version = "0.0.4"
 description = "Optional vanilla-style server gameplay features. Import this from a server profile only when you want classic behavior."
 modpacks = ["server-biomes-vanilla", "server-commands-vanilla", "game-modes", "block-durabilities-vanilla"]
 ignore = []
 
 mods = [
+    "server-player-surface-motion-vanilla-mod",
+    "server-voxel-overlap-validation-vanilla-mod",
     "server-biome-registry-mod",
     "server-chunk-provider-biomes-mod",
     "server-chunk-residency-player-interest-vanilla-mod",

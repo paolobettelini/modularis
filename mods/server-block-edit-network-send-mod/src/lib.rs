@@ -9,7 +9,7 @@ use server_chunk_world_api::{ServerChunkWorld, ServerChunkWorldApi};
 use server_network_events_api::{ServerAudience, ServerNetworkEventsApi, ServerPacketOut};
 use server_player_registry_api::{ServerPlayerRegistry, ServerPlayerRegistryApi};
 use tokio::task::JoinHandle;
-use voxel_math_api::ChunkPos;
+use voxel_frame_api::VoxelChunkAddress;
 use world_instance_api::WorldScopeId;
 
 pub struct ServerBlockEditNetworkSendMod;
@@ -76,7 +76,7 @@ fn instance_viewers(
     world: &ServerChunkWorld,
     players: &ServerPlayerRegistry,
     scope: &WorldScopeId,
-    position: ChunkPos,
+    position: VoxelChunkAddress,
 ) -> Vec<PlayerId> {
     players
         .players()

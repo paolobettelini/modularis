@@ -1,6 +1,6 @@
 [package]
 name = "client-player-network-sync-mod"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 
 [package.metadata.mod]
@@ -21,6 +21,7 @@ run = []
 ownership = []
 
 [dependencies]
+client-player-surface-api = {git = "https://github.com/paolobettelini/modularis.git"}
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 client-camera-api = { path = "../client-camera-api" }

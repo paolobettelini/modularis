@@ -7,7 +7,8 @@ use client_chunk_cache_api::{ClientChunkAvailable, ClientChunkCache, ClientChunk
 use client_game_state_api::{GameState, GameStateApi};
 use std::collections::HashMap;
 use tokio::task::JoinHandle;
-use voxel_math_api::BlockPos;
+use voxel_frame_api::VoxelBlockAddress;
+use client_voxel_frame_api::{ClientVoxelFrames,ClientVoxelFrameEntities};
 
 const EXPANSION: f32 = 0.004;
 
@@ -19,7 +20,7 @@ impl FromWorld for BreakOverlayCube {
 #[derive(Resource, Default)]
 struct BreakOverlayMaterials(HashMap<u8, Handle<StandardMaterial>>);
 #[derive(Resource, Default)]
-struct BreakOverlays(HashMap<BlockPos, Entity>);
+struct BreakOverlays(HashMap<VoxelBlockAddress, Entity>);
 
 pub struct ClientBlockBreakOverlayBevyMod;
 impl ClientBlockBreakOverlayBevyMod {
@@ -27,7 +28,7 @@ impl ClientBlockBreakOverlayBevyMod {
         bevy: &mut BevyMod, _plugins: &mut ClientBevyDefaultPluginsMod, _damage: &mut D,
         _cache: &mut C, _shapes: &mut S, _game: &mut G,
     ) -> Self {
-        bevy.app.init_resource::<BreakOverlayCube>().init_resource::<BreakOverlayMaterials>().init_resource::<BreakOverlays>()
+        bevy.app.init_resource::<ClientVoxelFrames>().init_resource::<ClientVoxelFrameEntities>().init_resource::<BreakOverlayCube>().init_resource::<BreakOverlayMaterials>().init_resource::<BreakOverlays>()
             .add_systems(Update, (draw_changed, draw_available_chunks).chain().in_set(ClientBlockDamageSet::Draw))
             .add_systems(OnExit(GameState::InGame), clear_overlays);
         Self
@@ -40,8 +41,9 @@ fn draw_changed(
     shapes: Res<BlockShapeService>, cube: Res<BreakOverlayCube>, asset_server: Res<AssetServer>,
     mut materials: ResMut<BreakOverlayMaterials>, mut material_assets: ResMut<Assets<StandardMaterial>>,
     mut overlays: ResMut<BreakOverlays>,
+    frames: Res<ClientVoxelFrames>, mut roots: ResMut<ClientVoxelFrameEntities>,
 ) {
-    for change in changes.read() { redraw(&mut commands, change.position, change.stage, &cache, &shapes, &cube, &asset_server, &mut materials, &mut material_assets, &mut overlays); }
+    for change in changes.read() { redraw(&mut commands, change.position, change.stage, &cache, &shapes, &cube, &asset_server, &mut materials, &mut material_assets, &mut overlays, &frames, &mut roots); }
 }
 
 fn draw_available_chunks(
@@ -49,18 +51,20 @@ fn draw_available_chunks(
     shapes: Res<BlockShapeService>, cube: Res<BreakOverlayCube>, asset_server: Res<AssetServer>,
     mut materials: ResMut<BreakOverlayMaterials>, mut material_assets: ResMut<Assets<StandardMaterial>>,
     mut overlays: ResMut<BreakOverlays>,
+    frames: Res<ClientVoxelFrames>, mut roots: ResMut<ClientVoxelFrameEntities>,
 ) {
     for chunk in available.read() {
-        for (position, stage) in damage.in_chunk(chunk.position) { redraw(&mut commands, position, stage, &cache, &shapes, &cube, &asset_server, &mut materials, &mut material_assets, &mut overlays); }
+        for (position, stage) in damage.in_chunk(chunk.position) { redraw(&mut commands, position, stage, &cache, &shapes, &cube, &asset_server, &mut materials, &mut material_assets, &mut overlays, &frames, &mut roots); }
     }
 }
 
 fn redraw(
-    commands: &mut Commands, position: BlockPos, stage: u8, cache: &ClientChunkCache, shapes: &BlockShapeService,
+    commands: &mut Commands, position: VoxelBlockAddress, stage: u8, cache: &ClientChunkCache, shapes: &BlockShapeService,
     cube: &BreakOverlayCube, asset_server: &AssetServer, materials: &mut BreakOverlayMaterials,
     material_assets: &mut Assets<StandardMaterial>, overlays: &mut BreakOverlays,
+    frames: &ClientVoxelFrames, roots: &mut ClientVoxelFrameEntities,
 ) {
-    if let Some(entity) = overlays.0.remove(&position) { commands.entity(entity).despawn(); }
+    if let Some(entity) = overlays.0.remove(&position) { commands.entity(entity).try_despawn(); }
     if stage == 0 { return; }
     let Some(block) = cache.block(position) else {
         warn!("cannot draw block damage stage {stage} at {position:?}: chunk is not cached");
@@ -80,8 +84,9 @@ fn redraw(
         depth_bias: 10.0,
         ..default()
     })).clone();
-    let origin = Vec3::new(position.x as f32, position.y as f32, position.z as f32);
-    let entity = commands.spawn((Transform::from_translation(origin), Visibility::Inherited, DespawnOnExit(GameState::InGame)))
+    let Some(parent) = roots.parent(commands,frames,position.frame) else { return; };
+    let origin = Vec3::new(position.local.x as f32, position.local.y as f32, position.local.z as f32);
+    let entity = commands.spawn((Transform::from_translation(origin), ChildOf(parent), Visibility::Inherited, DespawnOnExit(GameState::InGame)))
         .with_children(|parent| for bounds in shape.boxes() {
             let center = (bounds.min + bounds.max) * 0.5;
             let size = (bounds.max - bounds.min) + Vec3::splat(EXPANSION * 2.0);
@@ -91,5 +96,5 @@ fn redraw(
 }
 
 fn clear_overlays(mut commands: Commands, mut overlays: ResMut<BreakOverlays>) {
-    for (_, entity) in overlays.0.drain() { commands.entity(entity).despawn(); }
+    for (_, entity) in overlays.0.drain() { commands.entity(entity).try_despawn(); }
 }

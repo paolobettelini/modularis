@@ -1,0 +1,23 @@
+[package]
+name = "server-command-spawn-frame-vanilla-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerCommandSpawnFrameVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod","server-command-api","server-chat-api","server-chunk-world-api","block-stone"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path="../bevy-mod" }
+server-command-api = { path="../server-command-api" }
+server-chat-api = { path="../server-chat-api" }
+server-chunk-world-api = { path="../server-chunk-world-api" }
+block-stone = { path="../block-stone" }
+generated-block-registry = "0.1.0"
+server-command-spawn-frame-lib = { git = "https://github.com/paolobettelini/modularis.git" }
+tokio = {version="1",features=["full"]}

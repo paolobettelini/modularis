@@ -4,13 +4,13 @@ use client_game_state_api::{GameState, GameStateApi};
 use client_player_controller_api::{
     Grounded, Player, PlayerControllerApi, PlayerControllerSet, PlayerVelocity,
 };
-use collision_api::{CollisionApi, CollisionService};
+use collision_api::{CharacterQuery, CollisionApi, CollisionService};
 use player_gravity_api::{Gravity, PlayerGravityApi};
 use player_hitbox_api::{PlayerHitbox, PlayerHitboxApi};
 use player_sneak_api::{LocalPlayerSneak, PlayerSneakApi};
 use tokio::task::JoinHandle;
 
-const SUPPORT_PROBE_DISTANCE: f32 = 0.05;
+const SUPPORT_PROBE_DISTANCE: f32 = 0.025;
 const PATH_SAMPLES: usize = 8;
 const BINARY_SEARCH_STEPS: usize = 8;
 
@@ -64,32 +64,22 @@ fn constrain_sneaking_movement(
     }
 
     let down = gravity.direction();
-    let up = gravity.up();
-    let alignment = gravity.alignment();
-    let first_axis = (alignment * Vec3::X).normalize_or_zero();
-    let second_axis = (alignment * Vec3::Z).normalize_or_zero();
 
     for (transform, grounded, mut velocity) in &mut players {
         if !grounded.0 || !has_support(&collision, *hitbox, transform.translation, down) {
             continue;
         }
 
-        let vertical_velocity = up * velocity.0.dot(up);
-        let requested_delta = (velocity.0 - vertical_velocity) * delta_seconds;
-        let first_delta = first_axis * requested_delta.dot(first_axis);
-        let second_delta = second_axis * requested_delta.dot(second_axis);
-
-        let safe_first = safe_supported_delta(
+        // Predict the same full motion as the controller. Capsule contact can
+        // turn gravity into outward motion at an edge, even without WASD.
+        let safe = safe_supported_delta(
             &collision,
             *hitbox,
             transform.translation,
-            first_delta,
+            velocity.0 * delta_seconds,
             down,
         );
-        let after_first = transform.translation + safe_first;
-        let safe_second =
-            safe_supported_delta(&collision, *hitbox, after_first, second_delta, down);
-        velocity.0 = vertical_velocity + (safe_first + safe_second) / delta_seconds;
+        velocity.0 = safe / delta_seconds;
     }
 }
 
@@ -107,7 +97,7 @@ fn safe_supported_delta(
     let mut safe_fraction = 0.0;
     for sample in 1..=PATH_SAMPLES {
         let fraction = sample as f32 / PATH_SAMPLES as f32;
-        if has_support(collision, hitbox, start + requested * fraction, down) {
+        if resolved_support(collision, hitbox, start, requested * fraction, down) {
             safe_fraction = fraction;
             continue;
         }
@@ -116,7 +106,7 @@ fn safe_supported_delta(
         let mut high = fraction;
         for _ in 0..BINARY_SEARCH_STEPS {
             let middle = (low + high) * 0.5;
-            if has_support(collision, hitbox, start + requested * middle, down) {
+            if resolved_support(collision, hitbox, start, requested * middle, down) {
                 low = middle;
             } else {
                 high = middle;
@@ -125,6 +115,21 @@ fn safe_supported_delta(
         return requested * low;
     }
     requested
+}
+
+fn resolved_support(
+    collision: &CollisionService,
+    hitbox: PlayerHitbox,
+    start: Vec3,
+    movement: Vec3,
+    down: Vec3,
+) -> bool {
+    let mut query = CharacterQuery::new(start, movement, -down, hitbox.radius, hitbox.height);
+    query.was_grounded = true;
+    let result = collision.resolve_character(query);
+    // Inspect the final resolved position, not the old support attached to an
+    // intermediate contact. This also supports legacy collision providers.
+    has_support(collision, hitbox, result.position, down)
 }
 
 fn has_support(
@@ -136,7 +141,7 @@ fn has_support(
     collision.has_support(
         position,
         down,
-        SUPPORT_PROBE_DISTANCE,
+        SUPPORT_PROBE_DISTANCE * (hitbox.height / 1.8),
         hitbox.radius,
         hitbox.height,
     )
@@ -146,6 +151,39 @@ fn has_support(
 mod tests {
     use super::*;
     use collision_api::CollisionResult;
+
+    struct Floor(collision_api::CollisionBox);
+    impl collision_api::CharacterGeometry for Floor {
+        fn query(&self, _: collision_api::Aabb) -> Vec<collision_api::CollisionBox> { vec![self.0] }
+    }
+    impl collision_api::CharacterCollisionBackend for Floor {
+        fn resolve(&self, q: CharacterQuery) -> collision_api::CharacterResult { character_collision_lib::resolve(q, self) }
+        fn support(&self, q: CharacterQuery) -> Option<collision_api::CharacterContact> { character_collision_lib::support(q, self) }
+    }
+
+    #[test]
+    fn stays_supported_at_edges_with_arbitrary_gravity_and_tilted_frame() {
+        for rotation in [Quat::IDENTITY, Quat::from_euler(EulerRot::XYZ, 0.7, 0.4, -0.8)] {
+            let up = rotation * Vec3::Y;
+            let frame_rotation = rotation * Quat::from_rotation_z(0.3);
+            let normal = frame_rotation * Vec3::Y;
+            let hitbox = PlayerHitbox::default();
+            let service = CollisionService::new(|_,_,_| false, |_,_,_,_| unreachable!())
+                .with_character_backend(Floor(collision_api::CollisionBox {
+                    center: Vec3::ZERO, rotation: frame_rotation,
+                    half_extents: Vec3::new(1.0, 0.2, 1.0), surface: 42,
+                }));
+            let mut position = normal * (0.2 + hitbox.radius + 0.001) - up * hitbox.radius;
+            for _ in 0..120 {
+                let requested = rotation * Vec3::new(0.04, -0.02, 0.0);
+                let safe = safe_supported_delta(&service, hitbox, position, requested, -up);
+                let mut q = CharacterQuery::new(position, safe, up, hitbox.radius, hitbox.height);
+                q.was_grounded = true;
+                position = service.resolve_character(q).position;
+                assert!(service.character_support(CharacterQuery { position, ..q }).is_some());
+            }
+        }
+    }
 
     #[test]
     fn clamps_motion_at_the_first_unsupported_sample() {

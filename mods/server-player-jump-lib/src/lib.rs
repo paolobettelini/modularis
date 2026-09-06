@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use block_manager_api::BlockManagerApi;
 use block_shape_api::{BlockShape, BlockShapeService};
-use player_block_collision_api::collides_at;
+
 use player_gravity_api::{gravity_direction, gravity_up};
 use player_network_message_types::PlayerId;
 use server_chunk_world_api::ServerChunkWorld;
@@ -57,20 +57,7 @@ pub fn is_grounded<B: BlockManagerApi>(
     radius: f32,
     height: f32,
 ) -> bool {
-    collides_at(
-        position + gravity_direction * 0.05,
-        radius,
-        height,
-        &|position| {
-            world
-                .block_for_player(player_id, position)
-                .map_or_else(BlockShape::empty, |block| {
-                    if B::is_solid(block.block) {
-                        shapes.shape(&block)
-                    } else {
-                        BlockShape::empty()
-                    }
-                })
-        },
-    )
+    let geometry=server_player_movement_collision_lib::geometry::<B>(world,shapes,player_id,position);
+    let query=collision_api::CharacterQuery::new(position,Vec3::ZERO,-gravity_direction,radius,height);
+    character_collision_lib::support(query,&geometry).is_some()
 }

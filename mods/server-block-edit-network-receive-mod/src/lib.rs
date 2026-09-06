@@ -35,7 +35,7 @@ fn receive_edit_requests(
     players: Res<ServerPlayerRegistry>,
     mut break_packets: MessageReader<BlockBreakRequestReceived>,
     mut breaks: MessageWriter<ServerBlockBreakRequested>,
-    mut last_logged_target: Local<HashMap<u64, voxel_math_api::BlockPos>>,
+    mut last_logged_target: Local<HashMap<u64, voxel_frame_api::VoxelBlockAddress>>,
 ) {
     for packet in break_packets.read() {
         let Some(player) = players.player_for_address(packet.source) else {

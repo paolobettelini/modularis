@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use block_state_api::BlockState;
-use voxel_math_api::BlockPos;
+use voxel_frame_api::VoxelBlockAddress;
 use world_instance_api::WorldScopeId;
 
 #[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -14,7 +14,7 @@ pub enum ServerBlockEditSet {
 
 #[derive(Message, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BlockBreakRequested {
-    pub position: BlockPos,
+    pub position: VoxelBlockAddress,
 }
 
 pub type BlockEditorId = u64;
@@ -25,13 +25,13 @@ pub type BlockEditorId = u64;
 #[derive(Message, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ServerBlockBreakRequested {
     pub player_id: BlockEditorId,
-    pub position: BlockPos,
+    pub position: VoxelBlockAddress,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PendingBlockBreak {
     pub player_id: BlockEditorId,
-    pub position: BlockPos,
+    pub position: VoxelBlockAddress,
     pub allowed: bool,
 }
 
@@ -42,13 +42,13 @@ pub struct PendingBlockBreaks {
 
 #[derive(Message, Debug, Clone, PartialEq, Eq)]
 pub struct BlockBroken {
-    pub position: BlockPos,
+    pub position: VoxelBlockAddress,
     pub previous: BlockState,
 }
 
 #[derive(Message, Debug, Clone, PartialEq, Eq)]
 pub struct BlockPlaced {
-    pub position: BlockPos,
+    pub position: VoxelBlockAddress,
     pub block: BlockState,
     pub replaced: BlockState,
 }
@@ -57,7 +57,7 @@ pub struct BlockPlaced {
 pub struct ServerBlockBroken {
     pub player_id: BlockEditorId,
     pub scope: WorldScopeId,
-    pub position: BlockPos,
+    pub position: VoxelBlockAddress,
     pub previous: BlockState,
 }
 
@@ -65,7 +65,7 @@ pub struct ServerBlockBroken {
 pub struct ServerBlockPlaced {
     pub player_id: BlockEditorId,
     pub scope: WorldScopeId,
-    pub position: BlockPos,
+    pub position: VoxelBlockAddress,
     pub block: BlockState,
     pub replaced: BlockState,
 }

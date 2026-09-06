@@ -82,7 +82,7 @@ mod tests {
     use world_instance_api::WorldInstanceId;
 
     fn key() -> ResidentChunkKey {
-        ResidentChunkKey { instance: WorldInstanceId::new("test:world"), provider: ChunkProviderId::new("test:terrain"), position: ChunkPos::new(0, 0, 0) }
+        ResidentChunkKey { frame: voxel_frame_api::VoxelFrameId::ROOT, instance: WorldInstanceId::new("test:world"), provider: ChunkProviderId::new("test:terrain"), position: ChunkPos::new(0, 0, 0) }
     }
 
     #[test]
@@ -130,4 +130,16 @@ mod tests {
         restored.replace_chunk(key(), block_component_binary_format_lib::decode(&bytes).unwrap(), &registry).unwrap();
         assert_eq!(restored.get::<BlockDamage>(&key(), 7), Some(&BlockDamage(41)));
     }
+    #[test]
+    fn damage_at_the_same_local_position_is_isolated_between_frames() {
+        let properties=BlockProperties::default();
+        let mut data=ServerBlockComponents::default();
+        let mut first=key();first.frame=voxel_frame_api::VoxelFrameId::new();
+        let mut second=first.clone();second.frame=voxel_frame_api::VoxelFrameId::new();
+        apply_damage(&properties,&mut data,first.clone(),42,BlockId::Stone,12);
+        assert_eq!(status(&properties,&data,&first,42,BlockId::Stone).damage,12);
+        assert_eq!(status(&properties,&data,&second,42,BlockId::Stone).damage,0);
+        assert!(data.get::<BlockDamage>(&second,42).is_none());
+    }
+
 }

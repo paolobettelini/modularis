@@ -10,7 +10,8 @@ use server_block_interaction_rules_api::{
     ServerBlockInteractionRules, ServerBlockInteractionRulesApi,
 };
 use server_chunk_world_api::{ServerChunkWorld, ServerChunkWorldApi};
-use server_place_block_item_use_lib::try_place_block_item;
+use server_place_block_item_use_lib::{prepare_block_placement,apply_block_placement};
+use server_block_placement_api::{BlockPlacementSet,PendingBlockPlacements};
 use server_player_gravity_api::{ServerPlayerGravities, ServerPlayerGravityApi};
 use server_player_hitbox_api::{
     ServerPlayerHitboxApi, ServerPlayerHitboxSet, ServerPlayerHitboxes,
@@ -45,10 +46,13 @@ impl<B: BlockManagerApi> ServerPlaceBlockItemUseMod<B> {
         _shapes: &mut H,
         _permissions: &mut PM,
     ) -> Self {
-        bevy.app.add_systems(
+        bevy.app.init_resource::<PendingBlockPlacements>()
+            .configure_sets(Update,(BlockPlacementSet::Collect,BlockPlacementSet::Validate,BlockPlacementSet::Apply).chain().in_set(InventoryServerSet::ApplyWorldEffects))
+            .add_systems(Update,commit_placements.in_set(BlockPlacementSet::Apply))
+            .add_systems(
             Update,
             apply_place_block_item::<B>
-                .in_set(InventoryServerSet::ApplyWorldEffects)
+                .in_set(BlockPlacementSet::Collect)
                 .after(ServerPlayerHitboxSet),
         );
         Self(PhantomData)
@@ -68,20 +72,27 @@ fn apply_place_block_item<B: BlockManagerApi>(
     shapes: Res<BlockShapeService>,
     permissions: Res<ServerPlayerPermissions>,
     mut uses: MessageReader<HeldItemUseDispatched>,
-    mut placed: MessageWriter<ServerBlockPlaced>,
-    mut succeeded: MessageWriter<ItemUseSucceeded>,
+    mut pending: ResMut<PendingBlockPlacements>,
 ) {
     for item_use in uses.read() {
         if !permissions.has(item_use.player_id, PermissionId::CanInteract) { continue; }
-        match try_place_block_item::<B>(
+        match prepare_block_placement::<B>(
             &world, &players, &gravities, &hitboxes, &rules, &shapes, item_use,
         ) {
             Ok(Some(outcome)) => {
-                placed.write(outcome.placed);
-                succeeded.write(outcome.succeeded);
+                pending.0.push(outcome);
             }
             Ok(None) => {}
             Err(error) => debug!("ignored place-block item use: {error:?}"),
+        }
+    }
+}
+
+fn commit_placements(world:Res<ServerChunkWorld>,mut pending:ResMut<PendingBlockPlacements>,mut placed:MessageWriter<ServerBlockPlaced>,mut succeeded:MessageWriter<ItemUseSucceeded>) {
+    for intent in std::mem::take(&mut pending.0) {
+        match apply_block_placement(&world,&intent) {
+            Ok(Some(outcome))=>{placed.write(outcome.placed);succeeded.write(outcome.succeeded);}
+            Ok(None)=>{},Err(error)=>debug!("placement rejected at commit: {error:?}"),
         }
     }
 }

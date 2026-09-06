@@ -125,7 +125,7 @@ fn unload_portal_visuals(
             .0
             .keys()
             .copied()
-            .filter(|frame| frame.touches_chunk(unload.position))
+            .filter(|frame| unload.position.frame.is_root() && frame.touches_chunk(unload.position.local))
             .collect::<Vec<_>>();
         for frame in removed {
             if let Some(entity) = rendered.0.remove(&frame) {

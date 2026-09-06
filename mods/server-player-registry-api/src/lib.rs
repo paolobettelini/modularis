@@ -38,6 +38,7 @@ pub enum ServerPlayerSessionSet {
 
 #[derive(Debug, Clone)]
 pub struct PendingServerPlayerMove {
+    pub surface:Option<player_network_message_types::PlayerSurfacePosition>,
     pub source: SocketAddr,
     pub player_id: PlayerId,
     pub movement_epoch: MovementEpoch,

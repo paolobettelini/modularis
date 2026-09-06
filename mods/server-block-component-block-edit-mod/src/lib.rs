@@ -29,9 +29,9 @@ fn clear_replaced_components(
         let key = ResidentChunkKey {
             instance: scope.instance.clone(),
             provider: ChunkProviderId::new(scope.source.clone()),
-            position: position.chunk(),
+            frame: position.frame,
+            position: position.chunk().local,
         };
         components.remove_all_at(&key, position.local().index() as u16);
     }
 }
-

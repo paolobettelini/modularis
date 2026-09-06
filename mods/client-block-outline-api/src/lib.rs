@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use block_shape_api::BlockShape;
-use voxel_math_api::BlockPos;
+use voxel_frame_api::VoxelBlockAddress;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BlockOutlineStyle {
@@ -23,7 +23,7 @@ pub struct SetClientBlockOutline {
     /// Stable owner key. Different mods can maintain independent outlines.
     pub owner: String,
     /// `None` removes the outline owned by `owner`.
-    pub block: Option<BlockPos>,
+    pub block: Option<VoxelBlockAddress>,
     /// Local-space geometry to outline when `block` is present.
     pub shape: BlockShape,
     pub style: BlockOutlineStyle,

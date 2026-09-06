@@ -1,0 +1,22 @@
+[package]
+name = "server-voxel-frame-kinematic-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerVoxelFrameKinematicMod"
+provides = "voxel-frame-kinematic-api"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod","server-chunk-world-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = {path="../bevy-mod"}
+server-chunk-world-api = {path="../server-chunk-world-api"}
+voxel-frame-kinematic-api = {path = "../voxel-frame-kinematic-api"}
+voxel-frame-movement-lib = {git = "https://github.com/paolobettelini/modularis.git"}
+server-player-registry-api = {path="../server-player-registry-api"}
+tokio = {version="1",features=["full"]}

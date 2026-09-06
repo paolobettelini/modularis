@@ -388,7 +388,7 @@ Infrastructure and providers:
 - `client-chunk-streaming-around-player-impl`;
 - `client-chunk-cache-network-impl`;
 - `client-chunk-work-priority-mod`;
-- `client-chunk-layered-priority-vanilla-mod`;
+- `client-chunk-distance-priority-vanilla-mod`;
 - `client-chunk-request-network-mod`;
 - `client-chunk-mesh-voxel-models-impl` (active JSON model provider);
 - `client-chunk-mesh-naive-cubes-impl` (legacy alternate provider);
@@ -520,7 +520,8 @@ Providers and synchronization:
 
 TheCrown:
 
-- `parkour-gameplay-lib`;
+- `parkour-gameplay-lib`, including deterministic obstacle-frame planning and
+  frame-local landing recognition;
 - `thecrown-protocol`, `thecrown-common`, and `thecrown-database` plain
   libraries;
 - `thecrown-network-message-types` and `thecrown-network-messages-mod`;
@@ -532,6 +533,9 @@ TheCrown:
 - `thecrown-world-template-api`, `thecrown-world-template-state-mod`, and
   `server-chunk-provider-thecrown-mod`;
 - `thecrown-game-main-mod`;
+- generic `server-voxel-frame-kinematic-mod`, frame event/network adapters,
+  and `server-player-surface-motion-vanilla-mod` selected by the TheCrown game
+  composition;
 - `thecrown-auth.toml` and `thecrown-game.toml`.
 
 ## Chat and commands
@@ -782,3 +786,62 @@ When a crate name is unfamiliar:
 6. follow public messages and system sets.
 
 This is usually faster than starting from generated `main.rs`.
+
+## Voxel-frame refactor
+
+New lifecycle/support mods:
+
+- `voxel-frame-network-messages-mod` (support contributor)
+- `client-voxel-frame-network-mod`
+- `client-voxel-frame-render-mod`
+- `server-voxel-frame-network-mod`
+- `server-voxel-frame-events-mod`
+- `server-voxel-frame-persistence-mod`
+- `server-voxel-frame-demo-vanilla-mod`
+- `server-voxel-overlap-validation-vanilla-mod`
+- `client-chunk-distance-priority-vanilla-mod`
+
+New ordinary contract/mechanic libraries:
+
+- `voxel-frame-api`
+- `voxel-frame-registry-api`
+- `voxel-frame-geometry-lib`
+- `voxel-frame-storage-lib`
+- `voxel-frame-network-message-types`
+- `chunk-interest-api`
+- `client-voxel-frame-api`
+- `server-block-placement-api`
+- `server-voxel-overlap-lib`
+
+Removed: `client-chunk-layered-priority-vanilla-mod`, replaced by the
+three-dimensional distance policy. Existing world, storage, streaming,
+rendering, block-edit, damage and cell-menu adapters now carry frame addresses.
+See [the full chapter](../world/voxel-frames.md) for responsibilities and APIs.
+
+### On-demand frame spawning and animation
+
+- `server-command-spawn-frame-vanilla-mod`: optional privileged command glue.
+- `client-voxel-frame-movement-mod`: independent animation playback.
+- `server-voxel-frame-spawn-lib`: generic initial-block frame construction.
+- `server-command-spawn-frame-lib`: command registration/parsing and execution.
+- `voxel-frame-movement-lib`: easing/repeat/interpolation mechanics and wire types.
+- `client-voxel-frame-movement-api`: playback resource and public phase.
+- `server-voxel-frame-motion-api`: ECS request to send a presentation motion.
+
+The old demo-construction mod is no longer selected by default.
+
+## Kinematic character collision revision
+
+New libraries/contracts: `character-collision-lib`, `voxel-frame-collision-lib`,
+`client-player-surface-api`, and `server-player-surface-lib`.
+
+`voxel-frame-kinematic-api` is the replaceable Patchwork API for authoritative
+frame trajectories. `server-voxel-frame-kinematic-mod` is its default provider.
+
+New lifecycle mods: `client-player-surface-motion-mod`,
+`server-player-surface-motion-vanilla-mod`,
+`server-voxel-frame-kinematic-mod`.
+
+No physics engine is selected. Existing collision, jump, controller and
+frame network/render adapters are migrated rather than duplicated.
+See [character collisions](../gameplay/character-collisions.md).

@@ -13,8 +13,12 @@ pub struct NetworkPlayer {
     pub pitch: f32,
 }
 
+#[derive(Debug,Clone,Copy,Serialize,Deserialize,PartialEq)]
+pub struct PlayerSurfacePosition {pub surface:u128,pub local_foot:[f32;3]}
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct PlayerMove {
+    /// Untrusted support-relative position; validated against server contact history.
+    pub surface:Option<PlayerSurfacePosition>,
     pub movement_epoch: MovementEpoch,
     pub sequence: MovementSequence,
     pub position: [f32; 3],

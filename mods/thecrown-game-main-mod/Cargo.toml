@@ -1,6 +1,6 @@
 [package]
 name = "thecrown-game-main-mod"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 
 [package.metadata.mod]
@@ -25,6 +25,7 @@ init = [
     "server-sound-api",
     "server-external-link-api",
     "block-edit-events-mod",
+    "voxel-frame-kinematic-api",
 ]
 run = []
 ownership = []
@@ -70,6 +71,8 @@ thecrown-world-template-api = { path = "../thecrown-world-template-api" }
 tokio = { version = "1.48.0", features = ["full"] }
 uuid = "1.24.0"
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-frame-kinematic-api = { path = "../voxel-frame-kinematic-api" }
 world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
 
 [patch.crates-io]

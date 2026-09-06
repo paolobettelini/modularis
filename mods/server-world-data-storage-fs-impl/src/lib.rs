@@ -33,9 +33,9 @@ impl FilesystemWorldDataStorage {
     }
 
     fn path(&self, key: &WorldDataKey) -> Option<PathBuf> {
-        Some(self.roots.get(&key.instance)?.join("data")
-            .join(hex(&key.domain)).join(hex(&key.source))
-            .join(format!("c.{}.{}.{}.bin", key.partition.x, key.partition.y, key.partition.z)))
+        let root=self.roots.get(&key.instance)?.join("data").join(hex(&key.domain)).join(hex(&key.source));
+        let root=if key.frame.is_root() { root } else { root.join("frames").join(key.frame.to_string()) };
+        Some(root.join(format!("c.{}.{}.{}.bin",key.partition.x,key.partition.y,key.partition.z)))
     }
 }
 
@@ -87,4 +87,3 @@ fn atomic_write(path: &Path, bytes: &[u8]) -> Result<(), WorldDataStorageError> 
     fs::rename(temporary, path).map_err(io_error)
 }
 fn io_error(error: std::io::Error) -> WorldDataStorageError { WorldDataStorageError(error.to_string()) }
-

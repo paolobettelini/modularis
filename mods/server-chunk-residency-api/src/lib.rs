@@ -1,19 +1,19 @@
 use bevy::prelude::*;
 use voxel_math_api::ChunkPos;
+use chunk_interest_api::{ChunkInterest, SphericalChunkInterest};
 
-#[derive(Resource, Debug, Clone, Copy)]
+#[derive(Resource, Clone)]
 pub struct ServerChunkResidencyConfig {
-    pub horizontal_radius: i32,
-    pub vertical_radius: i32,
+    pub radius: i32,
+    pub volume: ChunkInterest,
     pub maintenance_interval_seconds: f32,
 }
-
+impl Default for ServerChunkResidencyConfig {
+    fn default() -> Self { Self { radius: 9, volume: ChunkInterest::new(SphericalChunkInterest), maintenance_interval_seconds: 1.0 } }
+}
 impl ServerChunkResidencyConfig {
-    pub fn contains(self, center: ChunkPos, requested: ChunkPos) -> bool {
-        (requested.x - center.x).abs() <= self.horizontal_radius.max(0)
-            && (requested.y - center.y).abs() <= self.vertical_radius.max(0)
-            && (requested.z - center.z).abs() <= self.horizontal_radius.max(0)
+    pub fn contains(&self, center: ChunkPos, requested: ChunkPos) -> bool {
+        self.volume.contains(center,requested,self.radius)
     }
 }
-
 pub trait ServerChunkResidencyApi: Send + Sync + 'static {}

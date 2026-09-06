@@ -14,9 +14,7 @@ use player_hitbox_api::{PlayerHitbox, PlayerHitboxApi};
 use player_speed_api::{PlayerSpeedApi, PlayerSpeedMultiplier};
 use tokio::task::JoinHandle;
 
-const GROUND_PROBE_DISTANCE: f32 = 0.01;
 const GROUND_LEAVE_SPEED_EPSILON: f32 = 0.05;
-const GROUND_STICK_SPEED_EPSILON: f32 = 0.05;
 
 pub struct FpsPlayerControllerBevyImpl;
 
@@ -43,7 +41,7 @@ impl FpsPlayerControllerBevyImpl {
     ) -> Self {
         bevy.app
             .insert_resource(Time::<Fixed>::from_hz(T::ticks_per_second()))
-            .init_resource::<PlayerMovementConfig>()
+            .init_resource::<PlayerMovementConfig>().init_resource::<client_player_surface_api::PlayerSurfaceContact>()
             .init_resource::<PlayerPlanarMovementIntent>()
             .configure_sets(
                 FixedUpdate,
@@ -143,19 +141,18 @@ fn update_grounded_probe(
 ) {
     let direction = gravity.direction();
     if direction.length_squared() == 0.0 {
+        for (_,_,mut grounded) in &mut players {grounded.0=false;}
         return;
     }
     for (transform, velocity, mut grounded) in &mut players {
-        let moving_away_from_ground = velocity.0.dot(direction) < -GROUND_LEAVE_SPEED_EPSILON;
-        // A probe preserves an existing contact; only a resolved collision may
-        // transition an airborne player back to grounded.
-        grounded.0 = grounded.0
-            && !moving_away_from_ground
-            && is_grounded_at(&collision, *hitbox, transform.translation, direction);
+        let query=collision_api::CharacterQuery::new(transform.translation,Vec3::ZERO,gravity.up(),hitbox.radius,hitbox.height);
+        let support=collision.character_support(query);
+        grounded.0=support.is_some_and(|hit|velocity.0.dot(hit.normal)<=GROUND_LEAVE_SPEED_EPSILON);
     }
 }
 
 fn move_player(
+    mut surface:ResMut<client_player_surface_api::PlayerSurfaceContact>,
     time: Res<Time>,
     gravity: Res<Gravity>,
     hitbox: Res<PlayerHitbox>,
@@ -177,53 +174,14 @@ fn move_player(
     let start = transform.translation;
     previous.0 = start;
     let movement = velocity.0 * time.delta_secs();
-    let result = collision.resolve(start, movement, hitbox.radius, hitbox.height);
-    transform.translation = result.position;
-    if result.hit_x {
-        velocity.0.x = 0.0;
-    }
-    if result.hit_y {
-        velocity.0.y = 0.0;
-    }
-    if result.hit_z {
-        velocity.0.z = 0.0;
-    }
+    let mut query=collision_api::CharacterQuery::new(start,movement,gravity.up(),hitbox.radius,hitbox.height);
+    query.was_grounded=was_grounded;
+    let result=collision.resolve_character(query);
+    transform.translation=result.position;
+    velocity.0=result.project_velocity(velocity.0);
+    grounded.0=result.support.is_some() && (was_grounded || movement.dot(gravity.up())<=query.skin());
+    surface.0=if grounded.0{result.support}else{None};
 
-    let gravity_direction = gravity.direction();
-    let blocked_movement = movement - (result.position - start);
-    let moving_into_ground = gravity_direction.length_squared() > 0.0
-        && movement.dot(gravity_direction) > 0.0
-        && blocked_movement.dot(gravity_direction) > 0.0001;
-    let near_ground = is_grounded_at(&collision, *hitbox, result.position, gravity_direction);
-    let gravity_speed = velocity.0.dot(gravity_direction);
-    let moving_away_from_ground = velocity.0.dot(gravity_direction) < -GROUND_LEAVE_SPEED_EPSILON;
-    let stable_near_ground = was_grounded
-        && near_ground
-        && !moving_away_from_ground
-        && gravity_speed.abs() <= GROUND_STICK_SPEED_EPSILON;
-    grounded.0 = moving_into_ground || stable_near_ground;
-    if grounded.0 {
-        let falling_speed = velocity.0.dot(gravity_direction);
-        if falling_speed > 0.0 {
-            velocity.0 -= gravity_direction * falling_speed;
-        }
-    }
-}
-
-fn is_grounded_at(
-    collision: &CollisionService,
-    hitbox: PlayerHitbox,
-    position: Vec3,
-    gravity_direction: Vec3,
-) -> bool {
-    gravity_direction.length_squared() > 0.0
-        && collision.has_support(
-            position,
-            gravity_direction,
-            GROUND_PROBE_DISTANCE,
-            hitbox.radius,
-            hitbox.height,
-        )
 }
 
 fn sync_camera_to_player(

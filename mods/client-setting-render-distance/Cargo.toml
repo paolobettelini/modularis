@@ -1,6 +1,6 @@
 [package]
 name = "client-setting-render-distance"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
@@ -18,7 +18,7 @@ type = "i32"
 input = "i32"
 default = 8
 min = 1
-max = 8
+max = 16
 section = "graphics"
 section_label = "Graphics"
 

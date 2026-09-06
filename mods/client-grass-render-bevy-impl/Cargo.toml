@@ -1,6 +1,6 @@
 [package]
 name = "client-grass-render-bevy-impl"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
@@ -24,6 +24,9 @@ run = []
 ownership = []
 
 [dependencies]
+voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
+client-voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
+
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 client-bevy-default-plugins-mod = { path = "../client-bevy-default-plugins-mod" }

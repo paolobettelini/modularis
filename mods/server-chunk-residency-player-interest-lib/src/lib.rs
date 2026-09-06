@@ -22,14 +22,13 @@ pub fn player_interest_chunks(
             player.position[2].floor() as i32,
         )
         .chunk();
-        for y in -config.vertical_radius.max(0)..=config.vertical_radius.max(0) {
-            for z in -config.horizontal_radius.max(0)..=config.horizontal_radius.max(0) {
-                for x in -config.horizontal_radius.max(0)..=config.horizontal_radius.max(0) {
-                    let position = ChunkPos::new(center.x + x, center.y + y, center.z + z);
-                    if let Some(key) = world.resident_key_for_player(player.id, position) {
-                        desired.insert(key);
-                    }
-                }
+        for position in config.volume.positions(center,config.radius) {
+            if let Some(key) = world.resident_key_for_player(player.id,position) { desired.insert(key); }
+        }
+        if let Some(root) = world.resident_key_for_player(player.id,center) {
+            let center = bevy::math::DVec3::new(player.position[0] as f64, player.position[1] as f64, player.position[2] as f64);
+            for position in world.frames().interested_chunks(&root.scope(),center,config.radius.max(0) as f64 * 16.0) {
+                if let Some(key) = world.resident_key_for_player(player.id,position) { desired.insert(key); }
             }
         }
     }

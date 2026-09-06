@@ -1,0 +1,24 @@
+[package]
+name = "client-player-surface-motion-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientPlayerSurfaceMotionMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod","client-player-controller-api","collision-api","player-gravity-api","player-hitbox-api","client-game-state-api"]
+run = []
+ownership = []
+
+[dependencies]
+client-voxel-frame-movement-api = {git = "https://github.com/paolobettelini/modularis.git"}
+bevy = "0.17.3"
+bevy-mod = {path="../bevy-mod"}
+client-player-controller-api = {path="../client-player-controller-api"}
+collision-api = {path="../collision-api"}
+player-gravity-api = {path="../player-gravity-api"}
+player-hitbox-api = {path="../player-hitbox-api"}
+client-game-state-api = {path="../client-game-state-api"}
+client-player-surface-api = {git = "https://github.com/paolobettelini/modularis.git"}
+tokio = {version="1",features=["full"]}

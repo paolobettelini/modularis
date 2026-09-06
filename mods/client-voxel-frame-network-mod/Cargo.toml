@@ -1,0 +1,27 @@
+[package]
+name = "client-voxel-frame-network-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientVoxelFrameNetworkMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod","network-protocol-mod","client-game-state-api","client-dimension-api","client-world-context-api","client-session-api"]
+run = []
+ownership = []
+
+[dependencies]
+client-voxel-frame-movement-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-frame-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }
+client-session-api = { path = "../client-session-api" }
+client-world-context-api = { path = "../client-world-context-api" }
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+network-protocol-mod = { path = "../network-protocol-mod" }
+client-game-state-api = { path = "../client-game-state-api" }
+client-dimension-api = { path = "../client-dimension-api" }
+client-voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
+generated-network-messages = "0.1.0"
+tokio = { version = "1.48.0", features = ["full"] }

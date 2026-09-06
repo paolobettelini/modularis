@@ -5,11 +5,11 @@ use std::{
     collections::{HashMap, HashSet},
     sync::{Arc, RwLock},
 };
-use voxel_math_api::{BlockPos, ChunkPos};
+use voxel_frame_api::{VoxelBlockAddress, VoxelChunkAddress, VoxelFrameId};
 
 #[derive(Resource, Clone, Default)]
 pub struct ClientChunkCache {
-    chunks: Arc<RwLock<HashMap<ChunkPos, Chunk>>>,
+    chunks: Arc<RwLock<HashMap<VoxelChunkAddress, Chunk>>>,
 }
 
 impl ClientChunkCache {
@@ -20,14 +20,17 @@ impl ClientChunkCache {
             .is_empty()
     }
 
-    pub fn insert(&self, chunk: Chunk) {
+    pub fn insert(&self, chunk: Chunk) { self.insert_in_frame(VoxelFrameId::ROOT,chunk); }
+
+    pub fn insert_in_frame(&self, frame: VoxelFrameId, chunk: Chunk) {
         self.chunks
             .write()
             .expect("client chunk cache lock poisoned")
-            .insert(chunk.position(), chunk);
+            .insert(VoxelChunkAddress::new(frame,chunk.position()), chunk);
     }
 
-    pub fn remove(&self, position: ChunkPos) {
+    pub fn remove(&self, position: impl Into<VoxelChunkAddress>) {
+        let position = position.into();
         self.chunks
             .write()
             .expect("client chunk cache lock poisoned")
@@ -41,7 +44,8 @@ impl ClientChunkCache {
             .clear();
     }
 
-    pub fn chunk(&self, position: ChunkPos) -> Option<Chunk> {
+    pub fn chunk(&self, position: impl Into<VoxelChunkAddress>) -> Option<Chunk> {
+        let position = position.into();
         self.chunks
             .read()
             .expect("client chunk cache lock poisoned")
@@ -49,14 +53,15 @@ impl ClientChunkCache {
             .cloned()
     }
 
-    pub fn contains(&self, position: ChunkPos) -> bool {
+    pub fn contains(&self, position: impl Into<VoxelChunkAddress>) -> bool {
+        let position = position.into();
         self.chunks
             .read()
             .expect("client chunk cache lock poisoned")
             .contains_key(&position)
     }
 
-    pub fn missing_from(&self, positions: &HashSet<ChunkPos>) -> Vec<ChunkPos> {
+    pub fn missing_from(&self, positions: &HashSet<VoxelChunkAddress>) -> Vec<VoxelChunkAddress> {
         let chunks = self
             .chunks
             .read()
@@ -68,7 +73,8 @@ impl ClientChunkCache {
             .collect()
     }
 
-    pub fn uniform_block(&self, position: ChunkPos) -> Option<BlockState> {
+    pub fn uniform_block(&self, position: impl Into<VoxelChunkAddress>) -> Option<BlockState> {
+        let position = position.into();
         self.chunks
             .read()
             .expect("client chunk cache lock poisoned")
@@ -76,7 +82,8 @@ impl ClientChunkCache {
             .and_then(Chunk::uniform_block)
     }
 
-    pub fn block(&self, position: BlockPos) -> Option<BlockState> {
+    pub fn block(&self, position: impl Into<VoxelBlockAddress>) -> Option<BlockState> {
+        let position = position.into();
         self.chunks
             .read()
             .expect("client chunk cache lock poisoned")
@@ -84,7 +91,8 @@ impl ClientChunkCache {
             .map(|chunk| chunk.get(position.local()))
     }
 
-    pub fn set_block(&self, position: BlockPos, block: impl Into<BlockState>) -> bool {
+    pub fn set_block(&self, position: impl Into<VoxelBlockAddress>, block: impl Into<BlockState>) -> bool {
+        let position = position.into();
         let mut chunks = self
             .chunks
             .write()
@@ -99,12 +107,12 @@ impl ClientChunkCache {
 
 #[derive(Message, Debug, Clone, Copy)]
 pub struct ClientChunkAvailable {
-    pub position: ChunkPos,
+    pub position: VoxelChunkAddress,
 }
 
 #[derive(Message, Debug, Clone, Copy)]
 pub struct ClientChunkChanged {
-    pub position: ChunkPos,
+    pub position: VoxelChunkAddress,
 }
 
 pub trait ClientChunkCacheApi: Send + Sync + 'static {}

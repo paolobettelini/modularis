@@ -172,6 +172,7 @@ fn apply_authoritative_player_target(
 }
 
 fn send_player_movement(
+    attachment:Option<Res<client_player_surface_api::PlayerSurfaceAttachment>>,
     time: Res<Time>,
     mut timer: ResMut<MovementSendTimer>,
     sender: Option<Res<ClientNetworkSender>>,
@@ -187,6 +188,7 @@ fn send_player_movement(
     };
     let (movement_epoch, sequence) = session.begin_next_movement();
     let _ = sender.send(&ServerBoundMessage::PlayerMove(PlayerMove {
+        surface:attachment.as_ref().and_then(|a|a.0).map(|a|player_network_message_types::PlayerSurfacePosition{surface:a.surface,local_foot:a.local_foot.to_array()}),
         movement_epoch,
         sequence,
         position: player.translation.to_array(),

@@ -1,6 +1,6 @@
 [package]
 name = "client-chunk-request-network-mod"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
@@ -14,11 +14,15 @@ init = [
     "client-chunk-cache-api",
     "client-chunk-work-priority-api",
     "client-game-state-api",
+    "client-session-api",
 ]
 run = []
 ownership = []
 
 [dependencies]
+client-session-api = { path = "../client-session-api" }
+client-voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 chunk-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }

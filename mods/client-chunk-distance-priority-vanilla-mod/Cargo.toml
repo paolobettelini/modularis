@@ -1,10 +1,10 @@
 [package]
-name = "client-chunk-layered-priority-vanilla-mod"
-version = "0.1.0"
+name = "client-chunk-distance-priority-vanilla-mod"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
-entry = "ClientChunkLayeredPriorityVanillaMod"
+entry = "ClientChunkDistancePriorityVanillaMod"
 
 [package.metadata.mod.dependencies]
 init = ["bevy-mod", "client-chunk-work-priority-api"]
@@ -12,8 +12,8 @@ run = []
 ownership = []
 
 [dependencies]
+chunk-interest-api = { git = "https://github.com/paolobettelini/modularis.git" }
 bevy-mod = { path = "../bevy-mod" }
 client-chunk-work-priority-api = { path = "../client-chunk-work-priority-api" }
 tokio = { version = "1.48.0", features = ["full"] }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
-

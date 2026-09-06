@@ -124,10 +124,10 @@ mod uses this phase.
 The collision service resolves the fixed tick's movement and returns:
 
 - resolved position;
-- hit X/Y/Z flags;
-- grounded information.
+- world contact normals and surface identities;
+- walkable support information.
 
-Blocked velocity components are cleared.
+Inward velocity is clipped against contact planes, not global axis flags.
 
 ### Camera sync and interpolation
 
@@ -146,52 +146,15 @@ stepped.
 therefore add a frame-local offset without accumulating it or changing the
 controller. The vanilla sneak camera mod uses this phase to lower eye height.
 
-## Collision service
+## Collision service and grounded state
 
-`collision-api` exposes a closure-backed `CollisionService`.
+The active character path uses a gravity-oriented capsule and shape-aware
+root/frame geometry. Ground detection, sliding and step-up operate relative to
+player up. See [character collisions](character-collisions.md) for the contracts,
+algorithm, scale handling, surface attachment and authoritative frame motion.
 
-Besides full overlap and movement resolution, the service exposes a support
-probe used by grounded and sneak policies. A collision provider can install a
-specialized support query with `with_support_query`; otherwise the service
-falls back to a tiny movement resolution. The block-AABB implementation scans
-only the leading face of the hitbox, which avoids repeatedly traversing the
-whole volume of very large scaled players.
-
-The active implementation reads block states from `ClientChunkCache`, asks
-`BlockShapeService` for each solid block's local AABB union, and resolves the
-player against the translated boxes. The server validator uses the same shape
-contract against its authoritative world route.
-
-The resolver:
-
-1. depenetrates an already overlapping player;
-2. resolves the height axis first;
-3. resolves X;
-4. resolves Z;
-5. applies a small skin distance;
-6. falls back to binary search for difficult contacts.
-
-Resolving height first lets a rising player clear a ledge before planar motion
-is tested. This avoids alternating vertical/side corrections when jumping onto
-a block.
-
-Partial blocks use their actual top and side coordinates. Standing on a lower
-slab-like element therefore grounds the player near `y + 0.5`, not `y + 1.0`.
-The collision algorithm is independent from JSON: replacing
-`BlockShapeService` replaces the geometry source without changing movement.
-
-## Grounded state
-
-Grounding uses two sources:
-
-- a real blocked movement into the gravity direction;
-- a very small contact probe that preserves an existing stable grounded state.
-
-The probe cannot turn an arbitrary airborne player into grounded. It also does
-not keep a player grounded while velocity moves away from the surface.
-
-This distinction prevents repeated tiny jumps caused by a probe cancelling a
-real upward or falling velocity.
+The older closure API remains available to providers, but the default player
+controller uses `resolve_character` and `character_support`.
 
 ## Movement network flow
 
@@ -200,6 +163,7 @@ The client sends a `PlayerMove` about every `0.05` seconds:
 ```text
 movement_epoch
 sequence
+optional support-relative position
 position
 yaw
 pitch
@@ -216,6 +180,7 @@ The server collects:
 
 ```rust
 PendingServerPlayerMove {
+    surface,
     source,
     player_id,
     movement_epoch,

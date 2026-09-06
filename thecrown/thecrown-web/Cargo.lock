@@ -3372,7 +3372,7 @@ dependencies = [
 
 [[package]]
 name = "thecrown-common"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "anyhow",
  "async-nats",
@@ -3386,7 +3386,7 @@ dependencies = [
 
 [[package]]
 name = "thecrown-database"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "chrono",
  "diesel",
@@ -3399,7 +3399,7 @@ dependencies = [
 
 [[package]]
 name = "thecrown-protocol"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "serde",
  "uuid",

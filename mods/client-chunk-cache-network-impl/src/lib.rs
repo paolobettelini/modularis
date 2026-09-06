@@ -20,6 +20,7 @@ impl ClientNetworkChunkCache {
         _block_edits: &mut BlockEditEventsMod,
         _streaming: &mut impl client_chunk_streaming_api::ChunkStreamingApi,
         _game_state: &mut G,
+        _session: &mut impl client_session_api::ClientSessionApi,
     ) -> Self {
         bevy.app
             .init_resource::<ClientChunkCache>()
@@ -30,7 +31,10 @@ impl ClientNetworkChunkCache {
                 Update,
                 (cache_chunks, apply_block_edits, remove_unloaded_chunks)
                     .chain()
-                    .after(NetworkMessageSet::DispatchPackets),
+                    .after(NetworkMessageSet::DispatchPackets)
+                    .after(client_voxel_frame_api::ClientVoxelFrameSet::Receive)
+                    .after(client_dimension_api::ClientDimensionSet::ResetWorld)
+                    .after(client_world_context_api::ClientWorldContextSet::ResetWorld),
             );
         Self
     }
@@ -47,13 +51,15 @@ fn clear_disconnected_cache(cache: Res<ClientChunkCache>) {
 impl ClientChunkCacheApi for ClientNetworkChunkCache {}
 
 fn cache_chunks(
+    session: Res<client_session_api::ClientSession>,
     cache: Res<ClientChunkCache>,
     mut responses: MessageReader<ChunkResponseReceived>,
     mut available: MessageWriter<ClientChunkAvailable>,
 ) {
     for response in responses.read() {
-        let position = response.0.chunk.position();
-        cache.insert(response.0.chunk.clone());
+        if response.0.movement_epoch != session.movement_epoch { continue; }
+        let position = voxel_frame_api::VoxelChunkAddress::new(response.0.frame,response.0.chunk.position());
+        cache.insert_in_frame(response.0.frame,response.0.chunk.clone());
         available.write(ClientChunkAvailable { position });
     }
 }
@@ -100,8 +106,9 @@ fn remove_unloaded_chunks(
 }
 
 fn neighboring_chunk_positions(
-    position: voxel_math_api::ChunkPos,
-) -> [voxel_math_api::ChunkPos; 6] {
+    address: voxel_frame_api::VoxelChunkAddress,
+) -> [voxel_frame_api::VoxelChunkAddress; 6] {
+    let position = address.local;
     [
         voxel_math_api::ChunkPos::new(position.x + 1, position.y, position.z),
         voxel_math_api::ChunkPos::new(position.x - 1, position.y, position.z),
@@ -109,5 +116,5 @@ fn neighboring_chunk_positions(
         voxel_math_api::ChunkPos::new(position.x, position.y - 1, position.z),
         voxel_math_api::ChunkPos::new(position.x, position.y, position.z + 1),
         voxel_math_api::ChunkPos::new(position.x, position.y, position.z - 1),
-    ]
+    ].map(|local| voxel_frame_api::VoxelChunkAddress::new(address.frame,local))
 }

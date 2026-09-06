@@ -14,10 +14,12 @@ use server_chunk_world_api::{
 use server_primary_chunk_provider_api::ServerPrimaryChunkProviderApi;
 use std::{
     collections::{HashMap, HashSet},
-    sync::RwLock,
+    sync::{RwLock, Mutex},
 };
 use tokio::task::JoinHandle;
 use voxel_math_api::{BlockPos, ChunkPos};
+use voxel_frame_api::{VoxelBlockAddress, VoxelChunkAddress, VoxelFrameId};
+use voxel_frame_registry_api::VoxelFrames;
 
 pub struct ServerChunkWorldDynamicImpl;
 
@@ -33,6 +35,8 @@ impl ServerChunkWorldDynamicImpl {
         _primary_provider: &mut P,
         _storage_api: &mut S,
     ) -> Self {
+        bevy.app.init_resource::<VoxelFrames>();
+        let frames = bevy.app.world().resource::<VoxelFrames>().clone();
         let providers = bevy
             .app
             .world()
@@ -43,7 +47,7 @@ impl ServerChunkWorldDynamicImpl {
         bevy.app
             .insert_resource(ServerChunkWorld::new(DynamicServerChunkWorld::new(
                 providers, router, storage,
-            )));
+            ).with_frames(frames)));
         Self
     }
 
@@ -55,6 +59,8 @@ impl ServerChunkWorldDynamicImpl {
 impl ServerChunkWorldApi for ServerChunkWorldDynamicImpl {}
 
 struct DynamicServerChunkWorld {
+    mutations: Mutex<()>,
+    frames: VoxelFrames,
     providers: ServerChunkProviderRegistry,
     router: ServerChunkRouter,
     storage: ServerChunkStorage,
@@ -69,6 +75,8 @@ impl DynamicServerChunkWorld {
         storage: ServerChunkStorage,
     ) -> Self {
         Self {
+            mutations: Mutex::new(()),
+            frames: VoxelFrames::default(),
             providers,
             router,
             storage,
@@ -77,15 +85,18 @@ impl DynamicServerChunkWorld {
         }
     }
 
+    fn with_frames(mut self, frames: VoxelFrames) -> Self { self.frames = frames; self }
+
     fn storage_key(key: &ResidentChunkKey) -> StoredChunkKey {
         StoredChunkKey {
             instance: key.instance.clone(),
             source: key.provider.0.clone(),
+            frame: key.frame,
             position: key.position,
         }
     }
 
-    fn load_chunk(&self, viewer: ChunkViewer, position: ChunkPos) -> Option<Chunk> {
+    fn load_chunk(&self, viewer: ChunkViewer, position: VoxelChunkAddress) -> Option<Chunk> {
         let key = self.resident_key(viewer, position)?;
         if let Some(chunk) = self
             .chunks
@@ -97,30 +108,32 @@ impl DynamicServerChunkWorld {
             return Some(chunk);
         }
 
+        // One cache miss wins publication and persistence; concurrent requests
+        // must not overwrite a newer mutation with an older generated payload.
+        let mut chunks=self.chunks.write().expect("resident server chunks lock poisoned");
+        if let Some(chunk)=chunks.get(&key) { return Some(chunk.clone()); }
         let storage_key = Self::storage_key(&key);
         match self.storage.load(&storage_key) {
             Ok(Some(stored)) => {
-                let mut chunks = self
-                    .chunks
-                    .write()
-                    .expect("resident server chunks lock poisoned");
                 return Some(chunks.entry(key).or_insert(stored).clone());
             }
             Ok(None) => {}
-            Err(error) => warn!(
-                "failed to load chunk {:?} from world '{}': {error}; regenerating",
-                position, key.instance
-            ),
+            Err(error) => {
+                error!("failed to load chunk {:?} from world '{}': {error}; refusing to overwrite stored data",position,key.instance);
+                return None;
+            }
         }
 
-        let generated = self.providers.generate(
+        let generated = if !position.frame.is_root() {
+            Chunk::filled(position.local, BlockId::Air)
+        } else { self.providers.generate(
             &key.provider,
             &ChunkGenerationRequest {
                 viewer,
                 instance: key.instance.clone(),
-                position,
+                position: position.local,
             },
-        )?;
+        )? };
         match self.storage.queue_store(&storage_key, &generated) {
             Ok(_) => {}
             Err(error) => warn!(
@@ -129,19 +142,17 @@ impl DynamicServerChunkWorld {
             ),
         }
 
-        let mut chunks = self
-            .chunks
-            .write()
-            .expect("resident server chunks lock poisoned");
         Some(chunks.entry(key).or_insert(generated).clone())
     }
 
     fn mutate(
         &self,
         viewer: ChunkViewer,
-        position: BlockPos,
+        position: VoxelBlockAddress,
         block: BlockState,
+        require_air: Option<bool>,
     ) -> Result<BlockMutation, WorldEditError> {
+        let _mutation=self.mutations.lock().expect("voxel mutation lock poisoned");
         let key = self
             .resident_key(viewer, position.chunk())
             .ok_or(WorldEditError::RouteUnavailable(position.chunk()))?;
@@ -156,7 +167,10 @@ impl DynamicServerChunkWorld {
             let chunk = chunks
                 .get_mut(&key)
                 .ok_or_else(|| WorldEditError::ChunkUnavailable(key.clone()))?;
-            let previous = chunk.set(position.local(), block.clone());
+            let previous = chunk.get(position.local());
+            if require_air == Some(true) && previous.block != BlockId::Air { return Err(WorldEditError::BlockPositionOccupied(position)); }
+            if require_air == Some(false) && previous.block == BlockId::Air { return Err(WorldEditError::BlockAlreadyAir(position)); }
+            chunk.set(position.local(), block.clone());
             (previous, chunk.clone())
         };
         match self
@@ -187,6 +201,10 @@ impl DynamicServerChunkWorld {
             }
         }
 
+        if !key.frame.is_root() {
+            self.frames.set_occupied(&key.scope(), key.frame, key.position,
+                current_chunk.iter().any(|(_,state)| state.block != BlockId::Air));
+        }
         Ok(BlockMutation {
             scope: key.scope(),
             position,
@@ -227,22 +245,25 @@ impl DynamicServerChunkWorld {
 }
 
 impl ServerChunkWorldBackend for DynamicServerChunkWorld {
-    fn resident_key(&self, viewer: ChunkViewer, position: ChunkPos) -> Option<ResidentChunkKey> {
-        let route = self.router.route(viewer, position)?;
-        self.providers
-            .contains(&route.provider)
-            .then_some(ResidentChunkKey {
-                instance: route.instance,
-                provider: route.provider,
-                position,
-            })
+    fn frames(&self) -> VoxelFrames { self.frames.clone() }
+    fn resident_key(&self, viewer: ChunkViewer, position: VoxelChunkAddress) -> Option<ResidentChunkKey> {
+        let route = self.router.route(viewer, position.local)?;
+        let scope = world_instance_api::WorldScopeId::new(route.instance.clone(), route.provider.0.clone());
+        if !position.frame.is_root() && self.frames.get(&scope,position.frame).is_none() { return None; }
+        self.providers.contains(&route.provider).then_some(ResidentChunkKey {
+            instance: route.instance, provider: route.provider, frame: position.frame, position: position.local,
+        })
     }
 
-    fn chunk(&self, viewer: ChunkViewer, position: ChunkPos) -> Option<Chunk> {
+    fn chunk(&self, viewer: ChunkViewer, position: VoxelChunkAddress) -> Option<Chunk> {
         self.load_chunk(viewer, position)
     }
 
-    fn block(&self, viewer: ChunkViewer, position: BlockPos) -> Option<BlockState> {
+    fn block(&self, viewer: ChunkViewer, position: VoxelBlockAddress) -> Option<BlockState> {
+        if !position.frame.is_root() {
+            let key=self.resident_key(viewer,position.chunk())?;
+            if !self.frames.get(&key.scope(),position.frame)?.occupied_chunks.contains(&key.position) { return Some(BlockId::Air.into()); }
+        }
         self.load_chunk(viewer, position.chunk())
             .map(|chunk| chunk.get(position.local()))
     }
@@ -250,42 +271,31 @@ impl ServerChunkWorldBackend for DynamicServerChunkWorld {
     fn set_block(
         &self,
         viewer: ChunkViewer,
-        position: BlockPos,
+        position: VoxelBlockAddress,
         block: BlockState,
     ) -> Result<BlockMutation, WorldEditError> {
-        self.mutate(viewer, position, block)
+        self.mutate(viewer, position, block, None)
     }
 
     fn place_block(
         &self,
         viewer: ChunkViewer,
-        position: BlockPos,
+        position: VoxelBlockAddress,
         block: BlockState,
     ) -> Result<BlockMutation, WorldEditError> {
-        let current = self
-            .block(viewer, position)
-            .ok_or(WorldEditError::RouteUnavailable(position.chunk()))?;
-        if current.block != BlockId::Air {
-            return Err(WorldEditError::BlockPositionOccupied(position));
-        }
-        self.mutate(viewer, position, block)
+        self.mutate(viewer, position, block, Some(true))
     }
 
     fn break_block(
         &self,
         viewer: ChunkViewer,
-        position: BlockPos,
+        position: VoxelBlockAddress,
     ) -> Result<BlockMutation, WorldEditError> {
-        let current = self
-            .block(viewer, position)
-            .ok_or(WorldEditError::RouteUnavailable(position.chunk()))?;
-        if current.block == BlockId::Air {
-            return Err(WorldEditError::BlockAlreadyAir(position));
-        }
-        self.mutate(viewer, position, BlockId::Air.into())
+        self.mutate(viewer, position, BlockId::Air.into(), Some(false))
     }
 
     fn retain_resident(&self, desired: &HashSet<ResidentChunkKey>) {
+        let _mutation = self.mutations.lock().expect("world mutation lock poisoned");
         self.retry_unpersisted_chunks();
         let unpersisted = self
             .unpersisted
@@ -307,6 +317,10 @@ impl ServerChunkWorldBackend for DynamicServerChunkWorld {
     }
 
     fn discard_instance(&self, instance: &world_instance_api::WorldInstanceId) -> usize {
+        let _mutation = self.mutations.lock().expect("world mutation lock poisoned");
+        for frame in self.frames.all().into_iter().filter(|f|&f.scope.instance==instance) {
+            self.frames.remove(&frame.scope,frame.id);
+        }
         let mut chunks = self
             .chunks
             .write()
@@ -511,6 +525,7 @@ mod tests {
         storage
             .queue_store(
                 &StoredChunkKey {
+                    frame: VoxelFrameId::ROOT,
                     instance,
                     source: ChunkProviderId::primary().0,
                     position,
@@ -531,4 +546,27 @@ mod tests {
         );
         assert_eq!(calls.load(Ordering::Relaxed), 0);
     }
+    #[test]
+    fn framed_mutations_preserve_root_and_survive_eviction() {
+        let world=player_isolated_world();
+        let local=BlockPos::new(-17,-2,33);
+        let scope=world.resident_key_for_player(1,local.chunk()).unwrap().scope();
+        let first=VoxelFrameId::new();let second=VoxelFrameId::new();
+        for id in [first,second] {
+            world.frames().upsert(voxel_frame_api::VoxelFrame::new(id,scope.clone(),voxel_frame_api::VoxelFrameTransform::IDENTITY)).unwrap();
+        }
+        let a=VoxelBlockAddress::new(first,local);let b=VoxelBlockAddress::new(second,local);
+        world.place_block_for_player(1,a,BlockId::Stone).unwrap();
+        world.place_block_for_player(1,b,BlockId::Dirt).unwrap();
+        assert_eq!(world.block_for_player(1,local).unwrap().block,BlockId::Air);
+        assert_eq!(world.block_for_player(1,b).unwrap().block,BlockId::Dirt);
+        world.frames().set_transform(&scope,first,voxel_frame_api::VoxelFrameTransform::new([100.0,200.0,-300.0],[0.0,0.6,0.0,0.8]).unwrap()).unwrap();
+        world.retain_resident(&HashSet::new());
+        assert_eq!(world.block_for_player(1,a).unwrap().block,BlockId::Stone);
+        assert_eq!(world.break_block_for_player(1,a).unwrap().position,a);
+        assert_eq!(world.block_for_player(1,b).unwrap().block,BlockId::Dirt);
+        assert!(!world.frames().get(&scope,first).unwrap().occupied_chunks.contains(&local.chunk()));
+        assert!(world.frames().get(&scope,second).unwrap().occupied_chunks.contains(&local.chunk()));
+    }
+
 }

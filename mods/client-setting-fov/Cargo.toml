@@ -1,6 +1,6 @@
 [package]
 name = "client-setting-fov"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
@@ -16,7 +16,7 @@ id = "graphics.fov"
 label = "Field of view (degrees)"
 type = "f32"
 input = "f32"
-default = 75.0
+default = 100.0
 min = 30.0
 max = 120.0
 section = "graphics"

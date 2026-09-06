@@ -12,7 +12,8 @@ use client_block_outline_api::{
 use client_game_state_api::{GameState, GameStateApi};
 use std::collections::HashMap;
 use tokio::task::JoinHandle;
-use voxel_math_api::BlockPos;
+use voxel_frame_api::VoxelBlockAddress;
+use client_voxel_frame_api::{ClientVoxelFrames,ClientVoxelFrameEntities};
 
 const OUTLINE_EDGE_THICKNESS: f32 = 0.002;
 
@@ -47,6 +48,8 @@ impl ClientBlockOutlineBevyMod {
     ) -> Self {
         bevy.app
             .init_resource::<BlockOutlineMesh>()
+            .init_resource::<ClientVoxelFrames>()
+            .init_resource::<ClientVoxelFrameEntities>()
             .init_resource::<ActiveBlockOutlines>()
             .init_resource::<ClientBlockOutlineEnabled>()
             .add_message::<SetClientBlockOutline>()
@@ -84,6 +87,8 @@ fn apply_block_outline_commands(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut active: ResMut<ActiveBlockOutlines>,
     enabled: Res<ClientBlockOutlineEnabled>,
+    frames: Res<ClientVoxelFrames>,
+    mut roots: ResMut<ClientVoxelFrameEntities>,
 ) {
     for command in commands.read() {
         remove_outline(
@@ -95,6 +100,7 @@ fn apply_block_outline_commands(
         let Some(block) = command.block else {
             continue;
         };
+        let Some(parent) = roots.parent(&mut entity_commands,&frames,block.frame) else { continue; };
         let outline = spawn_outline(
             &mut entity_commands,
             &mesh.0,
@@ -103,6 +109,7 @@ fn apply_block_outline_commands(
             &command.shape,
             command.style,
             enabled.0,
+            parent,
         );
         active.0.insert(command.owner.clone(), outline);
     }
@@ -112,10 +119,11 @@ fn spawn_outline(
     commands: &mut Commands,
     mesh: &Handle<Mesh>,
     materials: &mut Assets<StandardMaterial>,
-    block: BlockPos,
+    block: VoxelBlockAddress,
     shape: &BlockShape,
     style: BlockOutlineStyle,
     enabled: bool,
+    frame_parent: Entity,
 ) -> ActiveBlockOutline {
     let color = Color::srgba(
         style.color[0],
@@ -135,10 +143,11 @@ fn spawn_outline(
     });
     let thickness = OUTLINE_EDGE_THICKNESS;
     let expansion = style.expansion.max(0.0);
-    let origin = Vec3::new(block.x as f32, block.y as f32, block.z as f32);
+    let origin = Vec3::new(block.local.x as f32, block.local.y as f32, block.local.z as f32);
     let entity = commands
         .spawn((
             Transform::from_translation(origin),
+            ChildOf(frame_parent),
             if enabled { Visibility::Inherited } else { Visibility::Hidden },
         ))
         .with_children(|parent| {
@@ -196,7 +205,7 @@ fn remove_outline(
     active: &mut ActiveBlockOutlines,
 ) {
     if let Some(outline) = active.0.remove(owner) {
-        commands.entity(outline.entity).despawn();
+        commands.entity(outline.entity).try_despawn();
         materials.remove(outline.material.id());
     }
 }
@@ -207,7 +216,7 @@ fn clear_block_outlines(
     mut active: ResMut<ActiveBlockOutlines>,
 ) {
     for (_, outline) in active.0.drain() {
-        commands.entity(outline.entity).despawn();
+        commands.entity(outline.entity).try_despawn();
         materials.remove(outline.material.id());
     }
 }

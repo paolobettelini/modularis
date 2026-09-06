@@ -4,7 +4,9 @@ use block_edit_events_api::{ServerBlockBroken, ServerBlockPlaced};
 use block_state_api::BlockState;
 use generated_block_registry::BlockId;
 use generated_sound_registry::SoundId;
-use parkour_gameplay_lib::{ParkourBlockEdit, ParkourConfig, ParkourRun, ParkourUpdate};
+use parkour_gameplay_lib::{
+    ParkourConfig, ParkourFrameEdit, ParkourRun, ParkourUpdate,
+};
 use player_network_message_types::PlayerId;
 use server_chat_api::PublishServerChatMessage;
 use server_kick_api::{ServerKickRequested, ServerKickTarget};
@@ -30,7 +32,9 @@ use thecrown_game_relay_api::{
 use thecrown_game_session_api::TheCrownGamePlayerAdmitted;
 use thecrown_protocol::{GameInstanceSpec, GameMode};
 use thecrown_world_template_api::TheCrownWorldTemplates;
-use world_instance_api::WorldInstanceId;
+use voxel_frame_api::VoxelFrame;
+use voxel_frame_kinematic_api::SetVoxelFrameMotion;
+use world_instance_api::{WorldInstanceId, WorldScopeId};
 
 use crate::{hub, instance_policy::InstancePlayerPolicy};
 
@@ -187,6 +191,7 @@ pub fn assign_admitted_players(
     mut scale: MessageWriter<SetServerPlayerScale>,
     mut messages: MessageWriter<PublishServerChatMessage>,
     mut kicks: MessageWriter<ServerKickRequested>,
+    mut frame_motions: MessageWriter<SetVoxelFrameMotion>,
     request_ids: Res<TheCrownRelayRequestIds>,
     mut record_loads: MessageWriter<RequestRelayParkourRecord>,
 ) {
@@ -215,7 +220,7 @@ pub fn assign_admitted_players(
         let player_policy = instance.player_policy;
         let admission_nonce = runtime.take_admission_nonce();
 
-        let (player_scope, player_world, arena_entity, spawn) = match mode {
+        let (player_scope, player_world, arena_entity, mut spawn) = match mode {
             GameMode::Hub => (instance_scope.clone(), shared_world.expect("Hub has a shared world"), None, shared_spawn),
             GameMode::Parkour => {
                 let scope = ScopeNodeId::new(format!("thecrown:instance:{}:player:{}", admitted.session.instance_id, admitted.player_id));
@@ -226,17 +231,33 @@ pub fn assign_admitted_players(
                 scope_worlds.bind(&scopes, scope.clone(), ServerChunkRoute {
                     instance: world_id.clone(), provider: ChunkProviderId::primary(),
                 }).expect("parkour player scope exists");
-                let mut run = ParkourRun::new(parkour_seed(&admitted.session.instance_id, admitted.player_id));
-                let initial = run.reset(&runtime.config, time.elapsed_secs_f64());
-                apply_parkour_edits(&world, admitted.player_id, &initial.edits, None, None);
-                let spawn = initial.teleport.expect("parkour reset supplies a spawn");
-                commands.entity(entity).insert(run);
-                (scope, world_id, Some(entity), spawn)
+                (scope, world_id, Some(entity), [0.5, 42.0, 0.5])
             }
         };
 
         let previous = scopes.assign_player(admitted.player_id, player_scope.clone()).expect("player scope exists");
         scope_changes.write(ServerPlayerScopeChanged { player_id: admitted.player_id, previous, current: Some(player_scope.clone()) });
+        if mode == GameMode::Parkour {
+            let mut run = ParkourRun::new(parkour_seed(
+                &admitted.session.instance_id,
+                admitted.player_id,
+            ));
+            let initial = run.reset(&runtime.config, time.elapsed_secs_f64());
+            let world_scope = parkour_world_scope(&player_world);
+            apply_parkour_update(
+                &world,
+                admitted.player_id,
+                &world_scope,
+                &initial,
+                &mut frame_motions,
+                None,
+                None,
+            );
+            spawn = initial.teleport.expect("parkour reset supplies a spawn");
+            commands
+                .entity(arena_entity.expect("parkour has an arena entity"))
+                .insert(run);
+        }
         world_changes.write(RequestServerPlayerWorldChange { player_id: admitted.player_id, world: player_world.clone(), position: spawn });
         gravity.write(SetServerPlayerGravity {
             player_id: admitted.player_id,
@@ -277,16 +298,31 @@ pub fn progress_parkour(
     mut messages: MessageWriter<PublishServerChatMessage>, mut sounds: MessageWriter<PlayServerSound>,
     request_ids: Res<TheCrownRelayRequestIds>,
     mut record_submissions: MessageWriter<SubmitRelayParkourRecord>,
+    mut frame_motions: MessageWriter<SetVoxelFrameMotion>,
 ) {
     for movement in movements.read() {
         let Some(arena) = runtime.players.get(&movement.player_id) else { continue; };
         let Some(entity) = arena.arena_entity else { continue; };
         let world_id = arena.world.clone();
+        let world_scope = parkour_world_scope(&world_id);
         let identity = arena.identity;
         let Ok(mut run) = runs.get_mut(entity) else { continue; };
-        let update = run.observe_position(&runtime.config, movement.position, time.elapsed_secs_f64());
+        let update = run.observe_position_with_frames(
+            &runtime.config,
+            movement.position,
+            time.elapsed_secs_f64(),
+            |frame| world.frames().transform(&world_scope, frame),
+        );
         if update.edits.is_empty() && update.teleport.is_none() { continue; }
-        apply_parkour_edits(&world, movement.player_id, &update.edits, Some(&mut broken), Some(&mut placed));
+        apply_parkour_update(
+            &world,
+            movement.player_id,
+            &world_scope,
+            &update,
+            &mut frame_motions,
+            Some(&mut broken),
+            Some(&mut placed),
+        );
         if let Some(position) = update.teleport {
             world_changes.write(RequestServerPlayerWorldChange { player_id: movement.player_id, world: world_id, position });
         }
@@ -395,14 +431,47 @@ fn publish_score(player_id: PlayerId, update: &ParkourUpdate, messages: &mut Mes
     }
 }
 
-fn apply_parkour_edits(
-    world: &ServerChunkWorld, player_id: PlayerId, edits: &[ParkourBlockEdit],
+fn apply_parkour_update(
+    world: &ServerChunkWorld,
+    player_id: PlayerId,
+    scope: &WorldScopeId,
+    update: &ParkourUpdate,
+    frame_motions: &mut MessageWriter<SetVoxelFrameMotion>,
     mut broken: Option<&mut MessageWriter<ServerBlockBroken>>, mut placed: Option<&mut MessageWriter<ServerBlockPlaced>>,
 ) {
-    for edit in edits {
+    for frame_edit in &update.frame_edits {
+        if let ParkourFrameEdit::Spawn(plan) = frame_edit {
+            if let Err(error) = world
+                .frames()
+                .upsert(VoxelFrame::new(plan.id, scope.clone(), plan.initial))
+            {
+                warn!("could not create parkour frame {}: {error}", plan.id);
+            }
+        }
+    }
+
+    for edit in &update.edits {
         let Ok(mutation) = world.set_block_for_player(player_id, edit.position, BlockState::new(edit.block)) else { continue; };
         if mutation.previous == mutation.current { continue; }
         publish_block_mutation(player_id, mutation, &mut broken, &mut placed);
+    }
+
+    for frame_edit in &update.frame_edits {
+        if let ParkourFrameEdit::Remove(frame) = frame_edit {
+            world.frames().remove(scope, *frame);
+        }
+    }
+
+    for frame_edit in &update.frame_edits {
+        let ParkourFrameEdit::Spawn(plan) = frame_edit else { continue; };
+        let Some(target) = plan.target else { continue; };
+        frame_motions.write(SetVoxelFrameMotion {
+            scope: scope.clone(),
+            frame: plan.id,
+            target,
+            movement: plan.movement.clone(),
+            initial_elapsed_seconds: plan.initial_elapsed_seconds,
+        });
     }
 }
 
@@ -419,4 +488,8 @@ fn publish_block_mutation(
 
 fn parkour_seed(instance_id: &str, player_id: PlayerId) -> u64 {
     let mut hasher = DefaultHasher::new(); instance_id.hash(&mut hasher); player_id.hash(&mut hasher); hasher.finish()
+}
+
+fn parkour_world_scope(world: &WorldInstanceId) -> WorldScopeId {
+    WorldScopeId::new(world.clone(), ChunkProviderId::primary().0)
 }

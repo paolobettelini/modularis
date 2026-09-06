@@ -54,7 +54,7 @@ fn dispatch_validated_breaks(
     game_modes: Res<ServerPlayerGameModes>,
     mut pending: ResMut<PendingBlockBreaks>,
     mut validated: MessageWriter<ServerValidatedBlockBreak>,
-    mut last_logged_target: Local<std::collections::HashMap<u64, voxel_math_api::BlockPos>>,
+    mut last_logged_target: Local<std::collections::HashMap<u64, voxel_frame_api::VoxelBlockAddress>>,
 ) {
     for request in std::mem::take(&mut pending.breaks) {
         if !request.allowed {

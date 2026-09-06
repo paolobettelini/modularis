@@ -79,7 +79,7 @@ receives:
 
 - one cached `Chunk`;
 - a typed `ClientGrassSettings` snapshot;
-- horizontal distance from the streaming focus.
+- three-dimensional distance from the streaming focus.
 - the current generated `Dimension`.
 
 It returns plain vertex and index arrays plus a blade count. It does not spawn
@@ -127,9 +127,8 @@ to the same cache lifecycle as normal chunk rendering:
 - geometry-affecting grass setting changes.
 
 It keeps a deduplicated pending set and processes at most two grass chunks per
-frame, nearest first. Only four vertical chunk layers above or below the focus
-are considered, matching the useful bound from the Fabric implementation.
-Horizontal range comes from the grass settings.
+frame, nearest first. Range is three-dimensional, with no separate Y-layer
+cutoff. Extra-frame meshes remain local children of their frame render parent.
 
 Each non-empty result becomes one Bevy mesh entity at the chunk origin. A
 single shared custom material is reused by every grass chunk. Each entity also
@@ -232,7 +231,7 @@ The current section contains:
 | Blade height | 0.44 | base height in blocks |
 | Height variation | 0.35 | per-blade height range |
 | Blade width | 0.95 | ribbon width multiplier |
-| Render radius | 96 | independent horizontal range in blocks |
+| Render radius | 96 | independent three-dimensional range in blocks |
 | Distance LOD | on | density and segment reduction |
 | Brightness | 1.0 | fragment color multiplier |
 | Hue jitter | 8 degrees | stable per-blade color variation |

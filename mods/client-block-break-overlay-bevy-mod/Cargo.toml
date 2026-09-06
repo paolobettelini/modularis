@@ -1,6 +1,6 @@
 [package]
 name = "client-block-break-overlay-bevy-mod"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 
 [package.metadata.mod]
@@ -15,6 +15,8 @@ run = []
 ownership = []
 
 [dependencies]
+client-voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 block-shape-api = { path = "../block-shape-api" }
@@ -24,4 +26,3 @@ client-chunk-cache-api = { path = "../client-chunk-cache-api" }
 client-game-state-api = { path = "../client-game-state-api" }
 tokio = { version = "1.48.0", features = ["full"] }
 voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
-

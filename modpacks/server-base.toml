@@ -1,10 +1,13 @@
 name = "Minecraft demo server foundation"
-version = "0.0.3"
+version = "0.0.4"
 description = "Convenience umbrella for the core plus neutral chat, inventory, cell-menu, block-edit, flight and sun pipelines."
 modpacks = ["server-core"]
 ignore = []
 
 mods = [
+    "server-voxel-frame-kinematic-mod",
+    "server-voxel-frame-events-mod",
+    "server-voxel-frame-network-mod",
     "server-chat-events-mod",
     "server-chat-network-receive-mod",
     "server-chat-network-sync-mod",

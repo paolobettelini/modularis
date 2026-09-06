@@ -21,6 +21,7 @@ impl ServerBlockBreakReachVanillaMod {
         H: ServerPlayerHitboxApi,
         R: ServerBlockInteractionRulesApi,
         P: ServerPlayerRegistryApi,
+        W: server_chunk_world_api::ServerChunkWorldApi,
     >(
         bevy: &mut BevyMod,
         _events: &mut BlockEditEventsMod,
@@ -28,6 +29,7 @@ impl ServerBlockBreakReachVanillaMod {
         _hitbox: &mut H,
         _rules: &mut R,
         _players: &mut P,
+        _world: &mut W,
     ) -> Self {
         bevy.app.add_systems(
             Update,
@@ -48,9 +50,10 @@ fn validate_block_break_reach(
     gravities: Res<ServerPlayerGravities>,
     hitboxes: Res<ServerPlayerHitboxes>,
     rules: Res<ServerBlockInteractionRules>,
+    world: Res<server_chunk_world_api::ServerChunkWorld>,
     mut pending: ResMut<PendingBlockBreaks>,
 ) {
     for request in &mut pending.breaks {
-        request.allowed = block_break_is_in_reach(&players, &gravities, &hitboxes, *rules, request);
+        request.allowed = block_break_is_in_reach(&players, &gravities, &hitboxes, *rules, &world, request);
     }
 }

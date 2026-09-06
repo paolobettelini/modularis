@@ -22,7 +22,7 @@ pub struct PlaceBlockItemOutcome {
 /// The function includes the vanilla reach and player-overlap checks but does
 /// not decide when it runs. Custom servers can gate it by scope, mode,
 /// permissions or any other state before calling it.
-pub fn try_place_block_item<B: BlockManagerApi>(
+pub fn prepare_block_placement<B: BlockManagerApi>(
     world: &ServerChunkWorld,
     players: &ServerPlayerRegistry,
     gravities: &ServerPlayerGravities,
@@ -30,21 +30,27 @@ pub fn try_place_block_item<B: BlockManagerApi>(
     rules: &ServerBlockInteractionRules,
     shapes: &BlockShapeService,
     item_use: &HeldItemUseDispatched,
-) -> Result<Option<PlaceBlockItemOutcome>, WorldEditError> {
+) -> Result<Option<server_block_placement_api::PendingBlockPlacement>, WorldEditError> {
     let Some(place_block) = item_use.item.metadata.place_block else {
         return Ok(None);
     };
-    let ItemUseTarget::Block { adjacent, .. } = item_use.target else {
+    let ItemUseTarget::Block { hit, adjacent, .. } = item_use.target else {
         return Ok(None);
     };
+    if hit.frame!=adjacent.frame || (hit.local.x as i64-adjacent.local.x as i64).abs()
+        +(hit.local.y as i64-adjacent.local.y as i64).abs()
+        +(hit.local.z as i64-adjacent.local.z as i64).abs()!=1 {return Ok(None);}
     let Some(actor) = players.player(item_use.player_id) else {
         return Ok(None);
     };
-    if !rules.player_can_reach_from_eye(
+    let Some(key) = world.resident_key_for_player(actor.id,adjacent.chunk()) else { return Ok(None); };
+    let Some(pose) = world.frames().transform(&key.scope(),adjacent.frame) else { return Ok(None); };
+    if !rules.player_can_reach_in_frame(
         actor.position,
         gravity_up(gravities.gravity(actor.id)),
         hitboxes.hitbox(actor.id).eye_height,
         adjacent,
+        pose,
     ) {
         return Ok(None);
     }
@@ -72,42 +78,37 @@ pub fn try_place_block_item<B: BlockManagerApi>(
                 .resident_key_for_player(player.id, adjacent.chunk())
                 .is_some_and(|key| key.scope() == scope)
                 && placed_shape.boxes().iter().any(|bounds| {
-                    let block_min = [
-                        adjacent.x as f32 + bounds.min.x,
-                        adjacent.y as f32 + bounds.min.y,
-                        adjacent.z as f32 + bounds.min.z,
-                    ];
-                    let block_max = [
-                        adjacent.x as f32 + bounds.max.x,
-                        adjacent.y as f32 + bounds.max.y,
-                        adjacent.z as f32 + bounds.max.z,
-                    ];
-                    overlaps(player_min[0], player_max[0], block_min[0], block_max[0])
-                        && overlaps(player_min[1], player_max[1], block_min[1], block_max[1])
-                        && overlaps(player_min[2], player_max[2], block_min[2], block_max[2])
+                    let player = voxel_frame_geometry_lib::OrientedVoxelBox::new(
+                        voxel_frame_api::VoxelBounds { min: player_min.map(f64::from), max: player_max.map(f64::from) },
+                        voxel_frame_api::VoxelFrameTransform::IDENTITY);
+                    let block = voxel_frame_geometry_lib::OrientedVoxelBox::new(voxel_frame_geometry_lib::block_bounds(adjacent.local,*bounds),pose);
+                    player.overlaps(block)
                 })
         });
     if occupied_by_visible_player {
         return Ok(None);
     }
 
-    let mutation = world.place_block_for_player(item_use.player_id, adjacent, place_block.block)?;
+    Ok(Some(server_block_placement_api::PendingBlockPlacement { item_use: item_use.clone(), position: adjacent, block: BlockState::new(place_block.block), allowed: true }))
+}
+
+pub fn apply_block_placement(world:&ServerChunkWorld, intent:&server_block_placement_api::PendingBlockPlacement)->Result<Option<PlaceBlockItemOutcome>,WorldEditError> {
+    if !intent.allowed { return Ok(None); }
+    let item_use=&intent.item_use;
+    let mutation=world.place_block_for_player(item_use.player_id,intent.position,intent.block.clone())?;
     Ok(Some(PlaceBlockItemOutcome {
-        placed: ServerBlockPlaced {
-            player_id: item_use.player_id,
-            scope: mutation.scope,
-            position: mutation.position,
-            block: mutation.current,
-            replaced: mutation.previous,
-        },
-        succeeded: ItemUseSucceeded {
-            player_id: item_use.player_id,
-            cell: item_use.cell.clone(),
-            item_before_use: item_use.item.clone(),
-        },
+        placed: ServerBlockPlaced { player_id:item_use.player_id, scope:mutation.scope, position:mutation.position, block:mutation.current, replaced:mutation.previous },
+        succeeded: ItemUseSucceeded { player_id:item_use.player_id, cell:item_use.cell.clone(), item_before_use:item_use.item.clone() },
     }))
 }
 
-fn overlaps(a_min: f32, a_max: f32, b_min: f32, b_max: f32) -> bool {
-    a_min < b_max && a_max > b_min
+/// Explicit custom-orchestration convenience; additional validators can instead
+/// be called between prepare_block_placement and apply_block_placement.
+pub fn try_place_block_item<B:BlockManagerApi>(
+    world:&ServerChunkWorld,players:&ServerPlayerRegistry,gravities:&ServerPlayerGravities,
+    hitboxes:&ServerPlayerHitboxes,rules:&ServerBlockInteractionRules,shapes:&BlockShapeService,item_use:&HeldItemUseDispatched
+)->Result<Option<PlaceBlockItemOutcome>,WorldEditError> {
+    match prepare_block_placement::<B>(world,players,gravities,hitboxes,rules,shapes,item_use)? {
+        Some(intent)=>apply_block_placement(world,&intent), None=>Ok(None)
+    }
 }

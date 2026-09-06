@@ -1,0 +1,12 @@
+[package]
+name = "voxel-frame-network-messages-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+support = true
+[package.metadata.network.messages]
+clientbound = ["voxel_frame_network_message_types::VoxelFrameUpsert", "voxel_frame_network_message_types::VoxelFrameRemove", "voxel_frame_network_message_types::VoxelFramePose"]
+
+[dependencies]
+voxel-frame-network-message-types = { git = "https://github.com/paolobettelini/modularis.git" }

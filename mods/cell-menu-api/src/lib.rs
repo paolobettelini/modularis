@@ -51,7 +51,7 @@ pub enum CellMenuClientRenderSet {
 pub struct CellMenuOpenIntent {
     pub player_id: CellMenuViewerId,
     pub kind: String,
-    pub anchor: Option<voxel_math_api::BlockPos>,
+    pub anchor: Option<voxel_frame_api::VoxelBlockAddress>,
 }
 
 #[derive(Message, Debug, Clone)]

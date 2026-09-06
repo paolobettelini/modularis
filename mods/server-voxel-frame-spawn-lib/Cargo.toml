@@ -1,0 +1,12 @@
+[package]
+name = "server-voxel-frame-spawn-lib"
+version = "0.1.1"
+edition = "2024"
+
+[dependencies]
+bevy = "0.17.3"
+server-chunk-world-api = { path="../server-chunk-world-api" }
+server-chunk-provider-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
+block-state-api = { git = "https://github.com/paolobettelini/modularis.git" }

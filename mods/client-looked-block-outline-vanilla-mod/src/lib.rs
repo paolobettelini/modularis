@@ -13,13 +13,14 @@ use client_chunk_cache_api::{ClientChunkCache, ClientChunkCacheApi};
 use client_game_state_api::{GameStateApi, InGameOverlayState};
 use std::marker::PhantomData;
 use tokio::task::JoinHandle;
-use voxel_math_api::BlockPos;
-use voxel_raycast_api::raycast_voxel_shapes;
+use voxel_frame_api::VoxelBlockAddress;
+use voxel_frame_geometry_lib::{raycast,ray_bounds};
+use client_voxel_frame_api::ClientVoxelFrames;
 
 const OUTLINE_OWNER: &str = "vanilla:looked-block";
 
 #[derive(Resource, Default)]
-struct LookedBlockOutlineTarget(Option<(BlockPos, BlockShape)>);
+struct LookedBlockOutlineTarget(Option<(VoxelBlockAddress, BlockShape)>);
 
 pub struct ClientLookedBlockOutlineVanillaMod<B>(PhantomData<B>);
 
@@ -42,6 +43,7 @@ impl<B: BlockManagerApi> ClientLookedBlockOutlineVanillaMod<B> {
         _shapes: &mut S,
     ) -> Self {
         bevy.app
+            .init_resource::<ClientVoxelFrames>()
             .init_resource::<LookedBlockOutlineTarget>()
             .add_systems(
                 Update,
@@ -63,6 +65,7 @@ impl<B: BlockManagerApi> ClientLookedBlockOutlineVanillaMod<B> {
 
 fn update_looked_block_outline<B: BlockManagerApi>(
     rules: Res<ClientBlockInteractionRules>,
+    frames: Res<ClientVoxelFrames>,
     cache: Res<ClientChunkCache>,
     shapes: Res<BlockShapeService>,
     camera: Query<&GlobalTransform, With<PlayerCamera>>,
@@ -71,10 +74,11 @@ fn update_looked_block_outline<B: BlockManagerApi>(
 ) {
     let target = camera.single().ok().and_then(|camera| {
         let transform = camera.compute_transform();
-        raycast_voxel_shapes(
-            transform.translation,
-            transform.forward().as_vec3(),
-            rules.max_reach,
+        raycast(
+            transform.translation.as_dvec3()+frames.render_origin,
+            transform.forward().as_vec3().as_dvec3(),
+            rules.max_reach as f64,
+            frames.scope.as_ref().map(|scope| frames.registry.query(scope,ray_bounds(transform.translation.as_dvec3()+frames.render_origin,transform.forward().as_vec3().as_dvec3(),rules.max_reach as f64))).unwrap_or_default(),
             |position| {
                 cache
                     .block(position)

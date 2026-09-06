@@ -10,6 +10,7 @@ pub fn storage_key(key: &ResidentChunkKey) -> WorldDataKey {
         instance: key.instance.clone(),
         domain: BLOCK_COMPONENT_DOMAIN.to_string(),
         source: key.provider.0.clone(),
+        frame: key.frame,
         partition: key.position,
     }
 }
@@ -52,7 +53,7 @@ mod tests {
     use world_instance_api::WorldInstanceId;
 
     fn key() -> ResidentChunkKey {
-        ResidentChunkKey { instance: WorldInstanceId::new("test:world"), provider: ChunkProviderId::new("test:provider"), position: ChunkPos::new(1, -2, 3) }
+        ResidentChunkKey { frame: voxel_frame_api::VoxelFrameId::ROOT, instance: WorldInstanceId::new("test:world"), provider: ChunkProviderId::new("test:provider"), position: ChunkPos::new(1, -2, 3) }
     }
 
     #[test]
@@ -68,4 +69,20 @@ mod tests {
         load_if_needed(&mut restored, &key(), &registry, &storage).unwrap();
         assert_eq!(restored.get::<BlockDamage>(&key(), 42), Some(&BlockDamage(17)));
     }
+    #[test]
+    fn save_load_separates_frames_at_the_same_chunk_and_local_index() {
+        let mut registry=BlockComponentRegistry::default();registry.register::<BlockDamage>();
+        let storage=ServerWorldDataStorage::memory();
+        let mut first=key();first.frame=voxel_frame_api::VoxelFrameId::new();
+        let mut second=first.clone();second.frame=voxel_frame_api::VoxelFrameId::new();
+        let mut data=ServerBlockComponents::default();
+        data.set(first.clone(),42,BlockDamage(12));data.set(second.clone(),42,BlockDamage(31));
+        queue_dirty(&mut data,&registry,&storage).unwrap();
+        let mut loaded=ServerBlockComponents::default();
+        load_if_needed(&mut loaded,&first,&registry,&storage).unwrap();
+        load_if_needed(&mut loaded,&second,&registry,&storage).unwrap();
+        assert_eq!(loaded.get::<BlockDamage>(&first,42),Some(&BlockDamage(12)));
+        assert_eq!(loaded.get::<BlockDamage>(&second,42),Some(&BlockDamage(31)));
+    }
+
 }

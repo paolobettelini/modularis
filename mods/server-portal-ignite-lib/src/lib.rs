@@ -28,6 +28,10 @@ pub fn evaluate_portal_ignition<B: BlockManagerApi>(
     };
     let hit_block = world.block_for_player(item_use.player_id, hit)?;
     let rule = rules.for_frame_block(hit_block.block)?;
+    // This portal policy is world-axis aligned. A frame-local portal policy
+    // can replace it; never reinterpret framed coordinates as root coordinates.
+    if !adjacent.frame.is_root() { return None; }
+    let adjacent = adjacent.local;
     let frame = find_ignitable_frame(
         adjacent,
         |position| {

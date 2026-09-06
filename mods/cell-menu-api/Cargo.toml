@@ -1,9 +1,10 @@
 [package]
 name = "cell-menu-api"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [dependencies]
+voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
 audience-api = { git = "https://github.com/paolobettelini/modularis.git" }
 bevy = "0.17.3"
 inventory-core-api = { git = "https://github.com/paolobettelini/modularis.git" }

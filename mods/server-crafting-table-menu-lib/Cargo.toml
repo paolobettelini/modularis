@@ -1,9 +1,17 @@
 [package]
 name = "server-crafting-table-menu-lib"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 
 [dependencies]
+server-player-registry-api = { path = "../server-player-registry-api" }
+server-player-gravity-api = { path = "../server-player-gravity-api" }
+server-player-hitbox-api = { path = "../server-player-hitbox-api" }
+server-block-interaction-rules-api = { path = "../server-block-interaction-rules-api" }
+player-gravity-api = { path = "../player-gravity-api" }
+world-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-chunk-provider-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
 audience-api = { git = "https://github.com/paolobettelini/modularis.git" }
 cell-menu-api = { git = "https://github.com/paolobettelini/modularis.git" }
 generated-block-registry = "0.1.0"

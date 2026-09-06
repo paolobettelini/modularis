@@ -27,17 +27,17 @@ camera position
 
 The default view config allows:
 
-- horizontal radius up to 8;
-- vertical radius 2.
+- one radius up to 8 chunks on all three axes;
+- spherical inclusion through the replaceable `ChunkInterestVolume` contract.
 
 The center uses all three camera coordinates. The window follows arbitrary
 positive and negative Y chunk positions.
 
-The implementation rebuilds the desired `HashSet<ChunkPos>` only when:
+The implementation rebuilds the desired `HashSet<VoxelChunkAddress>` only when:
 
 - center changes;
-- horizontal radius changes;
-- vertical radius changes;
+- radius or volume configuration changes;
+- frame registry revision changes;
 - active state was explicitly cleared.
 
 It emits:
@@ -76,14 +76,10 @@ priority(position, focus) -> ChunkWorkPriority
 
 The neutral provider preserves FIFO-compatible ordering.
 
-The vanilla layered policy ranks:
-
-1. absolute vertical layer distance from focus;
-2. horizontal distance.
-
-Therefore the current XZ plane fills first, nearest chunks first, before upper
-and lower layers. This reduces visible stutter while crossing a vertical chunk
-boundary.
+The vanilla distance policy uses squared Euclidean distance in all three axes.
+It is selected by `client-chunk-distance-priority-vanilla-mod`; it has no
+XZ-plane preference. Extra frames contribute only relevant occupied chunks.
+See [voxel frames](voxel-frames.md) for transformed interest and parent entities.
 
 A custom client can provide:
 
@@ -105,7 +101,7 @@ This bounds network bursts and per-frame CPU work.
 
 ## Client cache
 
-`ClientChunkCache` is a lock-protected `ChunkPos -> Chunk` map.
+`ClientChunkCache` is a lock-protected `VoxelChunkAddress -> Chunk` map.
 
 It supports:
 

@@ -5,7 +5,7 @@ use inventory_core_api::{
     InventoryLayout, InventorySectionId, InventorySectionLayout, InventorySectionRole,
 };
 use server_chunk_world_api::{ResidentChunkKey, ServerChunkWorld};
-use voxel_math_api::BlockPos;
+use voxel_frame_api::VoxelBlockAddress;
 
 pub const CRAFTING_TABLE_MENU_KIND: &str = "demo:crafting-table";
 
@@ -39,11 +39,27 @@ pub fn crafting_table_open_request(
     })
 }
 
-pub fn crafting_table_menu_id(world: &ResidentChunkKey, position: BlockPos) -> CellMenuId {
+/// Opt-in reach policy for callers that use ordinary player interaction.
+pub fn crafting_table_open_request_in_reach(
+    world:&ServerChunkWorld, intent:&CellMenuOpenIntent,
+    players:&server_player_registry_api::ServerPlayerRegistry,
+    gravities:&server_player_gravity_api::ServerPlayerGravities,
+    hitboxes:&server_player_hitbox_api::ServerPlayerHitboxes,
+    rules:server_block_interaction_rules_api::ServerBlockInteractionRules,
+)->Option<CellMenuOpenRequested> {
+    let anchor=intent.anchor?;
+    let player=players.player(intent.player_id)?;
+    let key=world.resident_key_for_player(player.id,anchor.chunk())?;
+    let pose=world.frames().transform(&key.scope(),anchor.frame)?;
+    if !rules.player_can_reach_in_frame(player.position,player_gravity_api::gravity_up(gravities.gravity(player.id)),hitboxes.hitbox(player.id).eye_height,anchor,pose) {return None;}
+    crafting_table_open_request(world,intent)
+}
+
+pub fn crafting_table_menu_id(world: &ResidentChunkKey, position: VoxelBlockAddress) -> CellMenuId {
     CellMenuId::new(crafting_table_identity(world, position))
 }
 
-pub fn crafting_table_audience(world: &ResidentChunkKey, position: BlockPos) -> Audience {
+pub fn crafting_table_audience(world: &ResidentChunkKey, position: VoxelBlockAddress) -> Audience {
     Audience::shared(crafting_table_identity(world, position))
 }
 
@@ -58,9 +74,24 @@ pub fn crafting_table_layout() -> InventoryLayout {
     }
 }
 
-fn crafting_table_identity(world: &ResidentChunkKey, position: BlockPos) -> String {
+fn crafting_table_identity(world: &ResidentChunkKey, position: VoxelBlockAddress) -> String {
     format!(
-        "demo:crafting-table:{}:{}:{}:{}:{}",
-        world.instance, world.provider, position.x, position.y, position.z
+        "demo:crafting-table:{}:{}:{}:{}:{}:{}:{}:{}",
+        world.instance.to_string().len(),world.instance, world.provider.to_string().len(),world.provider, position.frame, position.local.x, position.local.y, position.local.z
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test] fn same_local_table_in_different_frames_has_distinct_menu_identity() {
+        let key=ResidentChunkKey{
+            instance:world_instance_api::WorldInstanceId::new("test:world"),
+            provider:server_chunk_provider_api::ChunkProviderId::primary(),
+            frame:voxel_frame_api::VoxelFrameId::new(),position:voxel_math_api::ChunkPos::new(0,0,0),
+        };
+        let first=VoxelBlockAddress::new(key.frame,voxel_math_api::BlockPos::new(1,2,3));
+        let second=VoxelBlockAddress::new(voxel_frame_api::VoxelFrameId::new(),first.local);
+        assert_ne!(crafting_table_menu_id(&key,first),crafting_table_menu_id(&key,second));
+    }
 }

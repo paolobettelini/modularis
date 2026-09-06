@@ -10,6 +10,8 @@ pub struct WorldDataKey {
     pub domain: String,
     /// Provider/source scope inside the world.
     pub source: String,
+    /// Optional grid namespace; other world domains may use ROOT.
+    pub frame: voxel_frame_api::VoxelFrameId,
     /// Domain-specific spatial partition. Block components use chunk position.
     pub partition: ChunkPos,
 }
@@ -68,4 +70,3 @@ impl ServerWorldDataStorageBackend for MemoryWorldDataStorage {
     fn flush(&self) -> Result<WorldDataFlushReport, WorldDataStorageError> { Ok(WorldDataFlushReport::default()) }
     fn pending_records(&self) -> usize { 0 }
 }
-

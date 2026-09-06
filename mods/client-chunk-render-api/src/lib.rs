@@ -4,7 +4,7 @@ use voxel_math_api::ChunkPos;
 
 #[derive(Resource, Default)]
 pub struct RenderedChunks {
-    pub entities: HashMap<ChunkPos, Vec<Entity>>,
+    pub entities: HashMap<voxel_frame_api::VoxelChunkAddress, Vec<Entity>>,
 }
 
 #[derive(Resource, Debug, Clone, Copy)]

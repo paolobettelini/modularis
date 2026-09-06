@@ -1,0 +1,19 @@
+[package]
+name = "server-voxel-frame-events-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerVoxelFrameEventsMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod","server-chunk-world-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }
+voxel-frame-registry-api = { git = "https://github.com/paolobettelini/modularis.git" }
+tokio = { version = "1.48.0", features = ["full"] }

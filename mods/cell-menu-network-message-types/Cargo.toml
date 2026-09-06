@@ -1,9 +1,10 @@
 [package]
 name = "cell-menu-network-message-types"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [dependencies]
+voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
 cell-menu-api = { git = "https://github.com/paolobettelini/modularis.git" }
 inventory-core-api = { git = "https://github.com/paolobettelini/modularis.git" }
 item-instance-api = { git = "https://github.com/paolobettelini/modularis.git" }

@@ -14,6 +14,7 @@ use world_instance_api::WorldInstanceId;
 pub struct StoredChunkKey {
     pub instance: WorldInstanceId,
     pub source: String,
+    pub frame: voxel_frame_api::VoxelFrameId,
     pub position: ChunkPos,
 }
 

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use block_manager_api::BlockManagerApi;
 use block_shape_api::{BlockShape, BlockShapeService};
-use player_block_collision_api::resolve_player_collision;
+
 use player_network_message_types::PlayerId;
 use server_chunk_world_api::ServerChunkWorld;
 use voxel_math_api::BlockPos;
@@ -21,16 +21,17 @@ pub fn resolve_server_player_movement<B: BlockManagerApi>(
     requested: Vec3,
     hitbox_radius: f32,
     hitbox_height: f32,
+    up: Vec3,
     speed_multiplier: f32,
     maximum_base_delta: f32,
 ) -> Vec3 {
     let requested =
         clamp_requested_movement(current, requested, speed_multiplier, maximum_base_delta);
     let delta = requested - current;
-    resolve_player_collision(current, delta, hitbox_radius, hitbox_height, &|position| {
-        collision_shape::<B>(world, shapes, player_id, position)
-    })
-    .position
+    let mut query=collision_api::CharacterQuery::new(current,delta,up,hitbox_radius,hitbox_height);
+    let geometry=geometry::<B>(world,shapes,player_id,current);
+    query.was_grounded=character_collision_lib::support(query,&geometry).is_some();
+    character_collision_lib::resolve(query,&geometry).position
 }
 
 pub fn clamp_requested_movement(
@@ -65,4 +66,12 @@ pub fn collision_shape<B: BlockManagerApi>(
     } else {
         BlockShape::empty()
     }
+}
+
+pub fn geometry<'a,B:BlockManagerApi>(world:&'a ServerChunkWorld,shapes:&'a BlockShapeService,player_id:PlayerId,position:Vec3)->impl collision_api::CharacterGeometry+'a {
+ let scope=world.resident_key_for_player(player_id,BlockPos::new(position.x.floor() as i32,position.y.floor() as i32,position.z.floor() as i32).chunk()).map(|key|key.scope());
+ voxel_frame_collision_lib::VoxelGeometry{
+  shape:move |address:voxel_frame_api::VoxelBlockAddress|world.block_for_player(player_id,address).map_or_else(BlockShape::full_cube,|block|if B::is_solid(block.block){shapes.shape(&block)}else{BlockShape::empty()}),
+  frames:move |bounds|scope.as_ref().map(|scope|world.frames().query(scope,bounds)).unwrap_or_default(),
+ }
 }

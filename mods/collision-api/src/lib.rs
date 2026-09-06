@@ -1,3 +1,5 @@
+mod character;
+pub use character::*;
 use bevy::prelude::*;
 use std::sync::Arc;
 
@@ -22,6 +24,7 @@ pub trait CollisionApi: Send + Sync + 'static {}
 pub struct CollisionService {
     collides: Arc<dyn Fn(Vec3, f32, f32) -> bool + Send + Sync>,
     resolve: Arc<dyn Fn(Vec3, Vec3, f32, f32) -> CollisionResult + Send + Sync>,
+    character: Option<Arc<dyn CharacterCollisionBackend>>,
     support_query: Option<Arc<dyn Fn(Vec3, Vec3, f32, f32, f32) -> bool + Send + Sync>>,
 }
 
@@ -35,6 +38,7 @@ impl CollisionService {
             collides: Arc::new(collides),
             resolve: Arc::new(resolve),
             support_query: None,
+            character: None,
         }
     }
 
@@ -52,7 +56,23 @@ impl CollisionService {
         self
     }
 
+    pub fn with_character_backend(mut self, backend:impl CharacterCollisionBackend)->Self {
+        self.character=Some(Arc::new(backend));self
+    }
+    pub fn resolve_character(&self,query:CharacterQuery)->CharacterResult{
+        if let Some(backend)=&self.character{return backend.resolve(query);}
+        let old=self.resolve(query.position,query.displacement,query.radius,query.height);
+        CharacterResult{position:old.position,contacts:Vec::new(),support:None}
+    }
+    pub fn character_support(&self,query:CharacterQuery)->Option<CharacterContact>{
+        self.character.as_ref()?.support(query)
+    }
+    pub fn surface_pose(&self,id:u128)->Option<(Vec3,Quat)>{self.character.as_ref()?.surface_pose(id)}
     pub fn collides(&self, position: Vec3, radius: f32, height: f32) -> bool {
+        if let Some(backend)=&self.character {
+            let q=CharacterQuery::new(position,Vec3::ZERO,Vec3::Y,radius,height);
+            return backend.resolve(q).position.distance_squared(position)>q.skin().powi(2);
+        }
         (self.collides)(position, radius, height)
     }
 
@@ -63,6 +83,13 @@ impl CollisionService {
         radius: f32,
         height: f32,
     ) -> CollisionResult {
+        if let Some(backend)=&self.character {
+            let result=backend.resolve(CharacterQuery::new(position,movement,Vec3::Y,radius,height));
+            return CollisionResult{position:result.position,grounded:result.support.is_some(),
+                hit_x:result.contacts.iter().any(|c|c.normal.x.abs()>0.5),
+                hit_y:result.contacts.iter().any(|c|c.normal.y.abs()>0.5),
+                hit_z:result.contacts.iter().any(|c|c.normal.z.abs()>0.5)};
+        }
         (self.resolve)(position, movement, radius, height)
     }
 
@@ -79,6 +106,11 @@ impl CollisionService {
             return false;
         }
 
+        if let Some(backend)=&self.character {
+            let mut query=CharacterQuery::new(position,Vec3::ZERO,-direction,radius,height);
+            query.ground_probe=probe_distance;
+            return backend.support(query).is_some();
+        }
         if let Some(support_query) = &self.support_query {
             return support_query(position, direction, probe_distance, radius, height);
         }

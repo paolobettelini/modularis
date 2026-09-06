@@ -16,7 +16,8 @@ use client_input_api::{ClientInputSet, InputApi, PlayerInput};
 use item_use_api::ItemUseTarget;
 use std::marker::PhantomData;
 use tokio::task::JoinHandle;
-use voxel_raycast_api::raycast_voxel_shapes;
+use voxel_frame_geometry_lib::{raycast,ray_bounds};
+use client_voxel_frame_api::ClientVoxelFrames;
 
 pub struct ClientBlockInteractionRaycastMod<B>(PhantomData<B>);
 
@@ -40,7 +41,7 @@ impl<B: BlockManagerApi> ClientBlockInteractionRaycastMod<B> {
         _game_state: &mut G,
         _rules: &mut Rules,
     ) -> Self {
-        bevy.app.add_systems(
+        bevy.app.init_resource::<ClientVoxelFrames>().add_systems(
             Update,
             interact_with_blocks::<B>
                 .run_if(in_state(InGameOverlayState::Playing))
@@ -58,13 +59,14 @@ impl<B: BlockManagerApi> ClientBlockInteractionRaycastMod<B> {
 fn interact_with_blocks<B: BlockManagerApi>(
     input: Res<PlayerInput>,
     rules: Res<ClientBlockInteractionRules>,
+    frames: Res<ClientVoxelFrames>,
     cache: Res<ClientChunkCache>,
     shapes: Res<BlockShapeService>,
     camera: Query<&GlobalTransform, With<PlayerCamera>>,
     mut breaks: MessageWriter<BlockBreakRequested>,
     mut uses: MessageWriter<LocalBlockUseIntent>,
     mut counter: Local<u64>,
-    mut last_logged_break: Local<Option<voxel_math_api::BlockPos>>,
+    mut last_logged_break: Local<Option<voxel_frame_api::VoxelBlockAddress>>,
 ) {
     if !input.break_block_held && !input.use_item_pressed {
         return;
@@ -73,10 +75,11 @@ fn interact_with_blocks<B: BlockManagerApi>(
         return;
     };
     let transform = camera.compute_transform();
-    let Some(hit) = raycast_voxel_shapes(
-        transform.translation,
-        transform.forward().as_vec3(),
-        rules.max_reach,
+    let Some(hit) = raycast(
+        transform.translation.as_dvec3()+frames.render_origin,
+        transform.forward().as_vec3().as_dvec3(),
+        rules.max_reach as f64,
+            frames.scope.as_ref().map(|scope| frames.registry.query(scope,ray_bounds(transform.translation.as_dvec3()+frames.render_origin,transform.forward().as_vec3().as_dvec3(),rules.max_reach as f64))).unwrap_or_default(),
         |position| {
             cache
                 .block(position)

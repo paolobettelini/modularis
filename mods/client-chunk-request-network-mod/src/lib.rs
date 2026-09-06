@@ -11,7 +11,7 @@ use client_network_api::{ClientNetworkApi, ClientNetworkSender};
 use generated_network_messages::ServerBoundMessage;
 use std::collections::HashMap;
 use tokio::task::JoinHandle;
-use voxel_math_api::ChunkPos;
+use voxel_frame_api::VoxelChunkAddress;
 
 const MAX_REQUESTS_PER_FRAME: usize = 4;
 const RETRY_AFTER_SECONDS: f64 = 0.5;
@@ -24,12 +24,12 @@ struct PendingChunkRequest {
 
 #[derive(Resource, Default)]
 struct PendingChunkRequests {
-    entries: HashMap<ChunkPos, PendingChunkRequest>,
+    entries: HashMap<VoxelChunkAddress, PendingChunkRequest>,
     next_order: u64,
 }
 
 impl PendingChunkRequests {
-    fn ensure(&mut self, position: ChunkPos) {
+    fn ensure(&mut self, position: VoxelChunkAddress) {
         if self.entries.contains_key(&position) {
             return;
         }
@@ -61,9 +61,11 @@ impl ClientChunkRequestNetworkMod {
         _cache: &mut C,
         _priority: &mut P,
         _game_state: &mut G,
+        _session: &mut impl client_session_api::ClientSessionApi,
     ) -> Self {
         bevy.app
             .init_resource::<PendingChunkRequests>()
+            .init_resource::<client_voxel_frame_api::ClientVoxelFrames>()
             .add_systems(
                 Update,
                 (
@@ -127,9 +129,11 @@ fn reconcile_active_chunks(
 
 fn send_chunk_requests(
     time: Res<Time>,
+    session: Res<client_session_api::ClientSession>,
     sender: Option<Res<ClientNetworkSender>>,
     focus: Res<ChunkStreamingFocus>,
     priority: Res<ChunkWorkPriorityService>,
+    frames: Res<client_voxel_frame_api::ClientVoxelFrames>,
     mut pending: ResMut<PendingChunkRequests>,
 ) {
     let Some(sender) = sender else {
@@ -146,7 +150,7 @@ fn send_chunk_requests(
                 .is_none_or(|last_sent| now - last_sent >= RETRY_AFTER_SECONDS)
                 .then(|| {
                     (
-                        (priority.priority)(*position, focus.center),
+                        (priority.priority)(frames.world_chunk(*position).unwrap_or(position.local), focus.center),
                         request.order,
                         *position,
                     )
@@ -160,7 +164,7 @@ fn send_chunk_requests(
     ready.sort_unstable();
 
     for (_, _, position) in ready {
-        let message = ServerBoundMessage::ChunkRequest(ChunkRequest { position });
+        let message = ServerBoundMessage::ChunkRequest(ChunkRequest { position, movement_epoch: session.movement_epoch });
         if let Err(error) = sender.send(&message) {
             warn!("failed to request chunk {position:?}: {error}");
         } else {

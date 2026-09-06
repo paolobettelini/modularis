@@ -83,7 +83,7 @@ fn send_portals_with_requested_chunks(
         };
         for portal in portals
             .in_scope(&scope)
-            .filter(|portal| portal.frame.touches_chunk(request.message.position))
+            .filter(|portal| request.message.position.frame.is_root() && portal.frame.touches_chunk(request.message.position.local))
         {
             packets.write(ServerPacketOut {
                 audience: ServerAudience::Address(request.source),

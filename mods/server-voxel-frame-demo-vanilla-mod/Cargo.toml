@@ -1,0 +1,27 @@
+[package]
+name = "server-voxel-frame-demo-vanilla-mod"
+version = "0.1.1"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerVoxelFrameDemoVanillaMod"
+
+[package.metadata.mod.dependencies]
+init = ["bevy-mod","server-chunk-world-api","server-voxel-frame-persistence-mod","block-stone","block-oak-stairs","block-crafting-table"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = { path = "../bevy-mod" }
+server-chunk-world-api = { path = "../server-chunk-world-api" }
+server-chunk-provider-api = { git = "https://github.com/paolobettelini/modularis.git" }
+server-voxel-frame-persistence-mod = { path = "../server-voxel-frame-persistence-mod" }
+block-stone = { path = "../block-stone" }
+block-oak-stairs = { path = "../block-oak-stairs" }
+block-crafting-table = { path = "../block-crafting-table" }
+voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }
+generated-block-registry = "0.1.0"
+uuid = "1"
+tokio = { version = "1.48.0", features = ["full"] }

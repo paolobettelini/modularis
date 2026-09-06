@@ -6,6 +6,7 @@ modpacks = [
     "server-patchwork-auth",
 ]
 mods = [
+    "server-voxel-frame-persistence-mod",
     "server-world-catalog-build-server-impl",
     "server-world-seed-catalog-fs-impl",
     "server-chunk-provider-registry-mod",
@@ -23,6 +24,18 @@ mods = [
     "server-dimension-aether-mod",
     "server-chunk-world-dynamic-impl",
 ]
-version = "0.0.5"
+version = "0.0.6"
 name = "Modularis server"
 
+[options.build]
+args = [
+    "--jobs 12",
+    "--config /home/paolo/Desktop/videogames/minecraft_simple_demo/mods/.cargo/config.toml",
+]
+
+[options.build.env]
+CARGO_NET_GIT_FETCH_WITH_CLI = "true"
+GIT_CONFIG_COUNT = "1"
+GIT_CONFIG_KEY_0 = "url.git@github.com:.insteadOf"
+GIT_CONFIG_VALUE_0 = "https://github.com/"
+GIT_SSH_COMMAND = "ssh -i ~/.ssh/id_ed25519_github -o IdentitiesOnly=yes"

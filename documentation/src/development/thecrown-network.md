@@ -343,13 +343,17 @@ loader/state side.
 
 Every admitted Parkour player gets a child scope and private
 `WorldInstanceId`. `parkour-gameplay-lib` remains a plain, pure Rust library:
-it receives positions and returns block edits, score changes, and optional
-teleports. It knows nothing about Bevy, NATS, packets, audiences, or chunk
-storage.
+it receives positions and returns frame plans, block edits, score changes, and
+optional teleports. It knows nothing about NATS, packets, audiences, chunk
+providers, or storage. The library uses the generic voxel-frame value types,
+but the TheCrown adapter owns the actual scoped frame registry and ECS motion
+messages.
 
 `thecrown-game-main-mod::parkour` is the application-specific adapter. It:
 
 - applies generated edits to the player's routed world;
+- creates one independent voxel frame for every parkour block;
+- starts authoritative frame trajectories through `SetVoxelFrameMotion`;
 - publishes generic block-edit events for client synchronization;
 - requests authoritative relocation on reset;
 - publishes personal score messages;
@@ -369,6 +373,58 @@ third policy without changing either service provider.
 
 This is deliberately monolithic policy inside TheCrown, while the mechanics it
 reuses remain independent libraries and services.
+
+### Parkour obstacle progression
+
+Nominal path generation runs first and is unchanged: it chooses the next
+integer block position from the previous nominal position. A separate RNG
+stream then plans the obstacle frame. Consequently, adding or changing visual
+motion does not perturb the sequence of nominal positions produced by an
+existing parkour seed.
+
+Each block receives one of these frame behaviors:
+
+- `Normal`;
+- `StaticTilt`;
+- `Slider`;
+- `Rotating`;
+- `SliderTilted`;
+- `SliderRotating`.
+
+Progression uses a clamped smoothstep from score 15 to score 150. At maximum
+difficulty, normal blocks retain roughly a quarter of the random weight. The
+planner also forces recovery blocks every four to seven obstacles, after a very
+difficult obstacle, or after a streak of three difficult obstacles.
+
+The planner first estimates nominal jump cost from horizontal distance,
+positive vertical travel, and total distance. Tilt, translation, and rotation
+then share only the remaining accessory budget. They are not independently
+maximized. This keeps a hard nominal jump from also receiving extreme movement
+and rotation.
+
+Sliders use one axis, mostly X or Z; rare Y movement is capped separately.
+Static tilt is capped near 30 degrees and dynamic rotation near 12 degrees.
+Animated endpoints use one shared half-traversal duration and cubic ease-in-out
+with `PingPong`. A deterministic phase offset is stored in the authoritative
+trajectory, so server collision and client presentation sample the same phase.
+
+The block remains at frame-local `(0, 0, 0)`. Because voxel-frame coordinates
+are corner based, each endpoint compensates its translation by the rotated
+half-block vector. The visible/collidable block therefore rotates around its
+center instead of orbiting around the local grid corner.
+
+Checkpoint recognition is frame aware. The application supplies the current
+authoritative transform for each frame, and the parkour library transforms the
+player foot position into that frame's local space before testing the top of
+the block. It does not compare the player against the nominal world-space
+`BlockPos`. The selected server and client surface-motion adapters also keep a
+grounded player attached to moving frame collision geometry.
+
+To replace this progression without replacing TheCrown networking, keep the
+same output boundary: deterministic frame plans plus local block edits. A
+different planner can choose other probabilities or budgets while the adapter
+continues to own scopes, frame registration, motion ECS messages, replication,
+score publication, and cleanup.
 
 ### Persistent parkour records
 

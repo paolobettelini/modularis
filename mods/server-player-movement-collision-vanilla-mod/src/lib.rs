@@ -39,11 +39,12 @@ impl<B: BlockManagerApi> ServerPlayerMovementCollisionVanillaMod<B> {
         _flight_speed: &mut FS,
         _hitboxes: &mut HB,
         _shapes: &mut H,
+        _gravity:&mut impl server_player_gravity_api::ServerPlayerGravityApi,
     ) -> Self {
         bevy.app.add_systems(
             Update,
             validate_player_movement_collision::<B>
-                .in_set(ServerPlayerMovementSet::Validate)
+                .in_set(ServerPlayerMovementSet::Validate).in_set(collision_api::CharacterCollisionSet::Resolve)
                 .after(ServerPlayerHitboxSet),
         );
         Self(PhantomData)
@@ -56,6 +57,7 @@ impl<B: BlockManagerApi> ServerPlayerMovementCollisionVanillaMod<B> {
 
 fn validate_player_movement_collision<B: BlockManagerApi>(
     world: Res<ServerChunkWorld>,
+    gravities:Res<server_player_gravity_api::ServerPlayerGravities>,
     speeds: Res<ServerPlayerSpeeds>,
     flight_capabilities: Res<ServerPlayerFlightCapabilities>,
     flight_speeds: Res<ServerPlayerFlightSpeeds>,
@@ -80,6 +82,7 @@ fn validate_player_movement_collision<B: BlockManagerApi>(
             movement.accepted_position,
             hitbox.radius,
             hitbox.height,
+            player_gravity_api::gravity_up(gravities.gravity(movement.player_id)),
             allowed_speed,
             DEFAULT_MAX_PLAYER_MOVE_DELTA,
         );

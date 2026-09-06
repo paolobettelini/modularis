@@ -1,6 +1,6 @@
 [package]
 name = "server-player-movement-collision-vanilla-mod"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 
 [package.metadata.mod]
@@ -17,11 +17,15 @@ init = [
     "server-player-flight-speed-api",
     "server-player-hitbox-api",
     "block-shape-api",
+    "server-player-gravity-api",
 ]
 run = []
 ownership = []
 
 [dependencies]
+collision-api = {path="../collision-api"}
+server-player-gravity-api = {path="../server-player-gravity-api"}
+player-gravity-api = {path="../player-gravity-api"}
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 block-manager-api = { path = "../block-manager-api" }

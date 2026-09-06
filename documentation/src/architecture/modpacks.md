@@ -176,7 +176,9 @@ host.
 - transient in-memory chunk storage;
 - a sparse RAM-template chunk provider;
 - generic player world-context synchronization;
-- selected reusable movement policies;
+- selected reusable movement policies, including moving-surface attachment;
+- authoritative voxel-frame kinematics plus frame event/network adapters for
+  transformed parkour blocks;
 - separate Relay and TheCrown session API providers;
 - one custom `thecrown-game-main-mod` orchestrator.
 

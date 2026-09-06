@@ -10,15 +10,19 @@ pub fn block_break_is_in_reach(
     gravities: &ServerPlayerGravities,
     hitboxes: &ServerPlayerHitboxes,
     rules: ServerBlockInteractionRules,
+    world: &server_chunk_world_api::ServerChunkWorld,
     request: &PendingBlockBreak,
 ) -> bool {
     request.allowed
         && players.player(request.player_id).is_some_and(|player| {
-            rules.player_can_reach_from_eye(
+            let Some(key) = world.resident_key_for_player(player.id,request.position.chunk()) else { return false; };
+            let Some(pose) = world.frames().transform(&key.scope(),request.position.frame) else { return false; };
+            rules.player_can_reach_in_frame(
                 player.position,
                 gravity_up(gravities.gravity(player.id)),
                 hitboxes.hitbox(player.id).eye_height,
                 request.position,
+                pose,
             )
         })
 }

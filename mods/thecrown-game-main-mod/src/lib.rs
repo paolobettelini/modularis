@@ -30,6 +30,7 @@ use thecrown_game_relay_api::{RelayStartInstance, RelayStopInstance, TheCrownGam
 use thecrown_game_session_api::TheCrownGameSessionApi;
 use thecrown_world_template_api::TheCrownWorldTemplateApi;
 use tokio::task::JoinHandle;
+use voxel_frame_kinematic_api::VoxelFrameKinematicApi;
 
 pub struct TheCrownGameMainMod;
 
@@ -51,6 +52,7 @@ impl TheCrownGameMainMod {
         M: ServerCommandApi,
         A: ServerSoundApi,
         E: ServerExternalLinkApi,
+        VK: VoxelFrameKinematicApi,
     >(
         bevy: &mut BevyMod,
         _relay: &mut R,
@@ -69,6 +71,7 @@ impl TheCrownGameMainMod {
         _sound: &mut A,
         _external_links: &mut E,
         _block_edits: &mut BlockEditEventsMod,
+        _frame_kinematics: &mut VK,
     ) -> Self {
         commands::register(&mut bevy.app);
         bevy.app

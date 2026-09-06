@@ -58,7 +58,7 @@ fn apply_survival_damage(
     mut requests: MessageReader<ServerValidatedBlockBreak>,
     mut damage_changed: MessageWriter<ServerBlockDamageChanged>,
     mut broken: MessageWriter<ServerBlockBroken>,
-    mut logged_stages: Local<std::collections::HashMap<(server_chunk_world_api::ResidentChunkKey, voxel_math_api::BlockPos), u8>>,
+    mut logged_stages: Local<std::collections::HashMap<(server_chunk_world_api::ResidentChunkKey, voxel_frame_api::VoxelBlockAddress), u8>>,
 ) {
     for batch in collect_survival_damage(requests.read()) {
         if let Err(error) = load_if_needed(&mut components, &batch.key, &registry, &storage) {

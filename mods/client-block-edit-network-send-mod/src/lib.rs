@@ -31,7 +31,7 @@ impl ClientBlockEditNetworkSendMod {
 fn send_block_edit_requests(
     sender: Option<Res<ClientNetworkSender>>,
     mut breaks: MessageReader<BlockBreakRequested>,
-    mut last_logged_break: Local<Option<voxel_math_api::BlockPos>>,
+    mut last_logged_break: Local<Option<voxel_frame_api::VoxelBlockAddress>>,
 ) {
     let Some(sender) = sender else {
         return;

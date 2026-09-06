@@ -1,6 +1,6 @@
 [package]
 name = "client-block-edit-network-send-mod"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 
 [package.metadata.mod]
@@ -12,6 +12,7 @@ run = []
 ownership = []
 
 [dependencies]
+voxel-frame-api = { git = "https://github.com/paolobettelini/modularis.git" }
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 block-edit-events-api = { git = "https://github.com/paolobettelini/modularis.git" }

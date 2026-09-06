@@ -300,3 +300,10 @@ the appropriate registry snapshots.
 
 These belong in optional policy or presentation mods. They should not be added
 as special cases to transport, generated messages, or the command dispatcher.
+
+## Frame construction
+
+`/spawnframe x y z i j k` requires Privileged. Position is world-space; rotation
+is Euler XYZ in degrees. The optional command spawns a frame containing one
+stone block in the caller's world. See [voxel frames](../world/voxel-frames.md)
+for its reusable construction library and animated pose packets.

@@ -15,7 +15,7 @@ use voxel_math_api::{BlockPos, ChunkPos};
 pub struct AroundPlayerChunkStreaming;
 
 #[derive(Resource, Default)]
-struct LastStreamingWindow(Option<(ChunkPos, i32, i32)>);
+struct LastStreamingWindow(Option<(ChunkPos, i32, u64)>);
 
 impl AroundPlayerChunkStreaming {
     pub fn init<S: SettingsApi, C: CameraApi, G: GameStateApi>(
@@ -26,6 +26,7 @@ impl AroundPlayerChunkStreaming {
     ) -> Self {
         bevy.app
             .init_resource::<ActiveChunks>()
+            .init_resource::<client_voxel_frame_api::ClientVoxelFrames>()
             .init_resource::<ChunkStreamingFocus>()
             .init_resource::<ChunkStreamingViewConfig>()
             .init_resource::<LastStreamingWindow>()
@@ -33,7 +34,7 @@ impl AroundPlayerChunkStreaming {
             .add_message::<ChunkUnload>()
             .add_systems(
                 Update,
-                update_active_chunks.run_if(in_state(GameState::InGame)),
+                update_active_chunks.after(client_voxel_frame_api::ClientVoxelFrameSet::Receive).run_if(in_state(GameState::InGame)),
             )
             .add_systems(OnExit(GameState::InGame), unload_all_chunks);
         Self
@@ -50,6 +51,7 @@ fn update_active_chunks(
     camera: Query<&Transform, With<PlayerCamera>>,
     settings: Res<SettingsStore>,
     view: Res<ChunkStreamingViewConfig>,
+    frames: Res<client_voxel_frame_api::ClientVoxelFrames>,
     mut focus: ResMut<ChunkStreamingFocus>,
     mut last_window: ResMut<LastStreamingWindow>,
     mut active: ResMut<ActiveChunks>,
@@ -75,15 +77,17 @@ fn update_active_chunks(
     let radius = settings
         .get_i32(SettingKey::GraphicsRenderDistance)
         .unwrap_or(8)
-        .clamp(1, view.max_horizontal_radius.max(1));
-    let vertical_radius = view.vertical_radius.max(0);
-    let window = (center, radius, vertical_radius);
-    if last_window.0 == Some(window) && !active.positions.is_empty() {
+        .clamp(1, view.max_radius.max(1));
+    let window = (center, radius, frames.registry.revision());
+    if last_window.0 == Some(window) && !view.is_changed() && !active.positions.is_empty() {
         return;
     }
     last_window.0 = Some(window);
 
-    let desired = desired_chunks(center, radius, vertical_radius);
+    let mut desired = view.volume.positions(center,radius).into_iter().map(voxel_frame_api::VoxelChunkAddress::root).collect::<HashSet<_>>();
+    if let Some(scope) = &frames.scope {
+        desired.extend(frames.registry.interested_chunks(scope,camera.translation.as_dvec3()+frames.render_origin,radius as f64*16.0));
+    }
 
     for position in desired.difference(&active.positions).copied() {
         needed.write(ChunkNeeded { position });
@@ -94,41 +98,8 @@ fn update_active_chunks(
     active.positions = desired;
 }
 
-fn desired_chunks(
-    center: ChunkPos,
-    horizontal_radius: i32,
-    vertical_radius: i32,
-) -> HashSet<ChunkPos> {
-    let horizontal_radius = horizontal_radius.max(0);
-    let vertical_radius = vertical_radius.max(0);
-    let mut desired = HashSet::new();
-    for y in -vertical_radius..=vertical_radius {
-        for z in -horizontal_radius..=horizontal_radius {
-            for x in -horizontal_radius..=horizontal_radius {
-                desired.insert(ChunkPos::new(center.x + x, center.y + y, center.z + z));
-            }
-        }
-    }
-    desired
-}
-
 fn unload_all_chunks(mut active: ResMut<ActiveChunks>, mut unload: MessageWriter<ChunkUnload>) {
     for position in active.positions.drain() {
         unload.write(ChunkUnload { position });
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn streaming_window_follows_arbitrary_vertical_chunk_coordinates() {
-        let center = ChunkPos::new(7, 120, -4);
-        let chunks = desired_chunks(center, 1, 2);
-        assert_eq!(chunks.len(), 3 * 3 * 5);
-        assert!(chunks.contains(&ChunkPos::new(7, 118, -4)));
-        assert!(chunks.contains(&ChunkPos::new(7, 122, -4)));
-        assert!(!chunks.iter().any(|position| position.y == 0));
     }
 }

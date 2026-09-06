@@ -306,8 +306,8 @@ Gameplay should use these operations instead of mutating chunk maps directly.
 
 `ServerChunkResidencyConfig` has:
 
-- horizontal radius;
-- vertical radius;
+- one three-dimensional radius;
+- a replaceable `ChunkInterest` volume (spherical by default);
 - maintenance interval.
 
 The vanilla player-interest mod builds desired resident keys around active
@@ -316,7 +316,10 @@ players and evicts other resident chunks.
 Chunk request handling validates the requested position against this policy.
 This prevents a client from forcing arbitrary distant chunks into server memory.
 
-The server radius includes slack beyond the client's nominal window to account
+Extra frames retain only relevant occupied chunks, using the same scoped frame
+registry as streaming. See [voxel frames](voxel-frames.md).
+
+The server radius includes isotropic slack beyond the client's nominal window to account
 for movement and network latency.
 
 ## Replacing residency

@@ -19,18 +19,10 @@ impl ServerChunkResidencyPlayerInterestVanillaMod {
         _world: &mut W,
         _players: &mut P,
     ) -> Self {
-        let config = ServerChunkResidencyConfig {
-            // Keep one chunk of slack beyond the client's maximum radius so
-            // requests at a chunk boundary are not rejected while the latest
-            // predicted player position is still in transit.
-            horizontal_radius: 9,
-            // The client keeps two chunks above/below its current chunk. Keep
-            // one extra chunk so boundary requests survive movement latency.
-            vertical_radius: 3,
-            maintenance_interval_seconds: 1.0,
-        };
+        // One chunk of isotropic slack beyond the client interest radius.
+        let config = ServerChunkResidencyConfig::default();
         bevy.app
-            .insert_resource(config)
+            .insert_resource(config.clone())
             .insert_resource(ChunkResidencyMaintenanceTimer(Timer::from_seconds(
                 config.maintenance_interval_seconds,
                 TimerMode::Repeating,
@@ -60,6 +52,6 @@ fn maintain_player_chunk_residency(
         return;
     }
 
-    let desired = player_interest_chunks(&world, players.players(), *config);
+    let desired = player_interest_chunks(&world, players.players(), config.clone());
     world.retain_resident(&desired);
 }

@@ -1,6 +1,6 @@
 [package]
 name = "server-block-break-reach-vanilla-mod"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [package.metadata.mod]
@@ -14,11 +14,13 @@ init = [
     "server-player-hitbox-api",
     "server-block-interaction-rules-api",
     "server-player-registry-api",
+    "server-chunk-world-api",
 ]
 run = []
 ownership = []
 
 [dependencies]
+server-chunk-world-api = { path = "../server-chunk-world-api" }
 bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 block-edit-events-api = { git = "https://github.com/paolobettelini/modularis.git" }

@@ -1,0 +1,6 @@
+[package]
+name = "chunk-interest-api"
+version = "0.1.1"
+edition = "2024"
+[dependencies]
+voxel-math-api = { git = "https://github.com/paolobettelini/modularis.git" }

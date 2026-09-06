@@ -1,16 +1,17 @@
 name = "Minecraft demo vanilla client features"
-version = "0.0.4"
+version = "0.0.5"
 description = "Optional vanilla-style client controls and gameplay behavior."
 modpacks = []
 ignore = []
 
 mods = [
+    "client-player-surface-motion-mod",
     "client-setting-jump-key",
     "client-setting-sprint-key",
     "client-setting-sneak-key",
     "client-setting-chat-key",
     "client-block-interaction-rules-vanilla-mod",
-    "client-chunk-layered-priority-vanilla-mod",
+    "client-chunk-distance-priority-vanilla-mod",
     "client-crosshair-bevy-mod",
     "client-looked-block-outline-vanilla-mod",
     "client-hotbar-selection-input-mod",

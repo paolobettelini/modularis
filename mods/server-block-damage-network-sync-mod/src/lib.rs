@@ -86,7 +86,7 @@ fn sync_sent_chunks(
         for index in indices {
             let x = i32::from(index % 16); let z = i32::from((index / 16) % 16); let y = i32::from(index / 256);
             let local = LocalBlockPos::new(x, y, z).unwrap();
-            let position = local.to_world(event.key.position);
+            let position = voxel_frame_api::VoxelBlockAddress::new(event.key.frame,local.to_world(event.key.position));
             let Some(block) = world.block_for_player(event.player_id, position) else { continue };
             let stage = discrete_stage(status(&properties, &components, &event.key, index, block.block), 6);
             send(ServerAudience::Player(event.player_id), position, stage, &mut packets);
@@ -94,6 +94,6 @@ fn sync_sent_chunks(
     }
 }
 
-fn send(audience: ServerAudience, position: voxel_math_api::BlockPos, stage: u8, packets: &mut MessageWriter<ServerPacketOut>) {
+fn send(audience: ServerAudience, position: voxel_frame_api::VoxelBlockAddress, stage: u8, packets: &mut MessageWriter<ServerPacketOut>) {
     packets.write(ServerPacketOut { audience, message: ClientBoundMessage::BlockDamageProgress(BlockDamageProgress { position, stage }) });
 }

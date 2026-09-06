@@ -196,17 +196,19 @@ The speed multiplier, camera offset/transition time, and edge-probe constants
 live in the mods that own those policies. A client may keep configurable sneak
 input but replace only its movement speed or camera presentation.
 
-Edge protection applies only while grounded. It samples the requested planar
-path along two gravity-relative axes and clamps each component at the last
-supported point. Jumping and flight are not converted into grounded movement.
+Edge protection applies only while grounded. It samples the full requested
+motion through the character collision backend and clamps it at the last
+supported result. This includes gravity: capsule contact at an edge can turn
+downward movement into outward sliding even without directional input.
+Jumping and flight are not converted into grounded movement.
 
-Those samples use `CollisionService::has_support`, not full movement
-resolution. Collision providers may attach an optimized support query; the
-block-AABB provider scans only the thin gravity-facing surface of the hitbox.
-This keeps sneak usable for strongly scaled players because the probe cost
-grows with hitbox surface area instead of its complete volume. Providers that
-do not implement the optional optimization transparently use the generic
-resolver fallback.
+Those samples use `CollisionService::has_support`. The current provider performs
+a gravity-relative capsule support sweep against root and frame geometry. Probe
+distance scales with the player hitbox and matches the controller's grounded
+probe, so the constraint cannot accept a position the controller calls airborne.
+Frame geometry and slope handling remain in the collision provider, not in the
+sneak policy mod. See
+[character collisions](character-collisions.md) for the algorithm and its limits.
 
 The interaction behavior matches the usual voxel-game convention: sneaking
 does not disable block breaking. It bypasses right-click block activation, so a
