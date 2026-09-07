@@ -186,6 +186,26 @@ libraries conditionally. CharacterQuery exposes up, dimensions, slope threshold,
 probe distance, step height and an optional excluded surface. No block IDs or
 game modes appear in the mathematical solver.</p>
 <h2 id="solver"><a class="header" href="#solver">Solver</a></h2>
+<p>Ground attachment and jump separation are measured against the supporting
+surface normal, not just gravity-up. Uphill walking has an upward component;
+this alone must not detach the character. Conversely, a short ascending jump
+must not snap back just because its starting position was grounded (including
+server validation of predicted movement).</p>
+<p>The vanilla inertia mod accelerates and damps grounded movement in the support
+tangent plane. In the air it retains gravity-relative inertia. Vanilla gravity
+does not accelerate a grounded character down a walkable slope: the support
+probe provides adhesion. These remain optional policies outside the resolver.</p>
+<p>Moving-support carry publishes <code>PlayerSurfaceDisplacement</code> for the fixed tick.
+The controller includes that displacement in its previous/current presentation
+interval. Collision-backed frame rendering uses the same one-tick-delayed
+clock as player interpolation; purely visual animations keep their own clock.
+Attached relative velocity rotates with the support, while detachment transfers
+the surface velocity through the existing surface-motion mod.</p>
+<p>For runtime reconciliation diagnosis, enable
+<code>RUST_LOG=info,server_player_movement_collision_vanilla_mod=debug</code> on the server.
+The vanilla validator logs significant changes with player ID, start, requested
+and accepted positions, and gravity. This distinguishes server corrections from
+client presentation jitter without enabling per-packet logs globally.</p>
 <p>Penetration recovery also corrects overlaps smaller than the collision skin.
 Non-walkable slopes add a gravity-relative wall constraint before contact-plane
 clipping; subtracting upward motion after clipping would push the character
@@ -215,6 +235,11 @@ explicit crush/relocation policy; no damage or teleport policy is hidden here.</
 <h2 id="moving-surface-attachment"><a class="header" href="#moving-surface-attachment">Moving-surface attachment</a></h2>
 <p>The support identifier is opaque to collision-api. The voxel adapter uses a
 frame UUID; static root is zero.</p>
+<p>The authoritative server movement result preserves this opaque support ID in
+<code>ServerPlayerMovementApplied::support_surface</code>. Gameplay systems that react to
+an actual landing should consume that value instead of repeating a collision
+query later in the update. This matters for moving frames: a repeated query may
+observe a newer frame pose than the one used to accept the movement.</p>
 <p>The client stores a local foot anchor and previous support pose. Before movement,
 it transforms that anchor by the latest pose, obtaining a displacement containing
 both translation and rotation. It sweeps this transport against other geometry,

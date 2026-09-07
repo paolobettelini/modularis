@@ -444,7 +444,8 @@ messages.</p>
 <p>Parkour admission applies its own instance policy:</p>
 <ul>
 <li>gravity <code>(0, -20, 0)</code>;</li>
-<li>fixed player model and hitbox scale <code>1.0</code>.</li>
+<li>fixed player model and hitbox scale <code>1.0</code>;</li>
+<li>flight capability disabled.</li>
 </ul>
 <p>These values are stored as part of the runtime instance policy rather than as
 global TheCrown defaults. Hub and Parkour can therefore configure the same
@@ -485,12 +486,20 @@ trajectory, so server collision and client presentation sample the same phase.</
 are corner based, each endpoint compensates its translation by the rotated
 half-block vector. The visible/collidable block therefore rotates around its
 center instead of orbiting around the local grid corner.</p>
-<p>Checkpoint recognition is frame aware. The application supplies the current
-authoritative transform for each frame, and the parkour library transforms the
-player foot position into that frame's local space before testing the top of
-the block. It does not compare the player against the nominal world-space
-<code>BlockPos</code>. The selected server and client surface-motion adapters also keep a
-grounded player attached to moving frame collision geometry.</p>
+<p>Checkpoint recognition consumes <code>ServerPlayerMovementApplied::support_surface</code>,
+the frame identity selected by the same authoritative capsule/OBB solve that
+accepted the movement. It does not compare the player against the nominal
+world-space <code>BlockPos</code>. If an accepted packet has no final support marker, the
+adapter falls back to the pure parkour library's swept foot test from the
+previous to the accepted position, using current authoritative frame poses and
+checking only future checkpoints. This covers clients that already resolved a
+landing locally without letting the current checkpoint mask the next one. Both
+paths remain independent from a concrete collision provider. The adapter also
+checks the final authoritative registry position every server tick: a client
+that stops sending input immediately after landing does not need to jump again
+to produce another movement event. The selected
+server and client surface-motion adapters keep a grounded player attached to
+moving frame collision geometry.</p>
 <p>To replace this progression without replacing TheCrown networking, keep the
 same output boundary: deterministic frame plans plus local block edits. A
 different planner can choose other probabilities or budgets while the adapter

@@ -6857,6 +6857,26 @@ libraries conditionally. CharacterQuery exposes up, dimensions, slope threshold,
 probe distance, step height and an optional excluded surface. No block IDs or
 game modes appear in the mathematical solver.</p>
 <h2 id="solver"><a class="header" href="#solver">Solver</a></h2>
+<p>Ground attachment and jump separation are measured against the supporting
+surface normal, not just gravity-up. Uphill walking has an upward component;
+this alone must not detach the character. Conversely, a short ascending jump
+must not snap back just because its starting position was grounded (including
+server validation of predicted movement).</p>
+<p>The vanilla inertia mod accelerates and damps grounded movement in the support
+tangent plane. In the air it retains gravity-relative inertia. Vanilla gravity
+does not accelerate a grounded character down a walkable slope: the support
+probe provides adhesion. These remain optional policies outside the resolver.</p>
+<p>Moving-support carry publishes <code>PlayerSurfaceDisplacement</code> for the fixed tick.
+The controller includes that displacement in its previous/current presentation
+interval. Collision-backed frame rendering uses the same one-tick-delayed
+clock as player interpolation; purely visual animations keep their own clock.
+Attached relative velocity rotates with the support, while detachment transfers
+the surface velocity through the existing surface-motion mod.</p>
+<p>For runtime reconciliation diagnosis, enable
+<code>RUST_LOG=info,server_player_movement_collision_vanilla_mod=debug</code> on the server.
+The vanilla validator logs significant changes with player ID, start, requested
+and accepted positions, and gravity. This distinguishes server corrections from
+client presentation jitter without enabling per-packet logs globally.</p>
 <p>Penetration recovery also corrects overlaps smaller than the collision skin.
 Non-walkable slopes add a gravity-relative wall constraint before contact-plane
 clipping; subtracting upward motion after clipping would push the character
@@ -6886,6 +6906,11 @@ explicit crush/relocation policy; no damage or teleport policy is hidden here.</
 <h2 id="moving-surface-attachment"><a class="header" href="#moving-surface-attachment">Moving-surface attachment</a></h2>
 <p>The support identifier is opaque to collision-api. The voxel adapter uses a
 frame UUID; static root is zero.</p>
+<p>The authoritative server movement result preserves this opaque support ID in
+<code>ServerPlayerMovementApplied::support_surface</code>. Gameplay systems that react to
+an actual landing should consume that value instead of repeating a collision
+query later in the update. This matters for moving frames: a repeated query may
+observe a newer frame pose than the one used to accept the movement.</p>
 <p>The client stores a local foot anchor and previous support pose. Before movement,
 it transforms that anchor by the latest pose, obtaining a displacement containing
 both translation and rotation. It sweeps this transport against other geometry,
@@ -7119,11 +7144,15 @@ vanilla composition assembles it from independent mods:</p>
 <p>The speed multiplier, camera offset/transition time, and edge-probe constants
 live in the mods that own those policies. A client may keep configurable sneak
 input but replace only its movement speed or camera presentation.</p>
-<p>Edge protection applies only while grounded. It samples the full requested
-motion through the character collision backend and clamps it at the last
-supported result. This includes gravity: capsule contact at an edge can turn
-downward movement into outward sliding even without directional input.
-Jumping and flight are not converted into grounded movement.</p>
+<p>Edge protection applies while grounded and uses a sneak-only support latch with
+partial-footprint probes. It checks candidate motion through the character
+backend and clamps unsupported travel, preserving a supported tangent direction
+where possible. Frame-local edge directions follow the moving support pose.
+The latch is not ordinary collision support and does not make convex corners
+walkable for non-sneaking players. A jump must detach it immediately.</p>
+<p>Crouch movement follows the actual support tangent plane. An upward component
+while walking uphill is not a jump; detachment is checked against the support
+normal. Post-movement latch maintenance must not re-ground a separating jump.</p>
 <p>Those samples use <code>CollisionService::has_support</code>. The current provider performs
 a gravity-relative capsule support sweep against root and frame geometry. Probe
 distance scales with the player hitbox and matches the controller's grounded
@@ -7158,7 +7187,9 @@ ServerPlayerFlightSet::{Apply, Sync}
 <p><code>server-player-flight-capability-mod</code> is neutral. Capability defaults to off.</p>
 <p>It removes state when a player leaves.</p>
 <p><code>server-player-flight-network-sync-mod</code> sends grants/revocations to the affected
-player.</p>
+player and always sends the current capability on join, including the default
+<code>false</code>. This prevents client state from leaking across server transfers or
+reconnections.</p>
 <h3 id="grant-policy"><a class="header" href="#grant-policy">Grant policy</a></h3>
 <p>The vanilla composition separates the role fact from the runtime capability:</p>
 <ul>
@@ -9850,7 +9881,8 @@ messages.</p>
 <p>Parkour admission applies its own instance policy:</p>
 <ul>
 <li>gravity <code>(0, -20, 0)</code>;</li>
-<li>fixed player model and hitbox scale <code>1.0</code>.</li>
+<li>fixed player model and hitbox scale <code>1.0</code>;</li>
+<li>flight capability disabled.</li>
 </ul>
 <p>These values are stored as part of the runtime instance policy rather than as
 global TheCrown defaults. Hub and Parkour can therefore configure the same
@@ -9891,12 +9923,20 @@ trajectory, so server collision and client presentation sample the same phase.</
 are corner based, each endpoint compensates its translation by the rotated
 half-block vector. The visible/collidable block therefore rotates around its
 center instead of orbiting around the local grid corner.</p>
-<p>Checkpoint recognition is frame aware. The application supplies the current
-authoritative transform for each frame, and the parkour library transforms the
-player foot position into that frame's local space before testing the top of
-the block. It does not compare the player against the nominal world-space
-<code>BlockPos</code>. The selected server and client surface-motion adapters also keep a
-grounded player attached to moving frame collision geometry.</p>
+<p>Checkpoint recognition consumes <code>ServerPlayerMovementApplied::support_surface</code>,
+the frame identity selected by the same authoritative capsule/OBB solve that
+accepted the movement. It does not compare the player against the nominal
+world-space <code>BlockPos</code>. If an accepted packet has no final support marker, the
+adapter falls back to the pure parkour library's swept foot test from the
+previous to the accepted position, using current authoritative frame poses and
+checking only future checkpoints. This covers clients that already resolved a
+landing locally without letting the current checkpoint mask the next one. Both
+paths remain independent from a concrete collision provider. The adapter also
+checks the final authoritative registry position every server tick: a client
+that stops sending input immediately after landing does not need to jump again
+to produce another movement event. The selected
+server and client surface-motion adapters keep a grounded player attached to
+moving frame collision geometry.</p>
 <p>To replace this progression without replacing TheCrown networking, keep the
 same output boundary: deterministic frame plans plus local block edits. A
 different planner can choose other probabilities or budgets while the adapter
