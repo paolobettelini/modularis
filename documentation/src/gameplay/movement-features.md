@@ -196,11 +196,16 @@ The speed multiplier, camera offset/transition time, and edge-probe constants
 live in the mods that own those policies. A client may keep configurable sneak
 input but replace only its movement speed or camera presentation.
 
-Edge protection applies only while grounded. It samples the full requested
-motion through the character collision backend and clamps it at the last
-supported result. This includes gravity: capsule contact at an edge can turn
-downward movement into outward sliding even without directional input.
-Jumping and flight are not converted into grounded movement.
+Edge protection applies while grounded and uses a sneak-only support latch with
+partial-footprint probes. It checks candidate motion through the character
+backend and clamps unsupported travel, preserving a supported tangent direction
+where possible. Frame-local edge directions follow the moving support pose.
+The latch is not ordinary collision support and does not make convex corners
+walkable for non-sneaking players. A jump must detach it immediately.
+
+Crouch movement follows the actual support tangent plane. An upward component
+while walking uphill is not a jump; detachment is checked against the support
+normal. Post-movement latch maintenance must not re-ground a separating jump.
 
 Those samples use `CollisionService::has_support`. The current provider performs
 a gravity-relative capsule support sweep against root and frame geometry. Probe
@@ -241,7 +246,9 @@ ServerPlayerFlightSet::{Apply, Sync}
 It removes state when a player leaves.
 
 `server-player-flight-network-sync-mod` sends grants/revocations to the affected
-player.
+player and always sends the current capability on join, including the default
+`false`. This prevents client state from leaking across server transfers or
+reconnections.
 
 ### Grant policy
 

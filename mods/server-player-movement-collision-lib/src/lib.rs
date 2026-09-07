@@ -25,13 +25,45 @@ pub fn resolve_server_player_movement<B: BlockManagerApi>(
     speed_multiplier: f32,
     maximum_base_delta: f32,
 ) -> Vec3 {
+    resolve_server_player_movement_result::<B>(
+        world,
+        shapes,
+        player_id,
+        current,
+        requested,
+        hitbox_radius,
+        hitbox_height,
+        up,
+        speed_multiplier,
+        maximum_base_delta,
+    )
+    .position
+}
+
+/// Resolves an authoritative movement while preserving contacts and support.
+///
+/// Gameplay adapters should consume this result (or the corresponding
+/// `ServerPlayerMovementApplied` fields) instead of repeating an approximate
+/// collision query after the frame simulation has advanced.
+pub fn resolve_server_player_movement_result<B: BlockManagerApi>(
+    world: &ServerChunkWorld,
+    shapes: &BlockShapeService,
+    player_id: PlayerId,
+    current: Vec3,
+    requested: Vec3,
+    hitbox_radius: f32,
+    hitbox_height: f32,
+    up: Vec3,
+    speed_multiplier: f32,
+    maximum_base_delta: f32,
+) -> collision_api::CharacterResult {
     let requested =
         clamp_requested_movement(current, requested, speed_multiplier, maximum_base_delta);
     let delta = requested - current;
     let mut query=collision_api::CharacterQuery::new(current,delta,up,hitbox_radius,hitbox_height);
     let geometry=geometry::<B>(world,shapes,player_id,current);
     query.was_grounded=character_collision_lib::support(query,&geometry).is_some();
-    character_collision_lib::resolve(query,&geometry).position
+    character_collision_lib::resolve(query,&geometry)
 }
 
 pub fn clamp_requested_movement(

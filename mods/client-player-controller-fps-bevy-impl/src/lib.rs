@@ -134,6 +134,7 @@ fn collect_planar_movement_intent(
 }
 
 fn update_grounded_probe(
+    mut surface: ResMut<client_player_surface_api::PlayerSurfaceContact>,
     gravity: Res<Gravity>,
     hitbox: Res<PlayerHitbox>,
     collision: Res<CollisionService>,
@@ -148,10 +149,12 @@ fn update_grounded_probe(
         let query=collision_api::CharacterQuery::new(transform.translation,Vec3::ZERO,gravity.up(),hitbox.radius,hitbox.height);
         let support=collision.character_support(query);
         grounded.0=support.is_some_and(|hit|velocity.0.dot(hit.normal)<=GROUND_LEAVE_SPEED_EPSILON);
+        if grounded.0 { surface.0=support; }
     }
 }
 
 fn move_player(
+    carried: Option<Res<client_player_surface_api::PlayerSurfaceDisplacement>>,
     mut surface:ResMut<client_player_surface_api::PlayerSurfaceContact>,
     time: Res<Time>,
     gravity: Res<Gravity>,
@@ -172,7 +175,7 @@ fn move_player(
     };
     let was_grounded = grounded.0;
     let start = transform.translation;
-    previous.0 = start;
+    previous.0 = start - carried.as_ref().map(|c|c.0).unwrap_or(Vec3::ZERO);
     let movement = velocity.0 * time.delta_secs();
     let mut query=collision_api::CharacterQuery::new(start,movement,gravity.up(),hitbox.radius,hitbox.height);
     query.was_grounded=was_grounded;

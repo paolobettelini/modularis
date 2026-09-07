@@ -331,6 +331,7 @@ fn collect_movement_requests(
         registry.touch_address(movement.source, time.elapsed_secs_f64());
         let pending_move = PendingServerPlayerMove {
             surface:movement.message.surface,
+            authoritative_support_surface: None,
             source: movement.source,
             player_id,
             movement_epoch: movement.message.movement_epoch,
@@ -389,6 +390,7 @@ fn apply_validated_movements(
                 sequence: movement.sequence,
                 previous_position: movement.current_position,
                 position,
+                support_surface: movement.authoritative_support_surface,
                 yaw: player.yaw,
                 pitch: player.pitch,
                 corrected: movement.rejected

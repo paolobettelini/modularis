@@ -364,7 +364,8 @@ messages.
 Parkour admission applies its own instance policy:
 
 - gravity `(0, -20, 0)`;
-- fixed player model and hitbox scale `1.0`.
+- fixed player model and hitbox scale `1.0`;
+- flight capability disabled.
 
 These values are stored as part of the runtime instance policy rather than as
 global TheCrown defaults. Hub and Parkour can therefore configure the same
@@ -413,12 +414,20 @@ are corner based, each endpoint compensates its translation by the rotated
 half-block vector. The visible/collidable block therefore rotates around its
 center instead of orbiting around the local grid corner.
 
-Checkpoint recognition is frame aware. The application supplies the current
-authoritative transform for each frame, and the parkour library transforms the
-player foot position into that frame's local space before testing the top of
-the block. It does not compare the player against the nominal world-space
-`BlockPos`. The selected server and client surface-motion adapters also keep a
-grounded player attached to moving frame collision geometry.
+Checkpoint recognition consumes `ServerPlayerMovementApplied::support_surface`,
+the frame identity selected by the same authoritative capsule/OBB solve that
+accepted the movement. It does not compare the player against the nominal
+world-space `BlockPos`. If an accepted packet has no final support marker, the
+adapter falls back to the pure parkour library's swept foot test from the
+previous to the accepted position, using current authoritative frame poses and
+checking only future checkpoints. This covers clients that already resolved a
+landing locally without letting the current checkpoint mask the next one. Both
+paths remain independent from a concrete collision provider. The adapter also
+checks the final authoritative registry position every server tick: a client
+that stops sending input immediately after landing does not need to jump again
+to produce another movement event. The selected
+server and client surface-motion adapters keep a grounded player attached to
+moving frame collision geometry.
 
 To replace this progression without replacing TheCrown networking, keep the
 same output boundary: deterministic frame plans plus local block edits. A

@@ -17,6 +17,9 @@ fn tick(time:Res<Time>,mut frames:ResMut<ClientVoxelFrames>,mut animations:ResMu
   let Some(mut frame)=frames.registry.get(scope,*id) else{return false;};
   if !animation.affects_collision{return true;}
   let (pose,done)=animation.movement.sample(animation.start,animation.target,time.elapsed_secs_f64()-animation.started_at);
-  frame.transform=pose;frames.upsert(frame);!done
+  frame.transform=pose;frames.upsert(frame);
+  // Keep the final interpolation interval available to the delayed renderer.
+  !done || !animation.movement.sample(animation.start,animation.target,
+      (time.elapsed_secs_f64()-animation.started_at-time.delta_secs_f64()).max(0.0)).1
  });
 }

@@ -1,6 +1,6 @@
 [package]
 name = "client-player-sneak-edge-protection-vanilla-mod"
-version = "0.1.3"
+version = "0.1.5"
 edition = "2024"
 
 [package.metadata.mod]
@@ -24,11 +24,9 @@ bevy = "0.17.3"
 bevy-mod = { path = "../bevy-mod" }
 client-game-state-api = { path = "../client-game-state-api" }
 client-player-controller-api = { path = "../client-player-controller-api" }
+client-player-surface-api = { git = "https://github.com/paolobettelini/modularis.git" }
 collision-api = { path = "../collision-api" }
 player-gravity-api = { path = "../player-gravity-api" }
 player-hitbox-api = { path = "../player-hitbox-api" }
 player-sneak-api = { path = "../player-sneak-api" }
 tokio = { version = "1.48.0", features = ["full"] }
-
-[dev-dependencies]
-character-collision-lib = { path = "../character-collision-lib" }

@@ -61,6 +61,7 @@ impl ClientPlayerInertiaVanillaMod {
 }
 
 fn accelerate_planar_velocity(
+    surface: Option<Res<client_player_surface_api::PlayerSurfaceContact>>,
     overlay: Res<State<InGameOverlayState>>,
     intent: Res<PlayerPlanarMovementIntent>,
     config: Res<VanillaInertiaConfig>,
@@ -79,7 +80,10 @@ fn accelerate_planar_velocity(
         }
         .clamp(0.0, 1.0);
         let acceleration = acceleration_per_tick(requested_speed, grounded.0, drag, speed_ratio);
-        velocity.0 += intent.direction * acceleration;
+        let normal = surface.as_ref().and_then(|s| s.0).filter(|_| grounded.0).map(|s| s.normal);
+        let direction = normal.map(|n| (intent.direction - n * intent.direction.dot(n)).normalize_or_zero())
+            .unwrap_or(intent.direction);
+        velocity.0 += direction * acceleration;
     }
 }
 
@@ -92,6 +96,7 @@ fn acceleration_per_tick(requested_speed: f32, grounded: bool, drag: f32, speed_
 }
 
 fn apply_planar_drag(
+    surface: Option<Res<client_player_surface_api::PlayerSurfaceContact>>,
     config: Res<VanillaInertiaConfig>,
     gravity: Res<Gravity>,
     mut players: Query<(&mut PlayerVelocity, &Grounded), With<Player>>,
@@ -104,7 +109,8 @@ fn apply_planar_drag(
             config.air_drag_per_tick
         }
         .clamp(0.0, 1.0);
-        let vertical = up * velocity.0.dot(up);
+        let axis = surface.as_ref().and_then(|s| s.0).filter(|_| grounded.0).map(|s| s.normal).unwrap_or(up);
+        let vertical = axis * velocity.0.dot(axis);
         velocity.0 = vertical + (velocity.0 - vertical) * drag;
     }
 }

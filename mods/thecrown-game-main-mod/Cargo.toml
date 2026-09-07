@@ -1,11 +1,10 @@
 [package]
 name = "thecrown-game-main-mod"
-version = "0.1.2"
+version = "0.1.4"
 edition = "2024"
 
 [package.metadata.mod]
 entry = "TheCrownGameMainMod"
-
 [package.metadata.mod.dependencies]
 init = [
     "bevy-mod",
@@ -19,6 +18,7 @@ init = [
     "server-kick-api",
     "server-player-world-api",
     "server-player-gravity-api",
+    "server-player-flight-api",
     "server-player-scale-api",
     "server-chat-api",
     "server-command-api",
@@ -55,9 +55,11 @@ server-external-link-api = { path = "../server-external-link-api" }
 server-kick-api = { path = "../server-kick-api" }
 server-player-chat-lib = { git = "https://github.com/paolobettelini/modularis.git" }
 server-player-gravity-api = { path = "../server-player-gravity-api" }
+server-player-flight-api = { path = "../server-player-flight-api" }
 server-player-lifecycle-events-api = { git = "https://github.com/paolobettelini/modularis.git" }
 server-player-registry-api = { path = "../server-player-registry-api" }
 server-player-scale-api = { path = "../server-player-scale-api" }
+server-player-surface-lib = { git = "https://github.com/paolobettelini/modularis.git" }
 server-player-world-api = { path = "../server-player-world-api" }
 server-scope-api = { path = "../server-scope-api" }
 server-scope-world-api = { path = "../server-scope-world-api" }

@@ -52,6 +52,30 @@ game modes appear in the mathematical solver.
 
 ## Solver
 
+Ground attachment and jump separation are measured against the supporting
+surface normal, not just gravity-up. Uphill walking has an upward component;
+this alone must not detach the character. Conversely, a short ascending jump
+must not snap back just because its starting position was grounded (including
+server validation of predicted movement).
+
+The vanilla inertia mod accelerates and damps grounded movement in the support
+tangent plane. In the air it retains gravity-relative inertia. Vanilla gravity
+does not accelerate a grounded character down a walkable slope: the support
+probe provides adhesion. These remain optional policies outside the resolver.
+
+Moving-support carry publishes `PlayerSurfaceDisplacement` for the fixed tick.
+The controller includes that displacement in its previous/current presentation
+interval. Collision-backed frame rendering uses the same one-tick-delayed
+clock as player interpolation; purely visual animations keep their own clock.
+Attached relative velocity rotates with the support, while detachment transfers
+the surface velocity through the existing surface-motion mod.
+
+For runtime reconciliation diagnosis, enable
+`RUST_LOG=info,server_player_movement_collision_vanilla_mod=debug` on the server.
+The vanilla validator logs significant changes with player ID, start, requested
+and accepted positions, and gravity. This distinguishes server corrections from
+client presentation jitter without enabling per-packet logs globally.
+
 Penetration recovery also corrects overlaps smaller than the collision skin.
 Non-walkable slopes add a gravity-relative wall constraint before contact-plane
 clipping; subtracting upward motion after clipping would push the character
@@ -91,6 +115,12 @@ explicit crush/relocation policy; no damage or teleport policy is hidden here.
 
 The support identifier is opaque to collision-api. The voxel adapter uses a
 frame UUID; static root is zero.
+
+The authoritative server movement result preserves this opaque support ID in
+`ServerPlayerMovementApplied::support_surface`. Gameplay systems that react to
+an actual landing should consume that value instead of repeating a collision
+query later in the update. This matters for moving frames: a repeated query may
+observe a newer frame pose than the one used to accept the movement.
 
 The client stores a local foot anchor and previous support pose. Before movement,
 it transforms that anchor by the latest pose, obtaining a displacement containing

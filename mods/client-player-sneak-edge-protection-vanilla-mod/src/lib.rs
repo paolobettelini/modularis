@@ -1,44 +1,50 @@
 use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use client_game_state_api::{GameState, GameStateApi};
+use client_player_surface_api::PlayerSurfaceContact;
 use client_player_controller_api::{
     Grounded, Player, PlayerControllerApi, PlayerControllerSet, PlayerPlanarMovementIntent,
     PlayerVelocity,
 };
-use collision_api::{CharacterQuery, CollisionApi, CollisionService};
+use collision_api::{CharacterContact, CharacterQuery, CollisionApi, CollisionService};
 use player_gravity_api::{Gravity, PlayerGravityApi};
 use player_hitbox_api::{PlayerHitbox, PlayerHitboxApi};
 use player_sneak_api::{LocalPlayerSneak, PlayerSneakApi};
 use tokio::task::JoinHandle;
 
 const SUPPORT_PROBE_DISTANCE: f32 = 0.025;
-
-/// Fraction of the capsule radius by which the player center may hang past the
-/// supporting face while sneaking.
 const SNEAK_OVERHANG_FRACTION: f32 = 0.90;
-
-/// Small numerical margin from the exact sneak-support boundary.
-const EDGE_BACKOFF: f32 = 0.002;
-
-const PATH_SAMPLES: usize = 8;
+const EDGE_BACKOFF: f32 = 0.0005;
 const BINARY_SEARCH_STEPS: usize = 9;
-const EDGE_NORMAL_PROBE: f32 = 0.03;
+const SUPPORT_GRACE_TICKS: u8 = 2;
 
-const DIAGONAL: f32 = 0.70710677;
-const SAMPLE_DIRECTIONS: [(f32, f32); 8] = [
-    (1.0, 0.0),
-    (-1.0, 0.0),
-    (0.0, 1.0),
-    (0.0, -1.0),
-    (DIAGONAL, DIAGONAL),
-    (DIAGONAL, -DIAGONAL),
-    (-DIAGONAL, DIAGONAL),
-    (-DIAGONAL, -DIAGONAL),
-];
-
-#[derive(Resource, Default)]
+#[derive(Resource)]
 struct SneakEdgeLatch {
     active: bool,
+    surface: u128,
+    local_face_normal: Vec3,
+    local_edge_a: Vec3,
+    local_edge_b: Vec3,
+    missed_support_ticks: u8,
+}
+
+impl Default for SneakEdgeLatch {
+    fn default() -> Self {
+        Self {
+            active: false,
+            surface: 0,
+            local_face_normal: Vec3::Y,
+            local_edge_a: Vec3::X,
+            local_edge_b: Vec3::Z,
+            missed_support_ticks: 0,
+        }
+    }
+}
+
+impl SneakEdgeLatch {
+    fn clear(&mut self) {
+        *self = Self::default();
+    }
 }
 
 pub struct ClientPlayerSneakEdgeProtectionVanillaMod;
@@ -62,11 +68,6 @@ impl ClientPlayerSneakEdgeProtectionVanillaMod {
     ) -> Self {
         bevy.app
             .init_resource::<SneakEdgeLatch>()
-            // The controller's normal grounded probe runs in Input. It must stay
-            // strict: capsule edge/corner contacts are not ground. Immediately
-            // afterwards this sneak-only policy may restore Grounded while a
-            // previously grounded crouching player still has partial footprint
-            // support.
             .add_systems(
                 FixedUpdate,
                 restore_sneak_edge_grounding
@@ -77,6 +78,12 @@ impl ClientPlayerSneakEdgeProtectionVanillaMod {
                 FixedUpdate,
                 constrain_sneaking_movement
                     .in_set(PlayerControllerSet::MovementConstraints)
+                    .run_if(in_state(GameState::InGame)),
+            )
+            .add_systems(
+                FixedUpdate,
+                maintain_sneak_support_after_movement
+                    .in_set(PlayerControllerSet::PostMovement)
                     .run_if(in_state(GameState::InGame)),
             );
 
@@ -96,45 +103,101 @@ fn restore_sneak_edge_grounding(
     mut latch: ResMut<SneakEdgeLatch>,
     mut players: Query<(&Transform, &PlayerVelocity, &mut Grounded), With<Player>>,
 ) {
-    if !sneak.active || gravity.0.length_squared() == 0.0 {
-        latch.active = false;
+    if !sneak.active || gravity.0.length_squared() <= f32::EPSILON {
+        latch.clear();
         return;
     }
 
     let up = gravity.up();
-    let (axis_a, axis_b) = tangent_basis(up);
 
     for (transform, velocity, mut grounded) in &mut players {
-        // Never turn a real jump / upward launch into edge grounding.
-        if velocity.0.dot(up) > 0.05 {
-            latch.active = false;
+        // A real jump must detach immediately from sneak edge protection.
+        let current_support = strict_support(&collision, *hitbox, transform.translation, up);
+        let support_normal = current_support.map(|hit| hit.normal).unwrap_or_else(||
+            if latch.active { latch_world_normal(&collision, &latch) } else { up });
+        if velocity.0.dot(support_normal) > 0.05 {
+            latch.clear();
             continue;
         }
 
-        // A true support contact arms the latch. The normal controller probe has
-        // already run in Input, so Grounded here represents genuine support.
-        if grounded.0 {
-            latch.active = true;
+        if let Some(contact) = current_support {
+            arm_latch_from_contact(&collision, &mut latch, contact, up);
+            grounded.0 = true;
             continue;
         }
 
-        // Once armed, sneak may keep the player grounded for a controlled
-        // partial-footprint overhang. This happens before GravityForces and
-        // MovementConstraints, so gravity cannot steal one falling tick.
-        if latch.active
-            && has_sneak_support(
-                &collision,
-                *hitbox,
-                transform.translation,
-                up,
-                axis_a,
-                axis_b,
-            )
-        {
+        if !latch.active {
+            continue;
+        }
+
+        let edges = latch_edge_directions(&collision, &latch, up);
+
+        if has_sneak_support(
+            &collision,
+            *hitbox,
+            transform.translation,
+            up,
+            edges,
+        ) {
+            latch.missed_support_ticks = 0;
+            grounded.0 = true;
+            continue;
+        }
+
+        // A transformed frame/capsule corner can lose the strict support probe
+        // for one fixed tick because of skin/rounding. Keep the previously
+        // armed latch briefly, while the movement constraint below prevents
+        // further travel into unsupported space.
+        if latch.missed_support_ticks < SUPPORT_GRACE_TICKS {
+            latch.missed_support_ticks += 1;
             grounded.0 = true;
         } else {
-            latch.active = false;
+            latch.clear();
         }
+    }
+}
+
+fn maintain_sneak_support_after_movement(
+    sneak: Res<LocalPlayerSneak>,
+    gravity: Res<Gravity>,
+    hitbox: Res<PlayerHitbox>,
+    collision: Res<CollisionService>,
+    latch: Res<SneakEdgeLatch>,
+    mut surface: ResMut<PlayerSurfaceContact>,
+    mut players: Query<(&Transform, &PlayerVelocity, &mut Grounded), With<Player>>,
+) {
+    if !sneak.active || !latch.active || gravity.0.length_squared() <= f32::EPSILON {
+        return;
+    }
+
+    let up = gravity.up();
+    let edges = latch_edge_directions(&collision, &latch, up);
+
+    for (transform, velocity, mut grounded) in &mut players {
+        // Never resurrect a support latch after JumpForces detached the player.
+        if !grounded.0 && velocity.0.dot(latch_world_normal(&collision, &latch)) > 0.05 { continue; }
+        // A real strict support returned by move_player is already ideal.
+        if grounded.0 && surface.0.is_some() {
+            continue;
+        }
+
+        if !has_sneak_support(
+            &collision,
+            *hitbox,
+            transform.translation,
+            up,
+            edges,
+        ) && latch.missed_support_ticks >= SUPPORT_GRACE_TICKS
+        {
+            continue;
+        }
+
+        grounded.0 = true;
+        surface.0 = Some(CharacterContact {
+            normal: latch_world_normal(&collision, &latch),
+            point: transform.translation,
+            surface: latch.surface,
+        });
     }
 }
 
@@ -145,9 +208,10 @@ fn constrain_sneaking_movement(
     hitbox: Res<PlayerHitbox>,
     collision: Res<CollisionService>,
     movement_intent: Res<PlayerPlanarMovementIntent>,
+    latch: Res<SneakEdgeLatch>,
     mut players: Query<(&Transform, &Grounded, &mut PlayerVelocity), With<Player>>,
 ) {
-    if !sneak.active || gravity.0.length_squared() == 0.0 {
+    if !sneak.active || gravity.0.length_squared() <= f32::EPSILON {
         return;
     }
 
@@ -157,413 +221,226 @@ fn constrain_sneaking_movement(
     }
 
     let up = gravity.up();
-    let (axis_a, axis_b) = tangent_basis(up);
+    let edges = if latch.active {
+        latch_edge_directions(&collision, &latch, up)
+    } else {
+        tangent_basis(up)
+    };
 
     for (transform, grounded, mut velocity) in &mut players {
-        // JumpForces runs before this set and clears Grounded when jumping.
-        if !grounded.0 {
+        // JumpForces runs before this set and clears Grounded for a real jump.
+        if !grounded.0 || !latch.active {
             continue;
         }
 
-        if !has_sneak_support(
-            &collision,
-            *hitbox,
-            transform.translation,
-            up,
-            axis_a,
-            axis_b,
-        ) {
-            continue;
-        }
+        let normal = latch_world_normal(&collision, &latch);
 
-        let vertical_speed = velocity.0.dot(up);
-
-        // IMPORTANT: edge protection is a movement constraint, not another
-        // movement/physics source. Use the already-modified planar intent as
-        // the authoritative crouch walking velocity. In particular, the sneak
-        // speed mod has already applied its multiplier before this set.
-        //
-        // Do not derive edge motion from PlayerVelocity: that value may contain
-        // residual tangential components produced by collision resolution or
-        // other forces, which previously made edge movement feel like ice.
+        // Sneak edge protection is only a constraint. It never carries planar
+        // velocity of its own: use the already crouch-scaled movement intent.
         let desired_speed =
             (movement_intent.target_speed * movement_intent.speed_multiplier).max(0.0);
-        let desired_planar_velocity =
-            movement_intent.direction.normalize_or_zero() * desired_speed;
-        let requested_planar_delta = desired_planar_velocity * delta_seconds;
+        let raw_direction = movement_intent.direction - up * movement_intent.direction.dot(up);
+        let desired_planar_velocity = project_to_plane(raw_direction, normal).normalize_or_zero() * desired_speed;
+        let requested_delta = desired_planar_velocity * delta_seconds;
 
-        let safe_planar_delta = safe_supported_delta(
+        let safe_delta = safe_supported_delta(
             &collision,
             *hitbox,
             transform.translation,
-            requested_planar_delta,
+            requested_delta,
             up,
-            axis_a,
-            axis_b,
+            edges,
         );
 
-        // Ground support owns motion into the floor. Preserve upward motion,
-        // but planar movement while crouching is exactly the constrained
-        // movement intent above. Releasing movement input therefore stops the
-        // player immediately just like ordinary crouch walking.
-        let vertical_velocity = up * vertical_speed.max(0.0);
-
-        velocity.0 = vertical_velocity + safe_planar_delta / delta_seconds;
+        // Walk tangent to the actual support. A gravity-up component here is
+        // slope traversal, not an extra vertical impulse to preserve each tick.
+        velocity.0 = safe_delta / delta_seconds;
     }
 }
 
-/// Keep the requested planar motion when possible.
-///
-/// When the requested displacement would leave sneak support, estimate the
-/// inward normal of the support boundary and decompose the ORIGINAL requested
-/// displacement into:
-///
-/// - motion toward the supported area;
-/// - motion tangent to the edge;
-/// - motion outward from the edge.
-///
-/// Only the outward component is constrained. The tangential component is never
-/// added on top of movement already performed, so edge movement cannot become
-/// faster than the original requested speed. For a diagonal input, the speed
-/// along the edge naturally becomes the tangential projection of that input.
+fn arm_latch_from_contact(
+    collision: &CollisionService,
+    latch: &mut SneakEdgeLatch,
+    contact: CharacterContact,
+    up: Vec3,
+) {
+    let rotation = collision
+        .surface_pose(contact.surface)
+        .map(|(_, rotation)| rotation)
+        .unwrap_or(Quat::IDENTITY);
+    let local_normal = rotation.conjugate() * contact.normal;
+
+    let face_axis = dominant_axis(local_normal);
+    // A model element may itself be rotated inside the frame. Keep its real
+    // normal; the dominant axis only chooses candidate footprint directions.
+    let local_face_normal = local_normal.normalize_or_zero();
+    let (local_edge_a, local_edge_b) = match face_axis {
+        0 => (Vec3::Y, Vec3::Z),
+        1 => (Vec3::X, Vec3::Z),
+        _ => (Vec3::X, Vec3::Y),
+    };
+
+    latch.active = true;
+    latch.surface = contact.surface;
+    latch.local_face_normal = local_face_normal;
+    latch.local_edge_a = local_edge_a;
+    latch.local_edge_b = local_edge_b;
+    latch.missed_support_ticks = 0;
+
+    // Validate immediately. Extremely degenerate projected edges fall back to
+    // a gravity-plane basis in `latch_edge_directions`.
+    let _ = latch_edge_directions(collision, latch, up);
+}
+
+fn dominant_axis(v: Vec3) -> usize {
+    let a = v.abs();
+    if a.x >= a.y && a.x >= a.z {
+        0
+    } else if a.y >= a.z {
+        1
+    } else {
+        2
+    }
+}
+
+/// Returns the two real block/frame edge directions projected into the player's
+/// gravity plane. The local axes remain stable while overhanging; a moving or
+/// rotating frame is refreshed from its current surface pose every tick.
+fn latch_world_normal(collision: &CollisionService, latch: &SneakEdgeLatch) -> Vec3 {
+    let rotation = collision
+        .surface_pose(latch.surface)
+        .map(|(_, rotation)| rotation)
+        .unwrap_or(Quat::IDENTITY);
+    (rotation * latch.local_face_normal).normalize_or_zero()
+}
+
+fn latch_edge_directions(
+    collision: &CollisionService,
+    latch: &SneakEdgeLatch,
+    up: Vec3,
+) -> (Vec3, Vec3) {
+    let rotation = collision
+        .surface_pose(latch.surface)
+        .map(|(_, rotation)| rotation)
+        .unwrap_or(Quat::IDENTITY);
+
+    let projected_a = project_to_plane(rotation * latch.local_edge_a, up);
+    let projected_b = project_to_plane(rotation * latch.local_edge_b, up);
+
+    match (
+        projected_a.length_squared() > 1e-8,
+        projected_b.length_squared() > 1e-8,
+    ) {
+        (true, true) => (projected_a.normalize(), projected_b.normalize()),
+        (true, false) => {
+            let a = projected_a.normalize();
+            (a, up.cross(a).normalize_or_zero())
+        }
+        (false, true) => {
+            let b = projected_b.normalize();
+            (up.cross(b).normalize_or_zero(), b)
+        }
+        (false, false) => tangent_basis(up),
+    }
+}
+
+fn project_to_plane(v: Vec3, normal: Vec3) -> Vec3 {
+    v - normal * v.dot(normal)
+}
+
+/// Clamp only the part of the requested crouch movement that would leave the
+/// sneak-support footprint. Candidate slide directions come from the actual
+/// support frame edges, never from a sampled gradient, so corner transitions do
+/// not acquire an artificial steering direction or extra velocity.
 fn safe_supported_delta(
     collision: &CollisionService,
     hitbox: PlayerHitbox,
     start: Vec3,
     requested: Vec3,
     up: Vec3,
-    axis_a: Vec3,
-    axis_b: Vec3,
+    edges: (Vec3, Vec3),
 ) -> Vec3 {
     if requested.length_squared() <= f32::EPSILON {
         return Vec3::ZERO;
     }
 
-    if resolved_sneak_support(
-        collision,
-        hitbox,
-        start,
-        requested,
-        up,
-        axis_a,
-        axis_b,
-    ) {
+    if resolved_sneak_support(collision, hitbox, start, requested, up, edges) {
         return requested;
     }
 
-    // First locate the boundary in the direction the player actually asked to
-    // move. This is used only to estimate the local edge orientation.
-    let boundary_delta = max_supported_delta(
-        collision,
-        hitbox,
-        start,
-        requested,
-        up,
-        axis_a,
-        axis_b,
-    );
-    let boundary_position =
-        resolved_position(collision, hitbox, start, boundary_delta, up);
+    let mut best = max_supported_delta(collision, hitbox, start, requested, up, edges);
 
-    let inward = estimate_support_inward(
-        collision,
-        hitbox,
-        boundary_position,
-        up,
-        axis_a,
-        axis_b,
-    );
+    for edge in [edges.0, edges.1] {
+        if edge.length_squared() <= 1e-8 {
+            continue;
+        }
 
-    if inward.length_squared() <= 1e-8 {
-        let fallback = best_projected_supported_delta(
-            collision,
-            hitbox,
-            start,
-            requested,
-            up,
-            axis_a,
-            axis_b,
-        );
-        return if fallback.length_squared() > boundary_delta.length_squared() {
-            fallback
-        } else {
-            boundary_delta
-        };
+        let edge = edge.normalize();
+        let tangent = edge * requested.dot(edge);
+        let remainder = requested - tangent;
+
+        // Moving along the physical edge first preserves the expected
+        // Minecraft-like diagonal glide. The second ordering is useful at a
+        // corner when moving inward onto the adjacent face before turning.
+        for candidate in [
+            sequence_candidate(
+                collision, hitbox, start, tangent, remainder, up, edges,
+            ),
+            sequence_candidate(
+                collision, hitbox, start, remainder, tangent, up, edges,
+            ),
+        ] {
+            best = better_candidate(best, candidate, requested);
+        }
     }
 
-    let normal_amount = requested.dot(inward);
-    let tangent_requested = requested - inward * normal_amount;
+    clamp_to_requested_length(best, requested.length())
+}
 
-    // Positive is toward more support and can remain untouched. Negative is
-    // outward and is the only component sneak protection needs to limit.
-    let inward_requested = inward * normal_amount.max(0.0);
-    let outward_requested = inward * normal_amount.min(0.0);
+fn sequence_candidate(
+    collision: &CollisionService,
+    hitbox: PlayerHitbox,
+    start: Vec3,
+    first: Vec3,
+    second: Vec3,
+    up: Vec3,
+    edges: (Vec3, Vec3),
+) -> Vec3 {
+    let safe_first = max_supported_delta(collision, hitbox, start, first, up, edges);
+    let after_first = resolved_position(collision, hitbox, start, safe_first, up);
+    let safe_second = max_supported_delta(collision, hitbox, after_first, second, up, edges);
+    let candidate = safe_first + safe_second;
 
-    // Preserve the complete non-outward part first. At a corner, even tangent
-    // motion can meet another edge, so still validate it through the same
-    // support predicate rather than blindly accepting it.
-    let non_outward_requested = inward_requested + tangent_requested;
-    let safe_non_outward = max_supported_delta(
-        collision,
-        hitbox,
-        start,
-        non_outward_requested,
-        up,
-        axis_a,
-        axis_b,
-    );
-
-    let after_non_outward =
-        resolved_position(collision, hitbox, start, safe_non_outward, up);
-
-    // Then allow only as much outward overhang as the sneak footprint permits.
-    let safe_outward = max_supported_delta(
-        collision,
-        hitbox,
-        after_non_outward,
-        outward_requested,
-        up,
-        axis_a,
-        axis_b,
-    );
-
-    let candidate = safe_non_outward + safe_outward;
-
-    // Never return a displacement whose magnitude exceeds the requested
-    // movement. In exact arithmetic the orthogonal decomposition already
-    // guarantees this; the clamp protects against numerical noise / sequential
-    // collision resolution.
-    let candidate = clamp_to_requested_length(candidate, requested.length());
-
-    let primary = if resolved_sneak_support(
-        collision,
-        hitbox,
-        start,
-        candidate,
-        up,
-        axis_a,
-        axis_b,
-    ) {
+    if resolved_sneak_support(collision, hitbox, start, candidate, up, edges) {
         candidate
     } else {
-        max_supported_delta(
-            collision,
-            hitbox,
-            start,
-            candidate,
-            up,
-            axis_a,
-            axis_b,
-        )
-    };
+        max_supported_delta(collision, hitbox, start, candidate, up, edges)
+    }
+}
 
-    // Near a corner the coverage gradient can point between two real edges and
-    // make the primary solution unnecessarily stall. Compare it with a small
-    // projection-only search and keep whichever preserves more of the original
-    // requested motion. Neither path can exceed the requested speed.
-    let fallback = best_projected_supported_delta(
-        collision,
-        hitbox,
-        start,
-        requested,
-        up,
-        axis_a,
-        axis_b,
-    );
+fn better_candidate(current: Vec3, candidate: Vec3, requested: Vec3) -> Vec3 {
+    const SCORE_EPSILON: f32 = 1e-7;
 
-    if fallback.dot(requested) > primary.dot(requested) {
-        fallback
+    let current_progress = current.dot(requested);
+    let candidate_progress = candidate.dot(requested);
+
+    if candidate_progress > current_progress + SCORE_EPSILON
+        || ((candidate_progress - current_progress).abs() <= SCORE_EPSILON
+            && candidate.length_squared() > current.length_squared())
+    {
+        candidate
     } else {
-        primary
+        current
     }
 }
 
 fn clamp_to_requested_length(delta: Vec3, requested_length: f32) -> Vec3 {
     let length = delta.length();
-
     if length <= requested_length || length <= f32::EPSILON {
         delta
     } else {
         delta * (requested_length / length)
     }
-}
-
-/// Estimate the direction toward increasing sneak support using the gradient of
-/// footprint coverage instead of a single supported/unsupported sample.
-///
-/// This is substantially less jittery near corners and rotated frame edges.
-fn estimate_support_inward(
-    collision: &CollisionService,
-    hitbox: PlayerHitbox,
-    position: Vec3,
-    up: Vec3,
-    axis_a: Vec3,
-    axis_b: Vec3,
-) -> Vec3 {
-    let plus_a = support_coverage(
-        collision,
-        hitbox,
-        position + axis_a * EDGE_NORMAL_PROBE,
-        up,
-        axis_a,
-        axis_b,
-    );
-    let minus_a = support_coverage(
-        collision,
-        hitbox,
-        position - axis_a * EDGE_NORMAL_PROBE,
-        up,
-        axis_a,
-        axis_b,
-    );
-    let plus_b = support_coverage(
-        collision,
-        hitbox,
-        position + axis_b * EDGE_NORMAL_PROBE,
-        up,
-        axis_a,
-        axis_b,
-    );
-    let minus_b = support_coverage(
-        collision,
-        hitbox,
-        position - axis_b * EDGE_NORMAL_PROBE,
-        up,
-        axis_a,
-        axis_b,
-    );
-
-    let gradient =
-        axis_a * (plus_a - minus_a) + axis_b * (plus_b - minus_b);
-
-    if gradient.length_squared() > 1e-8 {
-        return gradient.normalize();
-    }
-
-    // Fallback for a perfectly flat quantized coverage field: use a wider
-    // directional vote. This only decides edge orientation; it never changes
-    // the support rules themselves.
-    let mut inward = Vec3::ZERO;
-
-    for (a, b) in SAMPLE_DIRECTIONS {
-        let direction = (axis_a * a + axis_b * b).normalize_or_zero();
-
-        let supported_forward = has_sneak_support(
-            collision,
-            hitbox,
-            position + direction * EDGE_NORMAL_PROBE * 2.0,
-            up,
-            axis_a,
-            axis_b,
-        );
-        let supported_backward = has_sneak_support(
-            collision,
-            hitbox,
-            position - direction * EDGE_NORMAL_PROBE * 2.0,
-            up,
-            axis_a,
-            axis_b,
-        );
-
-        match (supported_forward, supported_backward) {
-            (true, false) => inward += direction,
-            (false, true) => inward -= direction,
-            _ => {}
-        }
-    }
-
-    (inward - up * inward.dot(up)).normalize_or_zero()
-}
-
-fn support_coverage(
-    collision: &CollisionService,
-    hitbox: PlayerHitbox,
-    position: Vec3,
-    up: Vec3,
-    axis_a: Vec3,
-    axis_b: Vec3,
-) -> f32 {
-    let mut supported = 0.0;
-    let mut samples = 1.0;
-
-    if has_support(collision, hitbox, position, up) {
-        supported += 1.0;
-    }
-
-    let overhang = hitbox.radius * SNEAK_OVERHANG_FRACTION;
-
-    for (a, b) in SAMPLE_DIRECTIONS {
-        samples += 1.0;
-        let offset = (axis_a * a + axis_b * b) * overhang;
-
-        if has_support(collision, hitbox, position + offset, up) {
-            supported += 1.0;
-        }
-    }
-
-    supported / samples
-}
-
-
-/// Corner fallback for cases where the local support gradient is ambiguous.
-///
-/// Candidate directions are sampled in the gravity plane. Each candidate gets
-/// only the scalar projection of the ORIGINAL requested displacement onto that
-/// direction, so it can never create speed or inertia. The candidate with the
-/// greatest progress along the player's requested motion wins.
-fn best_projected_supported_delta(
-    collision: &CollisionService,
-    hitbox: PlayerHitbox,
-    start: Vec3,
-    requested: Vec3,
-    up: Vec3,
-    axis_a: Vec3,
-    axis_b: Vec3,
-) -> Vec3 {
-    let requested_len = requested.length();
-    if requested_len <= f32::EPSILON {
-        return Vec3::ZERO;
-    }
-
-    let requested_dir = requested / requested_len;
-    let mut best = Vec3::ZERO;
-    let mut best_progress = 0.0;
-
-    // 16 directions are enough to make corners stable without turning this
-    // constraint into a steering system.
-    const DIRECTIONS: usize = 16;
-
-    for i in 0..DIRECTIONS {
-        let angle = i as f32 * std::f32::consts::TAU / DIRECTIONS as f32;
-        let dir = axis_a * angle.cos() + axis_b * angle.sin();
-
-        // Projection, not full requested speed. A 45 degree approach to an edge
-        // therefore moves along it at about 70.7% speed, never faster.
-        let projected_len = requested.dot(dir);
-        if projected_len <= 0.0 {
-            continue;
-        }
-
-        let candidate = dir * projected_len;
-
-        if resolved_sneak_support(
-            collision,
-            hitbox,
-            start,
-            candidate,
-            up,
-            axis_a,
-            axis_b,
-        ) {
-            let progress = candidate.dot(requested_dir);
-            if progress > best_progress {
-                best_progress = progress;
-                best = candidate;
-            }
-        }
-    }
-
-    best
 }
 
 fn max_supported_delta(
@@ -572,56 +449,43 @@ fn max_supported_delta(
     start: Vec3,
     requested: Vec3,
     up: Vec3,
-    axis_a: Vec3,
-    axis_b: Vec3,
+    edges: (Vec3, Vec3),
 ) -> Vec3 {
     if requested.length_squared() <= f32::EPSILON {
         return Vec3::ZERO;
     }
 
-    let mut safe_fraction = 0.0;
+    if resolved_sneak_support(collision, hitbox, start, requested, up, edges) {
+        return requested;
+    }
 
-    for sample in 1..=PATH_SAMPLES {
-        let fraction = sample as f32 / PATH_SAMPLES as f32;
+    // If a one-tick latch grace started just outside the sampled footprint,
+    // only a movement that returns to support is allowed. The full-delta check
+    // above already accepted that recovery case.
+    if !has_sneak_support(collision, hitbox, start, up, edges) {
+        return Vec3::ZERO;
+    }
 
+    let mut low = 0.0;
+    let mut high = 1.0;
+
+    for _ in 0..BINARY_SEARCH_STEPS {
+        let middle = (low + high) * 0.5;
         if resolved_sneak_support(
             collision,
             hitbox,
             start,
-            requested * fraction,
+            requested * middle,
             up,
-            axis_a,
-            axis_b,
+            edges,
         ) {
-            safe_fraction = fraction;
-            continue;
+            low = middle;
+        } else {
+            high = middle;
         }
-
-        let mut low = safe_fraction;
-        let mut high = fraction;
-
-        for _ in 0..BINARY_SEARCH_STEPS {
-            let middle = (low + high) * 0.5;
-
-            if resolved_sneak_support(
-                collision,
-                hitbox,
-                start,
-                requested * middle,
-                up,
-                axis_a,
-                axis_b,
-            ) {
-                low = middle;
-            } else {
-                high = middle;
-            }
-        }
-
-        return backed_off_delta(requested, low);
     }
 
-    requested
+    backed_off_delta(requested, low)
 }
 
 fn backed_off_delta(requested: Vec3, safe_fraction: f32) -> Vec3 {
@@ -644,19 +508,10 @@ fn resolved_sneak_support(
     start: Vec3,
     movement: Vec3,
     up: Vec3,
-    axis_a: Vec3,
-    axis_b: Vec3,
+    edges: (Vec3, Vec3),
 ) -> bool {
-    let result_position = resolved_position(collision, hitbox, start, movement, up);
-
-    has_sneak_support(
-        collision,
-        hitbox,
-        result_position,
-        up,
-        axis_a,
-        axis_b,
-    )
+    let position = resolved_position(collision, hitbox, start, movement, up);
+    has_sneak_support(collision, hitbox, position, up, edges)
 }
 
 fn resolved_position(
@@ -668,59 +523,70 @@ fn resolved_position(
 ) -> Vec3 {
     let mut query = CharacterQuery::new(start, movement, up, hitbox.radius, hitbox.height);
     query.was_grounded = true;
-
     collision.resolve_character(query).position
 }
 
-/// Sneak-specific partial-footprint support.
-///
-/// The normal character solver intentionally does NOT use capsule edge/corner
-/// contacts as ground. Here we probe virtual capsule-axis positions within the
-/// real player's footprint, allowing the center to extend beyond a ledge while
-/// some of the footprint still lies over a genuine walkable face.
+/// Sneak-only partial footprint support. The normal collision solver remains
+/// strict and never classifies a capsule edge/corner contact as ground.
 fn has_sneak_support(
     collision: &CollisionService,
     hitbox: PlayerHitbox,
     position: Vec3,
     up: Vec3,
-    axis_a: Vec3,
-    axis_b: Vec3,
+    edges: (Vec3, Vec3),
 ) -> bool {
-    if has_support(collision, hitbox, position, up) {
+    if strict_support(collision, hitbox, position, up).is_some() {
         return true;
     }
 
     let overhang = hitbox.radius * SNEAK_OVERHANG_FRACTION;
-
-    for (a, b) in SAMPLE_DIRECTIONS {
-        let offset = (axis_a * a + axis_b * b) * overhang;
-
-        if has_support(collision, hitbox, position + offset, up) {
-            return true;
-        }
+    let a = edges.0.normalize_or_zero();
+    let b = edges.1.normalize_or_zero();
+    if a == Vec3::ZERO || b == Vec3::ZERO {
+        return false;
     }
 
-    false
+    let diagonal_ab = (a + b).normalize_or_zero();
+    let diagonal_a_minus_b = (a - b).normalize_or_zero();
+    let directions = [
+        a,
+        -a,
+        b,
+        -b,
+        diagonal_ab,
+        -diagonal_ab,
+        diagonal_a_minus_b,
+        -diagonal_a_minus_b,
+    ];
+
+    directions.into_iter().any(|direction| {
+        direction != Vec3::ZERO
+            && strict_support(
+                collision,
+                hitbox,
+                position + direction * overhang,
+                up,
+            )
+            .is_some()
+    })
 }
 
-fn has_support(
+fn strict_support(
     collision: &CollisionService,
     hitbox: PlayerHitbox,
     position: Vec3,
     up: Vec3,
-) -> bool {
-    collision.has_support(
-        position,
-        -up,
-        SUPPORT_PROBE_DISTANCE * (hitbox.height / 1.8),
-        hitbox.radius,
-        hitbox.height,
-    )
+) -> Option<CharacterContact> {
+    let mut query = CharacterQuery::new(position, Vec3::ZERO, up, hitbox.radius, hitbox.height);
+    query.ground_probe = SUPPORT_PROBE_DISTANCE * (hitbox.height / 1.8);
+    collision.character_support(query)
 }
 
-/// Deterministic orthonormal basis of the plane perpendicular to gravity-up.
 fn tangent_basis(up: Vec3) -> (Vec3, Vec3) {
-    let up = up.normalize();
+    let up = up.normalize_or_zero();
+    if up == Vec3::ZERO {
+        return (Vec3::X, Vec3::Z);
+    }
 
     let helper = if up.x.abs() <= up.y.abs() && up.x.abs() <= up.z.abs() {
         Vec3::X
@@ -732,6 +598,104 @@ fn tangent_basis(up: Vec3) -> (Vec3, Vec3) {
 
     let axis_a = up.cross(helper).normalize_or_zero();
     let axis_b = up.cross(axis_a).normalize_or_zero();
-
     (axis_a, axis_b)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use collision_api::{Aabb, CharacterCollisionBackend, CharacterGeometry, CollisionBox};
+
+    #[derive(Clone)]
+    struct Scene(Vec<CollisionBox>);
+
+    impl CharacterGeometry for Scene {
+        fn query(&self, _: Aabb) -> Vec<CollisionBox> {
+            self.0.clone()
+        }
+    }
+
+    impl CharacterCollisionBackend for Scene {
+        fn resolve(&self, query: CharacterQuery) -> collision_api::CharacterResult {
+            character_collision_lib::resolve(query, self)
+        }
+
+        fn support(&self, query: CharacterQuery) -> Option<CharacterContact> {
+            character_collision_lib::support(query, self)
+        }
+
+        fn surface_pose(&self, surface: u128) -> Option<(Vec3, Quat)> {
+            self.0
+                .iter()
+                .find(|box_| box_.surface == surface)
+                .map(|box_| (box_.center, box_.rotation))
+        }
+    }
+
+    fn floor(rotation: Quat) -> CollisionService {
+        CollisionService::new(|_, _, _| false, |_, _, _, _| unreachable!())
+            .with_character_backend(Scene(vec![CollisionBox {
+                center: rotation * Vec3::new(0.0, -0.5, 0.0),
+                rotation,
+                half_extents: Vec3::new(0.5, 0.5, 0.5),
+                surface: 7,
+            }]))
+    }
+
+    #[test]
+    fn constrained_delta_never_exceeds_requested_speed() {
+        let collision = floor(Quat::IDENTITY);
+        let hitbox = PlayerHitbox::default();
+        let start = Vec3::new(0.65, 0.001, 0.0);
+        let requested = Vec3::new(0.1, 0.0, 0.1);
+        let safe = safe_supported_delta(
+            &collision,
+            hitbox,
+            start,
+            requested,
+            Vec3::Y,
+            (Vec3::X, Vec3::Z),
+        );
+
+        assert!(safe.length() <= requested.length() + 1e-6);
+    }
+
+    #[test]
+    fn diagonal_edge_motion_keeps_tangent_component() {
+        let collision = floor(Quat::IDENTITY);
+        let hitbox = PlayerHitbox::default();
+        let start = Vec3::new(0.75, 0.001, 0.0);
+        let requested = Vec3::new(0.08, 0.0, 0.08);
+        let safe = safe_supported_delta(
+            &collision,
+            hitbox,
+            start,
+            requested,
+            Vec3::Y,
+            (Vec3::X, Vec3::Z),
+        );
+
+        assert!(safe.z > 0.02);
+        assert!(safe.length() <= requested.length() + 1e-6);
+    }
+
+    #[test]
+    fn frame_edges_follow_rotated_surface_pose() {
+        let rotation = Quat::from_euler(EulerRot::XYZ, 0.3, 0.4, -0.2);
+        let collision = floor(rotation);
+        let mut latch = SneakEdgeLatch::default();
+        let up = rotation * Vec3::Y;
+        let contact = CharacterContact {
+            normal: up,
+            point: Vec3::ZERO,
+            surface: 7,
+        };
+        arm_latch_from_contact(&collision, &mut latch, contact, up);
+        let (a, b) = latch_edge_directions(&collision, &latch, up);
+
+        assert!(a.dot(up).abs() < 1e-5);
+        assert!(b.dot(up).abs() < 1e-5);
+        assert!(a.length() > 0.99);
+        assert!(b.length() > 0.99);
+    }
 }

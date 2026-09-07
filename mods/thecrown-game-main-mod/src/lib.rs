@@ -17,11 +17,13 @@ use server_external_link_api::ServerExternalLinkApi;
 use server_kick_api::ServerKickApi;
 use server_player_chat_lib::player_chat_message;
 use server_player_gravity_api::{ServerPlayerGravityApi, ServerPlayerGravitySet};
+use server_player_flight_api::{ServerPlayerFlightApi, ServerPlayerFlightSet};
 use server_player_registry_api::{
     ServerPlayerMovementSet, ServerPlayerRegistry, ServerPlayerRegistryApi,
     ServerPlayerRelocationSet, ServerPlayerSessionSet,
 };
 use server_player_scale_api::{ServerPlayerScaleApi, ServerPlayerScaleSet};
+use server_player_surface_lib::ServerPlayerSurfaceSet;
 use server_player_world_api::{ServerPlayerWorldApi, ServerPlayerWorldSet};
 use server_scope_api::{ScopeFacetId, ServerScopeApi, ServerScopeSet, ServerScopes};
 use server_scope_world_api::ServerScopeWorldApi;
@@ -47,6 +49,7 @@ impl TheCrownGameMainMod {
         K: ServerKickApi,
         PW: ServerPlayerWorldApi,
         G: ServerPlayerGravityApi,
+        F: ServerPlayerFlightApi,
         Z: ServerPlayerScaleApi,
         C: ServerChatApi,
         M: ServerCommandApi,
@@ -65,6 +68,7 @@ impl TheCrownGameMainMod {
         _kick: &mut K,
         _player_worlds: &mut PW,
         _gravity: &mut G,
+        _flight: &mut F,
         _scale: &mut Z,
         _chat: &mut C,
         _commands: &mut M,
@@ -77,33 +81,40 @@ impl TheCrownGameMainMod {
         bevy.app
             .init_resource::<parkour::TheCrownRuntime>()
             .add_systems(Startup, parkour::setup_root)
-            .add_systems(Update, (
-                apply_instance_commands,
-                parkour::assign_admitted_players
-                    .after(apply_instance_commands)
-                    .before(ServerPlayerGravitySet::Apply)
-                    .before(ServerPlayerScaleSet::Apply)
-                    .in_set(ServerPlayerSessionSet::Initialize)
-                    .in_set(ServerPlayerWorldSet::Request),
-                parkour::progress_parkour
-                    .after(ServerPlayerMovementSet::Apply)
-                    .before(ServerPlayerRelocationSet::Apply)
-                    .before(ServerPlayerMovementSet::Sync)
-                    .before(ServerBlockEditSet::Sync)
-                    .in_set(ServerSoundSet::Publish),
-                parkour::cleanup_left_players
-                    .after(ServerPlayerSessionSet::Cleanup)
-                    .before(ServerScopeSet::Cleanup),
-                publish_instance_chat.in_set(ServerChatSet::Publish),
-                commands::apply_command_requests.in_set(ServerChatSet::ApplyGameplay),
-                commands::apply_relay_results,
-                commands::deliver_relay_whispers,
-                parkour::apply_record_results,
-            ));
+            .add_systems(
+                Update,
+                (
+                    apply_instance_commands,
+                    parkour::assign_admitted_players
+                        .after(apply_instance_commands)
+                        .before(ServerPlayerGravitySet::Apply)
+                        .before(ServerPlayerFlightSet::Apply)
+                        .before(ServerPlayerScaleSet::Apply)
+                        .in_set(ServerPlayerSessionSet::Initialize)
+                        .in_set(ServerPlayerWorldSet::Request),
+                    parkour::progress_parkour
+                        .after(ServerPlayerMovementSet::Apply)
+                        .after(ServerPlayerSurfaceSet::Observe)
+                        .before(ServerPlayerRelocationSet::Apply)
+                        .before(ServerPlayerMovementSet::Sync)
+                        .before(ServerBlockEditSet::Sync)
+                        .in_set(ServerSoundSet::Publish),
+                    parkour::cleanup_left_players
+                        .after(ServerPlayerSessionSet::Cleanup)
+                        .before(ServerScopeSet::Cleanup),
+                    publish_instance_chat.in_set(ServerChatSet::Publish),
+                    commands::apply_command_requests.in_set(ServerChatSet::ApplyGameplay),
+                    commands::apply_relay_results,
+                    commands::deliver_relay_whispers,
+                    parkour::apply_record_results,
+                ),
+            );
         Self
     }
 
-    pub fn run(&self) -> Option<Vec<JoinHandle<()>>> { None }
+    pub fn run(&self) -> Option<Vec<JoinHandle<()>>> {
+        None
+    }
 }
 
 fn apply_instance_commands(
@@ -118,13 +129,34 @@ fn apply_instance_commands(
 ) {
     for start in starts.read() {
         if let Err(error) = parkour::start_instance(
-            &mut commands, &scopes, &scope_worlds, &templates, &mut runtime, &start.instance,
-        ) { warn!("could not start Relay instance {}: {error}", start.instance.instance_id); }
+            &mut commands,
+            &scopes,
+            &scope_worlds,
+            &templates,
+            &mut runtime,
+            &start.instance,
+        ) {
+            warn!(
+                "could not start Relay instance {}: {error}",
+                start.instance.instance_id
+            );
+        }
     }
     for stop in stops.read() {
         if let Err(error) = parkour::stop_instance(
-            &mut commands, &scopes, &scope_worlds, &templates, &world, &mut runtime, &stop.instance_id,
-        ) { warn!("could not stop Relay instance {}: {error}", stop.instance_id); }
+            &mut commands,
+            &scopes,
+            &scope_worlds,
+            &templates,
+            &world,
+            &mut runtime,
+            &stop.instance_id,
+        ) {
+            warn!(
+                "could not stop Relay instance {}: {error}",
+                stop.instance_id
+            );
+        }
     }
 }
 
@@ -135,9 +167,18 @@ fn publish_instance_chat(
     mut messages: MessageWriter<PublishServerChatMessage>,
 ) {
     for input in inputs.read().filter(|input| !input.text.starts_with('/')) {
-        let Some(chat_scope) = scopes.resolve_player_facet(input.player_id, &ScopeFacetId::chat()) else { continue; };
+        let Some(chat_scope) =
+            scopes.resolve_player_facet(input.player_id, &ScopeFacetId::chat())
+        else {
+            continue;
+        };
         if let Some(message) = player_chat_message(
-            &players, input.player_id, &input.text, Audience::shared(chat_scope.0),
-        ) { messages.write(message); }
+            &players,
+            input.player_id,
+            &input.text,
+            Audience::shared(chat_scope.0),
+        ) {
+            messages.write(message);
+        }
     }
 }

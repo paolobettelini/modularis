@@ -9,7 +9,7 @@ use server_player_hitbox_api::{
     ServerPlayerHitboxApi, ServerPlayerHitboxSet, ServerPlayerHitboxes,
 };
 use server_player_movement_collision_lib::{
-    DEFAULT_MAX_PLAYER_MOVE_DELTA, resolve_server_player_movement,
+    DEFAULT_MAX_PLAYER_MOVE_DELTA, resolve_server_player_movement_result,
 };
 use server_player_registry_api::{
     PendingServerPlayerMoves, ServerPlayerMovementSet, ServerPlayerRegistryApi,
@@ -74,7 +74,8 @@ fn validate_player_movement_collision<B: BlockManagerApi>(
             allowed_speed = allowed_speed.max(flight_speeds.multiplier(movement.player_id));
         }
         let hitbox = hitboxes.hitbox(movement.player_id);
-        movement.accepted_position = resolve_server_player_movement::<B>(
+        let requested = movement.accepted_position;
+        let result = resolve_server_player_movement_result::<B>(
             &world,
             &shapes,
             movement.player_id,
@@ -86,5 +87,28 @@ fn validate_player_movement_collision<B: BlockManagerApi>(
             allowed_speed,
             DEFAULT_MAX_PLAYER_MOVE_DELTA,
         );
+        movement.accepted_position = result.position;
+        let up = player_gravity_api::gravity_up(gravities.gravity(movement.player_id));
+        movement.authoritative_support_surface = result
+            .support
+            .map(|support| support.surface)
+            .or_else(|| {
+                result
+                    .contacts
+                    .iter()
+                    .filter(|contact| contact.normal.dot(up) >= 0.707_106_77)
+                    .max_by(|left, right| {
+                        left.normal
+                            .dot(up)
+                            .total_cmp(&right.normal.dot(up))
+                    })
+                    .map(|contact| contact.surface)
+            });
+        if movement.accepted_position.distance_squared(requested) > 0.03_f32.powi(2) {
+            debug!(player = movement.player_id, from = ?movement.current_position,
+                requested = ?requested, accepted = ?movement.accepted_position,
+                gravity = ?gravities.gravity(movement.player_id),
+                "movement changed by collision/speed validation");
+        }
     }
 }

@@ -6,8 +6,8 @@ use voxel_math_api::BlockPos;
 
 mod obstacles;
 pub use obstacles::{
-    ParkourFramePlan, ParkourObstacleBehavior, centered_block_pose,
-    nominal_jump_difficulty, score_difficulty,
+    ParkourFramePlan, ParkourObstacleBehavior, centered_block_pose, nominal_jump_difficulty,
+    score_difficulty,
 };
 
 #[derive(Debug, Clone)]
@@ -349,7 +349,7 @@ impl Default for ParkourConfig {
                 BlockId::CrimsonNylium,
                 BlockId::WarpedNylium,
                 BlockId::Moss,
-                BlockId::Calcite
+                BlockId::Calcite,
             ],
         }
     }
@@ -418,6 +418,16 @@ pub struct ParkourRun {
     obstacle_planner: obstacles::ParkourObstaclePlanner,
 }
 
+enum ParkourLandingObservation<'a> {
+    Position,
+    FrameTransforms(&'a mut dyn FnMut(VoxelFrameId) -> Option<VoxelFrameTransform>),
+    MovementWithFrames {
+        previous_position: Vec3,
+        frame_transform: &'a mut dyn FnMut(VoxelFrameId) -> Option<VoxelFrameTransform>,
+    },
+    SupportedFrame(Option<VoxelFrameId>),
+}
+
 impl ParkourRun {
     pub fn new(seed: u64) -> Self {
         Self {
@@ -446,6 +456,7 @@ impl ParkourRun {
     pub fn reset(&mut self, config: &ParkourConfig, now_seconds: f64) -> ParkourUpdate {
         let mut edits = Vec::with_capacity(self.blocks.len() + config.initial_block_count);
         let mut frame_edits = Vec::with_capacity(self.blocks.len() + config.initial_block_count);
+
         for block in self.blocks.drain(..) {
             edits.push(ParkourBlockEdit {
                 position: VoxelBlockAddress::new(block.frame.id, BlockPos::new(0, 0, 0)),
@@ -453,6 +464,7 @@ impl ParkourRun {
             });
             frame_edits.push(ParkourFrameEdit::Remove(block.frame.id));
         }
+
         self.score = 0;
         self.combo = 0;
         self.last_progress_seconds = now_seconds;
@@ -465,6 +477,7 @@ impl ParkourRun {
         });
         frame_edits.push(ParkourFrameEdit::Spawn(first.frame.clone()));
         self.blocks.push_back(first);
+
         for _ in 1..config.initial_block_count.max(1) {
             let (edit, frame_edit) = self.append_next(config);
             edits.push(edit);
@@ -492,7 +505,12 @@ impl ParkourRun {
         player_position: Vec3,
         now_seconds: f64,
     ) -> ParkourUpdate {
-        self.observe_position_internal(config, player_position, now_seconds, None)
+        self.observe_position_internal(
+            config,
+            player_position,
+            now_seconds,
+            ParkourLandingObservation::Position,
+        )
     }
 
     /// Frame-aware checkpoint recognition. The adapter supplies authoritative
@@ -509,7 +527,52 @@ impl ParkourRun {
             config,
             player_position,
             now_seconds,
-            Some(&mut frame_transform),
+            ParkourLandingObservation::FrameTransforms(&mut frame_transform),
+        )
+    }
+
+    /// Frame-aware landing recognition from the authoritative server movement.
+    ///
+    /// This deliberately does not depend on Grounded or surface-anchor state:
+    /// checkpoint detection is a gameplay query against the current transformed
+    /// top face of the known parkour blocks.
+    pub fn observe_movement_with_frames(
+        &mut self,
+        config: &ParkourConfig,
+        previous_position: Vec3,
+        player_position: Vec3,
+        now_seconds: f64,
+        mut frame_transform: impl FnMut(VoxelFrameId) -> Option<VoxelFrameTransform>,
+    ) -> ParkourUpdate {
+        self.observe_position_internal(
+            config,
+            player_position,
+            now_seconds,
+            ParkourLandingObservation::MovementWithFrames {
+                previous_position,
+                frame_transform: &mut frame_transform,
+            },
+        )
+    }
+
+    /// Recognizes a checkpoint from authoritative collision support.
+    ///
+    /// `Some(frame)` means that frame is really supporting the player's
+    /// character according to the server collision solver. `None` means the
+    /// authoritative solver observed no frame support; proximity alone must not
+    /// award a checkpoint in that case.
+    pub fn observe_supported_frame(
+        &mut self,
+        config: &ParkourConfig,
+        player_position: Vec3,
+        now_seconds: f64,
+        supported_frame: Option<VoxelFrameId>,
+    ) -> ParkourUpdate {
+        self.observe_position_internal(
+            config,
+            player_position,
+            now_seconds,
+            ParkourLandingObservation::SupportedFrame(supported_frame),
         )
     }
 
@@ -518,7 +581,7 @@ impl ParkourRun {
         config: &ParkourConfig,
         player_position: Vec3,
         now_seconds: f64,
-        mut frame_transform: Option<&mut dyn FnMut(VoxelFrameId) -> Option<VoxelFrameTransform>>,
+        observation: ParkourLandingObservation<'_>,
     ) -> ParkourUpdate {
         if self.awaiting_respawn {
             // Movement packets produced before the teleport is applied may
@@ -538,22 +601,48 @@ impl ParkourRun {
             return update;
         }
 
-        let Some(index) = self.blocks.iter().position(|block| {
-            if let Some(lookup) = frame_transform.as_mut() {
-                let pose = lookup(block.frame.id).unwrap_or(block.frame.initial);
-                player_is_on_frame_block(player_position, pose)
-            } else {
+        let index = match observation {
+            ParkourLandingObservation::SupportedFrame(supported_frame) => supported_frame
+                .and_then(|frame| self.blocks.iter().position(|block| block.frame.id == frame)),
+            ParkourLandingObservation::FrameTransforms(lookup) => {
+                self.blocks
+                    .iter()
+                    .enumerate()
+                    .skip(1)
+                    .find_map(|(index, block)| {
+                        let pose = lookup(block.frame.id).unwrap_or(block.frame.initial);
+                        player_is_on_frame_block(player_position, pose).then_some(index)
+                    })
+            }
+            ParkourLandingObservation::MovementWithFrames {
+                previous_position,
+                frame_transform,
+            } => self
+                .blocks
+                .iter()
+                .enumerate()
+                .skip(1)
+                .find_map(|(index, block)| {
+                    let pose = frame_transform(block.frame.id).unwrap_or(block.frame.initial);
+                    player_landed_on_frame_block(previous_position, player_position, pose)
+                        .then_some(index)
+                }),
+            ParkourLandingObservation::Position => {
                 let under_player = BlockPos::new(
                     player_position.x.floor() as i32,
                     (player_position.y - 0.08).floor() as i32,
                     player_position.z.floor() as i32,
                 );
-                block.position == under_player
+                self.blocks
+                    .iter()
+                    .position(|block| block.position == under_player)
             }
-        })
-        else {
+        };
+
+        let Some(index) = index else {
             return ParkourUpdate::unchanged(self.score, self.combo);
         };
+
         if index == 0 {
             return ParkourUpdate::unchanged(self.score, self.combo);
         }
@@ -581,12 +670,14 @@ impl ParkourRun {
                     block: BlockId::Air,
                 });
                 frame_edits.push(ParkourFrameEdit::Remove(removed.frame.id));
-                self.score += 1;
+                self.score += 400;
             }
+
             let (edit, frame_edit) = self.append_next(config);
             edits.push(edit);
             frame_edits.push(frame_edit);
         }
+
         self.last_progress_seconds = now_seconds;
         ParkourUpdate {
             edits,
@@ -616,15 +707,21 @@ impl ParkourRun {
             previous.y + y,
             previous.z + z,
         );
+
         // Keep all nominal path RNG calls before the independent obstacle
         // planner. Adding frame behavior therefore cannot change route shape.
         let block = self.make_block(config, previous, position, false);
         let frame = block.frame.clone();
         self.blocks.push_back(block);
+
         (
             ParkourBlockEdit {
                 position: VoxelBlockAddress::new(frame.id, BlockPos::new(0, 0, 0)),
-                block: self.blocks.back().expect("parkour block was inserted").block,
+                block: self
+                    .blocks
+                    .back()
+                    .expect("parkour block was inserted")
+                    .block,
             },
             ParkourFrameEdit::Spawn(frame),
         )
@@ -691,14 +788,169 @@ impl DeterministicRng {
     }
 }
 
+const PARKOUR_PLAYER_RADIUS: f32 = 0.3;
+const PARKOUR_SUPPORT_ABOVE_TOLERANCE: f32 = 0.10;
+const PARKOUR_SUPPORT_PENETRATION_TOLERANCE: f32 = 0.04;
+const PARKOUR_FACE_EDGE_MARGIN: f64 = 0.18;
+const PARKOUR_CHECKPOINT_HORIZONTAL_MARGIN: f64 = PARKOUR_PLAYER_RADIUS as f64 + 0.10;
+const PARKOUR_CHECKPOINT_BELOW_TOP: f64 = 0.22;
+const PARKOUR_CHECKPOINT_ABOVE_TOP: f64 = 0.42;
+
 fn player_is_on_frame_block(player_position: Vec3, transform: VoxelFrameTransform) -> bool {
-    let local = transform.world_to_local(player_position.as_dvec3());
-    // Player positions represent the foot center. A small horizontal margin
-    // tolerates solver skin and edge landings, while the narrow local-height
-    // band avoids recognizing side/underside contacts as checkpoints.
-    (-0.18..=1.18).contains(&local.x)
-        && (-0.18..=1.18).contains(&local.z)
-        && (0.82..=1.30).contains(&local.y)
+    capsule_bottom_sphere_supports_frame(player_position, transform)
+        || player_overlaps_frame_checkpoint(player_position, transform)
+}
+
+/// Detects the parkour landing from the same geometry that matters to the
+/// character controller: the player's bottom capsule sphere against the
+/// transformed local +Y face of the one-block checkpoint.
+///
+/// `CharacterQuery::position` is the foot point. For a tilted surface that foot
+/// point is NOT the contact point: the contact is shifted sideways by the
+/// sphere radius along the surface normal. Previous versions tested/raycasted
+/// from the foot point and therefore systematically misclassified tilted
+/// landings.
+fn player_landed_on_frame_block(
+    previous_position: Vec3,
+    player_position: Vec3,
+    transform: VoxelFrameTransform,
+) -> bool {
+    if !previous_position.is_finite() || !player_position.is_finite() {
+        return false;
+    }
+
+    if capsule_bottom_sphere_supports_frame(player_position, transform) {
+        return true;
+    }
+
+    // Checkpoint policy is intentionally more tolerant than physical support.
+    // A client can send the first accepted packet slightly above/below the
+    // solver's narrow support skin, especially while the frame itself moves.
+    // Test in frame-local space so translation and tilt remain exact.
+    if (player_position - previous_position).y <= 0.35
+        && player_overlaps_frame_checkpoint(player_position, transform)
+    {
+        return true;
+    }
+
+    // Swept fallback for the exact landing packet. Usually the resolved end
+    // position already satisfies the support test above, but this also catches
+    // a surface moving into the character or a packet whose endpoints straddle
+    // the contact plane by a tiny amount.
+    swept_bottom_sphere_hits_frame(previous_position, player_position, transform)
+}
+
+fn player_overlaps_frame_checkpoint(
+    foot_position: Vec3,
+    transform: VoxelFrameTransform,
+) -> bool {
+    if !foot_position.is_finite() {
+        return false;
+    }
+    let local = transform.world_to_local(foot_position.as_dvec3());
+    let horizontal = -PARKOUR_CHECKPOINT_HORIZONTAL_MARGIN
+        ..=1.0 + PARKOUR_CHECKPOINT_HORIZONTAL_MARGIN;
+
+    horizontal.contains(&local.x)
+        && horizontal.contains(&local.z)
+        && (1.0 - PARKOUR_CHECKPOINT_BELOW_TOP
+            ..=1.0 + PARKOUR_CHECKPOINT_ABOVE_TOP)
+            .contains(&local.y)
+}
+
+fn capsule_bottom_sphere_supports_frame(
+    foot_position: Vec3,
+    transform: VoxelFrameTransform,
+) -> bool {
+    let Some(face) = parkour_top_face(transform) else {
+        return false;
+    };
+
+    let sphere_center = foot_position + Vec3::Y * PARKOUR_PLAYER_RADIUS;
+    let plane_distance = (sphere_center - face.center).dot(face.normal);
+    let separation = plane_distance - PARKOUR_PLAYER_RADIUS;
+
+    if separation > PARKOUR_SUPPORT_ABOVE_TOLERANCE
+        || separation < -PARKOUR_SUPPORT_PENETRATION_TOLERANCE
+    {
+        return false;
+    }
+
+    let contact_world = sphere_center - face.normal * plane_distance;
+    contact_is_on_top_face(contact_world, transform)
+}
+
+fn swept_bottom_sphere_hits_frame(
+    previous_foot: Vec3,
+    current_foot: Vec3,
+    transform: VoxelFrameTransform,
+) -> bool {
+    let Some(face) = parkour_top_face(transform) else {
+        return false;
+    };
+
+    let previous_center = previous_foot + Vec3::Y * PARKOUR_PLAYER_RADIUS;
+    let current_center = current_foot + Vec3::Y * PARKOUR_PLAYER_RADIUS;
+
+    let previous_separation =
+        (previous_center - face.center).dot(face.normal) - PARKOUR_PLAYER_RADIUS;
+    let current_separation =
+        (current_center - face.center).dot(face.normal) - PARKOUR_PLAYER_RADIUS;
+
+    // Only a crossing toward the support plane is a landing. This avoids
+    // scoring while jumping upward away from an obstacle.
+    if previous_separation < current_separation
+        || previous_separation < -PARKOUR_SUPPORT_PENETRATION_TOLERANCE
+        || current_separation > PARKOUR_SUPPORT_ABOVE_TOLERANCE
+    {
+        return false;
+    }
+
+    let denominator = previous_separation - current_separation;
+    if denominator.abs() <= 1e-6 {
+        return false;
+    }
+
+    let t = (previous_separation / denominator).clamp(0.0, 1.0);
+    let sphere_center = previous_center.lerp(current_center, t);
+    let plane_distance = (sphere_center - face.center).dot(face.normal);
+    let contact_world = sphere_center - face.normal * plane_distance;
+
+    contact_is_on_top_face(contact_world, transform)
+}
+
+#[derive(Debug, Clone, Copy)]
+struct ParkourTopFace {
+    center: Vec3,
+    normal: Vec3,
+}
+
+fn parkour_top_face(transform: VoxelFrameTransform) -> Option<ParkourTopFace> {
+    let normal = transform
+        .local_direction_to_world(bevy::math::DVec3::Y)
+        .as_vec3()
+        .normalize_or_zero();
+
+    // TheCrown parkour gravity is fixed to world -Y and the character solver's
+    // default walkable slope threshold is cos(45°).
+    if normal.length_squared() <= 1e-8 || normal.dot(Vec3::Y) < 0.70710677 {
+        return None;
+    }
+
+    Some(ParkourTopFace {
+        center: transform
+            .local_to_world(bevy::math::DVec3::new(0.5, 1.0, 0.5))
+            .as_vec3(),
+        normal,
+    })
+}
+
+fn contact_is_on_top_face(contact_world: Vec3, transform: VoxelFrameTransform) -> bool {
+    let local = transform.world_to_local(contact_world.as_dvec3());
+
+    (-PARKOUR_FACE_EDGE_MARGIN..=1.0 + PARKOUR_FACE_EDGE_MARGIN).contains(&local.x)
+        && (-PARKOUR_FACE_EDGE_MARGIN..=1.0 + PARKOUR_FACE_EDGE_MARGIN).contains(&local.z)
+        && (local.y - 1.0).abs() <= 0.035
 }
 
 #[cfg(test)]
@@ -731,7 +983,7 @@ mod tests {
             1.2,
         );
         assert!(update.score_changed);
-        assert_eq!(update.score, 1);
+        assert_eq!(update.score, 400);
         assert_eq!(update.combo, 1);
         assert_eq!(run.blocks().len(), config.initial_block_count);
     }
@@ -758,7 +1010,169 @@ mod tests {
             (frame == target.frame.id).then_some(pose)
         });
         assert!(update.score_changed);
-        assert_eq!(update.score, 1);
+        assert_eq!(update.score, 400);
+    }
+
+    #[test]
+    fn authoritative_support_advances_without_position_heuristics() {
+        let mut run = ParkourRun::new(42);
+        let config = ParkourConfig::default();
+        run.reset(&config, 1.0);
+        let target = run.blocks()[1].clone();
+
+        // Deliberately not in the narrow local-Y band used by the old
+        // frame-position heuristic. Collision support is the authority.
+        let position = Vec3::new(
+            target.position.x as f32 + 0.5,
+            target.position.y as f32 + 0.2,
+            target.position.z as f32 + 0.5,
+        );
+        let update =
+            run.observe_supported_frame(&config, position, 1.2, Some(target.frame.id));
+        assert!(update.score_changed);
+        assert_eq!(update.score, 400);
+    }
+
+    #[test]
+    fn authoritative_no_support_does_not_score_from_proximity() {
+        let mut run = ParkourRun::new(42);
+        let config = ParkourConfig::default();
+        run.reset(&config, 1.0);
+        let target = run.blocks()[1].clone();
+        let pose = target.frame.initial;
+        let position = pose
+            .local_to_world(bevy::math::DVec3::new(0.5, 1.0, 0.5))
+            .as_vec3();
+
+        let update = run.observe_supported_frame(&config, position, 1.2, None);
+        assert!(!update.score_changed);
+        assert_eq!(update.score, 0);
+    }
+
+    #[test]
+    fn movement_fallback_checks_future_frames_instead_of_the_current_checkpoint() {
+        let mut run = ParkourRun::new(42);
+        let config = ParkourConfig::default();
+        run.reset(&config, 1.0);
+        let target = run.blocks()[1].clone();
+        let foot = target
+            .frame
+            .initial
+            .local_to_world(bevy::math::DVec3::new(0.5, 1.0, 0.5))
+            .as_vec3();
+
+        let update = run.observe_movement_with_frames(
+            &config,
+            foot + Vec3::Y * 0.8,
+            foot,
+            1.2,
+            |frame| (frame == target.frame.id).then_some(target.frame.initial),
+        );
+
+        assert!(update.score_changed);
+        assert_eq!(update.score, 400);
+    }
+
+    #[test]
+    fn capsule_center_landing_on_horizontal_frame_is_recognized() {
+        let pose = centered_block_pose(
+            bevy::math::DVec3::new(4.5, 8.5, -2.5),
+            bevy::math::DQuat::IDENTITY,
+        );
+        let contact = pose
+            .local_to_world(bevy::math::DVec3::new(0.5, 1.0, 0.5))
+            .as_vec3();
+        let normal = Vec3::Y;
+        let sphere_center = contact + normal * PARKOUR_PLAYER_RADIUS;
+        let foot = sphere_center - Vec3::Y * PARKOUR_PLAYER_RADIUS;
+
+        assert!(player_landed_on_frame_block(
+            foot + Vec3::Y * 0.8,
+            foot,
+            pose,
+        ));
+    }
+
+    #[test]
+    fn physically_correct_capsule_landing_on_tilted_center_is_recognized() {
+        let pose = centered_block_pose(
+            bevy::math::DVec3::new(4.5, 8.5, -2.5),
+            bevy::math::DQuat::from_rotation_z(30.0_f64.to_radians()),
+        );
+        let contact = pose
+            .local_to_world(bevy::math::DVec3::new(0.5, 1.0, 0.5))
+            .as_vec3();
+        let normal = pose
+            .local_direction_to_world(bevy::math::DVec3::Y)
+            .as_vec3()
+            .normalize();
+
+        // This is the actual foot-point geometry of the lower capsule sphere:
+        // sphere center is radius units along the tilted surface normal, while
+        // CharacterQuery::position is radius units below it along world up.
+        let sphere_center = contact + normal * PARKOUR_PLAYER_RADIUS;
+        let foot = sphere_center - Vec3::Y * PARKOUR_PLAYER_RADIUS;
+
+        assert!(player_landed_on_frame_block(
+            foot + Vec3::Y * 0.8,
+            foot,
+            pose,
+        ));
+    }
+
+    #[test]
+    fn tilted_landing_near_face_center_does_not_require_edge_contact() {
+        let pose = centered_block_pose(
+            bevy::math::DVec3::new(4.5, 8.5, -2.5),
+            bevy::math::DQuat::from_rotation_x(22.0_f64.to_radians()),
+        );
+        let contact = pose
+            .local_to_world(bevy::math::DVec3::new(0.45, 1.0, 0.55))
+            .as_vec3();
+        let normal = pose
+            .local_direction_to_world(bevy::math::DVec3::Y)
+            .as_vec3()
+            .normalize();
+        let foot = contact + normal * PARKOUR_PLAYER_RADIUS
+            - Vec3::Y * PARKOUR_PLAYER_RADIUS;
+
+        assert!(capsule_bottom_sphere_supports_frame(foot, pose));
+    }
+
+    #[test]
+    fn checkpoint_volume_accepts_center_and_edge_packets_on_a_moved_tilted_frame() {
+        let pose = centered_block_pose(
+            bevy::math::DVec3::new(17.5, 11.5, -8.5),
+            bevy::math::DQuat::from_rotation_z(28.0_f64.to_radians()),
+        );
+        let center = pose
+            .local_to_world(bevy::math::DVec3::new(0.5, 1.24, 0.5))
+            .as_vec3();
+        let edge = pose
+            .local_to_world(bevy::math::DVec3::new(-0.25, 1.08, 0.5))
+            .as_vec3();
+
+        assert!(player_overlaps_frame_checkpoint(center, pose));
+        assert!(player_overlaps_frame_checkpoint(edge, pose));
+    }
+
+    #[test]
+    fn capsule_beside_tilted_block_is_not_a_landing() {
+        let pose = centered_block_pose(
+            bevy::math::DVec3::new(4.5, 8.5, -2.5),
+            bevy::math::DQuat::from_rotation_z(25.0_f64.to_radians()),
+        );
+        let contact = pose
+            .local_to_world(bevy::math::DVec3::new(1.65, 1.0, 0.5))
+            .as_vec3();
+        let normal = pose
+            .local_direction_to_world(bevy::math::DVec3::Y)
+            .as_vec3()
+            .normalize();
+        let foot = contact + normal * PARKOUR_PLAYER_RADIUS
+            - Vec3::Y * PARKOUR_PLAYER_RADIUS;
+
+        assert!(!capsule_bottom_sphere_supports_frame(foot, pose));
     }
 
     #[test]
@@ -802,11 +1216,11 @@ mod tests {
             ),
             1.2,
         );
-        assert_eq!(checkpoint.score, 1);
+        assert_eq!(checkpoint.score, 400);
         assert_eq!(checkpoint.completed_score, None);
 
         let finished = run.observe_position(&config, Vec3::new(0.5, -1.0, 0.5), 2.0);
-        assert_eq!(finished.completed_score, Some(1));
+        assert_eq!(finished.completed_score, Some(400));
         assert_eq!(finished.score, 0);
     }
 }

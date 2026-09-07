@@ -446,7 +446,12 @@ pub fn resolve(q: CharacterQuery, geometry: &impl CharacterGeometry) -> Characte
         }
     }
 
-    if q.was_grounded || q.displacement.dot(q.up) <= q.skin() {
+    // Uphill walking has positive gravity-up velocity but remains tangent to
+    // its support. A jump separates along the actual support normal instead.
+    let leaving_support = support_sweep(CharacterQuery {
+        displacement: -q.up * q.ground_probe, ..q
+    }, &boxes).is_some_and(|(_, hit)| q.displacement.dot(hit.normal) > q.skin());
+    if !leaving_support && (q.was_grounded || q.displacement.dot(q.up) <= q.skin()) {
         let probe = CharacterQuery {
             position: result.position,
             displacement: -q.up * q.ground_probe,
@@ -626,6 +631,27 @@ mod tests {
 
         assert!(result.support.is_none());
         assert!(result.position.y > 0.19);
+    }
+
+    #[test]
+    fn support_normal_distinguishes_uphill_walking_from_short_jump() {
+        for gravity_rotation in [Quat::IDENTITY, Quat::from_euler(EulerRot::XYZ, 0.7, -0.4, 0.6)] {
+            let rotation = gravity_rotation * Quat::from_rotation_z(0.35);
+            let up = gravity_rotation * Vec3::Y;
+            let normal = rotation * Vec3::Y;
+            let scene = Scene(vec![CollisionBox {
+                center: Vec3::ZERO, rotation,
+                half_extents: Vec3::new(5.0, 0.2, 5.0), surface: 7,
+            }]);
+            let start = normal * (0.2 + 0.3 + 0.0006) - up * 0.3;
+            let mut walking = CharacterQuery::new(start, rotation * Vec3::X * 0.02, up, 0.3, 1.8);
+            walking.was_grounded = true;
+            assert!(resolve(walking, &scene).support.is_some());
+            let jumping = CharacterQuery { displacement: up * 0.01, ..walking };
+            let result = resolve(jumping, &scene);
+            assert!(result.support.is_none());
+            assert!((result.position - start).dot(up) > 0.009);
+        }
     }
 
     #[test]

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_mod::BevyMod;
 use client_game_state_api::{GameStateApi, InGameOverlayState};
 use client_player_controller_api::{
-    Player, PlayerControllerApi, PlayerControllerSet, PlayerVelocity,
+    Grounded, Player, PlayerControllerApi, PlayerControllerSet, PlayerVelocity,
 };
 use player_gravity_api::{Gravity, PlayerGravityApi};
 use tokio::task::JoinHandle;
@@ -33,13 +33,16 @@ impl ClientPlayerGravityVanillaMod {
 fn apply_gravity(
     time: Res<Time<Fixed>>,
     gravity: Res<Gravity>,
-    mut players: Query<&mut PlayerVelocity, With<Player>>,
+    mut players: Query<(&mut PlayerVelocity, &Grounded), With<Player>>,
 ) {
     let acceleration = gravity.0;
     if acceleration.length_squared() == 0.0 {
         return;
     }
-    for mut velocity in &mut players {
+    for (mut velocity, grounded) in &mut players {
+        // The support probe supplies adhesion; projected gravity would cause
+        // perpetual downhill acceleration on otherwise walkable surfaces.
+        if grounded.0 { continue; }
         velocity.0 += acceleration * time.delta_secs();
     }
 }

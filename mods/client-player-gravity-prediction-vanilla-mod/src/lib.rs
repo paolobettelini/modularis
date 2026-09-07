@@ -40,12 +40,9 @@ fn apply_predicted_gravity(
         return;
     }
     for (mut velocity, grounded) in &mut players {
-        if grounded.0 {
-            let falling_speed = velocity.0.dot(direction);
-            if falling_speed > 0.0 {
-                velocity.0 -= direction * falling_speed;
-            }
-        } else {
+        // Downhill tangent velocity is locomotion, not falling. Removing its
+        // gravity component makes the character repeatedly leave the slope.
+        if !grounded.0 {
             velocity.0 += gravity.0 * time.delta_secs();
         }
     }

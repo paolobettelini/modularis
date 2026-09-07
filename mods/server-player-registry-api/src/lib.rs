@@ -39,6 +39,9 @@ pub enum ServerPlayerSessionSet {
 #[derive(Debug, Clone)]
 pub struct PendingServerPlayerMove {
     pub surface:Option<player_network_message_types::PlayerSurfacePosition>,
+    /// Surface selected by the authoritative collision solver for the
+    /// accepted movement. Client surface claims must never populate this.
+    pub authoritative_support_surface: Option<u128>,
     pub source: SocketAddr,
     pub player_id: PlayerId,
     pub movement_epoch: MovementEpoch,
@@ -63,6 +66,9 @@ pub struct ServerPlayerMovementApplied {
     pub sequence: MovementSequence,
     pub previous_position: Vec3,
     pub position: Vec3,
+    /// Opaque identity of the surface that authoritatively supports the
+    /// character after this movement, if any.
+    pub support_surface: Option<u128>,
     pub yaw: f32,
     pub pitch: f32,
     pub corrected: bool,

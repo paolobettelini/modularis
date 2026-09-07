@@ -3,6 +3,10 @@ use collision_api::CharacterContact;
 /// Latest resolved support; not tied to voxels or frame packet types.
 #[derive(Resource,Default)]
 pub struct PlayerSurfaceContact(pub Option<CharacterContact>);
+/// Carry applied before character movement in this fixed tick. Presentation
+/// includes it in the previous/current interval instead of jumping each tick.
+#[derive(Resource,Default)]
+pub struct PlayerSurfaceDisplacement(pub Vec3);
 #[derive(Resource,Default)]
 pub struct PlayerSurfaceAttachment(pub Option<SurfaceAttachment>);
 #[derive(Clone,Copy)]

@@ -12,6 +12,7 @@ pub enum InstanceScalePolicy {
 pub struct InstancePlayerPolicy {
     pub gravity: Vec3,
     pub scale: InstanceScalePolicy,
+    pub flight_enabled: bool,
 }
 
 impl InstancePlayerPolicy {
@@ -20,10 +21,12 @@ impl InstancePlayerPolicy {
             GameMode::Hub => Self {
                 gravity: Vec3::new(0.0, -5.0, 0.0),
                 scale: InstanceScalePolicy::RandomPerAdmission { min: 0.4, max: 5.0 },
+                flight_enabled: false,
             },
             GameMode::Parkour => Self {
                 gravity: Vec3::new(0.0, -20.0, 0.0),
                 scale: InstanceScalePolicy::Fixed(1.0),
+                flight_enabled: false,
             },
         }
     }

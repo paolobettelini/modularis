@@ -10,7 +10,7 @@ use tokio::task::JoinHandle;
 pub struct ClientPlayerSurfaceMotionMod;
 impl ClientPlayerSurfaceMotionMod{
  pub fn init(bevy:&mut BevyMod,_player:&mut impl PlayerControllerApi,_collision:&mut impl CollisionApi,_gravity:&mut impl player_gravity_api::PlayerGravityApi,_hitbox:&mut impl player_hitbox_api::PlayerHitboxApi,_game:&mut impl GameStateApi)->Self{
-  bevy.app.init_resource::<PlayerSurfaceAttachment>().init_resource::<PlayerSurfaceContact>()
+  bevy.app.init_resource::<PlayerSurfaceAttachment>().init_resource::<PlayerSurfaceContact>().init_resource::<PlayerSurfaceDisplacement>()
    .add_systems(FixedUpdate,(
     carry.before(PlayerControllerSet::Input).after(client_voxel_frame_movement_api::ClientFrameAnimationSet),
     detach.after(PlayerControllerSet::ForceOverrides).before(PlayerControllerSet::MovementConstraints),
@@ -21,9 +21,10 @@ impl ClientPlayerSurfaceMotionMod{
  pub fn run(&self)->Option<Vec<JoinHandle<()>>>{None}
 }
 fn clear(mut attachment:ResMut<PlayerSurfaceAttachment>,mut contact:ResMut<PlayerSurfaceContact>){attachment.0=None;contact.0=None;}
-fn carry(time:Res<Time>,collision:Res<CollisionService>,gravity:Res<Gravity>,hitbox:Res<PlayerHitbox>,mut attachment:ResMut<PlayerSurfaceAttachment>,mut players:Query<(&mut Transform,&mut PreviousPlayerPosition),With<Player>>){
+fn carry(time:Res<Time>,collision:Res<CollisionService>,gravity:Res<Gravity>,hitbox:Res<PlayerHitbox>,mut displacement:ResMut<PlayerSurfaceDisplacement>,mut attachment:ResMut<PlayerSurfaceAttachment>,mut players:Query<(&mut Transform,&mut PreviousPlayerPosition,&mut PlayerVelocity),With<Player>>){
+ displacement.0=Vec3::ZERO;
  let Some(a)=attachment.0.as_mut()else{return;};
- let Ok((mut transform,mut previous))=players.single_mut()else{return;};
+ let Ok((mut transform,mut previous,mut velocity))=players.single_mut()else{return;};
  // Relocations/corrections invalidate a local support anchor instead of dragging it back.
  if transform.translation.distance(a.last_player_position)>hitbox.radius.max(0.01){attachment.0=None;return;}
  let Some((translation,rotation))=collision.surface_pose(a.surface)else{attachment.0=None;return;};
@@ -35,7 +36,9 @@ fn carry(time:Res<Time>,collision:Res<CollisionService>,gravity:Res<Gravity>,hit
  let transported=collision.resolve_character(q).position;
  let mut settle=CharacterQuery::new(transported,Vec3::ZERO,gravity.up(),hitbox.radius,hitbox.height);settle.step_height=0.0;
  let corrected=collision.resolve_character(settle).position;
- previous.0+=corrected-transform.translation;transform.translation=corrected;
+ displacement.0=corrected-transform.translation;
+ velocity.0=rotation*a.rotation.conjugate()*velocity.0;
+ previous.0+=displacement.0;transform.translation=corrected;
  a.translation=translation;a.rotation=rotation;
 }
 fn detach(mut attachment:ResMut<PlayerSurfaceAttachment>,mut players:Query<(&Grounded,&mut PlayerVelocity),With<Player>>){
