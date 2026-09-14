@@ -22,6 +22,7 @@
   - [Chat, commands, and completion](./runtime/chat-and-commands.md)
   - [Sounds, audiences, and spatial playback](./runtime/sounds.md)
 - [World architecture](./world/world-overview.md)
+  - [Networked entities and entity types](./world/entities.md)
   - [Blocks, items, and state](./world/blocks-and-items.md)
   - [Block properties and sparse components](./world/block-properties-and-components.md)
   - [JSON voxel models and textures](./world/voxel-models.md)

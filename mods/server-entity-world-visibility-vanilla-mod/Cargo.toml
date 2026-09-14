@@ -1,0 +1,23 @@
+[package]
+name = "server-entity-world-visibility-vanilla-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerEntityWorldVisibilityVanillaMod"
+[package.metadata.mod.dependencies]
+init = ["bevy-mod","server-entity-state-mod","server-chunk-world-api","server-player-registry-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = {path="../bevy-mod"}
+server-entity-state-mod = {path="../server-entity-state-mod"}
+server-entity-api = {path="../server-entity-api"}
+server-entity-visibility-api = {path="../server-entity-visibility-api"}
+server-chunk-world-api = {path="../server-chunk-world-api"}
+server-player-registry-api = {path="../server-player-registry-api"}
+tokio = {version="1",features=["full"]}
+
+voxel-math-api = {git = "https://github.com/paolobettelini/modularis.git"}

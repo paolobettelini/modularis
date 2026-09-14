@@ -90,7 +90,6 @@ impl ClientPlayerRenderApi for ClientPlayerRenderBlockyImpl {}
 
 #[derive(Resource, Default)]
 struct PendingBlockyPlayerSpawns {
-    next_spawn_id: u64,
     by_spawn_id: HashMap<u64, PendingBlockyPlayerSpawn>,
     by_player_id: HashMap<PlayerId, u64>,
 }
@@ -180,8 +179,7 @@ fn request_player_spawn(
     if rendered.entities.contains_key(&player.id) || pending.by_player_id.contains_key(&player.id) {
         return;
     }
-    pending.next_spawn_id = pending.next_spawn_id.wrapping_add(1);
-    let spawn_id = pending.next_spawn_id;
+    let spawn_id = blocky_model_api::next_blocky_spawn_id();
     pending.by_player_id.insert(player.id, spawn_id);
     pending.by_spawn_id.insert(
         spawn_id,

@@ -1,0 +1,6 @@
+name="Entity type registry"
+version="0.1.0"
+description="Composable entity capabilities"
+ignore=[]
+modpacks=[]
+mods=["entity-registry-codegen","entity-crystal-snail","entity-jewel-beetle","entity-network-messages-mod"]

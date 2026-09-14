@@ -1,9 +1,4 @@
-build-client
-build-server
-build-thecrown
-build-thecrown-auth
-build-thecrown-game
-build
+build-*
 target
 
 config.toml

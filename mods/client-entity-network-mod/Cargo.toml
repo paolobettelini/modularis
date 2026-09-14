@@ -1,0 +1,20 @@
+[package]
+name = "client-entity-network-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientEntityNetworkMod"
+[package.metadata.mod.dependencies]
+init = ["bevy-mod","network-protocol-mod","client-game-state-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = {path="../bevy-mod"}
+network-protocol-mod = {path="../network-protocol-mod"}
+client-game-state-api = {path="../client-game-state-api"}
+client-entity-api = {path="../client-entity-api"}
+generated-network-messages = "0.1.0"
+tokio = {version="1",features=["full"]}

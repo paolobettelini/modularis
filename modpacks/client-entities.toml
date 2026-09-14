@@ -1,0 +1,6 @@
+name="Entity replica and Blocky presentation"
+version="0.1.0"
+description="Composable entity capabilities"
+ignore=[]
+modpacks=["entities"]
+mods=["client-entity-network-mod","client-entity-blocky-render-mod"]

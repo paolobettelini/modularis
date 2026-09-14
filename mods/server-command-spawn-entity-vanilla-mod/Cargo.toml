@@ -1,0 +1,25 @@
+[package]
+name = "server-command-spawn-entity-vanilla-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ServerCommandSpawnEntityVanillaMod"
+[package.metadata.mod.dependencies]
+init = ["bevy-mod","server-command-api","server-chat-api","server-chunk-world-api","server-entity-state-mod"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = {path="../bevy-mod"}
+server-command-api = {path="../server-command-api"}
+server-chat-api = {path="../server-chat-api"}
+server-chunk-world-api = {path="../server-chunk-world-api"}
+server-entity-state-mod = {path="../server-entity-state-mod"}
+server-entity-api = {path="../server-entity-api"}
+server-command-spawn-entity-lib = {path="../server-command-spawn-entity-lib"}
+audience-api = {git = "https://github.com/paolobettelini/modularis.git"}
+tokio = {version="1",features=["full"]}
+
+voxel-math-api = {git = "https://github.com/paolobettelini/modularis.git"}

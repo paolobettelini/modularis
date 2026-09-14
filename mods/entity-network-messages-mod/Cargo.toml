@@ -1,0 +1,14 @@
+[package]
+name = "entity-network-messages-mod"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+entity-network-message-types = { path = "../entity-network-message-types" }
+
+[package.metadata.mod]
+support = true
+
+[package.metadata.network.messages]
+clientbound = ["entity_network_message_types::EntityUpsertPacket","entity_network_message_types::EntityDespawnPacket"]
+serverbound = []

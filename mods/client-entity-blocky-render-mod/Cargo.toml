@@ -1,0 +1,23 @@
+[package]
+name = "client-entity-blocky-render-mod"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "ClientEntityBlockyRenderMod"
+[package.metadata.mod.dependencies]
+init = ["bevy-mod","client-entity-network-mod","blocky-model-api","blocky-animation-api","client-game-state-api"]
+run = []
+ownership = []
+
+[dependencies]
+bevy = "0.17.3"
+bevy-mod = {path="../bevy-mod"}
+client-entity-network-mod = {path="../client-entity-network-mod"}
+client-entity-api = {path="../client-entity-api"}
+entity-state-api = {path="../entity-state-api"}
+blocky-model-api = {path="../blocky-model-api"}
+blocky-animation-api = {path="../blocky-animation-api"}
+client-game-state-api = {path="../client-game-state-api"}
+generated-entity-registry = "0.1.0"
+tokio = {version="1",features=["full"]}

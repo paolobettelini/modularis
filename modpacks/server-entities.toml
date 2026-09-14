@@ -1,0 +1,6 @@
+name="Entity state and replication mechanisms"
+version="0.1.0"
+description="Composable entity capabilities"
+ignore=[]
+modpacks=["entities"]
+mods=["server-entity-state-mod","server-entity-network-sync-mod"]

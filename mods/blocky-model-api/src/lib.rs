@@ -1,5 +1,11 @@
 use bevy::prelude::*;
 
+/// Shared correlation namespace for all independent model consumers.
+pub fn next_blocky_spawn_id() -> u64 {
+    static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+    NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+}
+
 #[derive(Message, Debug, Clone)]
 pub struct SpawnBlockyModel {
     pub spawn_id: Option<u64>,

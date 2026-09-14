@@ -1,0 +1,16 @@
+[package]
+name = "server-command-spawn-entity-lib"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy = "0.17.3"
+server-command-api = {path="../server-command-api"}
+server-entity-api = {path="../server-entity-api"}
+entity-state-api = {path="../entity-state-api"}
+world-instance-api = {git = "https://github.com/paolobettelini/modularis.git"}
+generated-entity-registry = "0.1.0"
+generated-permission-registry = "0.1.0"
+
+[package.metadata.mod]
+support = true

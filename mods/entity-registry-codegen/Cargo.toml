@@ -1,0 +1,25 @@
+[package]
+name = "entity-registry-codegen"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.mod]
+entry = "EntityRegistryCodegenMod"
+[package.metadata.mod.dependencies]
+init = []
+run = []
+ownership = []
+
+[dependencies]
+entity-type-api = {path="../entity-type-api"}
+codegen-utils = { git = "https://github.com/paolobettelini/modularis.git" }
+tokio = {version="1",features=["full"]}
+toml = "0.9"
+
+[[package.metadata.mod.codegen]]
+crate = "generated-entity-registry"
+version = "0.1.0"
+dev_crate = "generated-entity-registry"
+[package.metadata.mod.codegen.generator]
+crate = "entity-registry-codegen"
+command = "generate"

@@ -1,0 +1,6 @@
+name="Vanilla entity visibility and commands"
+version="0.1.0"
+description="Composable entity capabilities"
+ignore=[]
+modpacks=["server-entities"]
+mods=["server-entity-world-visibility-vanilla-mod","server-command-spawn-entity-vanilla-mod"]

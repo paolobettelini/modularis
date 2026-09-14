@@ -1,0 +1,13 @@
+[package]
+name = "entity-jewel-beetle"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+entity-type-api = { path = "../entity-type-api" }
+
+[package.metadata.mod]
+support = true
+
+[package.metadata.entity]
+id = "demo:jewel_beetle"
