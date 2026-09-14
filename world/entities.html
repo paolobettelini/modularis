@@ -1,0 +1,352 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Networked entities and entity types - Minecraft Simple Demo Architecture</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../introduction.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../getting-started/project-overview.html"><strong aria-hidden="true">1.1.</strong> Project overview</a></li><li class="chapter-item expanded "><a href="../getting-started/build-and-run.html"><strong aria-hidden="true">1.2.</strong> Build and run</a></li></ol></li><li class="chapter-item expanded "><a href="../architecture/foundations.html"><strong aria-hidden="true">2.</strong> Architecture foundations</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../architecture/patchwork-composition.html"><strong aria-hidden="true">2.1.</strong> Patchwork composition</a></li><li class="chapter-item expanded "><a href="../architecture/mod-anatomy.html"><strong aria-hidden="true">2.2.</strong> Mod anatomy and lifecycle</a></li><li class="chapter-item expanded "><a href="../architecture/dependency-sources.html"><strong aria-hidden="true">2.3.</strong> Cargo dependency sources</a></li><li class="chapter-item expanded "><a href="../architecture/apis-and-events.html"><strong aria-hidden="true">2.4.</strong> APIs, providers, and ECS contracts</a></li><li class="chapter-item expanded "><a href="../architecture/runtime-scopes.html"><strong aria-hidden="true">2.5.</strong> Runtime scope trees and facets</a></li><li class="chapter-item expanded "><a href="../architecture/vanilla-libraries.html"><strong aria-hidden="true">2.6.</strong> Vanilla mechanics as reusable libraries</a></li><li class="chapter-item expanded "><a href="../architecture/code-generation.html"><strong aria-hidden="true">2.7.</strong> Code generation and registries</a></li><li class="chapter-item expanded "><a href="../architecture/modpacks.html"><strong aria-hidden="true">2.8.</strong> Modpacks and feature boundaries</a></li><li class="chapter-item expanded "><a href="../architecture/assets-and-output.html"><strong aria-hidden="true">2.9.</strong> Assets and generated output</a></li></ol></li><li class="chapter-item expanded "><a href="../runtime/runtime-overview.html"><strong aria-hidden="true">3.</strong> Runtime and networking</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../runtime/bevy-lifecycle.html"><strong aria-hidden="true">3.1.</strong> Bevy application lifecycle</a></li><li class="chapter-item expanded "><a href="../runtime/networking.html"><strong aria-hidden="true">3.2.</strong> Protocol, transport, and framing</a></li><li class="chapter-item expanded "><a href="../runtime/patchwork-authentication.html"><strong aria-hidden="true">3.3.</strong> Patchwork account authentication</a></li><li class="chapter-item expanded "><a href="../runtime/sessions-and-visibility.html"><strong aria-hidden="true">3.4.</strong> Sessions, routing, and visibility</a></li><li class="chapter-item expanded "><a href="../runtime/loading-tasks.html"><strong aria-hidden="true">3.5.</strong> Loading tasks and progress screens</a></li><li class="chapter-item expanded "><a href="../runtime/chat-and-commands.html"><strong aria-hidden="true">3.6.</strong> Chat, commands, and completion</a></li><li class="chapter-item expanded "><a href="../runtime/sounds.html"><strong aria-hidden="true">3.7.</strong> Sounds, audiences, and spatial playback</a></li></ol></li><li class="chapter-item expanded "><a href="../world/world-overview.html"><strong aria-hidden="true">4.</strong> World architecture</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../world/entities.html" class="active"><strong aria-hidden="true">4.1.</strong> Networked entities and entity types</a></li><li class="chapter-item expanded "><a href="../world/blocks-and-items.html"><strong aria-hidden="true">4.2.</strong> Blocks, items, and state</a></li><li class="chapter-item expanded "><a href="../world/block-properties-and-components.html"><strong aria-hidden="true">4.3.</strong> Block properties and sparse components</a></li><li class="chapter-item expanded "><a href="../world/voxel-models.html"><strong aria-hidden="true">4.4.</strong> JSON voxel models and textures</a></li><li class="chapter-item expanded "><a href="../world/voxel-frames.html"><strong aria-hidden="true">4.5.</strong> Voxel frames and three-dimensional interest</a></li><li class="chapter-item expanded "><a href="../world/chunk-storage.html"><strong aria-hidden="true">4.6.</strong> Chunk coordinates and storage</a></li><li class="chapter-item expanded "><a href="../world/server-world.html"><strong aria-hidden="true">4.7.</strong> Server world providers and residency</a></li><li class="chapter-item expanded "><a href="../world/biomes.html"><strong aria-hidden="true">4.8.</strong> Biomes and world-generation features</a></li><li class="chapter-item expanded "><a href="../world/client-chunks.html"><strong aria-hidden="true">4.9.</strong> Client streaming, meshing, and rendering</a></li><li class="chapter-item expanded "><a href="../world/dimensions.html"><strong aria-hidden="true">4.10.</strong> Dimensions and world scopes</a></li><li class="chapter-item expanded "><a href="../world/portals.html"><strong aria-hidden="true">4.11.</strong> Portals</a></li></ol></li><li class="chapter-item expanded "><a href="../gameplay/gameplay-overview.html"><strong aria-hidden="true">5.</strong> Gameplay systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../gameplay/permissions-and-game-modes.html"><strong aria-hidden="true">5.1.</strong> Permissions and server game modes</a></li><li class="chapter-item expanded "><a href="../gameplay/movement.html"><strong aria-hidden="true">5.2.</strong> Player movement and prediction</a></li><li class="chapter-item expanded "><a href="../gameplay/character-collisions.html"><strong aria-hidden="true">5.3.</strong> Character collisions and moving supports</a></li><li class="chapter-item expanded "><a href="../gameplay/movement-features.html"><strong aria-hidden="true">5.4.</strong> Gravity, jump, sprint, and flight</a></li><li class="chapter-item expanded "><a href="../gameplay/block-interaction.html"><strong aria-hidden="true">5.5.</strong> Block interaction and world edits</a></li><li class="chapter-item expanded "><a href="../gameplay/inventory.html"><strong aria-hidden="true">5.6.</strong> Inventory, hotbar, and item use</a></li><li class="chapter-item expanded "><a href="../gameplay/cell-menus.html"><strong aria-hidden="true">5.7.</strong> Cell menus, audiences, and crafting tables</a></li></ol></li><li class="chapter-item expanded "><a href="../client/client-overview.html"><strong aria-hidden="true">6.</strong> Client systems</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../client/input-settings-menus.html"><strong aria-hidden="true">6.1.</strong> Input, settings, menus, and game state</a></li><li class="chapter-item expanded "><a href="../client/graphics.html"><strong aria-hidden="true">6.2.</strong> Graphics, lighting, sky, and outlines</a></li><li class="chapter-item expanded "><a href="../client/animated-grass.html"><strong aria-hidden="true">6.3.</strong> Animated grass and wind</a></li><li class="chapter-item expanded "><a href="../client/blocky-models.html"><strong aria-hidden="true">6.4.</strong> Blocky models and animation</a></li></ol></li><li class="chapter-item expanded "><a href="../development/developer-guide.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../development/extension-cookbook.html"><strong aria-hidden="true">7.1.</strong> Extension cookbook</a></li><li class="chapter-item expanded "><a href="../development/thecrown-network.html"><strong aria-hidden="true">7.2.</strong> TheCrown network and dynamic instances</a></li><li class="chapter-item expanded "><a href="../development/testing-and-performance.html"><strong aria-hidden="true">7.3.</strong> Testing, debugging, and performance</a></li><li class="chapter-item expanded "><a href="../reference/crate-map.html"><strong aria-hidden="true">7.4.</strong> Crate map</a></li><li class="chapter-item expanded "><a href="../reference/current-limits.html"><strong aria-hidden="true">7.5.</strong> Current limits and design direction</a></li></ol></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">Minecraft Simple Demo Architecture</h1>
+
+                    <div class="right-buttons">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="networked-entities"><a class="header" href="#networked-entities">Networked entities</a></h1>
+<p>Entities are runtime ECS objects, not players and not entries inside chunk
+palettes. The server owns their UUIDs and state. The generated <code>EntityKind</code>
+identifies the type selected by composition; <code>Uuid</code> identifies one occurrence.</p>
+<h2 id="composition-and-responsibilities"><a class="header" href="#composition-and-responsibilities">Composition and responsibilities</a></h2>
+<table><thead><tr><th>Crate</th><th>Responsibility</th></tr></thead><tbody>
+<tr><td>entity-type-api</td><td>Static type/visual descriptor contract</td></tr>
+<tr><td>entity-registry-codegen</td><td>Reads contributor metadata and generates EntityKind</td></tr>
+<tr><td>generated-entity-registry</td><td>Generated enum, lookup and contributor dispatch</td></tr>
+<tr><td>entity-crystal-snail</td><td>Snail type, model, texture and idle/walk clips</td></tr>
+<tr><td>entity-state-api</td><td>Serializable snapshot, pose and animation state</td></tr>
+<tr><td>server-entity-api</td><td>ECS components, requests, notifications and public phases</td></tr>
+<tr><td>server-entity-state-mod</td><td>Sequential request application to ECS entities</td></tr>
+<tr><td>server-entity-visibility-api</td><td>Per-entity viewer sets, independent of rendering</td></tr>
+<tr><td>server-entity-world-visibility-vanilla-mod</td><td>Default same-world-and-provider visibility</td></tr>
+<tr><td>server-entity-network-sync-mod</td><td>Per-viewer snapshot diff, spawn/update/despawn replication</td></tr>
+<tr><td>entity-network-message-types</td><td>Packet structs</td></tr>
+<tr><td>entity-network-messages-mod</td><td>Packet codegen contribution</td></tr>
+<tr><td>client-entity-api</td><td>Client replica and receive/present phases</td></tr>
+<tr><td>client-entity-network-mod</td><td>Receives packets; clears replicas on disconnect</td></tr>
+<tr><td>client-entity-blocky-render-mod</td><td>Model spawning, pose interpolation and clip playback</td></tr>
+<tr><td>server-command-spawn-entity-lib</td><td>Reusable command registration and request construction</td></tr>
+<tr><td>server-command-spawn-entity-vanilla-mod</td><td>Optional privileged command activation</td></tr>
+</tbody></table>
+<p>The new contract/helper crates use support metadata so downloaded compositions
+include them without lifecycle initialization. None is an exclusive provider
+just because its name ends with <code>-api</code>.</p>
+<p>Bundles:</p>
+<ul>
+<li><code>entities</code>: shared registry, content and protocol. Imported by <code>network</code>.</li>
+<li><code>client-entities</code>: replica and Blocky presentation. Imported by <code>client</code>.</li>
+<li><code>server-entities</code>: state and replication mechanisms, no visibility policy.</li>
+<li><code>server-entities-vanilla</code>: same-scope visibility and command. Imported by
+<code>server-vanilla</code>.</li>
+</ul>
+<p>TheCrown is not silently changed to install vanilla entity policy. A custom
+server may import <code>server-entities</code>, fill <code>EntityViewers</code> itself, and reuse the
+command library or create requests directly.</p>
+<h2 id="try-the-snail"><a class="header" href="#try-the-snail">Try the snail</a></h2>
+<p>Recompose both client and server: the network enum now contains entity packets.</p>
+<pre><code class="language-text">/spawnentity 0 12 0 demo:crystal_snail
+/spawnentity 0 12 0 crystal_snail 0.5
+</code></pre>
+<p>The optional scale defaults to 1 and must be finite and positive. Coordinates
+must be finite. The command requires <code>Privileged</code>, using the same permission
+registry and command refresh mechanism as other restricted commands.
+Completion suggests the generated type IDs after the three coordinates.</p>
+<p>The command resolves the invoking player's world/provider route, creates a
+fresh UUID and requests spawn. The default idle clip is selected if the type
+declares it as its default. The snail does not walk autonomously: motion policy is deliberately
+not part of entity state or rendering.</p>
+<p>Assets belong to <code>mods/entity-crystal-snail/assets/</code>:</p>
+<pre><code class="language-text">models/crystal_snail.blockymodel
+textures/crystal_snail.png
+animations/idle.blockyanim
+animations/walk.blockyanim
+</code></pre>
+<p>The texture is 512 by 512. Primitive units use <code>1.0 / 64.0</code>, independently of
+the runtime scale. Adjust the contributor descriptor if this particular model
+needs a different unit conversion. The assets were moved from the supplied
+<code>crystal_snail/</code> directory; they are not shared with player model settings.</p>
+<h2 id="add-a-type"><a class="header" href="#add-a-type">Add a type</a></h2>
+<p>Create a support contributor and declare its own metadata:</p>
+<pre><code class="language-toml">[package.metadata.mod]
+support = true
+
+[package.metadata.entity]
+id = &quot;mygame:creature&quot;
+
+[dependencies]
+entity-type-api = { path = &quot;../entity-type-api&quot; }
+</code></pre>
+<p>Export <code>pub const ENTITY_INFO: EntityTypeInfo</code>, with optional model/texture
+paths, primitive scale and named clips. Include the contributor in the shared
+composition, then compose again. Duplicate IDs and conflicting Rust variants
+are rejected. The generator sorts IDs deterministically. Never persist generated
+enum ordinals as permanent IDs; use the namespaced string for future storage.</p>
+<p>A type without a model remains a valid server entity. A different renderer can
+consume <code>ClientEntities</code> without selecting the Blocky renderer.</p>
+<h2 id="server-api-and-ecs-extension"><a class="header" href="#server-api-and-ecs-extension">Server API and ECS extension</a></h2>
+<p>The default phases are:</p>
+<pre><code class="language-text">Request -&gt; Apply -&gt; Visibility -&gt; Sync
+</code></pre>
+<p>Request handlers/custom mechanics run before Apply. Application is exclusive
+and sequential, so spawn followed by move/despawn in one update works without
+a deferred-command duplicate-UUID race. Successful changes publish
+<code>EntityChanged(uuid)</code>. The UUID lookup is built once per request batch.</p>
+<p>The authoritative object has <code>ServerEntity(EntitySnapshot)</code> and
+<code>EntityWorld(WorldScopeId)</code> components. Add your own ECS components for AI,
+health, ownership or scripts; these do not become fields in a generated giant
+struct, and are not replicated automatically.</p>
+<p>Example inside a system with a <code>MessageWriter&lt;EntityRequest&gt;</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>requests.write(EntityRequest::SetPose {
+    uuid,
+    pose: EntityPose {
+        position: [10.0, 4.0, 2.0],
+        rotation: [0.0, 0.0, 0.0, 1.0],
+        scale: 1.0,
+    },
+});
+
+requests.write(EntityRequest::Animate {
+    uuid,
+    animation: Some(EntityAnimationState {
+        clip: &quot;walk&quot;.into(),
+        speed: 1.0,
+        repeat: true,
+        revision: 0, // application assigns the replay revision
+    }),
+});
+
+// Stop playback, holding the current pose:
+requests.write(EntityRequest::Animate { uuid, animation: None });
+
+// Remove the runtime entity and all its current client replicas:
+requests.write(EntityRequest::Despawn { uuid });
+<span class="boring">}
+</span></code></pre></pre>
+<p>Send SetPose repeatedly from a movement mod to move an entity. The client
+smooths position and quaternion rotation; scale is authoritative. Sending an
+Animate request again restarts that clip through an incremented revision.
+Animation assets are resolved from the type descriptor, not arbitrary paths
+supplied over the network.</p>
+<h2 id="visibility-and-replication"><a class="header" href="#visibility-and-replication">Visibility and replication</a></h2>
+<p>The default policy compares each viewer's routed <code>WorldScopeId</code> (world
+instance and provider) to the entity's scope. Dimensions alone are not enough
+to separate private or minigame worlds.</p>
+<p>For custom rules, omit <code>server-entity-world-visibility-vanilla-mod</code> and populate
+<code>EntityViewers</code> in <code>ServerEntitySet::Visibility</code>. This policy can consult
+Audience, scope trees, teams, distance or arbitrary components. An empty viewer
+set means hidden, not broadcast. Visibility is recalculated after relocation.</p>
+<p>Replication sends a full upsert only on a changed snapshot or newly visible
+entity, and despawn when visibility is lost or the entity is deleted. Disconnected
+viewers' sent-state is removed. Newly joined viewers receive current state,
+even for entities created before their connection.</p>
+<p>Packets carry an ordering sequence. The client restores order across the
+separate generated ECS packet types if a despawn and subsequent reappearance
+arrive during the same rendered update. Reliable ordering/delivery is supplied
+by the existing TCP transport; this is not a new transport implementation.</p>
+<p>The client reuses the existing node/visual-separated Blocky renderer and
+animation systems. A shared <code>next_blocky_spawn_id()</code> allocator prevents
+independent player/entity consumers from claiming one another's model spawn
+responses. Late model completions after cancellation are removed.</p>
+<h2 id="current-limits"><a class="header" href="#current-limits">Current limits</a></h2>
+<p>This slice provides runtime spawning, transforms, animation, audience filtering,
+replication and rendering. It does not install entity persistence, collision,
+AI, pathfinding, automatic locomotion clips or gravity. These can be independent
+systems over the authoritative ECS entities.</p>
+<p>Newly visible clients start the selected animation locally; animation phase
+is not synchronized to an absolute server clock. Interpolation is smoothing
+toward received poses, not a timestamped prediction/reconciliation system.
+The vanilla visibility policy has no distance culling yet. These are explicit
+extension points, not hidden rules inside the entity core.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="../world/world-overview.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="../world/blocks-and-items.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="../world/world-overview.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="../world/blocks-and-items.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>
